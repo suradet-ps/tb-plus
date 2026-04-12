@@ -272,15 +272,15 @@ function sexLabel(sex: string | null | undefined): string | null {
 
           <!-- Full name -->
           <h1 class="patient-name">{{ patientName }}</h1>
-          <!-- HOSxp connection / error status -->
+          <!-- HOSxP connection / error status -->
           <p v-if="!detail.mysql_connected" class="demo-unavailable demo-unavailable--warn">
-            ⚠️ ยังไม่ได้เชื่อมต่อ HOSxp — ข้อมูลผู้ป่วยและประวัติยาจะไม่แสดง
+            ⚠️ ยังไม่ได้เชื่อมต่อ HOSxP — ข้อมูลผู้ป่วยและประวัติยาจะไม่แสดง
           </p>
           <p v-else-if="detail.mysql_error" class="demo-unavailable demo-unavailable--error">
-            ⚠️ HOSxp error: {{ detail.mysql_error }}
+            ⚠️ HOSxP error: {{ detail.mysql_error }}
           </p>
           <p v-else-if="!detail.demographics" class="demo-unavailable">
-            ℹ️ ไม่พบข้อมูลผู้ป่วยใน HOSxp (HN: {{ detail.patient.hn }})
+            ℹ️ ไม่พบข้อมูลผู้ป่วยใน HOSxP (HN: {{ detail.patient.hn }})
           </p>
 
           <!-- Age / sex / birthday -->
@@ -462,7 +462,7 @@ function sexLabel(sex: string | null | undefined): string | null {
       >
         <div class="card-head">
           <h2 class="card-title">ประวัติการจ่ายยา TB</h2>
-          <span class="card-sub card-source-badge">จาก HOSxp (อ่านอย่างเดียว)</span>
+          <span class="card-sub card-source-badge">จาก HOSxP (อ่านอย่างเดียว)</span>
         </div>
         <DispensingTable :records="detail.dispensing_history" />
       </section>

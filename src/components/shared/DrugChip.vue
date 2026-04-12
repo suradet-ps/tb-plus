@@ -28,7 +28,7 @@ const drugMap: Record<DrugClass, DrugConfig> = {
   E: { bg: '#e8f2fd', color: '#0075de', title: 'Ethambutol (EMB)',   label: 'E' },
 }
 
-/** Map HosXP drug icodes → drug class letter.
+/** Map HOSxP drug icodes → drug class letter.
  *  Handles legacy enrollment data that stored icodes instead of class letters.
  */
 const icodeToClass: Record<string, DrugClass> = {

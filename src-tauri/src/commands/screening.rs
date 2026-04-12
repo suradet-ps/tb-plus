@@ -13,7 +13,7 @@ pub async fn search_tb_patients(
 ) -> Result<Vec<PatientDrugRecord>, String> {
   let guard = mysql.lock().await;
   match &*guard {
-    None => Err("MySQL ยังไม่ได้เชื่อมต่อ กรุณาตั้งค่าการเชื่อมต่อ HOSxp ในการตั้งค่า".to_string()),
+    None => Err("MySQL ยังไม่ได้เชื่อมต่อ กรุณาตั้งค่าการเชื่อมต่อ HOSxP ในการตั้งค่า".to_string()),
     Some(pool) => {
       let enrolled_map = db::sqlite::get_enrolled_patients_map(&sqlite)
         .await

@@ -91,7 +91,7 @@ const isConnected = computed(() => settingsStore.isConnected)
           class="conn-icon"
         />
         <span class="conn-label">
-          {{ isConnected ? 'HOSxp เชื่อมต่อแล้ว' : 'ยังไม่ได้เชื่อมต่อ' }}
+          {{ isConnected ? 'HOSxP เชื่อมต่อแล้ว' : 'ยังไม่ได้เชื่อมต่อ' }}
         </span>
         <span class="conn-dot" />
       </div>

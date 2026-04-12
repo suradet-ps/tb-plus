@@ -118,7 +118,7 @@ pub async fn get_patient_detail(
   let mysql_connected = mysql_pool.is_some();
   let mut mysql_errors: Vec<String> = Vec::new();
 
-  // ── Demographics (HOSxp) ─────────────────────────────────────────────────
+  // ── Demographics (HOSxP) ─────────────────────────────────────────────────
   let demographics = if let Some(pool) = mysql_pool {
     match db::mysql::get_patient_demographics(pool, &hn).await {
       Ok(demo) => demo,
@@ -143,7 +143,7 @@ pub async fn get_patient_detail(
 
   let outcome = db::sqlite::get_outcome(&sqlite, &hn).await.ok().flatten();
 
-  // ── Dispensing history (HOSxp) ───────────────────────────────────────────
+  // ── Dispensing history (HOSxP) ───────────────────────────────────────────
   let dispensing_history = if let Some(pool) = mysql_pool {
     match db::mysql::get_dispensing_history(pool, &hn).await {
       Ok(rows) => rows,
@@ -158,7 +158,7 @@ pub async fn get_patient_detail(
 
   let today = Local::now().date_naive();
 
-  // ── Last dispensing date (HOSxp) ─────────────────────────────────────────
+  // ── Last dispensing date (HOSxP) ─────────────────────────────────────────
   let days_since_last = if let Some(pool) = mysql_pool {
     match db::mysql::get_last_dispensing_date(pool, &hn).await {
       Ok(date_str) => date_str

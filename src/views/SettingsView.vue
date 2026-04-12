@@ -178,9 +178,9 @@ async function downloadBackup() {
             <!-- Card header row with connection-status pill -->
             <div class="card-top-row">
               <div>
-                <h2 class="card-title">การเชื่อมต่อฐานข้อมูล HOSxp</h2>
+                <h2 class="card-title">การเชื่อมต่อฐานข้อมูล HOSxP</h2>
                 <p class="card-subtitle">
-                  กำหนดค่าการเชื่อมต่อ MySQL สำหรับดึงข้อมูลจาก HOSxp (อ่านอย่างเดียว)
+                  กำหนดค่าการเชื่อมต่อ MySQL สำหรับดึงข้อมูลจาก HOSxP (อ่านอย่างเดียว)
                 </p>
               </div>
               <span
@@ -303,7 +303,7 @@ async function downloadBackup() {
             <!-- Drug Codes sub-section -->
             <div class="sub-section">
               <h3 class="sub-title">รหัสยา (Drug Codes)</h3>
-              <p class="sub-desc">รหัสยาที่ระบบใช้ query ประวัติการจ่ายยาจาก HOSxp</p>
+              <p class="sub-desc">รหัสยาที่ระบบใช้ query ประวัติการจ่ายยาจาก HOSxP</p>
               <table class="drug-table">
                 <thead>
                   <tr>
@@ -468,7 +468,7 @@ async function downloadBackup() {
                     ไฟล์ฐานข้อมูลถูกเก็บไว้ที่ App Data Directory ของระบบ
                     ประกอบด้วยข้อมูลผู้ป่วย TB คลินิก ประวัติการติดตามรายเดือน
                     แผนการรักษา และผลลัพธ์การรักษาทั้งหมด
-                    (ข้อมูลจาก HOSxp จะไม่รวมอยู่ในไฟล์นี้)
+                    (ข้อมูลจาก HOSxP จะไม่รวมอยู่ในไฟล์นี้)
                   </p>
                 </div>
               </div>

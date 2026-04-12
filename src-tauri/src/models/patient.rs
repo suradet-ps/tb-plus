@@ -63,7 +63,7 @@ pub struct PatientDetail {
   pub outcome: Option<Outcome>,
   pub dispensing_history: Vec<DispensingRecord>,
   pub alerts: Vec<PatientAlert>,
-  /// Whether the HOSxp MySQL connection was available when this detail was loaded.
+  /// Whether the HOSxP MySQL connection was available when this detail was loaded.
   pub mysql_connected: bool,
   /// Error message from the MySQL side (demographics or dispensing fetch), if any.
   pub mysql_error: Option<String>,

@@ -106,7 +106,7 @@ struct DemographicsRow {
 /// - Optional `hn_search` / `name_search` filters applied as SQL WHERE predicates.
 /// - Enrollment-status filter (`"all"` / `"enrolled"` / `"not_enrolled"` / `"discharged"`)
 ///   is applied in Rust using the pre-fetched `enrolled_map` (hn → status) so that
-///   we never need to join against the local SQLite DB inside HOSxp.
+///   we never need to join against the local SQLite DB inside HOSxP.
 /// - Results are paginated; default page size is 50, maximum is 200.
 pub async fn search_tb_patients(
   pool: &MySqlPool,
@@ -233,8 +233,8 @@ pub async fn search_tb_patients(
   Ok(out)
 }
 
-/// Fetch HOSxp patient demographics for a single HN.
-/// Returns `None` when the HN does not exist in the HOSxp `patient` table.
+/// Fetch HOSxP patient demographics for a single HN.
+/// Returns `None` when the HN does not exist in the HOSxP `patient` table.
 pub async fn get_patient_demographics(
   pool: &MySqlPool,
   hn: &str,

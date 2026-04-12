@@ -116,7 +116,7 @@ function sortIcon(key: SortKey): 'none' | 'asc' | 'desc' {
         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
       </svg>
       <span class="empty-title">ไม่พบประวัติการจ่ายยา TB</span>
-      <span class="empty-sub">ยังไม่มีรายการยาวัณโรคในระบบ HOSxp สำหรับผู้ป่วยรายนี้</span>
+      <span class="empty-sub">ยังไม่มีรายการยาวัณโรคในระบบ HOSxP สำหรับผู้ป่วยรายนี้</span>
     </div>
 
     <!-- ── Table ───────────────────────────────────────────────────── -->
