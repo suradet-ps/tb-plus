@@ -1,13 +1,13 @@
 [package]
 name = "sabot-tb-clinic"
 version = "0.1.0"
-description = "TB Clinic Management System for Sarabosot Hospital"
+description = "TB Clinic Management System for Sabot Hospital"
 authors = ["Suradet Pratomsak"]
 license = "MIT"
-repository = ""
+repository = "https://github.com/pharmacist-sabot/sabot-tb-clinic"
 default-run = "sabot-tb-clinic"
-edition = "2021"
-rust-version = "1.77.2"
+edition = "2024"
+rust-version = "1.94.1"
 
 [lib]
 name = "sabot_tb_clinic_lib"
