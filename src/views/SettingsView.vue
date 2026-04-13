@@ -536,9 +536,8 @@ async function downloadBackup() {
 <style scoped>
 /* ── Page root ──────────────────────────────────────────────────────── */
 .view-root {
-  padding: 32px;
+  padding: 32px 32px 48px;
   max-width: 900px;
-  margin: 0 auto;
 }
 
 /* ── Page header ────────────────────────────────────────────────────── */

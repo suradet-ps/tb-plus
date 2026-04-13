@@ -231,9 +231,8 @@ function toggleDrugFilter(drug: string) {
 <style scoped>
 /* ── Root layout ─────────────────────────────────────────────────────────────── */
 .view-root {
-  padding: 32px;
+  padding: 32px 32px 48px;
   max-width: 1200px;
-  margin: 0 auto;
 }
 
 /* ── Page header ─────────────────────────────────────────────────────────────── */

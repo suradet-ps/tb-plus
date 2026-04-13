@@ -2,7 +2,6 @@
 <html lang="th">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sabot TB Clinic</title>
     <style>
@@ -22,7 +21,7 @@
         width: 100%;
         overflow: hidden;
         font-family: 'Inter', -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif;
-        background: transparent;
+        background: #f6f5f4;
         color: rgba(0, 0, 0, 0.95);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
@@ -32,10 +31,203 @@
         height: 100%;
         width: 100%;
       }
+
+      /* ── Splash overlay (shown before Vue mounts) ── */
+      #splash-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: #f6f5f4;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Inter', -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        user-select: none;
+        -webkit-user-select: none;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      #splash-overlay.splash-fade-out {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .splash-card {
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 16px;
+        box-shadow:
+          rgba(0, 0, 0, 0.06) 0px 8px 32px,
+          rgba(0, 0, 0, 0.04) 0px 4px 18px,
+          rgba(0, 0, 0, 0.027) 0px 2px 8px,
+          rgba(0, 0, 0, 0.015) 0px 1px 3px;
+        padding: 36px 48px 32px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        width: 320px;
+        position: relative;
+        overflow: hidden;
+        animation: cardIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+
+      .splash-icon-wrap {
+        width: 68px;
+        height: 68px;
+        border-radius: 18px;
+        background: #f6f5f4;
+        border: 1px solid rgba(0, 0, 0, 0.07);
+        box-shadow:
+          rgba(0, 0, 0, 0.06) 0px 2px 8px,
+          rgba(0, 0, 0, 0.04) 0px 1px 3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .splash-text-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        text-align: center;
+      }
+
+      .splash-app-name {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        color: rgba(0, 0, 0, 0.95);
+        line-height: 1.2;
+        margin: 0;
+      }
+
+      .splash-app-subtitle {
+        font-size: 11.5px;
+        color: #a39e98;
+        line-height: 1.55;
+        margin: 0;
+      }
+
+      .splash-loading-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 9px;
+      }
+
+      .splash-dots {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .splash-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #0075de;
+        opacity: 0.25;
+        animation: splashPulse 1.2s ease-in-out infinite;
+      }
+
+      .splash-dot:nth-child(2) { animation-delay: 0.2s; }
+      .splash-dot:nth-child(3) { animation-delay: 0.4s; }
+
+      @keyframes splashPulse {
+        0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
+        40%            { opacity: 1;    transform: scale(1.1);  }
+      }
+
+      .splash-loading-label {
+        font-size: 11px;
+        color: #a39e98;
+        letter-spacing: 0.01em;
+        min-height: 16px;
+        margin: 0;
+      }
+
+      .splash-version {
+        position: absolute;
+        bottom: 14px;
+        font-size: 10px;
+        color: #a39e98;
+        opacity: 0.45;
+      }
+
+      @keyframes cardIn {
+        from { opacity: 0; transform: translateY(8px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0)   scale(1);    }
+      }
     </style>
   </head>
-  <body autocapitalize="none" spellcheck="false">
+  <body>
+    <!-- Splash overlay — shown immediately, removed by App.vue after init -->
+    <div id="splash-overlay">
+      <div class="splash-card">
+        <!-- TB Clinic logo -->
+        <div class="splash-icon-wrap">
+          <svg width="46" height="46" viewBox="5 9 14 11" xmlns="http://www.w3.org/2000/svg" aria-label="Sabot TB Clinic">
+            <path d="M10.5 9.4h-0.2C7.4 9.4 5 11.8 5 14.8c0 3 2.2 5.3 5.5 5.3 1 0 1-1 1-2v-8c0-1 0-1-1-1z" fill="#f6f5f4"/>
+            <path d="M13.5 9.4h0.2c2.9 0 5.3 2.4 5.3 5.4 0 3-2.2 5.3-5.5 5.3-1 0-1-1-1-2v-8c0-1 0-1 1-1z" fill="#f6f5f4"/>
+            <path d="M10.5 9h-0.2C7.4 9 5 11.4 5 14.4c0 3.3 2.2 5.6 5.5 5.6 1 0 1-1 1-2v-8c0-1 0-1-1-1z" fill="#2a9d99" stroke="#238582" stroke-width="0.1"/>
+            <path d="M13.5 9h0.2c2.9 0 5.3 2.4 5.3 5.4 0 3.3-2.2 5.6-5.5 5.6-1 0-1-1-1-2v-8c0-1 0-1 1-1z" fill="#0075de" stroke="#005bab" stroke-width="0.1" fill-opacity="0.9"/>
+            <text x="8.1" y="15.8" font-family="system-ui,-apple-system,sans-serif" font-weight="800" font-size="4" fill="#ffffff" text-anchor="middle">T</text>
+            <text x="15.9" y="15.8" font-family="system-ui,-apple-system,sans-serif" font-weight="800" font-size="4" fill="#ffffff" text-anchor="middle">B</text>
+            <path d="M10.5 9.2h-0.2C7.4 9.2 5.2 11.3 5.2 14.3" stroke="#ffffff" stroke-width="0.15" fill="none" stroke-opacity="0.4"/>
+            <path d="M13.5 9.2h0.2c2.9 0 5.1 2.3 5.1 5.3" stroke="#ffffff" stroke-width="0.15" fill="none" stroke-opacity="0.4"/>
+          </svg>
+        </div>
+        <!-- App name -->
+        <div class="splash-text-group">
+          <p class="splash-app-name">Sabot TB Clinic</p>
+          <p class="splash-app-subtitle">ระบบบริหารจัดการคลินิกวัณโรค<br/>โรงพยาบาลสระโบสถ์</p>
+        </div>
+        <!-- Loading indicator -->
+        <div class="splash-loading-wrap">
+          <div class="splash-dots">
+            <div class="splash-dot"></div>
+            <div class="splash-dot"></div>
+            <div class="splash-dot"></div>
+          </div>
+          <p class="splash-loading-label" id="splash-loading-label">กำลังโหลด...</p>
+        </div>
+        <span class="splash-version">v0.1.0</span>
+      </div>
+    </div>
+
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
+
+    <script>
+      // Poll for Tauri API availability then listen for splash-status events
+      (function () {
+        var label = document.getElementById('splash-loading-label');
+        function attachListener() {
+          if (
+            typeof window.__TAURI__ !== 'undefined' &&
+            window.__TAURI__.event &&
+            typeof window.__TAURI__.event.listen === 'function'
+          ) {
+            window.__TAURI__.event.listen('splash-status', function (event) {
+              if (label && event.payload) {
+                label.textContent = event.payload;
+              }
+            });
+          } else {
+            setTimeout(attachListener, 80);
+          }
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', attachListener);
+        } else {
+          attachListener();
+        }
+      })();
+    </script>
   </body>
 </html>

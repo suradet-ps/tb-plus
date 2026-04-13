@@ -529,7 +529,7 @@ function sexLabel(sex: string | null | undefined): string | null {
 <style scoped>
 /* ── Page root ────────────────────────────────────────────────────── */
 .view-root {
-  padding: 28px 32px 64px;
+  padding: 32px 32px 48px;
   max-width: 1100px;
 }
 

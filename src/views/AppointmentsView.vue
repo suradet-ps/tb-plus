@@ -165,7 +165,7 @@ onMounted(() => {
 <style scoped>
 /* ── Page Root ──────────────────────────────────────────────────────────────── */
 .view-root {
-  padding: 28px 32px;
+  padding: 32px 32px 48px;
   display: flex;
   flex-direction: column;
   gap: 20px;

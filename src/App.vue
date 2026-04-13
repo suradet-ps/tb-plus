@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
+
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import { useAlertStore } from '@/stores/alerts'
 import { useSettingsStore } from '@/stores/settings'
@@ -15,6 +16,9 @@ const appointmentsStore = useAppointmentsStore()
 let startupRetryTimer: ReturnType<typeof setInterval> | null = null
 
 onMounted(async () => {
+  // Record when init starts so we can enforce a minimum splash display time
+  const splashStart = Date.now()
+
   // Load persisted config first so the Settings form is pre-filled
   await settingsStore.loadSavedConfig()
   // Check whether the backend already has an active connection
@@ -41,6 +45,20 @@ onMounted(async () => {
       }
     }, 2000)
   }
+
+  // Remove the splash overlay — ensure it is visible for at least 800 ms so
+  // the user sees the loading animation even on fast machines, then fade out.
+  // This runs entirely in Vue's lifecycle and has no dependency on Rust events,
+  // which avoids the race condition where splash-done fires before the listener
+  // is registered (common in dev mode where Vite adds ~1-2 s of load latency).
+  const elapsed = Date.now() - splashStart
+  setTimeout(() => {
+    const overlay = document.getElementById('splash-overlay')
+    if (overlay) {
+      overlay.classList.add('splash-fade-out')
+      setTimeout(() => overlay.remove(), 350)
+    }
+  }, Math.max(0, 800 - elapsed))
 })
 
 onUnmounted(() => {

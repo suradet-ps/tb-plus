@@ -15,20 +15,6 @@ pub fn run() {
     .setup(|app| {
       let app_handle = app.handle().clone();
 
-      // ── Acquire window handles ──────────────────────────────────────────
-      // Both windows are defined in tauri.conf.json.
-      // splashscreen: visible: true   → shows immediately
-      // main:         visible: false  → hidden until we explicitly show it
-      let splash_window = app
-        .get_webview_window("splashscreen")
-        .expect("[sabot] splashscreen window not found — check tauri.conf.json");
-      let main_window = app
-        .get_webview_window("main")
-        .expect("[sabot] main window not found — check tauri.conf.json");
-
-      // Extra safety: make sure main is invisible before any async work
-      let _ = main_window.hide();
-
       // ── Step 1: SQLite — synchronous, completes in < 10 ms ─────────────
       // We use block_on here because SQLite is a local file operation.
       // This guarantees that sqlite_pool is managed before the event loop
@@ -73,14 +59,12 @@ pub fn run() {
       let mysql_state: MySqlState = Arc::new(Mutex::new(None));
       app_handle.manage(Arc::clone(&mysql_state));
 
-      // ── Step 3: Background task — MySQL connect + window transition ─────
-      // Clone window handles for the async move block (WebviewWindow: Clone + Send).
-      let splash_clone = splash_window.clone();
-      let main_clone = main_window.clone();
+      // ── Step 3: Background task — MySQL connect + splash-done signal ────
+      let app_handle_clone = app_handle.clone();
 
       tauri::async_runtime::spawn(async move {
         // ── 3a. Update splash status ──────────────────────────────────────
-        let _ = splash_clone.emit("splash-status", "กำลังโหลดฐานข้อมูล...");
+        let _ = app_handle_clone.emit("splash-status", "กำลังโหลดฐานข้อมูล...");
 
         // ── 3b. Attempt MySQL auto-connect ────────────────────────────────
         let connect_result =
@@ -88,7 +72,7 @@ pub fn run() {
 
         match connect_result {
           Ok(Some(config)) => {
-            let _ = splash_clone.emit("splash-status", "กำลังเชื่อมต่อ MySQL...");
+            let _ = app_handle_clone.emit("splash-status", "กำลังเชื่อมต่อ MySQL...");
 
             let url = format!(
               "mysql://{}:{}@{}:{}/{}",
@@ -113,39 +97,38 @@ pub fn run() {
                 );
                 let mut guard = mysql_state.lock().await;
                 *guard = Some(pool);
-                let _ = splash_clone.emit("splash-status", "เชื่อมต่อสำเร็จ ✓");
+                let _ = app_handle_clone.emit("splash-status", "เชื่อมต่อสำเร็จ ✓");
               }
               Ok(Err(e)) => {
                 eprintln!("[sabot] Auto-connect to MySQL failed: {e}");
-                let _ = splash_clone.emit("splash-status", "เชื่อมต่อล้มเหลว (ใช้งานออฟไลน์ได้)");
+                let _ = app_handle_clone
+                  .emit("splash-status", "เชื่อมต่อล้มเหลว (ใช้งานออฟไลน์ได้)");
               }
               Err(_) => {
                 eprintln!("[sabot] MySQL auto-connect timed out after 8 s");
-                let _ = splash_clone.emit("splash-status", "เชื่อมต่อหมดเวลา (ใช้งานออฟไลน์ได้)");
+                let _ = app_handle_clone
+                  .emit("splash-status", "เชื่อมต่อหมดเวลา (ใช้งานออฟไลน์ได้)");
               }
             }
           }
           Ok(None) => {
             // No saved config — normal on first run, nothing to do.
-            let _ = splash_clone.emit("splash-status", "พร้อมใช้งาน (ยังไม่ตั้งค่า MySQL)");
+            let _ =
+              app_handle_clone.emit("splash-status", "พร้อมใช้งาน (ยังไม่ตั้งค่า MySQL)");
           }
           Err(e) => {
             eprintln!("[sabot] Failed to load saved DB config: {e}");
-            let _ = splash_clone.emit("splash-status", "โหลดการตั้งค่าล้มเหลว");
+            let _ = app_handle_clone.emit("splash-status", "โหลดการตั้งค่าล้มเหลว");
           }
         }
 
         // ── 3c. Minimum splash display time (visual comfort) ─────────────
-        // Ensures the user sees the splash for at least 500 ms even when
-        // SQLite is fast and MySQL config is missing.
-        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
-
-        // ── 3d. Transition: close splash → show main ──────────────────────
-        // Order matters: close splash first so there is no brief overlap
-        // where both windows are visible simultaneously.
-        let _ = splash_clone.close();
-        let _ = main_clone.show();
-        let _ = main_clone.set_focus();
+        // The splash overlay is now removed by Vue's onMounted lifecycle
+        // (App.vue) after the frontend finishes its own init sequence.
+        // This avoids the race condition where splash-done fires before the
+        // Vue listener is registered (especially in dev mode with Vite).
+        // We keep a short sleep so status text remains readable briefly.
+        tokio::time::sleep(std::time::Duration::from_millis(300)).await;
       });
 
       Ok(())
