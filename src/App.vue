@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import { useAlertStore } from '@/stores/alerts'
 import { useSettingsStore } from '@/stores/settings'
@@ -8,6 +8,11 @@ import { useAppointmentsStore } from '@/stores/appointments'
 const alertStore = useAlertStore()
 const settingsStore = useSettingsStore()
 const appointmentsStore = useAppointmentsStore()
+
+// Startup connection retry — polls get_mysql_status every 2 s for up to 10 s
+// so the sidebar badge updates as soon as the background MySQL auto-connect
+// completes (which can happen up to 8 s after the event loop starts).
+let startupRetryTimer: ReturnType<typeof setInterval> | null = null
 
 onMounted(async () => {
   // Load persisted config first so the Settings form is pre-filled
@@ -18,6 +23,31 @@ onMounted(async () => {
   alertStore.startAutoRefresh()
   // Fetch upcoming appointments (silently no-ops when not connected)
   appointmentsStore.fetchAppointments()
+
+  // If MySQL isn't connected yet (background auto-connect still running),
+  // keep re-checking every 2 s until connected or 5 attempts exhausted.
+  if (!settingsStore.isConnected) {
+    let attempts = 0
+    startupRetryTimer = setInterval(async () => {
+      attempts++
+      await settingsStore.checkConnection()
+      if (settingsStore.isConnected || attempts >= 5) {
+        clearInterval(startupRetryTimer!)
+        startupRetryTimer = null
+        // Once connected, kick off appointments fetch
+        if (settingsStore.isConnected) {
+          appointmentsStore.fetchAppointments()
+        }
+      }
+    }, 2000)
+  }
+})
+
+onUnmounted(() => {
+  if (startupRetryTimer) {
+    clearInterval(startupRetryTimer)
+    startupRetryTimer = null
+  }
 })
 </script>
 

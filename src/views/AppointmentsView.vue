@@ -166,8 +166,6 @@ onMounted(() => {
 /* ── Page Root ──────────────────────────────────────────────────────────────── */
 .view-root {
   padding: 28px 32px;
-  max-width: 920px;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 20px;

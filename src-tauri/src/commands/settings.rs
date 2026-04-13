@@ -82,36 +82,32 @@ pub async fn backup_sqlite(app: tauri::AppHandle) -> Result<String, String> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Persistent connection settings
+// Persistent connection settings — stored entirely in SQLite app_settings
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Keys stored in `app_settings` (non-sensitive only).
-const SETTING_KEYS: [&str; 4] = [
+/// All keys stored in `app_settings` (all fields including password).
+/// SQLite DB lives in the OS-protected app data directory.
+const SETTING_KEYS: [&str; 5] = [
   "mysql_host",
   "mysql_port",
   "mysql_database",
   "mysql_username",
+  "mysql_password",
 ];
 
-/// Keychain service / account names — constant across all platforms.
-const KEYCHAIN_SERVICE: &str = "sabot-tb-clinic";
-const KEYCHAIN_ACCOUNT: &str = "mysql-password";
-
-/// Persist the non-sensitive connection fields to the local SQLite
-/// `app_settings` table and store the password in the OS keychain.
-///
-/// Should be called **after** a successful `connect_mysql` so we only
-/// persist known-good credentials.
+/// Persist all connection fields to the local SQLite `app_settings` table.
+/// Should be called after a successful `connect_mysql`.
 #[tauri::command]
 pub async fn save_db_config(sqlite: State<'_, SqlitePool>, config: DbConfig) -> Result<(), String> {
   let now = Local::now().format("%Y-%m-%dT%H:%M:%S").to_string();
   let port_str = config.port.to_string();
 
-  let fields: [(&str, &str); 4] = [
+  let fields: [(&str, &str); 5] = [
     ("mysql_host", config.host.as_str()),
     ("mysql_port", port_str.as_str()),
     ("mysql_database", config.database.as_str()),
     ("mysql_username", config.username.as_str()),
+    ("mysql_password", config.password.as_str()),
   ];
 
   for (key, value) in &fields {
@@ -124,27 +120,11 @@ pub async fn save_db_config(sqlite: State<'_, SqlitePool>, config: DbConfig) -> 
       .map_err(|e| e.to_string())?;
   }
 
-  // Password goes to the OS keychain (never stored in SQLite)
-  // MacOS Keychain does not support storing empty strings, so we use a placeholder.
-  let password_to_save = if config.password.is_empty() {
-    "__SABOT_EMPTY_PASSWORD__"
-  } else {
-    &config.password
-  };
-
-  let entry = keyring::Entry::new(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT).map_err(|e| e.to_string())?;
-  entry
-    .set_password(password_to_save)
-    .map_err(|e| e.to_string())?;
-
   Ok(())
 }
 
-/// Load the saved DB config: non-sensitive fields from SQLite and the password
-/// from the OS keychain.
-///
-/// Returns `None` when no complete config has been saved yet (any missing key
-/// or keychain error causes a graceful `None` rather than an `Err`).
+/// Load the saved DB config from SQLite app_settings.
+/// Returns `None` when no complete config has been saved yet.
 #[tauri::command]
 pub async fn load_db_config(sqlite: State<'_, SqlitePool>) -> Result<Option<DbConfig>, String> {
   load_config_from_sqlite(sqlite.inner())
@@ -152,21 +132,16 @@ pub async fn load_db_config(sqlite: State<'_, SqlitePool>) -> Result<Option<DbCo
     .map_err(|e| e.to_string())
 }
 
-/// Remove saved config from both SQLite and the OS keychain.
+/// Remove saved config from SQLite.
 #[tauri::command]
 pub async fn delete_db_config(sqlite: State<'_, SqlitePool>) -> Result<(), String> {
   sqlx::query(
     "DELETE FROM app_settings \
-         WHERE key IN ('mysql_host', 'mysql_port', 'mysql_database', 'mysql_username')",
+     WHERE key IN ('mysql_host', 'mysql_port', 'mysql_database', 'mysql_username', 'mysql_password')",
   )
   .execute(sqlite.inner())
   .await
   .map_err(|e| e.to_string())?;
-
-  // Best-effort: ignore errors if the keychain entry was never created
-  if let Ok(entry) = keyring::Entry::new(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT) {
-    let _ = entry.delete_credential();
-  }
 
   Ok(())
 }
@@ -175,16 +150,10 @@ pub async fn delete_db_config(sqlite: State<'_, SqlitePool>) -> Result<(), Strin
 // Public (non-command) helper — used by lib.rs during startup auto-connect
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Read the persisted DB config directly from a `&SqlitePool` (no Tauri
-/// managed-state needed).  Called during app startup before the managed state
-/// has been registered, so commands::settings commands cannot be used yet.
+/// Read the persisted DB config directly from a `&SqlitePool`.
+/// Called during app startup before managed state has been registered.
 ///
-/// Returns `Ok(None)` when:
-/// - any of the four non-sensitive keys are absent from `app_settings`, or
-/// - the OS keychain does not contain the password entry.
-///
-/// Never propagates keychain errors as `Err` — the caller should treat a
-/// missing config as "user has not saved settings yet".
+/// Returns `Ok(None)` when any of the five keys are absent from `app_settings`.
 pub async fn load_config_from_sqlite(pool: &SqlitePool) -> AnyhowResult<Option<DbConfig>> {
   let mut values: std::collections::HashMap<String, String> =
     std::collections::HashMap::with_capacity(SETTING_KEYS.len());
@@ -204,19 +173,6 @@ pub async fn load_config_from_sqlite(pool: &SqlitePool) -> AnyhowResult<Option<D
     }
   }
 
-  // Retrieve password from OS keychain; any error → treat as not-saved
-  let mut password = match keyring::Entry::new(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT) {
-    Ok(entry) => match entry.get_password() {
-      Ok(p) => p,
-      Err(_) => return Ok(None),
-    },
-    Err(_) => return Ok(None),
-  };
-
-  if password == "__SABOT_EMPTY_PASSWORD__" {
-    password = String::new();
-  }
-
   let port: u16 = values
     .get("mysql_port")
     .and_then(|v| v.parse().ok())
@@ -227,6 +183,6 @@ pub async fn load_config_from_sqlite(pool: &SqlitePool) -> AnyhowResult<Option<D
     port,
     database: values.remove("mysql_database").unwrap_or_default(),
     username: values.remove("mysql_username").unwrap_or_default(),
-    password,
+    password: values.remove("mysql_password").unwrap_or_default(),
   }))
 }
