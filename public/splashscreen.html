@@ -20,7 +20,7 @@
         width: 100%;
         height: 100%;
         overflow: hidden;
-        background: var(--color-bg);
+        background: transparent;
         font-family: 'Inter', -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
         user-select: none;
@@ -30,53 +30,50 @@
       .splash {
         width: 100%;
         height: 100%;
-        background: var(--color-bg);
+        background: transparent;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 18px;
         padding: 32px;
+      }
+
+      .card {
+        background: var(--color-bg);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 16px;
+        box-shadow:
+          rgba(0, 0, 0, 0.06) 0px 8px 32px,
+          rgba(0, 0, 0, 0.04) 0px 4px 18px,
+          rgba(0, 0, 0, 0.027) 0px 2px 8px,
+          rgba(0, 0, 0, 0.015) 0px 1px 3px;
+        padding: 36px 48px 32px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        width: 320px;
         position: relative;
         overflow: hidden;
+        animation: cardIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
       }
 
-      /* Subtle top-right decorative circle */
-      .splash::before {
-        content: '';
-        position: absolute;
-        top: -70px;
-        right: -70px;
-        width: 220px;
-        height: 220px;
-        border-radius: 50%;
-        background: rgba(0, 117, 222, 0.04);
-        pointer-events: none;
-      }
-
-      /* Subtle bottom-left decorative circle */
-      .splash::after {
-        content: '';
-        position: absolute;
-        bottom: -50px;
-        left: -50px;
-        width: 160px;
-        height: 160px;
-        border-radius: 50%;
-        background: rgba(42, 157, 153, 0.04);
-        pointer-events: none;
-      }
-
+      /* Icon wrapper */
       .icon-wrap {
-        width: 56px;
-        height: 56px;
-        border-radius: 14px;
-        background: rgba(0, 117, 222, 0.08);
-        border: 1px solid rgba(0, 117, 222, 0.15);
+        width: 68px;
+        height: 68px;
+        border-radius: 18px;
+        background: #f6f5f4;
+        border: 1px solid rgba(0, 0, 0, 0.07);
+        box-shadow:
+          rgba(0, 0, 0, 0.06) 0px 2px 8px,
+          rgba(0, 0, 0, 0.04) 0px 1px 3px;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        position: relative;
+        z-index: 1;
       }
 
       .text-group {
@@ -85,6 +82,8 @@
         align-items: center;
         gap: 5px;
         text-align: center;
+        position: relative;
+        z-index: 1;
       }
 
       .app-name {
@@ -106,6 +105,8 @@
         flex-direction: column;
         align-items: center;
         gap: 9px;
+        position: relative;
+        z-index: 1;
       }
 
       .dots {
@@ -135,6 +136,8 @@
         font-size: 11px;
         color: var(--color-text-muted);
         letter-spacing: 0.01em;
+        min-height: 16px;
+        transition: opacity 0.2s ease;
       }
 
       .version-label {
@@ -142,63 +145,145 @@
         bottom: 14px;
         font-size: 10px;
         color: var(--color-text-muted);
-        opacity: 0.5;
+        opacity: 0.45;
+        z-index: 1;
       }
 
-      /* thin bottom accent line */
-      .accent-line {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: linear-gradient(
-          90deg,
-          var(--color-blue) 0%,
-          var(--color-teal) 100%
-        );
-        opacity: 0.6;
+      @keyframes cardIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px) scale(0.97);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
       }
     </style>
   </head>
   <body>
     <div class="splash">
-      <!-- Icon -->
-      <div class="icon-wrap">
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#0075de"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-        </svg>
-      </div>
+      <div class="card">
 
-      <!-- Text -->
-      <div class="text-group">
-        <div class="app-name">Sabot TB Clinic</div>
-        <div class="app-subtitle">
-          ระบบบริหารจัดการคลินิกวัณโรค<br />โรงพยาบาลสรบอสอต
+        <!-- TB Clinic logo -->
+        <div class="icon-wrap">
+          <svg
+            width="46"
+            height="46"
+            viewBox="5 9 14 11"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-label="Sabot TB Clinic"
+          >
+            <!-- Depth / shadow layer -->
+            <path
+              d="M10.5 9.4h-0.2C7.4 9.4 5 11.8 5 14.8c0 3 2.2 5.3 5.5 5.3 1 0 1-1 1-2v-8c0-1 0-1-1-1z"
+              fill="#f6f5f4"
+            />
+            <path
+              d="M13.5 9.4h0.2c2.9 0 5.3 2.4 5.3 5.4 0 3-2.2 5.3-5.5 5.3-1 0-1-1-1-2v-8c0-1 0-1 1-1z"
+              fill="#f6f5f4"
+            />
+            <!-- Teal pill — T (left) -->
+            <path
+              d="M10.5 9h-0.2C7.4 9 5 11.4 5 14.4c0 3.3 2.2 5.6 5.5 5.6 1 0 1-1 1-2v-8c0-1 0-1-1-1z"
+              fill="#2a9d99"
+              stroke="#238582"
+              stroke-width="0.1"
+            />
+            <!-- Blue pill — B (right) -->
+            <path
+              d="M13.5 9h0.2c2.9 0 5.3 2.4 5.3 5.4 0 3.3-2.2 5.6-5.5 5.6-1 0-1-1-1-2v-8c0-1 0-1 1-1z"
+              fill="#0075de"
+              stroke="#005bab"
+              stroke-width="0.1"
+              fill-opacity="0.9"
+            />
+            <!-- Letter T -->
+            <text
+              x="8.1"
+              y="15.8"
+              font-family="system-ui, -apple-system, sans-serif"
+              font-weight="800"
+              font-size="4"
+              fill="#ffffff"
+              text-anchor="middle"
+            >T</text>
+            <!-- Letter B -->
+            <text
+              x="15.9"
+              y="15.8"
+              font-family="system-ui, -apple-system, sans-serif"
+              font-weight="800"
+              font-size="4"
+              fill="#ffffff"
+              text-anchor="middle"
+            >B</text>
+            <!-- White highlight arcs -->
+            <path
+              d="M10.5 9.2h-0.2C7.4 9.2 5.2 11.3 5.2 14.3"
+              stroke="#ffffff"
+              stroke-width="0.15"
+              fill="none"
+              stroke-opacity="0.4"
+            />
+            <path
+              d="M13.5 9.2h0.2c2.9 0 5.1 2.3 5.1 5.3"
+              stroke="#ffffff"
+              stroke-width="0.15"
+              fill="none"
+              stroke-opacity="0.4"
+            />
+          </svg>
         </div>
-      </div>
 
-      <!-- Loading indicator -->
-      <div class="loading-wrap">
-        <div class="dots">
-          <div class="dot"></div>
-          <div class="dot"></div>
-          <div class="dot"></div>
+        <!-- App name & subtitle -->
+        <div class="text-group">
+          <div class="app-name">Sabot TB Clinic</div>
+          <div class="app-subtitle">
+            ระบบบริหารจัดการคลินิกวัณโรค<br />โรงพยาบาลสระโบสถ์
+          </div>
         </div>
-        <div class="loading-label">กำลังโหลด...</div>
-      </div>
 
-      <div class="version-label">v0.1.0</div>
-      <div class="accent-line"></div>
+        <!-- Loading indicator -->
+        <div class="loading-wrap">
+          <div class="dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+          <div class="loading-label" id="loading-label">กำลังโหลด...</div>
+        </div>
+
+        <div class="version-label">v0.1.0</div>
+      </div>
     </div>
+
+    <script>
+      (function () {
+        var label = document.getElementById('loading-label');
+
+        function attachListener() {
+          if (
+            typeof window.__TAURI__ !== 'undefined' &&
+            window.__TAURI__.event &&
+            typeof window.__TAURI__.event.listen === 'function'
+          ) {
+            window.__TAURI__.event.listen('splash-status', function (event) {
+              if (label && event.payload) {
+                label.textContent = event.payload;
+              }
+            });
+          } else {
+            setTimeout(attachListener, 80);
+          }
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', attachListener);
+        } else {
+          attachListener();
+        }
+      })();
+    </script>
   </body>
 </html>

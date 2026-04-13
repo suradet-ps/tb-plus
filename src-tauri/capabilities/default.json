@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/schema/acl/capabilities.schema.json",
   "identifier": "default",
-  "description": "Capability for the main window",
-  "windows": ["main"],
+  "description": "Capability for the main and splashscreen windows",
+  "windows": ["main", "splashscreen"],
   "permissions": [
     "core:default",
     "opener:default"

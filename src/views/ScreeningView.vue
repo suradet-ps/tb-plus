@@ -1,15 +1,40 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { Search, RotateCcw, UserPlus, Loader2 } from 'lucide-vue-next'
 import PatientTable from '@/components/screening/PatientTable.vue'
 import EnrollModal from '@/components/screening/EnrollModal.vue'
 import { useScreeningStore } from '@/stores/screening'
+import { useSettingsStore } from '@/stores/settings'
 
 const screeningStore = useScreeningStore()
+const settingsStore = useSettingsStore()
 const showEnrollModal = ref(false)
 
 onMounted(() => {
-  screeningStore.search()
+  // Only auto-search if MySQL is already connected.
+  // If the background auto-connect in Rust hasn't finished yet (race condition
+  // between webview JS startup and lib.rs async task), the watcher below will
+  // trigger the search as soon as isConnected flips to true.
+  if (settingsStore.isConnected) {
+    screeningStore.search()
+  }
+})
+
+// Watch for MySQL coming online after mount (handles the splash-screen
+// race condition where Vue mounts before lib.rs finishes auto-connecting).
+// Only fires on false → true transitions and only when there are no
+// results yet, so manual searches or reconnects don't double-fire.
+const stopConnectionWatch = watch(
+  () => settingsStore.isConnected,
+  (connected, wasConnected) => {
+    if (connected && !wasConnected && screeningStore.results.length === 0) {
+      screeningStore.search()
+    }
+  },
+)
+
+onUnmounted(() => {
+  stopConnectionWatch()
 })
 
 function resetFilters() {

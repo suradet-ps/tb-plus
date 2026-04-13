@@ -6,7 +6,7 @@ use commands::settings::MySqlState;
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::sqlite::SqlitePoolOptions;
 use std::sync::Arc;
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 use tokio::sync::Mutex;
 
 pub fn run() {
@@ -14,6 +14,20 @@ pub fn run() {
     .plugin(tauri_plugin_opener::init())
     .setup(|app| {
       let app_handle = app.handle().clone();
+
+      // ── Acquire window handles ──────────────────────────────────────────
+      // Both windows are defined in tauri.conf.json.
+      // splashscreen: visible: true   → shows immediately
+      // main:         visible: false  → hidden until we explicitly show it
+      let splash_window = app
+        .get_webview_window("splashscreen")
+        .expect("[sabot] splashscreen window not found — check tauri.conf.json");
+      let main_window = app
+        .get_webview_window("main")
+        .expect("[sabot] main window not found — check tauri.conf.json");
+
+      // Extra safety: make sure main is invisible before any async work
+      let _ = main_window.hide();
 
       // ── Step 1: SQLite — synchronous, completes in < 10 ms ─────────────
       // We use block_on here because SQLite is a local file operation.
@@ -59,58 +73,79 @@ pub fn run() {
       let mysql_state: MySqlState = Arc::new(Mutex::new(None));
       app_handle.manage(Arc::clone(&mysql_state));
 
-      // Spawn the MySQL auto-connect attempt in the background.
-      // The Vue app's checkConnection() / isConnected reactive state will
-      // update naturally once the user navigates to a page that calls
-      // get_mysql_status, or after the auto-connect completes and the
-      // periodic alert refresh fires.
+      // ── Step 3: Background task — MySQL connect + window transition ─────
+      // Clone window handles for the async move block (WebviewWindow: Clone + Send).
+      let splash_clone = splash_window.clone();
+      let main_clone = main_window.clone();
+
       tauri::async_runtime::spawn(async move {
+        // ── 3a. Update splash status ──────────────────────────────────────
+        let _ = splash_clone.emit("splash-status", "กำลังโหลดฐานข้อมูล...");
+
+        // ── 3b. Attempt MySQL auto-connect ────────────────────────────────
         let connect_result =
           crate::commands::settings::load_config_from_sqlite(&sqlite_pool).await;
 
-        let config = match connect_result {
-          Ok(Some(c)) => c,
+        match connect_result {
+          Ok(Some(config)) => {
+            let _ = splash_clone.emit("splash-status", "กำลังเชื่อมต่อ MySQL...");
+
+            let url = format!(
+              "mysql://{}:{}@{}:{}/{}",
+              config.username, config.password, config.host, config.port, config.database
+            );
+
+            // Hard-cap the auto-connect attempt at 8 seconds so startup is
+            // never indefinitely blocked when the server is unreachable.
+            let pool_result = tokio::time::timeout(
+              std::time::Duration::from_secs(8),
+              MySqlPoolOptions::new()
+                .max_connections(5)
+                .connect(&url),
+            )
+            .await;
+
+            match pool_result {
+              Ok(Ok(pool)) => {
+                println!(
+                  "[sabot] Auto-connected to MySQL ({}:{})",
+                  config.host, config.port
+                );
+                let mut guard = mysql_state.lock().await;
+                *guard = Some(pool);
+                let _ = splash_clone.emit("splash-status", "เชื่อมต่อสำเร็จ ✓");
+              }
+              Ok(Err(e)) => {
+                eprintln!("[sabot] Auto-connect to MySQL failed: {e}");
+                let _ = splash_clone.emit("splash-status", "เชื่อมต่อล้มเหลว (ใช้งานออฟไลน์ได้)");
+              }
+              Err(_) => {
+                eprintln!("[sabot] MySQL auto-connect timed out after 8 s");
+                let _ = splash_clone.emit("splash-status", "เชื่อมต่อหมดเวลา (ใช้งานออฟไลน์ได้)");
+              }
+            }
+          }
           Ok(None) => {
-            // No saved config — normal first-run, nothing to do
-            return;
+            // No saved config — normal on first run, nothing to do.
+            let _ = splash_clone.emit("splash-status", "พร้อมใช้งาน (ยังไม่ตั้งค่า MySQL)");
           }
           Err(e) => {
             eprintln!("[sabot] Failed to load saved DB config: {e}");
-            return;
-          }
-        };
-
-        let url = format!(
-          "mysql://{}:{}@{}:{}/{}",
-          config.username, config.password, config.host, config.port, config.database
-        );
-
-        // Hard-cap the auto-connect attempt at 8 seconds so startup is
-        // never indefinitely blocked when the server is unreachable.
-        let pool_result = tokio::time::timeout(
-          std::time::Duration::from_secs(8),
-          MySqlPoolOptions::new()
-            .max_connections(5)
-            .connect(&url),
-        )
-        .await;
-
-        match pool_result {
-          Ok(Ok(pool)) => {
-            println!(
-              "[sabot] Auto-connected to MySQL ({}:{})",
-              config.host, config.port
-            );
-            let mut guard = mysql_state.lock().await;
-            *guard = Some(pool);
-          }
-          Ok(Err(e)) => {
-            eprintln!("[sabot] Auto-connect to MySQL failed: {e}");
-          }
-          Err(_) => {
-            eprintln!("[sabot] MySQL auto-connect timed out after 8 s");
+            let _ = splash_clone.emit("splash-status", "โหลดการตั้งค่าล้มเหลว");
           }
         }
+
+        // ── 3c. Minimum splash display time (visual comfort) ─────────────
+        // Ensures the user sees the splash for at least 500 ms even when
+        // SQLite is fast and MySQL config is missing.
+        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+
+        // ── 3d. Transition: close splash → show main ──────────────────────
+        // Order matters: close splash first so there is no brief overlap
+        // where both windows are visible simultaneously.
+        let _ = splash_clone.close();
+        let _ = main_clone.show();
+        let _ = main_clone.set_focus();
       });
 
       Ok(())
