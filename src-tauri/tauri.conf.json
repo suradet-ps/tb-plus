@@ -20,7 +20,15 @@
         "minWidth": 1024,
         "minHeight": 640,
         "center": true,
-        "visible": true
+        "visible": true,
+        "focus": true,
+        "shadow": false,
+        "decorations": true,
+        "transparent": false,
+        "windowEffects": {
+          "effects": [],
+          "state": "active"
+        }
       }
     ],
     "security": {
