@@ -40,7 +40,7 @@ A modern desktop application built with Tauri (Rust) and Vue (TypeScript) for ma
 1. **Clone the repository** (and switch into the project directory):
 
    ```bash
-   git clone https://github.com/pharmacist-sabot/sabot-tb-clinic.git
+   git clone https://github.com/suradet-ps/sabot-tb-clinic.git
    cd sabot-tb-clinic
    ```
 

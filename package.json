@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.5",
   "description": "TB Clinic Management System for Sabot Hospital",
+  "repository": "https://github.com/suradet-ps/sabot-tb-clinic",
   "type": "module",
   "scripts": {
     "dev": "vite",
