@@ -37,7 +37,7 @@ onMounted(() => {
     <!-- ── Page Header ───────────────────────────────────────────────────── -->
     <div class="view-header">
       <div class="header-left">
-        <h1 class="page-title">การนัดหมาย TB Clinic</h1>
+        <h1 class="page-title">การนัดหมาย TB Plus</h1>
         <p class="page-subtitle">ตารางนัดหมายจากระบบ HOSxP (รหัสคลินิก 009)</p>
       </div>
       <button

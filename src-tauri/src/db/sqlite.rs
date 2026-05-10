@@ -315,7 +315,7 @@ pub async fn enroll_patient(pool: &SqlitePool, input: &EnrollmentInput) -> Resul
 /// Insert intensive (current) and continuation (pending) plan rows for a
 /// newly enrolled patient.
 ///
-/// Drug icodes use Sarabosot Hospital codes from AGENTS.md:
+/// Drug icodes use Sabot Hospital codes from AGENTS.md:
 /// - H+R+Z+E  →  `["1430104","1000265","1600004","1000258"]`
 /// - H+R       →  `["1430104","1000265"]`
 async fn create_initial_plans(

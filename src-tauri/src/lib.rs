@@ -28,7 +28,7 @@ pub fn run() {
           .expect("Failed to get app data dir");
         std::fs::create_dir_all(&app_data_dir).expect("Failed to create app data dir");
 
-        let db_path = app_data_dir.join("tb_clinic.db");
+        let db_path = app_data_dir.join("tb_plus.db");
         let db_url = format!(
           "sqlite://{}?mode=rwc",
           db_path.to_str().expect("db path is not valid UTF-8")

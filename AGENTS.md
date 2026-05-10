@@ -1,8 +1,8 @@
-# Sabot TB Clinic Management System — Agent Specification
+# TB Plus — Agent Specification
 
 ## Project Overview
 
-A Tauri 2.5 (Rust) + Vue 3.5 (TypeScript) + lucide-vue desktop application for managing tuberculosis (TB) clinic operations at Sarabosot Hospital. The system bridges HOSxP's MySQL database (read-only) with a local SQLite database for clinic-specific tracking data not available in HIS.
+A Tauri 2.5 (Rust) + Vue 3.5 (TypeScript) + lucide-vue desktop application for managing tuberculosis (TB) clinic operations at Sabot Hospital. The system bridges HOSxP's MySQL database (read-only) with a local SQLite database for clinic-specific tracking data not available in HIS.
 
 ---
 
@@ -80,7 +80,7 @@ A Tauri 2.5 (Rust) + Vue 3.5 (TypeScript) + lucide-vue desktop application for m
 - units       VARCHAR  -- dispensing unit
 ```
 
-### TB Drug Codes (Sarabosot Hospital)
+### TB Drug Codes (Sabot Hospital)
 
 | icode | Drug Name | Thai Name |
 |-------|-----------|-----------|
@@ -484,7 +484,7 @@ anyhow = "1"
 ## Project File Structure
 
 ```
-tb-clinic/
+tb-plus/
 ├── src-tauri/
 │   ├── src/
 │   │   ├── main.rs

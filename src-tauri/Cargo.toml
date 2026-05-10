@@ -1,20 +1,20 @@
 [package]
-name = "sabot-tb-clinic"
+name = "tb-plus"
 version = "0.1.5"
-description = "TB Clinic Management System for Sabot Hospital"
+description = "TB Plus — ระบบบริหารจัดการคลินิกวัณโรค โรงพยาบาลสระโบสถ์"
 authors = ["Suradet Pratomsak"]
 license = "MIT"
-repository = "https://github.com/suradet-ps/sabot-tb-clinic"
-default-run = "sabot-tb-clinic"
+repository = "https://github.com/suradet-ps/tb-plus"
+default-run = "tb-plus"
 edition = "2024"
 rust-version = "1.94.1"
 
 [lib]
-name = "sabot_tb_clinic_lib"
+name = "tb_plus_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [[bin]]
-name = "sabot-tb-clinic"
+name = "tb-plus"
 path = "src/main.rs"
 
 [build-dependencies]

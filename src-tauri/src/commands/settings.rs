@@ -93,7 +93,7 @@ pub async fn get_mysql_status(mysql: State<'_, MySqlState>) -> Result<bool, Stri
 pub async fn backup_sqlite(app: tauri::AppHandle, target_path: String) -> Result<(), String> {
   use tauri::Manager;
   let app_data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
-  let source_path = app_data_dir.join("tb_clinic.db");
+  let source_path = app_data_dir.join("tb_plus.db");
   if !source_path.exists() {
     return Err("ไม่พบไฟล์ฐานข้อมูล SQLite".to_string());
   }

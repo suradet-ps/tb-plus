@@ -60,7 +60,7 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
         <TbClinicLogo :size="40" />
       </div>
       <div class="sidebar-brand">
-        <span class="brand-title">TB Clinic</span>
+        <span class="brand-title">TB Plus</span>
         <span class="brand-sub">โรงพยาบาลสระโบสถ์</span>
       </div>
     </div>

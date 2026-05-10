@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Sabot TB Clinic",
+  "productName": "TB Plus",
   "version": "0.1.5",
-  "identifier": "com.sabothospital.tb-clinic",
+  "identifier": "com.sabothospital.tb-plus",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Sabot TB Clinic",
+        "title": "TB Plus",
         "width": 1280,
         "height": 800,
         "minWidth": 1024,
@@ -39,7 +39,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "publisher": "Sabot Hospital",
+    "publisher": "โรงพยาบาลสระโบสถ์",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

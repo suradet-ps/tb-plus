@@ -190,7 +190,7 @@ async function downloadBackup() {
   backupSuccess.value = false
   try {
     const targetPath = await saveDialog({
-      defaultPath: `tb-clinic-backup-${new Date().toISOString().slice(0, 10)}.db`,
+      defaultPath: `tb-plus-backup-${new Date().toISOString().slice(0, 10)}.db`,
       filters: [
         {
           name: 'SQLite Database',

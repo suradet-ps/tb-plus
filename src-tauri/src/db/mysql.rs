@@ -7,7 +7,7 @@ use sqlx::{MySqlPool, QueryBuilder};
 use std::collections::HashMap;
 
 // ---------------------------------------------------------------------------
-// TB drug icode constants (Sarabosot Hospital)
+// TB drug icode constants (Sabot Hospital)
 // ---------------------------------------------------------------------------
 
 const H_ICODES: &[&str] = &["1430104"];

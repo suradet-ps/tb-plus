@@ -1,4 +1,4 @@
-# Sabot TB Clinic Management System
+# TB Plus
 
 [![Tauri](https://img.shields.io/badge/Tauri-%5E2.10.1-24c8db?logo=tauri&logoColor=fff)](https://tauri.app/)
 [![Vue.js](https://img.shields.io/badge/Vue.js-%5E3.5.32-4FC08D?logo=vuedotjs&logoColor=fff)](https://vuejs.org/)
@@ -40,8 +40,8 @@ A modern desktop application built with Tauri (Rust) and Vue (TypeScript) for ma
 1. **Clone the repository** (and switch into the project directory):
 
    ```bash
-   git clone https://github.com/suradet-ps/sabot-tb-clinic.git
-   cd sabot-tb-clinic
+   git clone https://github.com/suradet-ps/tb-plus.git
+   cd tb-plus
    ```
 
 2. **Install frontend dependencies**:

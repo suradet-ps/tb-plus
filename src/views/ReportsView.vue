@@ -176,7 +176,7 @@ function exportCSV() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `tb-clinic-report-${new Date().toISOString().slice(0, 10)}.csv`
+  a.download = `tb-plus-report-${new Date().toISOString().slice(0, 10)}.csv`
   a.click()
   URL.revokeObjectURL(url)
 }

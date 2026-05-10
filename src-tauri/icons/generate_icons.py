@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate all Tauri icon sizes from the TB Clinic SVG logo.
+Generate all Tauri icon sizes from the TB Plus logo.
 Run from the src-tauri/icons/ directory:
     python3 generate_icons.py
 """
@@ -197,7 +197,7 @@ def build_ico(images: dict[int, Image.Image]) -> None:
 
 
 def main() -> None:
-    print("TB Clinic — icon generator")
+    print("TB Plus — icon generator")
     print(f"output dir: {SCRIPT_DIR}")
 
     images = build_flat_pngs()

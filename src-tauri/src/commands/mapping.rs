@@ -341,7 +341,7 @@ async fn geocode_address_with_rate_limit(address: &str) -> Result<(f64, f64), an
   let _guard = geocode_lock().lock().await;
   let client = Client::builder()
     .timeout(Duration::from_secs(15))
-    .user_agent("TBClinicMapping/1.0 (sabot-tb-clinic)")
+    .user_agent("TBPlusMapping/1.0 (tb-plus)")
     .build()?;
 
   let url = "https://nominatim.openstreetmap.org/search";
