@@ -432,3 +432,305 @@ pub async fn get_discharged_patients(
 
   Ok(rows)
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tests — alert logic (pure date math, no DB required)
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use chrono::{Datelike, Local, NaiveDate};
+
+  // ---------------------------------------------------------------------------
+  // Alert helper: mirrors the core logic from compute_alerts_for_patient
+  // but works with explicit NaiveDate inputs so we can control the "today"
+  // without needing a real database.
+  // ---------------------------------------------------------------------------
+
+  fn compute_alert_types(
+    current_plan: Option<&TreatmentPlan>,
+    current_month: Option<i64>,
+    total_months: Option<i64>,
+    days_since_last: Option<i64>,
+    reference_date: NaiveDate,
+  ) -> Vec<&'static str> {
+    let mut types = Vec::new();
+
+    // 1. Overdue (> 35, ≤ 60 days)
+    if let Some(d) = days_since_last {
+      if d > 35 && d <= 60 {
+        types.push("overdue");
+      }
+      if d > 60 {
+        types.push("lost_to_followup");
+      }
+    }
+
+    // 2. Phase transition
+    let intensive_end = current_plan
+      .filter(|p| p.phase == "intensive")
+      .and_then(|p| p.phase_end_expected.as_ref())
+      .and_then(|s| NaiveDate::parse_from_str(s, "%Y-%m-%d").ok());
+
+    if let (Some(plan), Some(end)) = (current_plan, intensive_end) {
+      if plan.phase == "intensive" && reference_date > end {
+        types.push("phase_transition");
+      }
+    }
+
+    // 3. Treatment complete
+    if let (Some(cur), Some(tot)) = (current_month, total_months) {
+      if cur > tot {
+        types.push("treatment_complete");
+      }
+    }
+
+    types
+  }
+
+  fn make_plan(phase: &str, phase_end: &str, duration: i64) -> TreatmentPlan {
+    TreatmentPlan {
+      id: 1,
+      hn: "HN001".into(),
+      regimen: "2HRZE/4HR".into(),
+      phase: phase.into(),
+      phase_start: "2025-01-01".into(),
+      phase_end_expected: Some(phase_end.into()),
+      drugs: r#"["H","R","Z","E"]"#.into(),
+      duration_months: duration,
+      is_current: true,
+      notes: None,
+      created_at: "2025-01-01T00:00:00".into(),
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // No alerts when all is well
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_no_overdue_alert_within_35_days() {
+    let today = Local::now().date_naive();
+    let types = compute_alert_types(
+      Some(&make_plan("intensive", "2026-06-01", 2)),
+      Some(3),
+      Some(6),
+      Some(5),
+      today,
+    );
+    assert!(!types.contains(&"overdue"));
+    assert!(!types.contains(&"lost_to_followup"));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Overdue (> 35, ≤ 60 days) → overdue alert
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_overdue_alert_at_36_days() {
+    let today = Local::now().date_naive();
+    let types = compute_alert_types(
+      Some(&make_plan("intensive", "2026-06-01", 2)),
+      Some(2),
+      Some(6),
+      Some(36),
+      today,
+    );
+    assert!(types.contains(&"overdue"), "36 days should trigger overdue");
+  }
+
+  #[test]
+  fn test_no_overdue_alert_at_35_days_exactly() {
+    let today = Local::now().date_naive();
+    let types = compute_alert_types(
+      Some(&make_plan("intensive", "2026-06-01", 2)),
+      Some(2),
+      Some(6),
+      Some(35),
+      today,
+    );
+    assert!(
+      !types.contains(&"overdue"),
+      "35 days exactly should NOT trigger overdue"
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Lost to follow-up (> 60 days)
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_lost_to_followup_at_61_days() {
+    let today = Local::now().date_naive();
+    let types = compute_alert_types(None, None, None, Some(61), today);
+    assert!(
+      types.contains(&"lost_to_followup"),
+      "61 days should trigger lost_to_followup"
+    );
+  }
+
+  #[test]
+  fn test_no_lost_to_followup_between_35_and_60_days() {
+    let today = Local::now().date_naive();
+    for days in [36, 45, 59] {
+      let types = compute_alert_types(None, None, None, Some(days), today);
+      assert!(
+        !types.contains(&"lost_to_followup"),
+        "days={days} should NOT trigger lost_to_followup"
+      );
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Treatment complete (> total_months)
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_treatment_complete_when_month_exceeds_total() {
+    let today = Local::now().date_naive();
+    let types = compute_alert_types(
+      Some(&make_plan("continuation", "2026-12-01", 6)),
+      Some(8),
+      Some(6),
+      Some(10),
+      today,
+    );
+    assert!(
+      types.contains(&"treatment_complete"),
+      "month 8 of 6 should trigger treatment_complete"
+    );
+  }
+
+  #[test]
+  fn test_no_treatment_complete_when_within_duration() {
+    let today = Local::now().date_naive();
+    let types = compute_alert_types(
+      Some(&make_plan("intensive", "2026-06-01", 2)),
+      Some(3),
+      Some(6),
+      Some(5),
+      today,
+    );
+    assert!(
+      !types.contains(&"treatment_complete"),
+      "month 3 of 6 should NOT trigger"
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Phase transition — intensive phase end date passed but still intensive
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_phase_transition_due_when_intensive_end_passed() {
+    let today = Local::now().date_naive();
+    let past = (today - chrono::Duration::days(10))
+      .format("%Y-%m-%d")
+      .to_string();
+    let types = compute_alert_types(
+      Some(&make_plan("intensive", &past, 2)),
+      Some(3),
+      Some(6),
+      Some(5),
+      today,
+    );
+    assert!(
+      types.contains(&"phase_transition"),
+      "intensive phase end in past should trigger phase_transition"
+    );
+  }
+
+  #[test]
+  fn test_no_phase_transition_when_continuation() {
+    let today = Local::now().date_naive();
+    let past = (today - chrono::Duration::days(10))
+      .format("%Y-%m-%d")
+      .to_string();
+    let types = compute_alert_types(
+      Some(&make_plan("continuation", &past, 4)),
+      Some(3),
+      Some(6),
+      Some(5),
+      today,
+    );
+    assert!(
+      !types.contains(&"phase_transition"),
+      "continuation phase should not trigger phase_transition"
+    );
+  }
+
+  #[test]
+  fn test_no_phase_transition_when_intensive_end_in_future() {
+    let today = Local::now().date_naive();
+    let future = (today + chrono::Duration::days(30))
+      .format("%Y-%m-%d")
+      .to_string();
+    let types = compute_alert_types(
+      Some(&make_plan("intensive", &future, 2)),
+      Some(1),
+      Some(6),
+      Some(5),
+      today,
+    );
+    assert!(
+      !types.contains(&"phase_transition"),
+      "intensive phase end in future should NOT trigger"
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // All alert types absent when no data
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_no_panic_without_current_plan() {
+    let today = Local::now().date_naive();
+    let types = compute_alert_types(None, None, None, None, today);
+    assert!(!types.contains(&"overdue"));
+    assert!(!types.contains(&"lost_to_followup"));
+    assert!(!types.contains(&"phase_transition"));
+    assert!(!types.contains(&"treatment_complete"));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Edge: current_month equals total_months exactly → not a violation
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_no_treatment_complete_when_month_equals_total() {
+    let today = Local::now().date_naive();
+    let types = compute_alert_types(
+      Some(&make_plan("continuation", "2026-12-01", 6)),
+      Some(6),
+      Some(6),
+      Some(10),
+      today,
+    );
+    assert!(
+      !types.contains(&"treatment_complete"),
+      "month 6 of 6 exact match should NOT trigger"
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Multiple alerts can coexist
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_overdue_and_phase_transition_can_coexist() {
+    let today = Local::now().date_naive();
+    let past = (today - chrono::Duration::days(10))
+      .format("%Y-%m-%d")
+      .to_string();
+    let types = compute_alert_types(
+      Some(&make_plan("intensive", &past, 2)),
+      Some(3),
+      Some(6),
+      Some(40),
+      today,
+    );
+    assert!(types.contains(&"overdue"));
+    assert!(types.contains(&"phase_transition"));
+  }
+}

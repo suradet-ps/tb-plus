@@ -450,3 +450,151 @@ pub async fn get_tb_appointments(
   .await
   .map_err(anyhow::Error::from)
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tests — pure helper functions (no DB required)
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  // ---------------------------------------------------------------------------
+  // icodes_for_classes
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_icodes_for_classes_empty_returns_empty() {
+    let result = icodes_for_classes(&[]);
+    assert!(result.is_empty());
+  }
+
+  #[test]
+  fn test_icodes_for_classes_h() {
+    let result = icodes_for_classes(&[String::from("H")]);
+    assert_eq!(result, ["1430104"]);
+  }
+
+  #[test]
+  fn test_icodes_for_classes_r_both_codes() {
+    let result = icodes_for_classes(&[String::from("R")]);
+    assert_eq!(result, ["1000265", "1000264"]);
+  }
+
+  #[test]
+  fn test_icodes_for_classes_e_both_codes() {
+    let result = icodes_for_classes(&[String::from("E")]);
+    assert_eq!(result, ["1600004", "1000129"]);
+  }
+
+  #[test]
+  fn test_icodes_for_classes_z() {
+    let result = icodes_for_classes(&[String::from("Z")]);
+    assert_eq!(result, ["1000258"]);
+  }
+
+  #[test]
+  fn test_icodes_for_classes_case_insensitive() {
+    let result = icodes_for_classes(&[String::from("h"), String::from("r")]);
+    assert!(result.contains(&"1430104"));
+    assert!(result.contains(&"1000265"));
+  }
+
+  #[test]
+  fn test_icodes_for_classes_unknown_class_ignored() {
+    let result = icodes_for_classes(&[String::from("X"), String::from("H")]);
+    assert_eq!(result, ["1430104"]);
+  }
+
+  // ---------------------------------------------------------------------------
+  // icode_to_class
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_icode_to_class_h() {
+    assert_eq!(icode_to_class("1430104"), Some("H"));
+  }
+
+  #[test]
+  fn test_icode_to_class_r_both_codes() {
+    assert_eq!(icode_to_class("1000265"), Some("R"));
+    assert_eq!(icode_to_class("1000264"), Some("R"));
+  }
+
+  #[test]
+  fn test_icode_to_class_e_both_codes() {
+    assert_eq!(icode_to_class("1600004"), Some("E"));
+    assert_eq!(icode_to_class("1000129"), Some("E"));
+  }
+
+  #[test]
+  fn test_icode_to_class_z() {
+    assert_eq!(icode_to_class("1000258"), Some("Z"));
+  }
+
+  #[test]
+  fn test_icode_to_class_unknown() {
+    assert_eq!(icode_to_class("9999999"), None);
+    assert_eq!(icode_to_class(""), None);
+  }
+
+  // ---------------------------------------------------------------------------
+  // drug_classes_from_icode_csv
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_drug_classes_single_class() {
+    assert_eq!(
+      drug_classes_from_icode_csv("1430104"),
+      vec![String::from("H")]
+    );
+  }
+
+  #[test]
+  fn test_drug_classes_all_classes_deduplicated() {
+    let result = drug_classes_from_icode_csv("1430104,1000265,1600004,1000258");
+    assert_eq!(result, vec!["H", "R", "E", "Z"]);
+  }
+
+  #[test]
+  fn test_drug_classes_duplicate_r_deduplicated() {
+    let result = drug_classes_from_icode_csv("1000265,1000264,1430104,1000265");
+    assert_eq!(result, vec!["R", "H"]);
+  }
+
+  #[test]
+  fn test_drug_classes_unknown_ignored() {
+    let result = drug_classes_from_icode_csv("9999999,1430104,8888888");
+    assert_eq!(result, vec![String::from("H")]);
+  }
+
+  #[test]
+  fn test_drug_classes_empty_csv() {
+    assert!(drug_classes_from_icode_csv("").is_empty());
+  }
+
+  #[test]
+  fn test_drug_classes_whitespace_trimmed() {
+    let result = drug_classes_from_icode_csv(" 1430104 , 1000265 ");
+    assert_eq!(result, vec!["H", "R"]);
+  }
+
+  // ---------------------------------------------------------------------------
+  // in_placeholders
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_in_placeholders_zero() {
+    assert_eq!(in_placeholders(0), "");
+  }
+
+  #[test]
+  fn test_in_placeholders_one() {
+    assert_eq!(in_placeholders(1), "?");
+  }
+
+  #[test]
+  fn test_in_placeholders_five() {
+    assert_eq!(in_placeholders(5), "?, ?, ?, ?, ?");
+  }
+}

@@ -675,3 +675,163 @@ pub async fn get_intensive_phase_end(pool: &SqlitePool, hn: &str) -> Result<Opti
   .await?;
   Ok(row.flatten())
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tests — pure helper functions (no DB required)
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  // ---------------------------------------------------------------------------
+  // days_in_month
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_days_in_month_jan() {
+    assert_eq!(days_in_month(2024, 1), 31);
+  }
+  #[test]
+  fn test_days_in_month_feb_leap() {
+    assert_eq!(days_in_month(2024, 2), 29);
+  }
+  #[test]
+  fn test_days_in_month_feb_non_leap() {
+    assert_eq!(days_in_month(2025, 2), 28);
+  }
+  #[test]
+  fn test_days_in_month_apr() {
+    assert_eq!(days_in_month(2024, 4), 30);
+  }
+  #[test]
+  fn test_days_in_month_dec() {
+    assert_eq!(days_in_month(2024, 12), 31);
+  }
+  #[test]
+  fn test_days_in_month_century_non_leap() {
+    assert_eq!(days_in_month(1900, 2), 28);
+  }
+  #[test]
+  fn test_days_in_month_century_leap() {
+    assert_eq!(days_in_month(2000, 2), 29);
+  }
+
+  // ---------------------------------------------------------------------------
+  // add_months
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_add_months_simple() {
+    let d = NaiveDate::from_ymd_opt(2024, 3, 15).unwrap();
+    assert_eq!(
+      add_months(d, 1),
+      NaiveDate::from_ymd_opt(2024, 4, 15).unwrap()
+    );
+  }
+
+  #[test]
+  fn test_add_months_year_wrap() {
+    let d = NaiveDate::from_ymd_opt(2024, 11, 15).unwrap();
+    assert_eq!(
+      add_months(d, 3),
+      NaiveDate::from_ymd_opt(2025, 2, 15).unwrap()
+    );
+  }
+
+  #[test]
+  fn test_add_months_clamp_day_end_of_month() {
+    // Jan 31 + 1 month → Feb has at most 29 days in 2024
+    let d = NaiveDate::from_ymd_opt(2024, 1, 31).unwrap();
+    assert_eq!(
+      add_months(d, 1),
+      NaiveDate::from_ymd_opt(2024, 2, 29).unwrap()
+    );
+  }
+
+  #[test]
+  fn test_add_months_clamp_day_non_leap_feb() {
+    let d = NaiveDate::from_ymd_opt(2023, 1, 31).unwrap();
+    assert_eq!(
+      add_months(d, 1),
+      NaiveDate::from_ymd_opt(2023, 2, 28).unwrap()
+    );
+  }
+
+  #[test]
+  fn test_add_months_leap_year_feb_29() {
+    let d = NaiveDate::from_ymd_opt(2024, 2, 29).unwrap();
+    assert_eq!(
+      add_months(d, 12),
+      NaiveDate::from_ymd_opt(2025, 2, 28).unwrap()
+    );
+  }
+
+  #[test]
+  fn test_add_months_zero_months() {
+    let d = NaiveDate::from_ymd_opt(2024, 6, 10).unwrap();
+    assert_eq!(add_months(d, 0), d);
+  }
+
+  #[test]
+  fn test_add_months_large_jump() {
+    let d = NaiveDate::from_ymd_opt(2020, 1, 15).unwrap();
+    assert_eq!(
+      add_months(d, 24),
+      NaiveDate::from_ymd_opt(2022, 1, 15).unwrap()
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // parse_regimen_durations
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_parse_regimen_2hrze_4hr() {
+    let (i, c) = parse_regimen_durations("2HRZE/4HR");
+    assert_eq!(i, 2);
+    assert_eq!(c, 4);
+  }
+
+  #[test]
+  fn test_parse_regimen_2hrze_6hr() {
+    let (i, c) = parse_regimen_durations("2HRZE/6HR");
+    assert_eq!(i, 2);
+    assert_eq!(c, 6);
+  }
+
+  #[test]
+  fn test_parse_regimen_missing_continuation() {
+    let (i, c) = parse_regimen_durations("3HRZE/");
+    assert_eq!(i, 3);
+    assert_eq!(c, 4); // falls back to 4
+  }
+
+  #[test]
+  fn test_parse_regimen_unknown_format() {
+    let (i, c) = parse_regimen_durations("CUSTOM");
+    assert_eq!(i, 2); // falls back
+    assert_eq!(c, 4); // falls back
+  }
+
+  #[test]
+  fn test_parse_regimen_empty() {
+    let (i, c) = parse_regimen_durations("");
+    assert_eq!(i, 2);
+    assert_eq!(c, 4);
+  }
+
+  #[test]
+  fn test_parse_regimen_no_slash() {
+    let (i, c) = parse_regimen_durations("2HRZE");
+    assert_eq!(i, 2);
+    assert_eq!(c, 4);
+  }
+
+  #[test]
+  fn test_parse_regimen_1hrze_8hr() {
+    let (i, c) = parse_regimen_durations("1HRZE/8HR");
+    assert_eq!(i, 1);
+    assert_eq!(c, 8);
+  }
+}

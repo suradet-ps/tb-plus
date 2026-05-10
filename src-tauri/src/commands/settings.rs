@@ -247,3 +247,86 @@ async fn load_string_list_setting(
     None => Ok(default),
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tests
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  // ---------------------------------------------------------------------------
+  // DbConfig serde round-trip
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_db_config_serde_roundtrip() {
+    let config = DbConfig {
+      host: "192.168.1.100".into(),
+      port: 3306,
+      database: "hosxp_db".into(),
+      username: "admin".into(),
+      password: "secret".into(),
+      staff_names: vec!["พยาบาลวิชาชีพ".into(), "เภสัชกร".into()],
+      regimens: vec!["2HRZE/4HR".into(), "2HRZE/6HR".into()],
+    };
+    let json = serde_json::to_string(&config).unwrap();
+    let restored: DbConfig = serde_json::from_str(&json).unwrap();
+    assert_eq!(restored.host, "192.168.1.100");
+    assert_eq!(restored.port, 3306);
+    assert_eq!(restored.database, "hosxp_db");
+    assert_eq!(restored.staff_names.len(), 2);
+    assert_eq!(restored.regimens.len(), 2);
+  }
+
+  #[test]
+  fn test_db_config_serde_empty_optionals() {
+    let config = DbConfig {
+      host: "localhost".into(),
+      port: 3307,
+      database: "test".into(),
+      username: "user".into(),
+      password: "pass".into(),
+      staff_names: vec![],
+      regimens: vec![],
+    };
+    let json = serde_json::to_string(&config).unwrap();
+    let restored: DbConfig = serde_json::from_str(&json).unwrap();
+    assert_eq!(restored.staff_names, Vec::<String>::new());
+    assert_eq!(restored.regimens, Vec::<String>::new());
+  }
+
+  #[test]
+  fn test_db_config_default_staff_names() {
+    let defaults = default_staff_names();
+    assert!(defaults.contains(&"พยาบาลวิชาชีพ".to_string()));
+    assert!(defaults.contains(&"เภสัชกร".to_string()));
+    assert!(defaults.contains(&"แพทย์".to_string()));
+    assert_eq!(defaults.len(), 3);
+  }
+
+  #[test]
+  fn test_db_config_default_regimens() {
+    let defaults = default_regimens();
+    assert!(defaults.contains(&"2HRZE/4HR".to_string()));
+    assert!(defaults.contains(&"2HRZE/6HR".to_string()));
+    assert_eq!(defaults.len(), 2);
+  }
+
+  #[test]
+  fn test_db_config_default_port_is_3306() {
+    let config = DbConfig {
+      host: "localhost".into(),
+      port: 3306,
+      database: "test".into(),
+      username: "user".into(),
+      password: "pass".into(),
+      staff_names: default_staff_names(),
+      regimens: default_regimens(),
+    };
+    let json = serde_json::to_string(&config).unwrap();
+    let restored: DbConfig = serde_json::from_str(&json).unwrap();
+    assert_eq!(restored.port, 3306);
+  }
+}

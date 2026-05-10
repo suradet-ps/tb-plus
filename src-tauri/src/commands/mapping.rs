@@ -590,3 +590,354 @@ fn address_preview(raw_address: &str) -> String {
     format!("{}...", compact.chars().take(40).collect::<String>())
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tests — pure helper functions (no DB, no network required)
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  // ---------------------------------------------------------------------------
+  // normalize_address
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_normalize_already_has_thailand() {
+    let addr = "123 ถนนสุขุม ตำบลในเมือง อำเภอเมือง จังหวัดสระบุรี ประเทศไทย";
+    assert!(normalize_address(addr).ends_with("ประเทศไทย"));
+    assert!(!normalize_address(addr).ends_with("ประเทศไทย ประเทศไทย"));
+  }
+
+  #[test]
+  fn test_normalize_adds_thailand_suffix() {
+    let addr = "123 ถนนสุขุม ตำบลในเมือง อำเภอเมือง จังหวัดสระบุรี";
+    assert_eq!(
+      normalize_address(addr),
+      "123 ถนนสุขุม ตำบลในเมือง อำเภอเมือง จังหวัดสระบุรี ประเทศไทย"
+    );
+  }
+
+  #[test]
+  fn test_normalize_english_thailand() {
+    let addr = "123 Sukhum Rd Thailand";
+    assert_eq!(normalize_address(addr), addr);
+  }
+
+  #[test]
+  fn test_normalize_empty_string() {
+    assert_eq!(normalize_address(""), "");
+  }
+
+  #[test]
+  fn test_normalize_collapse_whitespace() {
+    let addr = "123   ถนน   สุขุม   ตำบล  ในเมือง";
+    assert!(!normalize_address(addr).contains("  "));
+  }
+
+  #[test]
+  fn test_normalize_collapse_comma() {
+    let addr = "123, ถนนสุขุม, ตำบลในเมือง";
+    assert!(!normalize_address(addr).contains(','));
+  }
+
+  // ---------------------------------------------------------------------------
+  // expand_thai_address_tokens
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_expand_thai_address_tokens_full() {
+    let input = "123 หมู่ 5 ต.ในเมือง อ.เมือง จ.สระบุรี";
+    let expanded = expand_thai_address_tokens(input);
+    assert!(expanded.contains("ตำบล"));
+    assert!(expanded.contains("อำเภอ"));
+    assert!(expanded.contains("จังหวัด"));
+  }
+
+  #[test]
+  fn test_expand_thai_address_tokens_no_change() {
+    let input = "123 ถนนสุขุม ตำบลในเมือง";
+    let expanded = expand_thai_address_tokens(input);
+    assert_eq!(expanded, "123 ถนนสุขุม ตำบลในเมือง");
+  }
+
+  #[test]
+  fn test_expand_thai_address_tokens_already_expanded() {
+    let input = "ตำบลในเมือง อำเภอเมือง จังหวัดสระบุรี";
+    let expanded = expand_thai_address_tokens(input);
+    assert!(expanded.contains("ตำบล"));
+    assert!(expanded.contains("อำเภอ"));
+    assert!(expanded.contains("จังหวัด"));
+  }
+
+  // ---------------------------------------------------------------------------
+  // extract_admin_segment
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_extract_admin_segment_tambon() {
+    let result = extract_admin_segment("123 ตำบลในเมือง อำเภอ", &["ตำบล", "ต."]);
+    assert_eq!(result, Some(String::from("ในเมือง")));
+  }
+
+  #[test]
+  fn test_extract_admin_segment_abbrev() {
+    let result = extract_admin_segment("456 ต.ในเมือง อ.", &["ตำบล", "ต."]);
+    assert_eq!(result, Some(String::from("ในเมือง")));
+  }
+
+  #[test]
+  fn test_extract_admin_segment_not_found() {
+    let result = extract_admin_segment("789 ถนนสุขุม", &["ตำบล", "ต."]);
+    assert_eq!(result, None);
+  }
+
+  #[test]
+  fn test_extract_admin_segment_empty_suffix() {
+    // "ต." → suffix is "" (empty), but the function returns None for empty suffix
+    let result = extract_admin_segment("ต.", &["ตำบล", "ต."]);
+    // Implementation returns None for empty suffix (guards `!suffix.is_empty()`)
+    assert_eq!(result, None);
+  }
+
+  // ---------------------------------------------------------------------------
+  // strip_house_number_prefix
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_strip_house_number_prefix_numeric() {
+    let input = "123 ถนนสุขุม ตำบลในเมือง";
+    assert_eq!(
+      strip_house_number_prefix(input),
+      Some(String::from("ถนนสุขุม ตำบลในเมือง"))
+    );
+  }
+
+  #[test]
+  fn test_strip_house_number_prefix_moo() {
+    let input = "หมู่ 5 บ้านใหม่ ตำบลในเมือง";
+    assert_eq!(
+      strip_house_number_prefix(input),
+      Some(String::from("บ้านใหม่ ตำบลในเมือง"))
+    );
+  }
+
+  #[test]
+  fn test_strip_house_number_prefix_no_strip_when_no_leading_prefix() {
+    let input = "ตำบลในเมือง อำเภอเมือง";
+    // Function returns full address when first token is not a house-number or "หมู่" prefix
+    // (since the loop breaks immediately at start_index=0)
+    let result = strip_house_number_prefix(input);
+    assert_eq!(result, Some(input.to_string()));
+  }
+
+  #[test]
+  fn test_strip_house_number_prefix_all_numeric() {
+    let input = "123 456 789";
+    assert_eq!(strip_house_number_prefix(input), None);
+  }
+
+  // ---------------------------------------------------------------------------
+  // jitter_coordinates (deterministic)
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_jitter_is_deterministic() {
+    let (lat1, lng1) = jitter_coordinates(13.7563, 100.5018, "HN0001");
+    let (lat2, lng2) = jitter_coordinates(13.7563, 100.5018, "HN0001");
+    assert_eq!(lat1, lat2);
+    assert_eq!(lng1, lng2);
+  }
+
+  #[test]
+  fn test_jitter_different_keys_different_offsets() {
+    let (lat1, _) = jitter_coordinates(13.7563, 100.5018, "HN0001");
+    let (lat2, _) = jitter_coordinates(13.7563, 100.5018, "HN9999");
+    assert_ne!(lat1, lat2);
+  }
+
+  #[test]
+  fn test_jitter_stays_in_valid_range() {
+    for key in &["A", "B", "C"] {
+      let (lat, lng) = jitter_coordinates(0.0, 0.0, key);
+      assert!((-90.0..=90.0).contains(&lat), "lat out of range: {lat}");
+      assert!((-180.0..=180.0).contains(&lng), "lng out of range: {lng}");
+    }
+  }
+
+  #[test]
+  fn test_jitter_at_extreme_latitudes() {
+    let (lat, _) = jitter_coordinates(89.5, 0.0, "HN001");
+    assert!(lat <= 90.0);
+    let (lat, _) = jitter_coordinates(-89.5, 0.0, "HN002");
+    assert!(lat >= -90.0);
+  }
+
+  // ---------------------------------------------------------------------------
+  // deterministic_offset
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_deterministic_offset_same_input_same_output() {
+    let a = deterministic_offset("test-key");
+    let b = deterministic_offset("test-key");
+    assert_eq!(a, b);
+  }
+
+  #[test]
+  fn test_deterministic_offset_different_inputs() {
+    let a = deterministic_offset("key-a");
+    let b = deterministic_offset("key-b");
+    assert_ne!(a, b);
+  }
+
+  // ---------------------------------------------------------------------------
+  // mask_hn
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_mask_hn_shows_last_4() {
+    let result = mask_hn("00012345");
+    assert!(result.contains("2345"));
+    assert!(result.starts_with("HN ••••"));
+  }
+
+  #[test]
+  fn test_mask_hn_short_hn() {
+    let result = mask_hn("1234");
+    assert!(result.starts_with("HN ••••"));
+  }
+
+  #[test]
+  fn test_mask_hn_very_short() {
+    let result = mask_hn("1");
+    assert!(result.starts_with("HN ••••"));
+  }
+
+  // ---------------------------------------------------------------------------
+  // mask_name
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_mask_name_two_words() {
+    let result = mask_name("สมชาย ใจดี");
+    assert!(result.contains("••"));
+    assert!(!result.contains("สม"));
+  }
+
+  #[test]
+  fn test_mask_name_three_words() {
+    let result = mask_name("นาย สมชาย ใจดี");
+    assert!(result.contains("••"));
+  }
+
+  #[test]
+  fn test_mask_name_single_word() {
+    let result = mask_name("สมชาย");
+    assert!(result.ends_with("••"));
+  }
+
+  #[test]
+  fn test_mask_name_empty() {
+    assert_eq!(mask_name(""), "ไม่ระบุชื่อ");
+  }
+
+  #[test]
+  fn test_mask_name_whitespace_only() {
+    assert_eq!(mask_name("   "), "ไม่ระบุชื่อ");
+  }
+
+  // ---------------------------------------------------------------------------
+  // address_preview
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_address_preview_short_unchanged() {
+    let addr = "123 ถนนสุขุม ตำบลในเมือง";
+    assert_eq!(address_preview(addr), addr);
+  }
+
+  #[test]
+  fn test_address_preview_long_truncated() {
+    let addr = "123 ถนนสุขุมมากมาย ซอย 5 หมู่บ้านรุ่งเรือง ถนนเทศบาล ตำบลในเมือง อำเภอเมือง จังหวัดสระบุรี";
+    let result = address_preview(addr);
+    assert!(result.ends_with("..."));
+    // Original address has Thai chars which are 2+ bytes; "..." is 3 bytes
+    // The function joins by space, so char count vs byte count differ.
+    // We verify it ends with ... and is not the full address.
+    assert!(
+      result.len() < addr.len(),
+      "should be shorter than original {} chars",
+      addr.len()
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // build_geocode_queries
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_build_geocode_queries_deduplicates() {
+    let queries = build_geocode_queries("123 ถนนสุขุม ตำบลในเมือง อำเภอเมือง จังหวัดสระบุรี ประเทศไทย");
+    assert!(!queries.is_empty());
+    // No duplicate entries
+    let unique: std::collections::HashSet<_> = queries.iter().collect();
+    assert_eq!(unique.len(), queries.len());
+  }
+
+  #[test]
+  fn test_build_geocode_queries_includes_abbreviated() {
+    let queries = build_geocode_queries("123 ถนน ต.ในเมือง อ.เมือง จ.สระบุรี");
+    assert!(!queries.is_empty());
+    // Should include expanded version
+    let has_expanded = queries
+      .iter()
+      .any(|q| q.contains("ตำบล") && q.contains("อำเภอ"));
+    assert!(has_expanded);
+  }
+
+  #[test]
+  fn test_build_geocode_queries_empty_address() {
+    let queries = build_geocode_queries("");
+    assert!(queries.is_empty());
+  }
+
+  // ---------------------------------------------------------------------------
+  // normalize_address_opt
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_normalize_address_opt_some() {
+    let result = normalize_address_opt(Some("123 ถนนสุขุม ตำบลในเมือง"));
+    assert!(result.contains("ประเทศไทย"));
+  }
+
+  #[test]
+  fn test_normalize_address_opt_none() {
+    let result = normalize_address_opt(None);
+    assert_eq!(result, "");
+  }
+
+  // ---------------------------------------------------------------------------
+  // has_text
+  // ---------------------------------------------------------------------------
+
+  #[test]
+  fn test_has_text_some_with_content() {
+    assert!(has_text(Some("   hello ")));
+    assert!(has_text(Some("x")));
+  }
+
+  #[test]
+  fn test_has_text_some_empty() {
+    assert!(!has_text(Some("")));
+    assert!(!has_text(Some("   ")));
+    assert!(!has_text(Some("\t")));
+  }
+
+  #[test]
+  fn test_has_text_none() {
+    assert!(!has_text(None));
+  }
+}
