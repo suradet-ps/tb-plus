@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import {
   Database,
   Server,
@@ -112,52 +112,44 @@ async function saveAlerts() {
   setTimeout(() => { alertsSaved.value = false }, 2500)
 }
 
-// ── Drug classes display (dynamic from store) ────────────────────────
-const drugTable = computed(() =>
-  settingsStore.drugClasses.map((entry) => ({
-    cls: entry.class,
-    name: entry.name,
-    thaiName: '',
-    codes: entry.icodes,
-  })),
-)
-
-// ── Drug class management ────────────────────────────────────────────
-const newClassLetter = ref('')
-const newClassName = ref('')
-const newDrugCodes = ref<Record<string, string>>({})
+// ── Drug class management — search-first flow ────────────────────────
 const drugSearchQuery = ref('')
 const drugSearchResults = ref<any[]>([])
 const isSearching = ref(false)
+const assignLetters = ref<Record<string, string>>({})
+
+const searchErrorMsg = ref('')
 
 async function searchDrugs() {
   if (!drugSearchQuery.value.trim()) return
   isSearching.value = true
+  searchErrorMsg.value = ''
+  drugSearchResults.value = []
   try {
     drugSearchResults.value = await settingsStore.searchDrugs(drugSearchQuery.value.trim())
-  } catch {
-    drugSearchResults.value = []
+    assignLetters.value = {}
+    if (drugSearchResults.value.length === 0) {
+      searchErrorMsg.value = 'ไม่พบรายการยา — ตรวจสอบชื่อหรือ icode'
+    }
+  } catch (e) {
+    searchErrorMsg.value = String(e)
   } finally {
     isSearching.value = false
   }
 }
 
-function addSearchCodeToClass(cls: string, icode: string) {
-  const entry = settingsStore.drugClasses.find(c => c.class === cls)
-  if (entry && !entry.icodes.includes(icode)) {
+function assignIcodeToClass(icode: string, drugName: string) {
+  const letter = assignLetters.value[icode]?.trim().toUpperCase()
+  if (!letter) return
+  let entry = settingsStore.drugClasses.find(c => c.class === letter)
+  if (!entry) {
+    // Create new class with this icode
+    settingsStore.drugClasses.push({ class: letter, icodes: [icode], name: drugName })
+  } else if (!entry.icodes.includes(icode)) {
     entry.icodes.push(icode)
-    settingsStore.syncDrugCodesFromClasses()
   }
-}
-
-function addDrugClass() {
-  const letter = newClassLetter.value.trim().toUpperCase()
-  const name = newClassName.value.trim()
-  if (!letter || !name) return
-  if (settingsStore.drugClasses.find(c => c.class === letter)) return
-  settingsStore.drugClasses.push({ class: letter, icodes: [], name })
-  newClassLetter.value = ''
-  newClassName.value = ''
+  assignLetters.value[icode] = ''
+  settingsStore.syncDrugCodesFromClasses()
   saveDrugClasses()
 }
 
@@ -167,30 +159,20 @@ function removeDrugClass(cls: string) {
   saveDrugClasses()
 }
 
+function removeDrugIcode(cls: string, icode: string) {
+  const entry = settingsStore.drugClasses.find(c => c.class === cls)
+  if (entry && entry.icodes.length > 1) {
+    entry.icodes = entry.icodes.filter(c => c !== icode)
+    settingsStore.syncDrugCodesFromClasses()
+    saveDrugClasses()
+  }
+}
+
 async function saveDrugClasses() {
   try {
     await settingsStore.saveDrugClasses()
     showSettingsSaved('บันทึกกลุ่มยาแล้ว')
   } catch (e) { showSettingsSaveError(e) }
-}
-
-function addDrugCode(cls: string) {
-  const code = newDrugCodes.value[cls]?.trim()
-  if (!code) return
-  const entry = settingsStore.drugClasses.find(c => c.class === cls)
-  if (entry && !entry.icodes.includes(code)) {
-    entry.icodes.push(code)
-    newDrugCodes.value[cls] = ''
-    settingsStore.syncDrugCodesFromClasses()
-  }
-}
-
-function removeDrugCode(cls: string, idx: number) {
-  const entry = settingsStore.drugClasses.find(c => c.class === cls)
-  if (entry && entry.icodes.length > 1) {
-    entry.icodes.splice(idx, 1)
-    settingsStore.syncDrugCodesFromClasses()
-  }
 }
 
 // ── Regimen management (structured) ─────────────────────────────────
@@ -540,103 +522,83 @@ async function downloadBackup() {
             <h2 class="card-title">ยาและสูตรยา</h2>
             <p class="card-subtitle">ตั้งค่ารหัสยา TB และสูตรการรักษาที่ใช้ในระบบ</p>
 
-            <!-- Drug Codes sub-section -->
+            <!-- Drug Classes sub-section -->
             <div class="sub-section">
-              <h3 class="sub-title">กลุ่มยา (Drug Classes)</h3>
-              <p class="sub-desc">เพิ่มกลุ่มยาโดยกำหนดตัวย่อ และค้นหารหัสยาจาก HOSxP</p>
-
-              <div class="add-class-row">
-                <input v-model="newClassLetter" class="form-input" style="width:70px" placeholder="ตัวย่อ" maxlength="2" />
-                <input v-model="newClassName" class="form-input" style="flex:1" placeholder="ชื่อกลุ่มยา เช่น Isoniazid" />
-                <button class="btn-primary" @click="addDrugClass">
-                  <Plus :size="14" /> เพิ่มกลุ่ม
-                </button>
-              </div>
+              <h3 class="sub-title">ค้นหาและกำหนดกลุ่มยา</h3>
+              <p class="sub-desc">ค้นหารหัสยาจากฐานข้อมูล HOSxP แล้วกำหนดตัวย่อสำหรับใช้ในสูตรการรักษา</p>
 
               <div class="drug-search-row">
                 <input
                   v-model="drugSearchQuery"
                   class="form-input"
-                  placeholder="ค้นหายาจาก HOSxP ด้วยชื่อ หรือ icode..."
+                  placeholder="ค้นหาชื่อยาหรือ icode จาก HOSxP..."
                   @keydown.enter="searchDrugs"
                 />
-                <button class="btn-secondary" :disabled="isSearching" @click="searchDrugs">
+                <button class="btn-primary" :disabled="isSearching" @click="searchDrugs">
                   <Search :size="14" /> ค้นหา
                 </button>
               </div>
-              <div v-if="drugSearchResults.length" class="drug-search-results">
-                <div v-for="item in drugSearchResults" :key="item.icode" class="drug-search-item">
-                  <span class="ds-icode">{{ item.icode }}</span>
-                  <span class="ds-name">{{ item.name }}</span>
-                  <div class="ds-assign">
+
+              <!-- Search results -->
+              <div v-if="drugSearchResults.length" class="search-results-box">
+                <div class="sr-header">
+                  <span class="sr-h">icode</span>
+                  <span class="sr-h">ชื่อยา</span>
+                  <span class="sr-h">กำหนดตัวย่อ</span>
+                </div>
+                <div
+                  v-for="item in drugSearchResults"
+                  :key="item.icode"
+                  class="sr-row"
+                  :class="{ 'sr-row--assigned': settingsStore.drugClasses.some(c => c.icodes.includes(item.icode)) }"
+                >
+                  <span class="sr-icode">{{ item.icode }}</span>
+                  <span class="sr-name">{{ item.name }}</span>
+                  <div class="sr-assign">
+                    <input
+                      v-model="assignLetters[item.icode]"
+                      class="sr-input"
+                      placeholder="ตัวย่อ"
+                      maxlength="2"
+                      @keydown.enter="assignIcodeToClass(item.icode, item.name)"
+                    />
                     <button
-                      v-for="cls in settingsStore.drugClasses"
-                      :key="cls.class"
-                      class="ds-btn"
-                      :class="{ 'ds-btn--on': cls.icodes.includes(item.icode) }"
-                      @click="addSearchCodeToClass(cls.class, item.icode)"
+                      class="sr-btn"
+                      :disabled="!assignLetters[item.icode]?.trim()"
+                      @click="assignIcodeToClass(item.icode, item.name)"
                     >
-                      {{ cls.class }}
+                      กำหนด
                     </button>
+                    <span
+                      v-if="settingsStore.drugClasses.some(c => c.icodes.includes(item.icode))"
+                      class="sr-done"
+                    >✓</span>
                   </div>
                 </div>
               </div>
-              <div v-if="drugTable.length === 0" class="empty-hint">
-                ยังไม่มีกลุ่มยา — เพิ่มกลุ่มยาด้านบนก่อน
+              <p v-if="searchErrorMsg" class="error-note">
+                {{ searchErrorMsg }}
+              </p>
+
+              <!-- Configured classes -->
+              <div v-if="settingsStore.drugClasses.length" class="classes-summary">
+                <h4 class="sub-title" style="margin-top:16px">กลุ่มยาที่กำหนดแล้ว</h4>
+                <div v-for="cls in settingsStore.drugClasses" :key="cls.class" class="class-summary-card">
+                  <div class="cs-top">
+                    <DrugChip :drug="cls.class" size="md" />
+                    <span class="cs-name">{{ cls.name }}</span>
+                    <button class="btn-ghost-danger-sm" @click="removeDrugClass(cls.class)" title="ลบกลุ่มยา">
+                      <Trash2 :size="12" />
+                    </button>
+                  </div>
+                  <div class="cs-icodes">
+                    <span v-for="code in cls.icodes" :key="code" class="cs-icode">
+                      {{ code }}
+                      <button class="cs-remove" @click="removeDrugIcode(cls.class, code)" :disabled="cls.icodes.length <= 1">×</button>
+                    </span>
+                  </div>
+                </div>
               </div>
-              <table v-else class="drug-table">
-                <thead>
-                  <tr>
-                    <th class="drug-th">กลุ่มยา</th>
-                    <th class="drug-th">ชื่อยา</th>
-                    <th class="drug-th">รหัส (icode)</th>
-                    <th class="drug-th">เพิ่มรหัส</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="drug in drugTable" :key="drug.cls">
-                    <td class="drug-td-chip">
-                      <DrugChip :drug="drug.cls" size="md" />
-                    </td>
-                    <td class="drug-td-name">
-                      <span class="drug-full-name">{{ drug.name }}</span>
-                      <button
-                        class="btn-ghost-danger-sm"
-                        @click="removeDrugClass(drug.cls)"
-                        title="ลบกลุ่มยา"
-                      >
-                        <Trash2 :size="12" />
-                      </button>
-                    </td>
-                    <td class="drug-td-codes">
-                      <span
-                        v-for="(code, idx) in drug.codes"
-                        :key="code"
-                        class="icode icode-editable"
-                      >
-                        {{ code }}
-                        <button
-                          class="icode-remove"
-                          @click="removeDrugCode(drug.cls, idx)"
-                          :title="`ลบรหัส ${code}`"
-                          :disabled="drug.codes.length <= 1"
-                        >×</button>
-                      </span>
-                    </td>
-                    <td class="drug-td-add">
-                      <div class="add-code-row">
-                        <input
-                          v-model="newDrugCodes[drug.cls]"
-                          class="add-code-input"
-                          placeholder="รหัส..."
-                          @keydown.enter="addDrugCode(drug.cls)"
-                        />
-                        <button class="btn-add-code" @click="addDrugCode(drug.cls)">+</button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
 
             <!-- Regimens sub-section -->
@@ -1201,74 +1163,6 @@ async function downloadBackup() {
   line-height: 1.5;
 }
 
-/* ── Drug codes table ───────────────────────────────────────────────── */
-.drug-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 4px;
-}
-
-.drug-th {
-  padding: 8px 10px 8px 0;
-  text-align: left;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  border-bottom: var(--border);
-}
-
-.drug-th:first-child { width: 80px; }
-
-.drug-table td {
-  padding: 12px 10px 12px 0;
-  border-bottom: var(--border);
-  vertical-align: middle;
-}
-
-.drug-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.drug-td-chip {
-  width: 80px;
-}
-
-.drug-td-name {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.drug-full-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.drug-thai-name {
-  font-size: 12px;
-  color: var(--color-text-muted);
-}
-
-.drug-td-codes {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.icode {
-  font-family: monospace;
-  font-size: 12px;
-  color: var(--color-text-muted);
-  background: var(--color-bg-alt);
-  padding: 2px 7px;
-  border-radius: 3px;
-  border: var(--border);
-  white-space: nowrap;
-}
-
 /* ── Info note ──────────────────────────────────────────────────────── */
 .info-note {
   background: var(--color-bg-alt);
@@ -1286,7 +1180,7 @@ async function downloadBackup() {
 }
 
 /* ── Staff list ─────────────────────────────────────────────────────── */
-/* ── Drug code editing ───────────────────────────────────────────────────────── */
+/* ── Sub-section layout ──────────────────────────────────────────────── */
 .sub-section {
   margin-bottom: 24px;
   padding-bottom: 24px;
@@ -1310,79 +1204,6 @@ async function downloadBackup() {
   font-size: 12px;
   color: var(--color-text-muted);
   margin: 0 0 12px;
-}
-
-.icode-editable {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.icode-remove {
-  background: none;
-  border: none;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  font-size: 13px;
-  line-height: 1;
-  padding: 0 1px;
-  border-radius: 2px;
-  transition: color 0.1s;
-}
-
-.icode-remove:hover:not(:disabled) {
-  color: var(--color-orange);
-}
-
-.icode-remove:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.drug-td-add {
-  width: 160px;
-}
-
-.add-code-row {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.add-code-input {
-  flex: 1;
-  padding: 4px 8px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: var(--radius-sm);
-  font-size: 12px;
-  font-family: var(--font);
-  background: var(--color-bg);
-  color: var(--color-text);
-  outline: none;
-  min-width: 0;
-}
-
-.add-code-input:focus {
-  border-color: var(--color-blue);
-  box-shadow: 0 0 0 2px rgba(0, 117, 222, 0.1);
-}
-
-.btn-add-code {
-  background: var(--color-blue);
-  color: #fff;
-  border: none;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: var(--font);
-  line-height: 1;
-  transition: background 0.12s;
-}
-
-.btn-add-code:hover {
-  background: var(--color-blue-active);
 }
 
 /* ── Regimen management ──────────────────────────────────────────────────────── */
@@ -1558,7 +1379,7 @@ async function downloadBackup() {
   to { transform: rotate(360deg); }
 }
 
-/* ── Drug search ── */
+/* ── Drug search — search-first flow ── */
 .drug-search-row {
   display: flex;
   gap: 8px;
@@ -1566,42 +1387,128 @@ async function downloadBackup() {
 }
 .drug-search-row .form-input { flex: 1; }
 
-.drug-search-results {
-  max-height: 200px;
-  overflow-y: auto;
+.search-results-box {
   border: var(--border);
   border-radius: var(--radius-md);
-  margin-bottom: 16px;
+  overflow: hidden;
+  margin-bottom: 12px;
 }
 
-.drug-search-item {
+.sr-header {
   display: flex;
-  align-items: center;
   gap: 10px;
   padding: 7px 12px;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-  font-size: 13px;
-}
-.drug-search-item:last-child { border-bottom: none; }
-
-.ds-icode { font-family: monospace; font-weight: 600; width: 80px; }
-.ds-name { flex: 1; }
-
-.ds-assign { display: flex; gap: 4px; }
-
-.ds-btn {
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  border: var(--border);
-  background: var(--color-bg);
+  background: var(--color-bg-alt);
+  border-bottom: var(--border);
   font-size: 11px;
   font-weight: 600;
-  font-family: monospace;
-  cursor: pointer;
   color: var(--color-text-muted);
-  transition: all 0.1s;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
-.ds-btn--on { background: var(--color-blue); color: #fff; border-color: var(--color-blue); }
+.sr-h:nth-child(1) { width: 90px; }
+.sr-h:nth-child(2) { flex: 1; }
+.sr-h:nth-child(3) { width: 180px; }
+
+.sr-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  font-size: 13px;
+  transition: background 0.1s;
+}
+.sr-row:last-child { border-bottom: none; }
+.sr-row:hover { background: rgba(0,0,0,0.02); }
+.sr-row--assigned { background: rgba(26,174,57,0.04); }
+
+.sr-icode { font-family: monospace; font-weight: 600; width: 90px; color: var(--color-text); }
+.sr-name { flex: 1; }
+.sr-assign { display: flex; gap: 4px; align-items: center; width: 180px; }
+
+.sr-input {
+  width: 50px;
+  padding: 3px 6px;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-family: monospace;
+  font-weight: 600;
+  text-transform: uppercase;
+  text-align: center;
+  outline: none;
+  background: var(--color-bg);
+}
+.sr-input:focus { border-color: var(--color-blue); box-shadow: 0 0 0 2px rgba(0,117,222,0.1); }
+
+.sr-btn {
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--color-blue);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+}
+.sr-btn:disabled { opacity: 0.4; cursor: default; }
+
+.sr-done { color: var(--color-green); font-weight: 700; font-size: 14px; }
+
+/* ── Configured classes summary ── */
+.classes-summary {
+  margin-top: 4px;
+}
+
+.class-summary-card {
+  background: var(--color-bg-alt);
+  border: var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  margin-bottom: 6px;
+}
+
+.cs-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.cs-name { font-size: 13px; font-weight: 600; flex: 1; }
+
+.cs-icodes {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.cs-icode {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: var(--border);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cs-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1;
+  padding: 0;
+}
+.cs-remove:hover { color: var(--color-orange); }
+.cs-remove:disabled { opacity: 0.3; cursor: default; }
 
 /* ── Input hint ── */
 .input-hint {

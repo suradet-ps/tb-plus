@@ -466,7 +466,6 @@ pub async fn get_tb_appointments(
 struct DrugItemRow {
   icode: String,
   name: String,
-  shortname: Option<String>,
   units: Option<String>,
 }
 
@@ -477,7 +476,7 @@ pub async fn search_drugs(
   limit: u32,
 ) -> Result<Vec<DrugItem>> {
   let sql = format!(
-    "SELECT icode, name, shortname, units \
+    "SELECT icode, name, units \
          FROM {} \
          WHERE name LIKE ? OR icode LIKE ? \
          ORDER BY name \
@@ -497,7 +496,7 @@ pub async fn search_drugs(
       .map(|r| DrugItem {
         icode: r.icode,
         name: r.name,
-        shortname: r.shortname,
+        shortname: None,
         units: r.units,
       })
       .collect(),

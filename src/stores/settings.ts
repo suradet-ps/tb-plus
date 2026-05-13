@@ -232,11 +232,7 @@ export const useSettingsStore = defineStore('settings', () => {
   // ── Drug search (setup wizard) ──────────────────────────────────────────
 
   async function searchDrugs(query: string): Promise<DrugItem[]> {
-    try {
-      return await invoke<DrugItem[]>('search_hosxp_drugs', { query })
-    } catch {
-      return []
-    }
+    return await invoke<DrugItem[]>('search_hosxp_drugs', { query })
   }
 
   // ── Drug classes ────────────────────────────────────────────────────────
