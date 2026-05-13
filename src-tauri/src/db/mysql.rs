@@ -7,6 +7,13 @@ use anyhow::Result;
 use sqlx::{MySqlPool, QueryBuilder};
 use std::collections::HashMap;
 
+// ── HOSxP table names (hardcoded defaults, not configurable) ─────────
+const TABLE_OPITEMRECE: &str = "opitemrece";
+const TABLE_PATIENT: &str = "patient";
+const TABLE_DRUGITEMS: &str = "drugitems";
+const TABLE_OAPP: &str = "oapp";
+const TABLE_CLINIC: &str = "clinic";
+
 // ---------------------------------------------------------------------------
 // Private helpers
 // ---------------------------------------------------------------------------
@@ -122,9 +129,9 @@ pub async fn search_tb_patients(
             COUNT(DISTINCT DATE_FORMAT(o.vstdate, '%Y-%m-%d')) AS visit_count, \
             GROUP_CONCAT(DISTINCT o.icode ORDER BY o.icode SEPARATOR ',') AS icode_list, \
             GROUP_CONCAT(DISTINCT d.name ORDER BY d.name SEPARATOR ', ') AS drug_names \
-        FROM opitemrece o \
-        JOIN patient p ON o.hn = p.hn \
-        JOIN drugitems d ON o.icode = d.icode \
+        FROM {TABLE_OPITEMRECE} o \
+        JOIN {TABLE_PATIENT} p ON o.hn = p.hn \
+        JOIN {TABLE_DRUGITEMS} d ON o.icode = d.icode \
         WHERE o.icode IN ({}) ",
     in_placeholders(icodes.len())
   );
@@ -436,24 +443,49 @@ pub async fn was_ze_dispensed_recently(
 pub async fn get_tb_appointments(
   pool: &MySqlPool,
   days_ahead: i64,
-  hosxp_config: &crate::models::settings::HosxpConfig,
+  clinic_code: &str,
 ) -> Result<Vec<AppointmentRecord>> {
   let sql = format!(
     "SELECT \
             a.hn, \
             CONCAT(COALESCE(p.pname, ''), p.fname, ' ', p.lname) AS full_name, \
             DATE_FORMAT(a.nextdate, '%Y-%m-%d') AS nextdate \
-        FROM {} a \
-        JOIN {} p ON a.hn = p.hn \
+        FROM {TABLE_OAPP} a \
+        JOIN {TABLE_PATIENT} p ON a.hn = p.hn \
         WHERE a.clinic = ? \
           AND a.nextdate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY) \
         ORDER BY a.nextdate ASC",
-    hosxp_config.table_oapp, hosxp_config.table_patient,
   );
 
   sqlx::query_as::<_, AppointmentRecord>(&sql)
-    .bind(&hosxp_config.clinic_code)
+    .bind(clinic_code)
     .bind(days_ahead)
+    .fetch_all(pool)
+    .await
+    .map_err(anyhow::Error::from)
+}
+
+/// Search for TB clinics in HOSxP `clinic` table by name or code.
+/// Used in settings to let users find their TB clinic code.
+#[derive(sqlx::FromRow)]
+pub struct ClinicRow {
+  pub clinic: String,
+  pub name: Option<String>,
+}
+
+pub async fn search_clinics(pool: &MySqlPool, query: &str, limit: u32) -> Result<Vec<ClinicRow>> {
+  let sql = format!(
+    "SELECT clinic, name \
+         FROM {TABLE_CLINIC} \
+         WHERE clinic LIKE ? OR name LIKE ? \
+         ORDER BY clinic \
+         LIMIT ?",
+  );
+  let pattern = format!("%{}%", query);
+  sqlx::query_as::<_, ClinicRow>(&sql)
+    .bind(&pattern)
+    .bind(&pattern)
+    .bind(limit as i64)
     .fetch_all(pool)
     .await
     .map_err(anyhow::Error::from)
@@ -469,19 +501,13 @@ struct DrugItemRow {
   units: Option<String>,
 }
 
-pub async fn search_drugs(
-  pool: &MySqlPool,
-  query: &str,
-  hosxp_config: &crate::models::settings::HosxpConfig,
-  limit: u32,
-) -> Result<Vec<DrugItem>> {
+pub async fn search_drugs(pool: &MySqlPool, query: &str, limit: u32) -> Result<Vec<DrugItem>> {
   let sql = format!(
     "SELECT icode, name, units \
-         FROM {} \
+         FROM {TABLE_DRUGITEMS} \
          WHERE name LIKE ? OR icode LIKE ? \
          ORDER BY name \
          LIMIT ?",
-    hosxp_config.table_drugitems,
   );
   let pattern = format!("%{}%", query);
   let rows: Vec<DrugItemRow> = sqlx::query_as(&sql)

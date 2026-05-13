@@ -16,11 +16,12 @@ pub async fn get_appointments(
     None => Err("MySQL ยังไม่ได้เชื่อมต่อ".to_string()),
     Some(pool) => {
       let days = days_ahead.unwrap_or(30);
-      let hosxp_cfg = settings
+      let clinic_code = &settings
         .get_hosxp_config()
         .await
-        .map_err(|e| e.to_string())?;
-      db::mysql::get_tb_appointments(pool, days, &hosxp_cfg)
+        .map_err(|e| e.to_string())?
+        .clinic_code;
+      db::mysql::get_tb_appointments(pool, days, clinic_code)
         .await
         .map_err(|e| e.to_string())
     }

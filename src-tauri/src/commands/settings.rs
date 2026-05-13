@@ -8,6 +8,12 @@ use std::sync::Arc;
 use tauri::State;
 use tokio::sync::Mutex;
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ClinicResult {
+  pub clinic: String,
+  pub name: Option<String>,
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared types
 // ─────────────────────────────────────────────────────────────────────────────
@@ -171,25 +177,44 @@ pub async fn delete_db_config(settings: State<'_, SettingsManager>) -> Result<()
 // Setup wizard — drug search, drug classes, regimen definitions
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Search HOSxP drugitems by name/icode. Used in the setup wizard to let
+/// Search HOSxP drugitems by name/icode. Used in the settings page to let
 /// users find the right icodes when configuring drug classes.
 #[tauri::command]
 pub async fn search_hosxp_drugs(
   mysql: State<'_, MySqlState>,
-  settings: State<'_, SettingsManager>,
   query: String,
 ) -> Result<Vec<crate::models::settings::DrugItem>, String> {
   let guard = mysql.lock().await;
   let pool = guard
     .as_ref()
     .ok_or_else(|| "MySQL ยังไม่ได้เชื่อมต่อ".to_string())?;
-  let hosxp_cfg = settings
-    .get_hosxp_config()
-    .await
-    .map_err(|e| e.to_string())?;
-  crate::db::mysql::search_drugs(pool, &query, &hosxp_cfg, 20)
+  crate::db::mysql::search_drugs(pool, &query, 20)
     .await
     .map_err(|e| e.to_string())
+}
+
+/// Search HOSxP clinic table by name or code. Used to find TB clinic code.
+#[tauri::command]
+pub async fn search_hosxp_clinics(
+  mysql: State<'_, MySqlState>,
+  query: String,
+) -> Result<Vec<ClinicResult>, String> {
+  let guard = mysql.lock().await;
+  let pool = guard
+    .as_ref()
+    .ok_or_else(|| "MySQL ยังไม่ได้เชื่อมต่อ".to_string())?;
+  let rows = crate::db::mysql::search_clinics(pool, &query, 20)
+    .await
+    .map_err(|e| e.to_string())?;
+  Ok(
+    rows
+      .into_iter()
+      .map(|r| ClinicResult {
+        clinic: r.clinic,
+        name: r.name,
+      })
+      .collect(),
+  )
 }
 
 /// Save a complete drug-classes configuration. Replaces any existing data.

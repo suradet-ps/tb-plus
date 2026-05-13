@@ -159,6 +159,7 @@ pub fn run() {
       commands::settings::load_db_config,
       commands::settings::delete_db_config,
       commands::settings::search_hosxp_drugs,
+      commands::settings::search_hosxp_clinics,
       commands::settings::save_drug_classes,
       commands::settings::save_regimen_definitions,
       commands::settings::get_regimen_definitions,

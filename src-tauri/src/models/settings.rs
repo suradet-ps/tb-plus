@@ -66,27 +66,9 @@ impl Default for PaginationConfig {
   }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct HosxpConfig {
   pub clinic_code: String,
-  pub table_opitemrece: String,
-  pub table_patient: String,
-  pub table_drugitems: String,
-  pub table_ovst: String,
-  pub table_oapp: String,
-}
-
-impl Default for HosxpConfig {
-  fn default() -> Self {
-    Self {
-      clinic_code: "009".into(),
-      table_opitemrece: "opitemrece".into(),
-      table_patient: "patient".into(),
-      table_drugitems: "drugitems".into(),
-      table_ovst: "ovst".into(),
-      table_oapp: "oapp".into(),
-    }
-  }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

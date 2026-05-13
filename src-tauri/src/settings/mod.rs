@@ -103,6 +103,14 @@ impl SettingsManager {
     self
       .seed_json_default("pagination", &PaginationConfig::default(), &now)
       .await?;
+    // Migrate old hosxp format (had table_* fields) → new format (clinic_code only)
+    if let Some(raw) = self.get("hosxp").await?
+      && raw.contains("table_opitemrece")
+    {
+      sqlx::query("DELETE FROM app_settings WHERE key = 'hosxp'")
+        .execute(&self.pool)
+        .await?;
+    }
     self
       .seed_json_default("hosxp", &HosxpConfig::default(), &now)
       .await?;

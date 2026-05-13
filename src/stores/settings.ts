@@ -17,11 +17,6 @@ export interface AppConfig extends DbConfig {
 
 export interface HosxpSettings {
   clinic_code: string
-  table_opitemrece: string
-  table_patient: string
-  table_drugitems: string
-  table_ovst: string
-  table_oapp: string
 }
 
 export interface AlertThresholds {
@@ -67,14 +62,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const staffNames = ref<string[]>([])
   const drugClasses = ref<DrugClassEntry[]>([])
   const regimenDefinitions = ref<RegimenEntry[]>([])
-  const hosxpSettings = ref<HosxpSettings>({
-    clinic_code: '009',
-    table_opitemrece: 'opitemrece',
-    table_patient: 'patient',
-    table_drugitems: 'drugitems',
-    table_ovst: 'ovst',
-    table_oapp: 'oapp',
-  })
+  const hosxpSettings = ref<HosxpSettings>({ clinic_code: '009' })
   const alertThresholds = ref<AlertThresholds>({
     overdue_days: 35,
     lost_followup_days: 60,
@@ -242,6 +230,10 @@ export const useSettingsStore = defineStore('settings', () => {
     return await invoke<DrugItem[]>('search_hosxp_drugs', { query })
   }
 
+  async function searchClinics(query: string): Promise<{ clinic: string; name: string | null }[]> {
+    return await invoke<{ clinic: string; name: string | null }[]>('search_hosxp_clinics', { query })
+  }
+
   // ── Drug classes ────────────────────────────────────────────────────────
 
   async function saveDrugClasses(): Promise<void> {
@@ -302,6 +294,7 @@ export const useSettingsStore = defineStore('settings', () => {
     addStaffName,
     removeStaffName,
     searchDrugs,
+    searchClinics,
     saveDrugClasses,
     saveRegimenDefinitions,
     loadAllSettings,

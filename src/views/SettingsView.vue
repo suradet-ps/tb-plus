@@ -30,7 +30,7 @@ const activeSection = ref<Section>('mysql')
 
 const navItems: { id: Section; label: string; icon: string }[] = [
   { id: 'mysql',     label: 'ฐานข้อมูล MySQL', icon: 'Database'  },
-  { id: 'hosxp',     label: 'ตาราง HOSxP',    icon: 'Server'     },
+  { id: 'hosxp',     label: 'คลินิกวัณโรค',    icon: 'Server'     },
   { id: 'drugcodes', label: 'ยาและสูตรยา',       icon: 'Pill'      },
   { id: 'alerts',    label: 'การแจ้งเตือน',     icon: 'AlertTriangle' },
   { id: 'staff',     label: 'ผู้ใช้งาน',         icon: 'Users'     },
@@ -95,6 +95,33 @@ function showSettingsSaved(message: string) {
 function showSettingsSaveError(error: unknown) {
   settingsSaveSuccess.value = null
   settingsSaveError.value = String(error)
+}
+
+// ── HOSxP clinic search ────────────────────────────────────────────
+const clinicSearchQuery = ref('')
+const clinicSearchResults = ref<{ clinic: string; name: string | null }[]>([])
+const isClinicSearching = ref(false)
+const clinicSearchError = ref('')
+
+async function searchClinics() {
+  if (!clinicSearchQuery.value.trim()) return
+  isClinicSearching.value = true
+  clinicSearchError.value = ''
+  clinicSearchResults.value = []
+  try {
+    clinicSearchResults.value = await settingsStore.searchClinics(clinicSearchQuery.value.trim())
+    if (clinicSearchResults.value.length === 0) {
+      clinicSearchError.value = 'ไม่พบคลินิก'
+    }
+  } catch (e) {
+    clinicSearchError.value = String(e)
+  } finally {
+    isClinicSearching.value = false
+  }
+}
+
+function selectClinic(code: string) {
+  settingsStore.hosxpSettings.clinic_code = code
 }
 
 // ── HOSxP / Alert save ──────────────────────────────────────────────
@@ -467,42 +494,60 @@ async function downloadBackup() {
         </template>
 
         <!-- ══════════════════════════════════════════════════
-             Section 2 — HOSxP Config
+             Section 2 — HOSxP clinic code
         ══════════════════════════════════════════════════ -->
         <template v-else-if="activeSection === 'hosxp'">
           <div class="settings-card">
-            <div class="card-top-row">
-              <div>
-                <h2 class="card-title">กำหนดค่าตาราง HOSxP</h2>
-                <p class="card-subtitle">ชื่อตารางในฐานข้อมูล HOSxP และรหัสคลินิกวัณโรค</p>
+            <h2 class="card-title">ค้นหาและกำหนดรหัสคลินิกวัณโรค</h2>
+            <p class="card-subtitle">ค้นหารหัสคลินิกวัณโรคในฐานข้อมูล HOSxP เพื่อใช้กรองข้อมูลนัดหมาย</p>
+
+            <div class="drug-search-row">
+              <input
+                v-model="clinicSearchQuery"
+                class="form-input"
+                placeholder="ค้นหารหัสหรือชื่อคลินิก..."
+                @keydown.enter="searchClinics"
+              />
+              <button class="btn-primary" :disabled="isClinicSearching" @click="searchClinics">
+                <Search :size="14" /> ค้นหา
+              </button>
+            </div>
+
+            <div v-if="clinicSearchResults.length" class="search-results-box">
+              <div class="sr-header">
+                <span class="sr-h">รหัส</span>
+                <span class="sr-h">ชื่อคลินิก</span>
+                <span class="sr-h">เลือก</span>
+              </div>
+              <div
+                v-for="item in clinicSearchResults"
+                :key="item.clinic"
+                class="sr-row"
+                :class="{ 'sr-row--assigned': settingsStore.hosxpSettings.clinic_code === item.clinic }"
+              >
+                <span class="sr-icode">{{ item.clinic }}</span>
+                <span class="sr-name">{{ item.name ?? '—' }}</span>
+                <div class="sr-assign">
+                  <button
+                    class="sr-btn"
+                    :disabled="settingsStore.hosxpSettings.clinic_code === item.clinic"
+                    @click="selectClinic(item.clinic)"
+                  >
+                    {{ settingsStore.hosxpSettings.clinic_code === item.clinic ? '✓ เลือกแล้ว' : 'เลือก' }}
+                  </button>
+                </div>
               </div>
             </div>
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label">Clinic Code</label>
-                <input v-model="settingsStore.hosxpSettings.clinic_code" class="form-input" placeholder="009" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">ตาราง opitemrece</label>
-                <input v-model="settingsStore.hosxpSettings.table_opitemrece" class="form-input" placeholder="opitemrece" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">ตาราง patient</label>
-                <input v-model="settingsStore.hosxpSettings.table_patient" class="form-input" placeholder="patient" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">ตาราง drugitems</label>
-                <input v-model="settingsStore.hosxpSettings.table_drugitems" class="form-input" placeholder="drugitems" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">ตาราง ovst</label>
-                <input v-model="settingsStore.hosxpSettings.table_ovst" class="form-input" placeholder="ovst" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">ตาราง oapp</label>
-                <input v-model="settingsStore.hosxpSettings.table_oapp" class="form-input" placeholder="oapp" />
+
+            <p v-if="clinicSearchError" class="error-note">{{ clinicSearchError }}</p>
+
+            <div v-if="settingsStore.hosxpSettings.clinic_code" class="current-clinic">
+              <h4>คลินิกที่เลือก</h4>
+              <div class="clinic-badge">
+                รหัส: <strong>{{ settingsStore.hosxpSettings.clinic_code }}</strong>
               </div>
             </div>
+
             <div class="form-actions">
               <button class="btn-primary" @click="saveHosxp">
                 <CheckCircle :size="13" /> บันทึก
@@ -1651,5 +1696,30 @@ async function downloadBackup() {
   display: flex;
   gap: 8px;
   margin-top: 12px;
+}
+
+/* ── Clinic search ── */
+.current-clinic {
+  margin-top: 12px;
+}
+.current-clinic h4 {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.clinic-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--color-badge-bg);
+  color: var(--color-blue);
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 600;
+}
+.clinic-badge strong {
+  font-family: monospace;
+  font-size: 16px;
 }
 </style>
