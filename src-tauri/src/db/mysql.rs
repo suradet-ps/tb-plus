@@ -7,58 +7,38 @@ use sqlx::{MySqlPool, QueryBuilder};
 use std::collections::HashMap;
 
 // ---------------------------------------------------------------------------
-// TB drug icode constants (Sabot Hospital)
-// ---------------------------------------------------------------------------
-
-const H_ICODES: &[&str] = &["1430104"];
-const R_ICODES: &[&str] = &["1000265", "1000264"];
-const E_ICODES: &[&str] = &["1600004", "1000129"];
-const Z_ICODES: &[&str] = &["1000258"];
-
-const ALL_TB_ICODES: &[&str] = &[
-  "1430104", "1000265", "1000264", "1600004", "1000129", "1000258",
-];
-
-// ---------------------------------------------------------------------------
 // Private helpers
 // ---------------------------------------------------------------------------
 
-fn icodes_for_classes(classes: &[String]) -> Vec<&'static str> {
+fn icodes_for_classes(
+  classes: &[String],
+  class_to_icodes: &HashMap<String, Vec<String>>,
+) -> Vec<String> {
   let mut out = Vec::new();
   for c in classes {
-    match c.to_uppercase().as_str() {
-      "H" => out.extend_from_slice(H_ICODES),
-      "R" => out.extend_from_slice(R_ICODES),
-      "E" => out.extend_from_slice(E_ICODES),
-      "Z" => out.extend_from_slice(Z_ICODES),
-      _ => {}
+    if let Some(icodes) = class_to_icodes.get(&c.to_uppercase()) {
+      out.extend_from_slice(icodes);
     }
   }
   out
 }
 
-fn icode_to_class(icode: &str) -> Option<&'static str> {
-  match icode {
-    "1430104" => Some("H"),
-    "1000265" | "1000264" => Some("R"),
-    "1600004" | "1000129" => Some("E"),
-    "1000258" => Some("Z"),
-    _ => None,
-  }
-}
-
 /// Convert a comma-separated icode list (from GROUP_CONCAT) into sorted,
 /// de-duplicated drug class letters.
-fn drug_classes_from_icode_csv(csv: &str) -> Vec<String> {
-  let mut seen = Vec::<&'static str>::new();
+fn drug_classes_from_icode_csv(
+  csv: &str,
+  icode_to_class_map: &HashMap<String, String>,
+) -> Vec<String> {
+  let mut seen = Vec::new();
   for code in csv.split(',') {
-    if let Some(cls) = icode_to_class(code.trim())
-      && !seen.contains(&cls)
+    if let Some(cls) = icode_to_class_map.get(code.trim())
+      && !seen.contains(cls)
     {
-      seen.push(cls);
+      seen.push(cls.clone());
     }
   }
-  seen.into_iter().map(String::from).collect()
+  seen.sort();
+  seen
 }
 
 /// Build a `?, ?, …` placeholder string for an IN clause.
@@ -114,20 +94,19 @@ pub async fn search_tb_patients(
   pool: &MySqlPool,
   filters: &SearchFilters,
   enrolled_map: &HashMap<String, String>,
+  all_icodes: &[String],
+  class_to_icodes: &HashMap<String, Vec<String>>,
+  icode_to_class_map: &HashMap<String, String>,
 ) -> Result<Vec<PatientDrugRecord>> {
   // Resolve which icodes to include based on the drug-class filter
-  let icodes: Vec<&str> = filters
+  let icodes: Vec<String> = filters
     .drug_classes
     .as_deref()
     .map(|classes| {
-      let v = icodes_for_classes(classes);
-      if v.is_empty() {
-        ALL_TB_ICODES.to_vec()
-      } else {
-        v
-      }
+      let v = icodes_for_classes(classes, class_to_icodes);
+      if v.is_empty() { all_icodes.to_vec() } else { v }
     })
-    .unwrap_or_else(|| ALL_TB_ICODES.to_vec());
+    .unwrap_or_else(|| all_icodes.to_vec());
 
   // Build SQL dynamically — IN clause, optional date predicates, optional
   // hn/name search predicates all go into WHERE (before GROUP BY).
@@ -175,7 +154,7 @@ pub async fn search_tb_patients(
   // Bind parameters in the same order they appear in the SQL
   let mut q = sqlx::query_as::<_, ScreeningRow>(&sql);
   for icode in &icodes {
-    q = q.bind(*icode);
+    q = q.bind(icode.as_str());
   }
   if let Some(df) = &filters.date_from {
     q = q.bind(df.as_str());
@@ -214,7 +193,7 @@ pub async fn search_tb_patients(
     let drug_classes = row
       .icode_list
       .as_deref()
-      .map(drug_classes_from_icode_csv)
+      .map(|csv| drug_classes_from_icode_csv(csv, icode_to_class_map))
       .unwrap_or_default();
 
     out.push(PatientDrugRecord {
@@ -329,52 +308,63 @@ pub async fn get_patient_demographics_by_hns(
 ///   raw icode via COALESCE in that case.
 /// - `CAST(o.qty AS DOUBLE)` avoids sqlx DECIMAL→f64 mapping issues that
 ///   silently kill the entire result set with unwrap_or_default().
-pub async fn get_dispensing_history(pool: &MySqlPool, hn: &str) -> Result<Vec<DispensingRecord>> {
-  sqlx::query_as::<_, DispensingRecord>(
+pub async fn get_dispensing_history(
+  pool: &MySqlPool,
+  hn: &str,
+  all_icodes: &[String],
+  icode_to_class_map: &HashMap<String, String>,
+) -> Result<Vec<DispensingRecord>> {
+  let placeholders = in_placeholders(all_icodes.len());
+  let sql = format!(
     "SELECT \
             DATE_FORMAT(o.vstdate, '%Y-%m-%d') AS vstdate, \
             o.icode, \
             TRIM(CONCAT_WS(' ', COALESCE(d.name, o.icode), d.strength)) AS drug_name, \
             CAST(o.qty AS DOUBLE) AS qty, \
             d.units, \
-            CASE o.icode \
-                WHEN '1430104' THEN 'H' \
-                WHEN '1000265' THEN 'R' \
-                WHEN '1000264' THEN 'R' \
-                WHEN '1600004' THEN 'E' \
-                WHEN '1000129' THEN 'E' \
-                WHEN '1000258' THEN 'Z' \
-                ELSE NULL \
-            END AS drug_class \
+            NULL AS drug_class \
         FROM opitemrece o \
         LEFT JOIN drugitems d ON o.icode = d.icode \
         WHERE o.hn = ? \
-          AND o.icode IN ('1430104','1000265','1000264','1600004','1000129','1000258') \
-        ORDER BY o.vstdate DESC, o.icode",
-  )
-  .bind(hn)
-  .fetch_all(pool)
-  .await
-  .map_err(anyhow::Error::from)
+          AND o.icode IN ({placeholders}) \
+        ORDER BY o.vstdate DESC, o.icode"
+  );
+
+  let mut q = sqlx::query_as::<_, DispensingRecord>(&sql);
+  q = q.bind(hn);
+  for icode in all_icodes {
+    q = q.bind(icode.as_str());
+  }
+
+  let mut rows: Vec<DispensingRecord> = q.fetch_all(pool).await.map_err(anyhow::Error::from)?;
+  for row in &mut rows {
+    row.drug_class = icode_to_class_map.get(&row.icode).cloned();
+  }
+  Ok(rows)
 }
 
 /// Return the most recent date on which any TB drug was dispensed to `hn` as
 /// `YYYY-MM-DD`, or `None` when no dispensing records exist.
-pub async fn get_last_dispensing_date(pool: &MySqlPool, hn: &str) -> Result<Option<String>> {
-  // MAX() on an empty set returns a single row with a NULL value — fetch_one
-  // is therefore safe here; query_scalar decodes the nullable result as
-  // Option<String>.
-  let date: Option<String> = sqlx::query_scalar(
+pub async fn get_last_dispensing_date(
+  pool: &MySqlPool,
+  hn: &str,
+  all_icodes: &[String],
+) -> Result<Option<String>> {
+  let placeholders = in_placeholders(all_icodes.len());
+  let sql = format!(
     "SELECT DATE_FORMAT(MAX(vstdate), '%Y-%m-%d') \
          FROM opitemrece \
          WHERE hn = ? \
-           AND icode IN ('1430104','1000265','1000264','1600004','1000129','1000258')",
-  )
-  .bind(hn)
-  .fetch_one(pool)
-  .await?;
+           AND icode IN ({placeholders})"
+  );
 
-  Ok(date)
+  let mut q = sqlx::query_scalar::<_, Option<String>>(&sql);
+  q = q.bind(hn);
+  for icode in all_icodes {
+    q = q.bind(icode.as_str());
+  }
+
+  q.fetch_one(pool).await.map_err(anyhow::Error::from)
 }
 
 /// Return `true` if Ethambutol (icode 1600004 **or** 1000129) was dispensed
@@ -386,41 +376,53 @@ pub async fn was_ethambutol_dispensed_recently(
   pool: &MySqlPool,
   hn: &str,
   days: i64,
+  e_icodes: &[String],
 ) -> Result<bool> {
-  let count: i64 = sqlx::query_scalar(
+  let placeholders = in_placeholders(e_icodes.len());
+  let sql = format!(
     "SELECT COUNT(*) \
          FROM opitemrece \
          WHERE hn = ? \
-           AND icode IN ('1600004','1000129') \
-           AND vstdate >= CURDATE() - INTERVAL ? DAY",
-  )
-  .bind(hn)
-  .bind(days)
-  .fetch_one(pool)
-  .await?;
+           AND icode IN ({placeholders}) \
+           AND vstdate >= CURDATE() - INTERVAL ? DAY"
+  );
 
+  let mut q = sqlx::query_scalar::<_, i64>(&sql);
+  q = q.bind(hn);
+  for icode in e_icodes {
+    q = q.bind(icode.as_str());
+  }
+  q = q.bind(days);
+
+  let count = q.fetch_one(pool).await?;
   Ok(count > 0)
 }
 
-/// Return `true` if Pyrazinamide (Z, icode 1000258) OR Ethambutol
-/// (E, icodes 1600004 / 1000129) was dispensed to `hn` within the last
-/// `days` calendar days.
-///
-/// Used to distinguish:
-///   • Still receiving Z/E → patient is in intensive phase drugs (transition needed)
-///   • No Z/E dispensed   → patient is likely already on continuation drugs (plan needs update)
-pub async fn was_ze_dispensed_recently(pool: &MySqlPool, hn: &str, days: i64) -> Result<bool> {
-  let count: i64 = sqlx::query_scalar(
+/// Return `true` if Pyrazinamide (Z) OR Ethambutol (E) was dispensed to `hn`
+/// within the last `days` calendar days.
+pub async fn was_ze_dispensed_recently(
+  pool: &MySqlPool,
+  hn: &str,
+  days: i64,
+  ze_icodes: &[String],
+) -> Result<bool> {
+  let placeholders = in_placeholders(ze_icodes.len());
+  let sql = format!(
     "SELECT COUNT(*) \
          FROM opitemrece \
          WHERE hn = ? \
-           AND icode IN ('1600004','1000129','1000258') \
-           AND vstdate >= CURDATE() - INTERVAL ? DAY",
-  )
-  .bind(hn)
-  .bind(days)
-  .fetch_one(pool)
-  .await?;
+           AND icode IN ({placeholders}) \
+           AND vstdate >= CURDATE() - INTERVAL ? DAY"
+  );
+
+  let mut q = sqlx::query_scalar::<_, i64>(&sql);
+  q = q.bind(hn);
+  for icode in ze_icodes {
+    q = q.bind(icode.as_str());
+  }
+  q = q.bind(days);
+
+  let count = q.fetch_one(pool).await?;
   Ok(count > 0)
 }
 
@@ -433,22 +435,27 @@ pub async fn was_ze_dispensed_recently(pool: &MySqlPool, hn: &str, days: i64) ->
 pub async fn get_tb_appointments(
   pool: &MySqlPool,
   days_ahead: i64,
+  hosxp_config: &crate::models::settings::HosxpConfig,
 ) -> Result<Vec<AppointmentRecord>> {
-  sqlx::query_as::<_, AppointmentRecord>(
+  let sql = format!(
     "SELECT \
             a.hn, \
             CONCAT(COALESCE(p.pname, ''), p.fname, ' ', p.lname) AS full_name, \
             DATE_FORMAT(a.nextdate, '%Y-%m-%d') AS nextdate \
-        FROM oapp a \
-        JOIN patient p ON a.hn = p.hn \
-        WHERE a.clinic = '009' \
+        FROM {} a \
+        JOIN {} p ON a.hn = p.hn \
+        WHERE a.clinic = ? \
           AND a.nextdate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY) \
         ORDER BY a.nextdate ASC",
-  )
-  .bind(days_ahead)
-  .fetch_all(pool)
-  .await
-  .map_err(anyhow::Error::from)
+    hosxp_config.table_oapp, hosxp_config.table_patient,
+  );
+
+  sqlx::query_as::<_, AppointmentRecord>(&sql)
+    .bind(&hosxp_config.clinic_code)
+    .bind(days_ahead)
+    .fetch_all(pool)
+    .await
+    .map_err(anyhow::Error::from)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -459,83 +466,78 @@ pub async fn get_tb_appointments(
 mod tests {
   use super::*;
 
+  fn default_class_map() -> HashMap<String, Vec<String>> {
+    let mut m = HashMap::new();
+    m.insert("H".into(), vec!["1430104".into()]);
+    m.insert("R".into(), vec!["1000265".into(), "1000264".into()]);
+    m.insert("E".into(), vec!["1600004".into(), "1000129".into()]);
+    m.insert("Z".into(), vec!["1000258".into()]);
+    m
+  }
+
+  fn default_icode_map() -> HashMap<String, String> {
+    let mut m = HashMap::new();
+    m.insert("1430104".into(), "H".into());
+    m.insert("1000265".into(), "R".into());
+    m.insert("1000264".into(), "R".into());
+    m.insert("1600004".into(), "E".into());
+    m.insert("1000129".into(), "E".into());
+    m.insert("1000258".into(), "Z".into());
+    m
+  }
+
   // ---------------------------------------------------------------------------
   // icodes_for_classes
   // ---------------------------------------------------------------------------
 
   #[test]
   fn test_icodes_for_classes_empty_returns_empty() {
-    let result = icodes_for_classes(&[]);
+    let map = default_class_map();
+    let result = icodes_for_classes(&[], &map);
     assert!(result.is_empty());
   }
 
   #[test]
   fn test_icodes_for_classes_h() {
-    let result = icodes_for_classes(&[String::from("H")]);
-    assert_eq!(result, ["1430104"]);
+    let map = default_class_map();
+    let result = icodes_for_classes(&[String::from("H")], &map);
+    assert_eq!(result, vec!["1430104"]);
   }
 
   #[test]
   fn test_icodes_for_classes_r_both_codes() {
-    let result = icodes_for_classes(&[String::from("R")]);
-    assert_eq!(result, ["1000265", "1000264"]);
+    let map = default_class_map();
+    let result = icodes_for_classes(&[String::from("R")], &map);
+    assert_eq!(result, vec!["1000265", "1000264"]);
   }
 
   #[test]
   fn test_icodes_for_classes_e_both_codes() {
-    let result = icodes_for_classes(&[String::from("E")]);
-    assert_eq!(result, ["1600004", "1000129"]);
+    let map = default_class_map();
+    let result = icodes_for_classes(&[String::from("E")], &map);
+    assert_eq!(result, vec!["1600004", "1000129"]);
   }
 
   #[test]
   fn test_icodes_for_classes_z() {
-    let result = icodes_for_classes(&[String::from("Z")]);
-    assert_eq!(result, ["1000258"]);
+    let map = default_class_map();
+    let result = icodes_for_classes(&[String::from("Z")], &map);
+    assert_eq!(result, vec!["1000258"]);
   }
 
   #[test]
   fn test_icodes_for_classes_case_insensitive() {
-    let result = icodes_for_classes(&[String::from("h"), String::from("r")]);
-    assert!(result.contains(&"1430104"));
-    assert!(result.contains(&"1000265"));
+    let map = default_class_map();
+    let result = icodes_for_classes(&[String::from("h"), String::from("r")], &map);
+    assert!(result.contains(&"1430104".to_string()));
+    assert!(result.contains(&"1000265".to_string()));
   }
 
   #[test]
   fn test_icodes_for_classes_unknown_class_ignored() {
-    let result = icodes_for_classes(&[String::from("X"), String::from("H")]);
-    assert_eq!(result, ["1430104"]);
-  }
-
-  // ---------------------------------------------------------------------------
-  // icode_to_class
-  // ---------------------------------------------------------------------------
-
-  #[test]
-  fn test_icode_to_class_h() {
-    assert_eq!(icode_to_class("1430104"), Some("H"));
-  }
-
-  #[test]
-  fn test_icode_to_class_r_both_codes() {
-    assert_eq!(icode_to_class("1000265"), Some("R"));
-    assert_eq!(icode_to_class("1000264"), Some("R"));
-  }
-
-  #[test]
-  fn test_icode_to_class_e_both_codes() {
-    assert_eq!(icode_to_class("1600004"), Some("E"));
-    assert_eq!(icode_to_class("1000129"), Some("E"));
-  }
-
-  #[test]
-  fn test_icode_to_class_z() {
-    assert_eq!(icode_to_class("1000258"), Some("Z"));
-  }
-
-  #[test]
-  fn test_icode_to_class_unknown() {
-    assert_eq!(icode_to_class("9999999"), None);
-    assert_eq!(icode_to_class(""), None);
+    let map = default_class_map();
+    let result = icodes_for_classes(&[String::from("X"), String::from("H")], &map);
+    assert_eq!(result, vec!["1430104"]);
   }
 
   // ---------------------------------------------------------------------------
@@ -544,38 +546,44 @@ mod tests {
 
   #[test]
   fn test_drug_classes_single_class() {
+    let map = default_icode_map();
     assert_eq!(
-      drug_classes_from_icode_csv("1430104"),
+      drug_classes_from_icode_csv("1430104", &map),
       vec![String::from("H")]
     );
   }
 
   #[test]
   fn test_drug_classes_all_classes_deduplicated() {
-    let result = drug_classes_from_icode_csv("1430104,1000265,1600004,1000258");
-    assert_eq!(result, vec!["H", "R", "E", "Z"]);
+    let map = default_icode_map();
+    let result = drug_classes_from_icode_csv("1430104,1000265,1600004,1000258", &map);
+    assert_eq!(result, vec!["E", "H", "R", "Z"]);
   }
 
   #[test]
   fn test_drug_classes_duplicate_r_deduplicated() {
-    let result = drug_classes_from_icode_csv("1000265,1000264,1430104,1000265");
-    assert_eq!(result, vec!["R", "H"]);
+    let map = default_icode_map();
+    let result = drug_classes_from_icode_csv("1000265,1000264,1430104,1000265", &map);
+    assert_eq!(result, vec!["H", "R"]);
   }
 
   #[test]
   fn test_drug_classes_unknown_ignored() {
-    let result = drug_classes_from_icode_csv("9999999,1430104,8888888");
+    let map = default_icode_map();
+    let result = drug_classes_from_icode_csv("9999999,1430104,8888888", &map);
     assert_eq!(result, vec![String::from("H")]);
   }
 
   #[test]
   fn test_drug_classes_empty_csv() {
-    assert!(drug_classes_from_icode_csv("").is_empty());
+    let map = default_icode_map();
+    assert!(drug_classes_from_icode_csv("", &map).is_empty());
   }
 
   #[test]
   fn test_drug_classes_whitespace_trimmed() {
-    let result = drug_classes_from_icode_csv(" 1430104 , 1000265 ");
+    let map = default_icode_map();
+    let result = drug_classes_from_icode_csv(" 1430104 , 1000265 ", &map);
     assert_eq!(result, vec!["H", "R"]);
   }
 

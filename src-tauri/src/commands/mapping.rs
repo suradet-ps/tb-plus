@@ -2,6 +2,8 @@ use crate::commands::settings::MySqlState;
 use crate::db;
 use crate::models::mapping::{BatchGeocodeResult, MappingPatientRow, MappingSummary};
 use crate::models::patient::{PatientDemographics, TbPatient};
+use crate::models::settings::GeocodeConfig;
+use crate::settings::SettingsManager;
 use chrono::Local;
 use reqwest::Client;
 use serde::Deserialize;
@@ -11,8 +13,6 @@ use std::hash::{Hash, Hasher};
 use std::sync::OnceLock;
 use std::time::Duration;
 use tauri::State;
-
-const JITTER_RANGE_DEGREES: f64 = 0.005;
 
 fn geocode_lock() -> &'static tokio::sync::Mutex<()> {
   static GEOCODE_LOCK: OnceLock<tokio::sync::Mutex<()>> = OnceLock::new();
@@ -29,6 +29,7 @@ struct NominatimResult {
 pub async fn get_mapping_patients(
   sqlite: State<'_, SqlitePool>,
   mysql: State<'_, MySqlState>,
+  _settings: State<'_, SettingsManager>,
 ) -> Result<Vec<MappingPatientRow>, String> {
   let patients = db::sqlite::get_all_tb_patients(&sqlite)
     .await
@@ -57,8 +58,29 @@ pub async fn get_mapping_patients(
 pub async fn get_mapping_summary(
   sqlite: State<'_, SqlitePool>,
   mysql: State<'_, MySqlState>,
+  _settings: State<'_, SettingsManager>,
 ) -> Result<MappingSummary, String> {
-  let rows = get_mapping_patients(sqlite, mysql).await?;
+  let patients = db::sqlite::get_all_tb_patients(&sqlite)
+    .await
+    .map_err(|e| e.to_string())?;
+  let locations = db::sqlite::get_all_patient_locations(&sqlite)
+    .await
+    .map_err(|e| e.to_string())?;
+
+  let hns = patients
+    .iter()
+    .map(|patient| patient.hn.clone())
+    .collect::<Vec<_>>();
+  let mysql_pool = mysql.lock().await.clone();
+  let demographics = if let Some(pool) = mysql_pool {
+    db::mysql::get_patient_demographics_by_hns(&pool, &hns)
+      .await
+      .map_err(|e| e.to_string())?
+  } else {
+    HashMap::new()
+  };
+
+  let rows = build_mapping_rows(&patients, &locations, &demographics);
 
   let total_patients = rows.len() as i64;
   let active_patients = rows.iter().filter(|row| row.tb_status == "active").count() as i64;
@@ -81,6 +103,7 @@ pub async fn get_mapping_summary(
 pub async fn geocode_patient_address(
   sqlite: State<'_, SqlitePool>,
   mysql: State<'_, MySqlState>,
+  settings: State<'_, SettingsManager>,
   hn: String,
 ) -> Result<MappingPatientRow, String> {
   let mysql_pool = mysql
@@ -99,7 +122,12 @@ pub async fn geocode_patient_address(
     .map_err(|e| e.to_string())?
     .ok_or_else(|| format!("ไม่พบข้อมูลผู้ป่วย HN {} ใน HOSxP", hn))?;
 
-  geocode_patient_core(&sqlite, &patient, &demographics)
+  let geocode_cfg = settings
+    .get_geocode_config()
+    .await
+    .map_err(|e| e.to_string())?;
+
+  geocode_patient_core(&sqlite, &patient, &demographics, &geocode_cfg)
     .await
     .map_err(|e| e.to_string())
 }
@@ -108,6 +136,7 @@ pub async fn geocode_patient_address(
 pub async fn batch_geocode_patients(
   sqlite: State<'_, SqlitePool>,
   mysql: State<'_, MySqlState>,
+  settings: State<'_, SettingsManager>,
   limit: Option<usize>,
 ) -> Result<BatchGeocodeResult, String> {
   let mysql_pool = mysql
@@ -130,11 +159,18 @@ pub async fn batch_geocode_patients(
     .await
     .map_err(|e| e.to_string())?;
 
+  let geocode_cfg = settings
+    .get_geocode_config()
+    .await
+    .map_err(|e| e.to_string())?;
+
   let mut processed = 0_i64;
   let mut succeeded = 0_i64;
   let mut failed = 0_i64;
   let mut skipped = 0_i64;
-  let capped_limit = limit.unwrap_or(25).clamp(1, 100);
+  let capped_limit = limit
+    .unwrap_or(geocode_cfg.batch_default_limit as usize)
+    .clamp(1, geocode_cfg.batch_max_limit as usize);
 
   for patient in patients {
     if processed >= capped_limit as i64 {
@@ -163,7 +199,7 @@ pub async fn batch_geocode_patients(
     }
 
     processed += 1;
-    match geocode_patient_core(&sqlite, &patient, demographics_row).await {
+    match geocode_patient_core(&sqlite, &patient, demographics_row, &geocode_cfg).await {
       Ok(_) => succeeded += 1,
       Err(_) => failed += 1,
     }
@@ -260,6 +296,7 @@ async fn geocode_patient_core(
   sqlite: &SqlitePool,
   patient: &TbPatient,
   demographics: &PatientDemographics,
+  geocode_cfg: &GeocodeConfig,
 ) -> Result<MappingPatientRow, anyhow::Error> {
   let raw_address = demographics
     .address
@@ -285,12 +322,13 @@ async fn geocode_patient_core(
     .as_ref()
     .map(|item| item.geocode_attempts)
     .unwrap_or(0);
-  let geocode_result = geocode_address_with_rate_limit(&normalized_address).await;
+  let geocode_result = geocode_address_with_rate_limit(&normalized_address, geocode_cfg).await;
 
   let (lat, lng, jittered_lat, jittered_lng, geocode_status, geocode_error, geocoded_at) =
     match geocode_result {
       Ok((lat, lng)) => {
-        let (j_lat, j_lng) = jitter_coordinates(lat, lng, &patient.hn);
+        let (j_lat, j_lng) =
+          jitter_coordinates(lat, lng, &patient.hn, geocode_cfg.jitter_range_degrees);
         (
           Some(lat),
           Some(lng),
@@ -337,28 +375,30 @@ async fn geocode_patient_core(
   build_single_mapping_row(patient, location, demographics.clone())
 }
 
-async fn geocode_address_with_rate_limit(address: &str) -> Result<(f64, f64), anyhow::Error> {
+async fn geocode_address_with_rate_limit(
+  address: &str,
+  cfg: &GeocodeConfig,
+) -> Result<(f64, f64), anyhow::Error> {
   let _guard = geocode_lock().lock().await;
   let client = Client::builder()
-    .timeout(Duration::from_secs(15))
-    .user_agent("TBPlusMapping/1.0 (tb-plus)")
+    .timeout(Duration::from_secs(cfg.http_timeout_seconds))
+    .user_agent(&cfg.user_agent)
     .build()?;
 
-  let url = "https://nominatim.openstreetmap.org/search";
   let mut last_error: Option<anyhow::Error> = None;
   let candidates = build_geocode_queries(address);
 
   for candidate in candidates {
-    for attempt in 0..3 {
-      tokio::time::sleep(Duration::from_secs(1)).await;
+    for attempt in 0..cfg.max_retries {
+      tokio::time::sleep(Duration::from_millis(cfg.rate_limit_sleep_ms)).await;
 
       let url_with_params = reqwest::Url::parse_with_params(
-        url,
+        &cfg.nominatim_url,
         &[
           ("q", candidate.as_str()),
           ("format", "jsonv2"),
           ("limit", "1"),
-          ("countrycodes", "th"),
+          ("countrycodes", &cfg.country_code),
         ],
       )?;
       let response = client.get(url_with_params).send().await;
@@ -532,21 +572,21 @@ fn strip_house_number_prefix(address: &str) -> Option<String> {
   }
 }
 
-fn jitter_coordinates(lat: f64, lng: f64, key: &str) -> (f64, f64) {
-  let lat_offset = deterministic_offset(&(key.to_string() + "-lat"));
-  let lng_offset = deterministic_offset(&(key.to_string() + "-lng"));
+fn jitter_coordinates(lat: f64, lng: f64, key: &str, jitter_range: f64) -> (f64, f64) {
+  let lat_offset = deterministic_offset(&(key.to_string() + "-lat"), jitter_range);
+  let lng_offset = deterministic_offset(&(key.to_string() + "-lng"), jitter_range);
   (
     (lat + lat_offset).clamp(-90.0, 90.0),
     (lng + lng_offset).clamp(-180.0, 180.0),
   )
 }
 
-fn deterministic_offset(key: &str) -> f64 {
+fn deterministic_offset(key: &str, jitter_range: f64) -> f64 {
   let mut hasher = std::collections::hash_map::DefaultHasher::new();
   key.hash(&mut hasher);
   let hash = hasher.finish();
   let normalized = (hash % 10_001) as f64 / 10_000.0;
-  (normalized - 0.5) * JITTER_RANGE_DEGREES * 2.0
+  (normalized - 0.5) * jitter_range * 2.0
 }
 
 fn has_text(value: Option<&str>) -> bool {
@@ -742,25 +782,27 @@ mod tests {
   // jitter_coordinates (deterministic)
   // ---------------------------------------------------------------------------
 
+  const TEST_JITTER_RANGE: f64 = 0.005;
+
   #[test]
   fn test_jitter_is_deterministic() {
-    let (lat1, lng1) = jitter_coordinates(13.7563, 100.5018, "HN0001");
-    let (lat2, lng2) = jitter_coordinates(13.7563, 100.5018, "HN0001");
+    let (lat1, lng1) = jitter_coordinates(13.7563, 100.5018, "HN0001", TEST_JITTER_RANGE);
+    let (lat2, lng2) = jitter_coordinates(13.7563, 100.5018, "HN0001", TEST_JITTER_RANGE);
     assert_eq!(lat1, lat2);
     assert_eq!(lng1, lng2);
   }
 
   #[test]
   fn test_jitter_different_keys_different_offsets() {
-    let (lat1, _) = jitter_coordinates(13.7563, 100.5018, "HN0001");
-    let (lat2, _) = jitter_coordinates(13.7563, 100.5018, "HN9999");
+    let (lat1, _) = jitter_coordinates(13.7563, 100.5018, "HN0001", TEST_JITTER_RANGE);
+    let (lat2, _) = jitter_coordinates(13.7563, 100.5018, "HN9999", TEST_JITTER_RANGE);
     assert_ne!(lat1, lat2);
   }
 
   #[test]
   fn test_jitter_stays_in_valid_range() {
     for key in &["A", "B", "C"] {
-      let (lat, lng) = jitter_coordinates(0.0, 0.0, key);
+      let (lat, lng) = jitter_coordinates(0.0, 0.0, key, TEST_JITTER_RANGE);
       assert!((-90.0..=90.0).contains(&lat), "lat out of range: {lat}");
       assert!((-180.0..=180.0).contains(&lng), "lng out of range: {lng}");
     }
@@ -768,9 +810,9 @@ mod tests {
 
   #[test]
   fn test_jitter_at_extreme_latitudes() {
-    let (lat, _) = jitter_coordinates(89.5, 0.0, "HN001");
+    let (lat, _) = jitter_coordinates(89.5, 0.0, "HN001", TEST_JITTER_RANGE);
     assert!(lat <= 90.0);
-    let (lat, _) = jitter_coordinates(-89.5, 0.0, "HN002");
+    let (lat, _) = jitter_coordinates(-89.5, 0.0, "HN002", TEST_JITTER_RANGE);
     assert!(lat >= -90.0);
   }
 
@@ -780,15 +822,15 @@ mod tests {
 
   #[test]
   fn test_deterministic_offset_same_input_same_output() {
-    let a = deterministic_offset("test-key");
-    let b = deterministic_offset("test-key");
+    let a = deterministic_offset("test-key", TEST_JITTER_RANGE);
+    let b = deterministic_offset("test-key", TEST_JITTER_RANGE);
     assert_eq!(a, b);
   }
 
   #[test]
   fn test_deterministic_offset_different_inputs() {
-    let a = deterministic_offset("key-a");
-    let b = deterministic_offset("key-b");
+    let a = deterministic_offset("key-a", TEST_JITTER_RANGE);
+    let b = deterministic_offset("key-b", TEST_JITTER_RANGE);
     assert_ne!(a, b);
   }
 

@@ -1,8 +1,10 @@
 mod commands;
 mod db;
 mod models;
+mod settings;
 
 use commands::settings::MySqlState;
+use settings::SettingsManager;
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::sqlite::SqlitePoolOptions;
 use std::sync::Arc;
@@ -16,11 +18,7 @@ pub fn run() {
     .setup(|app| {
       let app_handle = app.handle().clone();
 
-      // ── Step 1: SQLite — synchronous, completes in < 10 ms ─────────────
-      // We use block_on here because SQLite is a local file operation.
-      // This guarantees that sqlite_pool is managed before the event loop
-      // starts, so Vue can safely call SQLite-backed commands immediately
-      // after mount without any race condition.
+      // ── Step 1: SQLite — synchronous init ─────────────────────────────────
       let sqlite_pool = tauri::async_runtime::block_on(async {
         let app_data_dir = app_handle
           .path()
@@ -48,42 +46,58 @@ pub fn run() {
         pool
       });
 
-      // Register SQLite immediately so Vue commands work as soon as the
-      // first frame renders.
       app_handle.manage(sqlite_pool.clone());
 
-      // ── Step 2: MySQL — pre-register as None, connect asynchronously ───
-      // MySQL auto-connect can take several seconds when the server is
-      // behind Tailscale or temporarily unreachable.  We pre-register the
-      // state as None so the event loop (and Vue) can start without waiting,
-      // then fill it in once the connection is established.
+      // ── Step 2: SettingsManager — wraps SqlitePool + master encryption key ─
+      let app_data_dir = app_handle
+        .path()
+        .app_data_dir()
+        .expect("Failed to get app data dir for settings");
+      let settings_manager = tauri::async_runtime::block_on(async {
+        SettingsManager::new(sqlite_pool.clone(), &app_data_dir)
+          .await
+          .expect("Failed to initialize SettingsManager")
+      });
+      app_handle.manage(settings_manager);
+
+      // ── Step 3: MySQL — pre-register as None, connect asynchronously ─────
       let mysql_state: MySqlState = Arc::new(Mutex::new(None));
       app_handle.manage(Arc::clone(&mysql_state));
 
-      // ── Step 3: Background task — MySQL connect + splash-done signal ────
       let app_handle_clone = app_handle.clone();
 
       tauri::async_runtime::spawn(async move {
-        // ── 3a. Update splash status ──────────────────────────────────────
-        let _ = app_handle_clone.emit("splash-status", "กำลังโหลดฐานข้อมูล...");
+        let settings = app_handle_clone.state::<SettingsManager>();
+        let splash = settings.get_splash_messages().await.unwrap_or_default();
 
-        // ── 3b. Attempt MySQL auto-connect ────────────────────────────────
+        let _ = app_handle_clone.emit("splash-status", &splash.loading_db);
+
+        // Attempt auto-connect from saved config
         let connect_result = crate::commands::settings::load_config_from_sqlite(&sqlite_pool).await;
 
         match connect_result {
           Ok(Some(config)) => {
-            let _ = app_handle_clone.emit("splash-status", "กำลังเชื่อมต่อ MySQL...");
+            let _ = app_handle_clone.emit("splash-status", &splash.connecting_mysql);
 
             let url = format!(
               "mysql://{}:{}@{}:{}/{}",
               config.username, config.password, config.host, config.port, config.database
             );
 
-            // Hard-cap the auto-connect attempt at 8 seconds so startup is
-            // never indefinitely blocked when the server is unreachable.
+            let max_conn = settings
+              .get_u32("mysql.max_connections", 5)
+              .await
+              .unwrap_or(5);
+            let timeout_secs = settings
+              .get_u64("mysql.connect_timeout_seconds", 8)
+              .await
+              .unwrap_or(8);
+
             let pool_result = tokio::time::timeout(
-              std::time::Duration::from_secs(8),
-              MySqlPoolOptions::new().max_connections(5).connect(&url),
+              std::time::Duration::from_secs(timeout_secs),
+              MySqlPoolOptions::new()
+                .max_connections(max_conn)
+                .connect(&url),
             )
             .await;
 
@@ -95,34 +109,27 @@ pub fn run() {
                 );
                 let mut guard = mysql_state.lock().await;
                 *guard = Some(pool);
-                let _ = app_handle_clone.emit("splash-status", "เชื่อมต่อสำเร็จ ✓");
+                let _ = app_handle_clone.emit("splash-status", &splash.connect_ok);
               }
               Ok(Err(e)) => {
                 eprintln!("[sabot] Auto-connect to MySQL failed: {e}");
-                let _ = app_handle_clone.emit("splash-status", "เชื่อมต่อล้มเหลว (ใช้งานออฟไลน์ได้)");
+                let _ = app_handle_clone.emit("splash-status", &splash.connect_fail);
               }
               Err(_) => {
-                eprintln!("[sabot] MySQL auto-connect timed out after 8 s");
-                let _ = app_handle_clone.emit("splash-status", "เชื่อมต่อหมดเวลา (ใช้งานออฟไลน์ได้)");
+                eprintln!("[sabot] MySQL auto-connect timed out");
+                let _ = app_handle_clone.emit("splash-status", &splash.connect_timeout);
               }
             }
           }
           Ok(None) => {
-            // No saved config — normal on first run, nothing to do.
-            let _ = app_handle_clone.emit("splash-status", "พร้อมใช้งาน (ยังไม่ตั้งค่า MySQL)");
+            let _ = app_handle_clone.emit("splash-status", &splash.no_config);
           }
           Err(e) => {
             eprintln!("[sabot] Failed to load saved DB config: {e}");
-            let _ = app_handle_clone.emit("splash-status", "โหลดการตั้งค่าล้มเหลว");
+            let _ = app_handle_clone.emit("splash-status", &splash.config_load_fail);
           }
         }
 
-        // ── 3c. Minimum splash display time (visual comfort) ─────────────
-        // The splash overlay is now removed by Vue's onMounted lifecycle
-        // (App.vue) after the frontend finishes its own init sequence.
-        // This avoids the race condition where splash-done fires before the
-        // Vue listener is registered (especially in dev mode with Vite).
-        // We keep a short sleep so status text remains readable briefly.
         tokio::time::sleep(std::time::Duration::from_millis(300)).await;
       });
 

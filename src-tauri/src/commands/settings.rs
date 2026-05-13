@@ -1,5 +1,5 @@
+use crate::settings::SettingsManager;
 use anyhow::Result as AnyhowResult;
-use chrono::Local;
 use serde::{Deserialize, Serialize};
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::{MySqlPool, SqlitePool};
@@ -19,30 +19,17 @@ pub struct DbConfig {
   pub database: String,
   pub username: String,
   pub password: String,
-  #[serde(default = "default_staff_names")]
+  #[serde(default)]
   pub staff_names: Vec<String>,
-  #[serde(default = "default_regimens")]
+  #[serde(default)]
   pub regimens: Vec<String>,
 }
 
-fn default_staff_names() -> Vec<String> {
-  vec![
-    "พยาบาลวิชาชีพ".to_string(),
-    "เภสัชกร".to_string(),
-    "แพทย์".to_string(),
-  ]
-}
-
-fn default_regimens() -> Vec<String> {
-  vec!["2HRZE/4HR".to_string(), "2HRZE/6HR".to_string()]
-}
-
-/// Tauri managed state: an optional live MySQL connection pool protected by an
-/// async Mutex so multiple commands can safely read/replace it.
+/// Tauri managed state: an optional live MySQL connection pool.
 pub type MySqlState = Arc<Mutex<Option<MySqlPool>>>;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Existing commands (kept verbatim)
+// Commands
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Test connectivity with a one-shot pool — does not persist the connection.
@@ -63,16 +50,22 @@ pub async fn test_mysql_connection(config: DbConfig) -> Result<bool, String> {
 }
 
 /// Connect to MySQL and store the live pool in managed state.
-/// Call this from the UI "Connect" button; call `save_db_config` afterwards
-/// to persist the credentials across restarts.
 #[tauri::command]
-pub async fn connect_mysql(mysql: State<'_, MySqlState>, config: DbConfig) -> Result<(), String> {
+pub async fn connect_mysql(
+  mysql: State<'_, MySqlState>,
+  settings: State<'_, SettingsManager>,
+  config: DbConfig,
+) -> Result<(), String> {
   let url = format!(
     "mysql://{}:{}@{}:{}/{}",
     config.username, config.password, config.host, config.port, config.database
   );
+  let max_conn = settings
+    .get_u32("mysql.max_connections", 5)
+    .await
+    .map_err(|e| e.to_string())?;
   let pool = MySqlPoolOptions::new()
-    .max_connections(5)
+    .max_connections(max_conn)
     .connect(&url)
     .await
     .map_err(|e| e.to_string())?;
@@ -97,155 +90,221 @@ pub async fn backup_sqlite(app: tauri::AppHandle, target_path: String) -> Result
   if !source_path.exists() {
     return Err("ไม่พบไฟล์ฐานข้อมูล SQLite".to_string());
   }
-
   let target_path = PathBuf::from(target_path);
   if let Some(parent) = target_path.parent() {
     std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
   }
-
   std::fs::copy(&source_path, &target_path).map_err(|e| e.to_string())?;
   Ok(())
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Persistent connection settings — stored entirely in SQLite app_settings
+// Persistent connection settings — stored in SQLite app_settings with encryption
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// All keys stored in `app_settings` (all fields including password).
-/// SQLite DB lives in the OS-protected app data directory.
-const REQUIRED_SETTING_KEYS: [&str; 5] = [
-  "mysql_host",
-  "mysql_port",
-  "mysql_database",
-  "mysql_username",
-  "mysql_password",
-];
-
-const STAFF_NAMES_KEY: &str = "staff_names";
-const REGIMENS_KEY: &str = "regimens";
-
-/// Persist all connection fields to the local SQLite `app_settings` table.
-/// Should be called after a successful `connect_mysql`.
+/// Persist all connection fields and list settings to SQLite `app_settings`.
+/// Every MySQL connection field is encrypted using AES-256-GCM before storage.
 #[tauri::command]
-pub async fn save_db_config(sqlite: State<'_, SqlitePool>, config: DbConfig) -> Result<(), String> {
-  let now = Local::now().format("%Y-%m-%dT%H:%M:%S").to_string();
-  let port_str = config.port.to_string();
-  let staff_names = serde_json::to_string(&config.staff_names).map_err(|e| e.to_string())?;
-  let regimens = serde_json::to_string(&config.regimens).map_err(|e| e.to_string())?;
-
-  let fields: [(&str, &str); 7] = [
-    ("mysql_host", config.host.as_str()),
-    ("mysql_port", port_str.as_str()),
-    ("mysql_database", config.database.as_str()),
-    ("mysql_username", config.username.as_str()),
-    ("mysql_password", config.password.as_str()),
-    (STAFF_NAMES_KEY, staff_names.as_str()),
-    (REGIMENS_KEY, regimens.as_str()),
-  ];
-
-  for (key, value) in &fields {
-    sqlx::query("INSERT OR REPLACE INTO app_settings (key, value, updated_at) VALUES (?, ?, ?)")
-      .bind(*key)
-      .bind(*value)
-      .bind(&now)
-      .execute(sqlite.inner())
-      .await
-      .map_err(|e| e.to_string())?;
-  }
-
+pub async fn save_db_config(
+  settings: State<'_, SettingsManager>,
+  config: DbConfig,
+) -> Result<(), String> {
+  settings
+    .set_encrypted("mysql.host", &config.host)
+    .await
+    .map_err(|e| e.to_string())?;
+  settings
+    .set_encrypted("mysql.port", &config.port.to_string())
+    .await
+    .map_err(|e| e.to_string())?;
+  settings
+    .set_encrypted("mysql.database", &config.database)
+    .await
+    .map_err(|e| e.to_string())?;
+  settings
+    .set_encrypted("mysql.username", &config.username)
+    .await
+    .map_err(|e| e.to_string())?;
+  settings
+    .set_encrypted("mysql.password", &config.password)
+    .await
+    .map_err(|e| e.to_string())?;
+  settings
+    .set_json("staff_names", &config.staff_names)
+    .await
+    .map_err(|e| e.to_string())?;
+  settings
+    .set_json("regimens", &config.regimens)
+    .await
+    .map_err(|e| e.to_string())?;
   Ok(())
 }
 
 /// Load the saved DB config from SQLite app_settings.
-/// Returns `None` when no complete config has been saved yet.
+/// All five MySQL fields are transparently decrypted.
 #[tauri::command]
-pub async fn load_db_config(sqlite: State<'_, SqlitePool>) -> Result<Option<DbConfig>, String> {
-  load_config_from_sqlite(sqlite.inner())
+pub async fn load_db_config(
+  settings: State<'_, SettingsManager>,
+) -> Result<Option<DbConfig>, String> {
+  let host = settings
+    .get_encrypted("mysql.host")
     .await
-    .map_err(|e| e.to_string())
-}
-
-/// Remove saved config from SQLite.
-#[tauri::command]
-pub async fn delete_db_config(sqlite: State<'_, SqlitePool>) -> Result<(), String> {
-  sqlx::query(
-    "DELETE FROM app_settings \
-     WHERE key IN (
-       'mysql_host',
-       'mysql_port',
-       'mysql_database',
-       'mysql_username',
-       'mysql_password',
-       'staff_names',
-       'regimens'
-     )",
-  )
-  .execute(sqlite.inner())
-  .await
-  .map_err(|e| e.to_string())?;
-
-  Ok(())
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Public (non-command) helper — used by lib.rs during startup auto-connect
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Read the persisted DB config directly from a `&SqlitePool`.
-/// Called during app startup before managed state has been registered.
-///
-/// Returns `Ok(None)` when any of the five keys are absent from `app_settings`.
-pub async fn load_config_from_sqlite(pool: &SqlitePool) -> AnyhowResult<Option<DbConfig>> {
-  let mut values: std::collections::HashMap<String, String> =
-    std::collections::HashMap::with_capacity(REQUIRED_SETTING_KEYS.len());
-
-  for key in REQUIRED_SETTING_KEYS {
-    let value: Option<String> = sqlx::query_scalar("SELECT value FROM app_settings WHERE key = ?")
-      .bind(key)
-      .fetch_optional(pool)
-      .await?;
-
-    match value {
-      Some(v) => {
-        values.insert(key.to_string(), v);
-      }
-      // Any missing key means the config is incomplete — bail out gracefully
-      None => return Ok(None),
-    }
+    .map_err(|e| e.to_string())?;
+  if host.as_deref().unwrap_or("").is_empty() {
+    return Ok(None);
   }
 
-  let port: u16 = values
-    .get("mysql_port")
+  let port: u16 = settings
+    .get_encrypted("mysql.port")
+    .await
+    .map_err(|e| e.to_string())?
     .and_then(|v| v.parse().ok())
     .unwrap_or(3306);
-  let staff_names = load_string_list_setting(pool, STAFF_NAMES_KEY, default_staff_names()).await?;
-  let regimens = load_string_list_setting(pool, REGIMENS_KEY, default_regimens()).await?;
+  let database = settings
+    .get_encrypted("mysql.database")
+    .await
+    .map_err(|e| e.to_string())?
+    .unwrap_or_default();
+  let username = settings
+    .get_encrypted("mysql.username")
+    .await
+    .map_err(|e| e.to_string())?
+    .unwrap_or_default();
+  let password = settings
+    .get_encrypted("mysql.password")
+    .await
+    .map_err(|e| e.to_string())?
+    .unwrap_or_default();
+  let staff_names = settings
+    .get_staff_names()
+    .await
+    .map_err(|e| e.to_string())?;
+  let regimens = settings.get_regimens().await.map_err(|e| e.to_string())?;
 
   Ok(Some(DbConfig {
-    host: values.remove("mysql_host").unwrap_or_default(),
+    host: host.unwrap_or_default(),
     port,
-    database: values.remove("mysql_database").unwrap_or_default(),
-    username: values.remove("mysql_username").unwrap_or_default(),
-    password: values.remove("mysql_password").unwrap_or_default(),
+    database,
+    username,
+    password,
     staff_names,
     regimens,
   }))
 }
 
-async fn load_string_list_setting(
-  pool: &SqlitePool,
-  key: &str,
-  default: Vec<String>,
-) -> AnyhowResult<Vec<String>> {
+/// Remove saved config from SQLite.
+#[tauri::command]
+pub async fn delete_db_config(settings: State<'_, SettingsManager>) -> Result<(), String> {
+  let keys = [
+    "mysql.host",
+    "mysql.port",
+    "mysql.database",
+    "mysql.username",
+    "mysql.password",
+    "staff_names",
+    "regimens",
+  ];
+  settings.delete_keys(&keys).await.map_err(|e| e.to_string())
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Public helper — used by lib.rs during startup auto-connect
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Read a scalar value from the app_settings table directly.
+async fn read_setting(pool: &SqlitePool, key: &str) -> AnyhowResult<Option<String>> {
   let value: Option<String> = sqlx::query_scalar("SELECT value FROM app_settings WHERE key = ?")
     .bind(key)
     .fetch_optional(pool)
     .await?;
+  Ok(value)
+}
 
+/// Read a JSON array from the app_settings table directly.
+async fn read_json_setting<T: serde::de::DeserializeOwned>(
+  pool: &SqlitePool,
+  key: &str,
+  default: Vec<T>,
+) -> AnyhowResult<Vec<T>> {
+  let value: Option<String> = read_setting(pool, key).await?;
   match value {
     Some(raw) => serde_json::from_str(&raw).or(Ok(default)),
     None => Ok(default),
   }
+}
+
+/// Read and decrypt an encrypted setting from the SqlitePool.
+async fn read_decrypted(
+  pool: &SqlitePool,
+  key: &str,
+  mk: &[u8; 32],
+) -> AnyhowResult<Option<String>> {
+  let raw = read_setting(pool, key).await?;
+  match raw {
+    Some(enc) if !enc.is_empty() => Ok(Some(
+      crate::settings::crypto::decrypt(mk, &enc).unwrap_or_default(),
+    )),
+    _ => Ok(None),
+  }
+}
+
+/// Read the persisted DB config directly from the SqlitePool, bypassing
+/// the SettingsManager (needed before SettingsManager is registered).
+/// All five MySQL fields are decrypted using the device master key.
+pub async fn load_config_from_sqlite(pool: &SqlitePool) -> AnyhowResult<Option<DbConfig>> {
+  let app_data_dir = app_data_dir_for_key()?;
+  let mk = SettingsManager::load_or_create_static_key(&app_data_dir);
+
+  let host = read_decrypted(pool, "mysql.host", &mk).await?;
+  if host.as_deref().unwrap_or("").is_empty() {
+    return Ok(None);
+  }
+
+  let port: u16 = read_decrypted(pool, "mysql.port", &mk)
+    .await?
+    .and_then(|v| v.parse().ok())
+    .unwrap_or(3306);
+  let database = read_decrypted(pool, "mysql.database", &mk)
+    .await?
+    .unwrap_or_default();
+  let username = read_decrypted(pool, "mysql.username", &mk)
+    .await?
+    .unwrap_or_default();
+  let password = read_decrypted(pool, "mysql.password", &mk)
+    .await?
+    .unwrap_or_default();
+  let staff_names = read_json_setting(pool, "staff_names", default_staff_names_vec()).await?;
+  let regimens = read_json_setting(pool, "regimens", default_regimens_vec()).await?;
+
+  Ok(Some(DbConfig {
+    host: host.unwrap_or_default(),
+    port,
+    database,
+    username,
+    password,
+    staff_names,
+    regimens,
+  }))
+}
+
+fn app_data_dir_for_key() -> AnyhowResult<PathBuf> {
+  let home = std::env::var("HOME")
+    .or_else(|_| std::env::var("USERPROFILE"))
+    .map_err(|_| anyhow::anyhow!("cannot determine home directory"))?;
+  Ok(
+    std::path::PathBuf::from(home)
+      .join("Library")
+      .join("Application Support")
+      .join("com.sabothospital.tb-plus"),
+  )
+}
+
+fn default_staff_names_vec() -> Vec<String> {
+  vec!["พยาบาลวิชาชีพ".into(), "เภสัชกร".into(), "แพทย์".into()]
+}
+
+fn default_regimens_vec() -> Vec<String> {
+  vec!["2HRZE/4HR".into(), "2HRZE/6HR".into()]
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -255,10 +314,6 @@ async fn load_string_list_setting(
 #[cfg(test)]
 mod tests {
   use super::*;
-
-  // ---------------------------------------------------------------------------
-  // DbConfig serde round-trip
-  // ---------------------------------------------------------------------------
 
   #[test]
   fn test_db_config_serde_roundtrip() {
@@ -295,38 +350,5 @@ mod tests {
     let restored: DbConfig = serde_json::from_str(&json).unwrap();
     assert_eq!(restored.staff_names, Vec::<String>::new());
     assert_eq!(restored.regimens, Vec::<String>::new());
-  }
-
-  #[test]
-  fn test_db_config_default_staff_names() {
-    let defaults = default_staff_names();
-    assert!(defaults.contains(&"พยาบาลวิชาชีพ".to_string()));
-    assert!(defaults.contains(&"เภสัชกร".to_string()));
-    assert!(defaults.contains(&"แพทย์".to_string()));
-    assert_eq!(defaults.len(), 3);
-  }
-
-  #[test]
-  fn test_db_config_default_regimens() {
-    let defaults = default_regimens();
-    assert!(defaults.contains(&"2HRZE/4HR".to_string()));
-    assert!(defaults.contains(&"2HRZE/6HR".to_string()));
-    assert_eq!(defaults.len(), 2);
-  }
-
-  #[test]
-  fn test_db_config_default_port_is_3306() {
-    let config = DbConfig {
-      host: "localhost".into(),
-      port: 3306,
-      database: "test".into(),
-      username: "user".into(),
-      password: "pass".into(),
-      staff_names: default_staff_names(),
-      regimens: default_regimens(),
-    };
-    let json = serde_json::to_string(&config).unwrap();
-    let restored: DbConfig = serde_json::from_str(&json).unwrap();
-    assert_eq!(restored.port, 3306);
   }
 }

@@ -1,15 +1,14 @@
 use crate::commands::settings::MySqlState;
 use crate::db;
 use crate::models::patient::AppointmentRecord;
+use crate::settings::SettingsManager;
 use tauri::State;
 
-/// Fetch upcoming TB clinic appointments from HOSxP `oapp` (clinic = `009`).
-///
-/// `days_ahead` controls how far into the future to look (default: 30 days).
-/// Returns an error string when the MySQL connection is not available.
+/// Fetch upcoming TB clinic appointments from HOSxP.
 #[tauri::command]
 pub async fn get_appointments(
   mysql: State<'_, MySqlState>,
+  settings: State<'_, SettingsManager>,
   days_ahead: Option<i64>,
 ) -> Result<Vec<AppointmentRecord>, String> {
   let guard = mysql.lock().await;
@@ -17,7 +16,11 @@ pub async fn get_appointments(
     None => Err("MySQL ยังไม่ได้เชื่อมต่อ".to_string()),
     Some(pool) => {
       let days = days_ahead.unwrap_or(30);
-      db::mysql::get_tb_appointments(pool, days)
+      let hosxp_cfg = settings
+        .get_hosxp_config()
+        .await
+        .map_err(|e| e.to_string())?;
+      db::mysql::get_tb_appointments(pool, days, &hosxp_cfg)
         .await
         .map_err(|e| e.to_string())
     }

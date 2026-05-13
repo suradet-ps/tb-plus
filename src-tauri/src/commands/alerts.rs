@@ -2,6 +2,7 @@ use crate::commands::patients::compute_alerts_for_patient;
 use crate::commands::settings::MySqlState;
 use crate::db;
 use crate::models::alert::PatientAlert;
+use crate::settings::SettingsManager;
 use chrono::{Datelike, Local, NaiveDate};
 use sqlx::SqlitePool;
 use tauri::State;
@@ -10,6 +11,7 @@ use tauri::State;
 pub async fn get_patient_alerts(
   sqlite: State<'_, SqlitePool>,
   mysql: State<'_, MySqlState>,
+  settings: State<'_, SettingsManager>,
 ) -> Result<Vec<PatientAlert>, String> {
   let patients = db::sqlite::get_active_patients(&sqlite)
     .await
@@ -17,6 +19,19 @@ pub async fn get_patient_alerts(
 
   let mysql_guard = mysql.lock().await;
   let mysql_pool = mysql_guard.as_ref();
+
+  let alert_cfg = settings
+    .get_alert_config()
+    .await
+    .map_err(|e| e.to_string())?;
+  let all_icodes = settings
+    .get_all_tb_icodes()
+    .await
+    .map_err(|e| e.to_string())?;
+  let class_to_icodes = settings
+    .build_class_to_icodes()
+    .await
+    .map_err(|e| e.to_string())?;
 
   let today = Local::now().date_naive();
   let mut all_alerts: Vec<PatientAlert> = Vec::new();
@@ -46,7 +61,7 @@ pub async fn get_patient_alerts(
       .map(|plans| plans.iter().map(|p| p.duration_months).sum::<i64>());
 
     let days_since_last = if let Some(pool) = mysql_pool {
-      db::mysql::get_last_dispensing_date(pool, &patient.hn)
+      db::mysql::get_last_dispensing_date(pool, &patient.hn, &all_icodes)
         .await
         .ok()
         .flatten()
@@ -64,6 +79,9 @@ pub async fn get_patient_alerts(
       days_since_last,
       mysql_pool,
       &sqlite,
+      &alert_cfg,
+      &all_icodes,
+      &class_to_icodes,
     )
     .await;
 

@@ -2,9 +2,12 @@ use crate::commands::settings::MySqlState;
 use crate::db;
 use crate::models::alert::PatientAlert;
 use crate::models::patient::{ActivePatientRow, EnrollmentInput, PatientDetail};
+use crate::models::settings::AlertConfig;
 use crate::models::treatment::TreatmentPlan;
+use crate::settings::SettingsManager;
 use chrono::{Datelike, Local, NaiveDate};
 use sqlx::SqlitePool;
+use std::collections::HashMap;
 use tauri::State;
 
 #[tauri::command]
@@ -21,6 +24,7 @@ pub async fn enroll_patient(
 pub async fn get_active_patients(
   sqlite: State<'_, SqlitePool>,
   mysql: State<'_, MySqlState>,
+  settings: State<'_, SettingsManager>,
 ) -> Result<Vec<ActivePatientRow>, String> {
   let patients = db::sqlite::get_active_patients(&sqlite)
     .await
@@ -28,6 +32,19 @@ pub async fn get_active_patients(
 
   let mysql_guard = mysql.lock().await;
   let mysql_pool = mysql_guard.as_ref();
+
+  let alert_cfg = settings
+    .get_alert_config()
+    .await
+    .map_err(|e| e.to_string())?;
+  let all_icodes = settings
+    .get_all_tb_icodes()
+    .await
+    .map_err(|e| e.to_string())?;
+  let class_to_icodes = settings
+    .build_class_to_icodes()
+    .await
+    .map_err(|e| e.to_string())?;
 
   let today = Local::now().date_naive();
   let mut rows = Vec::new();
@@ -47,7 +64,6 @@ pub async fn get_active_patients(
       .ok()
       .flatten();
 
-    // Compute current month from earliest phase_start across all plans
     let first_start = db::sqlite::get_first_phase_start(&sqlite, &patient.hn)
       .await
       .ok()
@@ -67,7 +83,7 @@ pub async fn get_active_patients(
       .map(|plans| plans.iter().map(|p| p.duration_months).sum::<i64>());
 
     let days_since_last = if let Some(pool) = mysql_pool {
-      db::mysql::get_last_dispensing_date(pool, &patient.hn)
+      db::mysql::get_last_dispensing_date(pool, &patient.hn, &all_icodes)
         .await
         .ok()
         .flatten()
@@ -85,6 +101,9 @@ pub async fn get_active_patients(
       days_since_last,
       mysql_pool,
       &sqlite,
+      &alert_cfg,
+      &all_icodes,
+      &class_to_icodes,
     )
     .await;
 
@@ -107,6 +126,7 @@ pub async fn get_active_patients(
 pub async fn get_patient_detail(
   sqlite: State<'_, SqlitePool>,
   mysql: State<'_, MySqlState>,
+  settings: State<'_, SettingsManager>,
   hn: String,
 ) -> Result<PatientDetail, String> {
   let patient = db::sqlite::get_patient_by_hn(&sqlite, &hn)
@@ -118,6 +138,23 @@ pub async fn get_patient_detail(
   let mysql_pool = mysql_guard.as_ref();
   let mysql_connected = mysql_pool.is_some();
   let mut mysql_errors: Vec<String> = Vec::new();
+
+  let alert_cfg = settings
+    .get_alert_config()
+    .await
+    .map_err(|e| e.to_string())?;
+  let all_icodes = settings
+    .get_all_tb_icodes()
+    .await
+    .map_err(|e| e.to_string())?;
+  let class_to_icodes = settings
+    .build_class_to_icodes()
+    .await
+    .map_err(|e| e.to_string())?;
+  let icode_to_class_map = settings
+    .build_icode_to_class()
+    .await
+    .map_err(|e| e.to_string())?;
 
   // ── Demographics (HOSxP) ─────────────────────────────────────────────────
   let demographics = if let Some(pool) = mysql_pool {
@@ -146,7 +183,7 @@ pub async fn get_patient_detail(
 
   // ── Dispensing history (HOSxP) ───────────────────────────────────────────
   let dispensing_history = if let Some(pool) = mysql_pool {
-    match db::mysql::get_dispensing_history(pool, &hn).await {
+    match db::mysql::get_dispensing_history(pool, &hn, &all_icodes, &icode_to_class_map).await {
       Ok(rows) => rows,
       Err(e) => {
         mysql_errors.push(format!("dispensing: {}", e));
@@ -161,7 +198,7 @@ pub async fn get_patient_detail(
 
   // ── Last dispensing date (HOSxP) ─────────────────────────────────────────
   let days_since_last = if let Some(pool) = mysql_pool {
-    match db::mysql::get_last_dispensing_date(pool, &hn).await {
+    match db::mysql::get_last_dispensing_date(pool, &hn, &all_icodes).await {
       Ok(date_str) => date_str
         .and_then(|s| NaiveDate::parse_from_str(&s, "%Y-%m-%d").ok())
         .map(|d| (today - d).num_days()),
@@ -200,6 +237,9 @@ pub async fn get_patient_detail(
     days_since_last,
     mysql_pool,
     &sqlite,
+    &alert_cfg,
+    &all_icodes,
+    &class_to_icodes,
   )
   .await;
 
@@ -226,6 +266,7 @@ pub async fn get_patient_detail(
 // Shared alert helper — pub(crate) so alerts.rs can call it directly
 // ---------------------------------------------------------------------------
 
+#[allow(clippy::too_many_arguments)]
 pub(crate) async fn compute_alerts_for_patient(
   hn: &str,
   current_plan: &Option<TreatmentPlan>,
@@ -234,14 +275,19 @@ pub(crate) async fn compute_alerts_for_patient(
   days_since_last: Option<i64>,
   mysql_pool: Option<&sqlx::MySqlPool>,
   sqlite: &SqlitePool,
+  alert_cfg: &AlertConfig,
+  _all_icodes: &[String],
+  class_to_icodes: &HashMap<String, Vec<String>>,
 ) -> Vec<PatientAlert> {
   let mut alerts = Vec::new();
   let today = Local::now().date_naive();
+  let overdue_days = alert_cfg.overdue_days as i64;
+  let lost_days = alert_cfg.lost_followup_days as i64;
 
-  // 1. Overdue dispensing (> 35 days, not yet lost to follow-up)
+  // 1. Overdue dispensing
   if let Some(days) = days_since_last
-    && days > 35
-    && days <= 60
+    && days > overdue_days
+    && days <= lost_days
   {
     alerts.push(PatientAlert {
       hn: hn.to_string(),
@@ -252,9 +298,9 @@ pub(crate) async fn compute_alerts_for_patient(
     });
   }
 
-  // 2. Lost to follow-up (> 60 days)
+  // 2. Lost to follow-up
   if let Some(days) = days_since_last
-    && days > 60
+    && days > lost_days
   {
     alerts.push(PatientAlert {
       hn: hn.to_string(),
@@ -282,12 +328,22 @@ pub(crate) async fn compute_alerts_for_patient(
     .and_then(|s| NaiveDate::parse_from_str(s, "%Y-%m-%d").ok());
 
   if let Some(pool) = mysql_pool {
-    // 3a. Ethambutol overrun — E was dispensed AFTER the intensive phase end date.
-    //     Fires regardless of whether the SQLite plan record has been updated,
-    //     because the clinical risk exists whether the record is current or not.
+    let e_icodes: Vec<String> = class_to_icodes.get("E").cloned().unwrap_or_default();
+    let mut ze_icodes: Vec<String> = class_to_icodes.get("Z").cloned().unwrap_or_default();
+    if let Some(e_codes) = class_to_icodes.get("E") {
+      ze_icodes.extend(e_codes.clone());
+    }
+
+    // 3a. Ethambutol overrun
     if let Some(end_date) = intensive_end_date
       && today > end_date
-      && let Ok(true) = db::mysql::was_ethambutol_dispensed_recently(pool, hn, 30).await
+      && let Ok(true) = db::mysql::was_ethambutol_dispensed_recently(
+        pool,
+        hn,
+        alert_cfg.e_overrun_lookback_days as i64,
+        &e_icodes,
+      )
+      .await
     {
       alerts.push(PatientAlert {
         hn: hn.to_string(),
@@ -300,23 +356,20 @@ pub(crate) async fn compute_alerts_for_patient(
       });
     }
 
-    // 3b. Phase-transition check: current SQLite plan is STILL "intensive"
-    //     but the expected end date has passed.
-    //
-    //     Cross-reference HOSxP dispensing to distinguish two situations:
-    //       • Z/E dispensed recently  → patient still on intensive drugs
-    //                                   → "phase_transition" alert (due for switch)
-    //       • Z/E NOT dispensed recently → patient evidently already on H+R only
-    //                                   → "phase_not_updated" alert (update the record)
+    // 3b. Phase-transition check
     if let Some(plan) = current_plan
       && plan.phase == "intensive"
       && let Some(end_date) = intensive_end_date
       && today > end_date
     {
-      // Default to true (conservative: assume still intensive) if MySQL unavailable
-      let ze_recent = db::mysql::was_ze_dispensed_recently(pool, hn, 35)
-        .await
-        .unwrap_or(true);
+      let ze_recent = db::mysql::was_ze_dispensed_recently(
+        pool,
+        hn,
+        alert_cfg.phase_transition_lookback_days as i64,
+        &ze_icodes,
+      )
+      .await
+      .unwrap_or(true);
 
       let (alert_type, message) = if ze_recent {
         ("phase_transition", "ถึงเวลาเปลี่ยนเป็น Continuation Phase")
@@ -386,6 +439,7 @@ pub async fn discharge_patient(
 pub async fn get_discharged_patients(
   sqlite: State<'_, SqlitePool>,
   mysql: State<'_, MySqlState>,
+  _settings: State<'_, SettingsManager>,
 ) -> Result<Vec<ActivePatientRow>, String> {
   let patients = db::sqlite::get_discharged_patients(&sqlite)
     .await
@@ -440,7 +494,7 @@ pub async fn get_discharged_patients(
 #[cfg(test)]
 mod tests {
   use super::*;
-  use chrono::{Datelike, Local, NaiveDate};
+  use chrono::{Local, NaiveDate};
 
   // ---------------------------------------------------------------------------
   // Alert helper: mirrors the core logic from compute_alerts_for_patient
@@ -455,14 +509,17 @@ mod tests {
     days_since_last: Option<i64>,
     reference_date: NaiveDate,
   ) -> Vec<&'static str> {
+    let cfg = AlertConfig::default();
+    let overdue_days = cfg.overdue_days as i64;
+    let lost_days = cfg.lost_followup_days as i64;
     let mut types = Vec::new();
 
-    // 1. Overdue (> 35, ≤ 60 days)
+    // 1. Overdue
     if let Some(d) = days_since_last {
-      if d > 35 && d <= 60 {
+      if d > overdue_days && d <= lost_days {
         types.push("overdue");
       }
-      if d > 60 {
+      if d > lost_days {
         types.push("lost_to_followup");
       }
     }
