@@ -194,6 +194,13 @@ export const useSettingsStore = defineStore('settings', () => {
     try {
       const saved = await invoke<AppConfig | null>('load_db_config')
       if (saved) {
+        dbConfig.value = {
+          host: saved.host,
+          port: saved.port,
+          database: saved.database,
+          username: saved.username,
+          password: saved.password,
+        }
         staffNames.value = saved.staff_names ?? []
       }
     } catch { /* keep empty */ }

@@ -72,8 +72,9 @@ pub fn run() {
 
         let _ = app_handle_clone.emit("splash-status", &splash.loading_db);
 
-        // Attempt auto-connect from saved config
-        let connect_result = crate::commands::settings::load_config_from_sqlite(&sqlite_pool).await;
+        // Attempt auto-connect from saved config (using the registered
+        // SettingsManager so the master encryption key is guaranteed to match).
+        let connect_result = settings.get_db_config().await;
 
         match connect_result {
           Ok(Some(config)) => {

@@ -370,6 +370,51 @@ impl SettingsManager {
         .map(|r| r.phases),
     )
   }
+
+  /// Load the complete DbConfig (with decrypted password) from app_settings.
+  /// Returns `None` when no MySQL config has been saved yet.
+  pub async fn get_db_config(&self) -> Result<Option<crate::commands::settings::DbConfig>> {
+    self.load_db_config_inner().await
+  }
+
+  /// Internal helper used by both `get_db_config` and `load_db_config` command.
+  pub(crate) async fn load_db_config_inner(
+    &self,
+  ) -> Result<Option<crate::commands::settings::DbConfig>> {
+    let host = self.get_encrypted("mysql.host").await?;
+    if host.as_deref().unwrap_or("").is_empty() {
+      return Ok(None);
+    }
+    let port: u16 = self
+      .get_encrypted("mysql.port")
+      .await?
+      .and_then(|v| v.parse().ok())
+      .unwrap_or(3306);
+    let database = self
+      .get_encrypted("mysql.database")
+      .await?
+      .unwrap_or_default();
+    let username = self
+      .get_encrypted("mysql.username")
+      .await?
+      .unwrap_or_default();
+    let password = self
+      .get_encrypted("mysql.password")
+      .await?
+      .unwrap_or_default();
+    let staff_names = self.get_staff_names().await?;
+    let regimens = self.get_regimens().await?;
+
+    Ok(Some(crate::commands::settings::DbConfig {
+      host: host.unwrap_or_default(),
+      port,
+      database,
+      username,
+      password,
+      staff_names,
+      regimens,
+    }))
+  }
 }
 
 // ── Default factory functions ────────────────────────────────────────────────

@@ -1,9 +1,8 @@
 use crate::models::settings::{AlertConfig, DrugClassEntry, HosxpConfig, RegimenEntry};
 use crate::settings::SettingsManager;
-use anyhow::Result as AnyhowResult;
 use serde::{Deserialize, Serialize};
+use sqlx::MySqlPool;
 use sqlx::mysql::MySqlPoolOptions;
-use sqlx::{MySqlPool, SqlitePool};
 use std::path::PathBuf;
 use std::sync::Arc;
 use tauri::State;
@@ -147,50 +146,10 @@ pub async fn save_db_config(
 pub async fn load_db_config(
   settings: State<'_, SettingsManager>,
 ) -> Result<Option<DbConfig>, String> {
-  let host = settings
-    .get_encrypted("mysql.host")
+  settings
+    .load_db_config_inner()
     .await
-    .map_err(|e| e.to_string())?;
-  if host.as_deref().unwrap_or("").is_empty() {
-    return Ok(None);
-  }
-
-  let port: u16 = settings
-    .get_encrypted("mysql.port")
-    .await
-    .map_err(|e| e.to_string())?
-    .and_then(|v| v.parse().ok())
-    .unwrap_or(3306);
-  let database = settings
-    .get_encrypted("mysql.database")
-    .await
-    .map_err(|e| e.to_string())?
-    .unwrap_or_default();
-  let username = settings
-    .get_encrypted("mysql.username")
-    .await
-    .map_err(|e| e.to_string())?
-    .unwrap_or_default();
-  let password = settings
-    .get_encrypted("mysql.password")
-    .await
-    .map_err(|e| e.to_string())?
-    .unwrap_or_default();
-  let staff_names = settings
-    .get_staff_names()
-    .await
-    .map_err(|e| e.to_string())?;
-  let regimens = settings.get_regimens().await.map_err(|e| e.to_string())?;
-
-  Ok(Some(DbConfig {
-    host: host.unwrap_or_default(),
-    port,
-    database,
-    username,
-    password,
-    staff_names,
-    regimens,
-  }))
+    .map_err(|e| e.to_string())
 }
 
 /// Remove saved config from SQLite.
@@ -336,106 +295,6 @@ pub async fn is_setup_complete(settings: State<'_, SettingsManager>) -> Result<b
       .as_deref()
       == Some("true"),
   )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Public helper — used by lib.rs during startup auto-connect
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Read a scalar value from the app_settings table directly.
-async fn read_setting(pool: &SqlitePool, key: &str) -> AnyhowResult<Option<String>> {
-  let value: Option<String> = sqlx::query_scalar("SELECT value FROM app_settings WHERE key = ?")
-    .bind(key)
-    .fetch_optional(pool)
-    .await?;
-  Ok(value)
-}
-
-/// Read a JSON array from the app_settings table directly.
-async fn read_json_setting<T: serde::de::DeserializeOwned>(
-  pool: &SqlitePool,
-  key: &str,
-  default: Vec<T>,
-) -> AnyhowResult<Vec<T>> {
-  let value: Option<String> = read_setting(pool, key).await?;
-  match value {
-    Some(raw) => serde_json::from_str(&raw).or(Ok(default)),
-    None => Ok(default),
-  }
-}
-
-/// Read and decrypt an encrypted setting from the SqlitePool.
-async fn read_decrypted(
-  pool: &SqlitePool,
-  key: &str,
-  mk: &[u8; 32],
-) -> AnyhowResult<Option<String>> {
-  let raw = read_setting(pool, key).await?;
-  match raw {
-    Some(enc) if !enc.is_empty() => Ok(Some(
-      crate::settings::crypto::decrypt(mk, &enc).unwrap_or_default(),
-    )),
-    _ => Ok(None),
-  }
-}
-
-/// Read the persisted DB config directly from the SqlitePool, bypassing
-/// the SettingsManager (needed before SettingsManager is registered).
-/// All five MySQL fields are decrypted using the device master key.
-pub async fn load_config_from_sqlite(pool: &SqlitePool) -> AnyhowResult<Option<DbConfig>> {
-  let app_data_dir = app_data_dir_for_key()?;
-  let mk = SettingsManager::load_or_create_static_key(&app_data_dir);
-
-  let host = read_decrypted(pool, "mysql.host", &mk).await?;
-  if host.as_deref().unwrap_or("").is_empty() {
-    return Ok(None);
-  }
-
-  let port: u16 = read_decrypted(pool, "mysql.port", &mk)
-    .await?
-    .and_then(|v| v.parse().ok())
-    .unwrap_or(3306);
-  let database = read_decrypted(pool, "mysql.database", &mk)
-    .await?
-    .unwrap_or_default();
-  let username = read_decrypted(pool, "mysql.username", &mk)
-    .await?
-    .unwrap_or_default();
-  let password = read_decrypted(pool, "mysql.password", &mk)
-    .await?
-    .unwrap_or_default();
-  let staff_names = read_json_setting(pool, "staff_names", default_staff_names_vec()).await?;
-  let regimens = read_json_setting(pool, "regimens", default_regimens_vec()).await?;
-
-  Ok(Some(DbConfig {
-    host: host.unwrap_or_default(),
-    port,
-    database,
-    username,
-    password,
-    staff_names,
-    regimens,
-  }))
-}
-
-fn app_data_dir_for_key() -> AnyhowResult<PathBuf> {
-  let home = std::env::var("HOME")
-    .or_else(|_| std::env::var("USERPROFILE"))
-    .map_err(|_| anyhow::anyhow!("cannot determine home directory"))?;
-  Ok(
-    std::path::PathBuf::from(home)
-      .join("Library")
-      .join("Application Support")
-      .join("com.sabothospital.tb-plus"),
-  )
-}
-
-fn default_staff_names_vec() -> Vec<String> {
-  vec!["พยาบาลวิชาชีพ".into(), "เภสัชกร".into(), "แพทย์".into()]
-}
-
-fn default_regimens_vec() -> Vec<String> {
-  vec!["2HRZE/4HR".into(), "2HRZE/6HR".into()]
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
