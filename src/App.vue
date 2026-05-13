@@ -11,36 +11,18 @@ const alertStore = useAlertStore()
 const settingsStore = useSettingsStore()
 const appointmentsStore = useAppointmentsStore()
 
-// Startup connection retry — polls get_mysql_status every 2 s for up to 10 s
-// so the sidebar badge updates as soon as the background MySQL auto-connect
-// completes (which can happen up to 8 s after the event loop starts).
 let startupRetryTimer: ReturnType<typeof setInterval> | null = null
 
 onMounted(async () => {
-  // ── Flash prevention (Windows) ─────────────────────────────────────
-  // tauri.windows.conf.json sets visible:false so the native OS window
-  // stays hidden while WebView2 initialises (~600-900 ms on Windows).
-  // By the time onMounted fires the HTML splash overlay is already painted
-  // in the DOM, so calling show() here reveals a fully-rendered splash card
-  // instead of a blinding white rectangle.
-  // On macOS / Linux the window is already visible (visible:true in
-  // tauri.conf.json), so this call is a harmless no-op on those platforms.
   await getCurrentWindow().show()
-
-  // Record when init starts so we can enforce a minimum splash display time
   const splashStart = Date.now()
 
-  // Load persisted config first so the Settings form is pre-filled
-  await settingsStore.loadSavedConfig()
-  // Check whether the backend already has an active connection
+  // Load everything (MySQL config + drug classes + regimens + HOSxP + alerts)
+  await settingsStore.loadAllSettings()
   await settingsStore.checkConnection()
-  // Start alert polling loop
   alertStore.startAutoRefresh()
-  // Fetch upcoming appointments (silently no-ops when not connected)
   appointmentsStore.fetchAppointments()
 
-  // If MySQL isn't connected yet (background auto-connect still running),
-  // keep re-checking every 2 s until connected or 5 attempts exhausted.
   if (!settingsStore.isConnected) {
     let attempts = 0
     startupRetryTimer = setInterval(async () => {
@@ -49,7 +31,6 @@ onMounted(async () => {
       if (settingsStore.isConnected || attempts >= 5) {
         clearInterval(startupRetryTimer!)
         startupRetryTimer = null
-        // Once connected, kick off appointments fetch
         if (settingsStore.isConnected) {
           appointmentsStore.fetchAppointments()
         }
@@ -57,11 +38,6 @@ onMounted(async () => {
     }, 2000)
   }
 
-  // Remove the splash overlay — ensure it is visible for at least 800 ms so
-  // the user sees the loading animation even on fast machines, then fade out.
-  // This runs entirely in Vue's lifecycle and has no dependency on Rust events,
-  // which avoids the race condition where splash-done fires before the listener
-  // is registered (common in dev mode where Vite adds ~1-2 s of load latency).
   const elapsed = Date.now() - splashStart
   setTimeout(() => {
     const overlay = document.getElementById('splash-overlay')

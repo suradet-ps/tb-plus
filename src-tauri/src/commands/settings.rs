@@ -1,3 +1,4 @@
+use crate::models::settings::{AlertConfig, DrugClassEntry, HosxpConfig, RegimenEntry};
 use crate::settings::SettingsManager;
 use anyhow::Result as AnyhowResult;
 use serde::{Deserialize, Serialize};
@@ -205,6 +206,136 @@ pub async fn delete_db_config(settings: State<'_, SettingsManager>) -> Result<()
     "regimens",
   ];
   settings.delete_keys(&keys).await.map_err(|e| e.to_string())
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Setup wizard — drug search, drug classes, regimen definitions
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Search HOSxP drugitems by name/icode. Used in the setup wizard to let
+/// users find the right icodes when configuring drug classes.
+#[tauri::command]
+pub async fn search_hosxp_drugs(
+  mysql: State<'_, MySqlState>,
+  settings: State<'_, SettingsManager>,
+  query: String,
+) -> Result<Vec<crate::models::settings::DrugItem>, String> {
+  let guard = mysql.lock().await;
+  let pool = guard
+    .as_ref()
+    .ok_or_else(|| "MySQL ยังไม่ได้เชื่อมต่อ".to_string())?;
+  let hosxp_cfg = settings
+    .get_hosxp_config()
+    .await
+    .map_err(|e| e.to_string())?;
+  crate::db::mysql::search_drugs(pool, &query, &hosxp_cfg, 20)
+    .await
+    .map_err(|e| e.to_string())
+}
+
+/// Save a complete drug-classes configuration. Replaces any existing data.
+#[tauri::command]
+pub async fn save_drug_classes(
+  settings: State<'_, SettingsManager>,
+  classes: Vec<DrugClassEntry>,
+) -> Result<(), String> {
+  settings
+    .set_json("drug_classes", &classes)
+    .await
+    .map_err(|e| e.to_string())
+}
+
+/// Save a complete regimen-definitions configuration. Replaces any existing data.
+#[tauri::command]
+pub async fn save_regimen_definitions(
+  settings: State<'_, SettingsManager>,
+  regimens: Vec<RegimenEntry>,
+) -> Result<(), String> {
+  settings
+    .set_json("regimen_definitions", &regimens)
+    .await
+    .map_err(|e| e.to_string())
+}
+
+/// Get the current regimen definitions.
+#[tauri::command]
+pub async fn get_regimen_definitions(
+  settings: State<'_, SettingsManager>,
+) -> Result<Vec<RegimenEntry>, String> {
+  settings
+    .get_regimen_definitions()
+    .await
+    .map_err(|e| e.to_string())
+}
+
+/// Save HOSxP table/clinic configuration.
+#[tauri::command]
+pub async fn save_hosxp_config(
+  settings: State<'_, SettingsManager>,
+  config: HosxpConfig,
+) -> Result<(), String> {
+  settings
+    .set_json("hosxp", &config)
+    .await
+    .map_err(|e| e.to_string())
+}
+
+/// Load HOSxP configuration.
+#[tauri::command]
+pub async fn load_hosxp_config(
+  settings: State<'_, SettingsManager>,
+) -> Result<HosxpConfig, String> {
+  settings.get_hosxp_config().await.map_err(|e| e.to_string())
+}
+
+/// Save alert threshold configuration.
+#[tauri::command]
+pub async fn save_alert_config(
+  settings: State<'_, SettingsManager>,
+  config: AlertConfig,
+) -> Result<(), String> {
+  settings
+    .set_json("alert", &config)
+    .await
+    .map_err(|e| e.to_string())
+}
+
+/// Load alert thresholds.
+#[tauri::command]
+pub async fn load_alert_config(
+  settings: State<'_, SettingsManager>,
+) -> Result<AlertConfig, String> {
+  settings.get_alert_config().await.map_err(|e| e.to_string())
+}
+
+/// Load drug classes.
+#[tauri::command]
+pub async fn load_drug_classes(
+  settings: State<'_, SettingsManager>,
+) -> Result<Vec<DrugClassEntry>, String> {
+  settings.get_drug_classes().await.map_err(|e| e.to_string())
+}
+
+/// Mark the initial setup wizard as completed.
+#[tauri::command]
+pub async fn mark_setup_complete(settings: State<'_, SettingsManager>) -> Result<(), String> {
+  settings
+    .set("setup_complete", "true")
+    .await
+    .map_err(|e| e.to_string())
+}
+
+/// Check whether the setup wizard has been completed.
+#[tauri::command]
+pub async fn is_setup_complete(settings: State<'_, SettingsManager>) -> Result<bool, String> {
+  Ok(
+    settings
+      .get("setup_complete")
+      .await
+      .map_err(|e| e.to_string())?
+      .as_deref()
+      == Some("true"),
+  )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -13,8 +13,15 @@ use tauri::State;
 #[tauri::command]
 pub async fn enroll_patient(
   sqlite: State<'_, SqlitePool>,
-  enrollment: EnrollmentInput,
+  settings: State<'_, SettingsManager>,
+  mut enrollment: EnrollmentInput,
 ) -> Result<i64, String> {
+  // Resolve regimen phases from settings if not already provided by frontend
+  if enrollment.regimen_phases.is_none()
+    && let Ok(Some(phases)) = settings.resolve_regimen_phases(&enrollment.regimen).await
+  {
+    enrollment.regimen_phases = Some(phases);
+  }
   db::sqlite::enroll_patient(&sqlite, &enrollment)
     .await
     .map_err(|e| e.to_string())

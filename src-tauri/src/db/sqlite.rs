@@ -5,6 +5,7 @@ use std::collections::HashMap;
 
 use crate::models::mapping::TbPatientLocation;
 use crate::models::patient::{EnrollmentInput, TbPatient};
+use crate::models::settings::RegimenPhase;
 use crate::models::treatment::{
   Followup, FollowupInput, Outcome, OutcomeInput, TreatmentPlan, TreatmentPlanUpdate,
 };
@@ -302,73 +303,85 @@ pub async fn enroll_patient(pool: &SqlitePool, input: &EnrollmentInput) -> Resul
     .last_insert_rowid()
   };
 
-  // Create fresh intensive + continuation plan rows (shared by both paths)
+  // Create initial plan rows from regimen phase definitions
   let start_date = NaiveDate::parse_from_str(&input.treatment_start_date, "%Y-%m-%d")
     .unwrap_or_else(|_| Local::now().date_naive());
 
-  create_initial_plans(&mut tx, &input.hn, &input.regimen, start_date, &now).await?;
+  match &input.regimen_phases {
+    Some(phases) if !phases.is_empty() => {
+      create_initial_plans(&mut tx, &input.hn, &input.regimen, start_date, &now, phases).await?;
+    }
+    _ => {
+      // Fallback: parse the regimen string (e.g. "2HRZE/4HR") for backward compat
+      let (intensive_months, continuation_months) = parse_regimen_durations(&input.regimen);
+      let fallback_phases = vec![
+        RegimenPhase {
+          phase: "intensive".into(),
+          months: intensive_months as u32,
+          drug_classes: vec!["H".into(), "R".into(), "Z".into(), "E".into()],
+        },
+        RegimenPhase {
+          phase: "continuation".into(),
+          months: continuation_months as u32,
+          drug_classes: vec!["H".into(), "R".into()],
+        },
+      ];
+      create_initial_plans(
+        &mut tx,
+        &input.hn,
+        &input.regimen,
+        start_date,
+        &now,
+        &fallback_phases,
+      )
+      .await?;
+    }
+  }
 
   tx.commit().await?;
   Ok(patient_id)
 }
 
-/// Insert intensive (current) and continuation (pending) plan rows for a
-/// newly enrolled patient.
-///
-/// Drug icodes use Sabot Hospital codes from AGENTS.md:
-/// - H+R+Z+E  →  `["1430104","1000265","1600004","1000258"]`
-/// - H+R       →  `["1430104","1000265"]`
+/// Insert initial treatment plan rows for a newly enrolled patient using
+/// structured phase definitions. Each phase specifies its own drug class list
+/// (e.g. intensive → H,R,Z,E ; continuation → H,R), eliminating all hardcoded
+/// drug class assumptions.
 async fn create_initial_plans(
   tx: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
   hn: &str,
   regimen: &str,
   start_date: NaiveDate,
   now: &str,
+  phases: &[RegimenPhase],
 ) -> Result<()> {
-  const HRZE: &str = r#"["H","R","Z","E"]"#;
-  const HR: &str = r#"["H","R"]"#;
+  let mut phase_start = start_date;
 
-  let (intensive_months, continuation_months) = parse_regimen_durations(regimen);
-
-  // ── Intensive phase (is_current = 1) ─────────────────────────────────────
-  let intensive_end = add_months(start_date, intensive_months);
-
-  sqlx::query(
-    "INSERT INTO tb_treatment_plans
-             (hn, regimen, phase, phase_start, phase_end_expected,
-              drugs, duration_months, is_current, notes, created_at)
-         VALUES (?1, ?2, 'intensive', ?3, ?4, ?5, ?6, 1, NULL, ?7)",
-  )
-  .bind(hn)
-  .bind(regimen)
-  .bind(start_date.format("%Y-%m-%d").to_string())
-  .bind(intensive_end.format("%Y-%m-%d").to_string())
-  .bind(HRZE)
-  .bind(intensive_months as i64)
-  .bind(now)
-  .execute(&mut **tx)
-  .await?;
-
-  // ── Continuation phase (is_current = 0, pre-created) ─────────────────────
-  if continuation_months > 0 {
-    let cont_start = intensive_end;
-    let cont_end = add_months(cont_start, continuation_months);
+  for (i, phase) in phases.iter().enumerate() {
+    let months = phase.months as i64;
+    let phase_end = add_months(phase_start, months as i32);
+    let drugs_json =
+      serde_json::to_string(&phase.drug_classes).unwrap_or_else(|_| "[]".to_string());
+    let is_current: i64 = if i == 0 { 1 } else { 0 };
 
     sqlx::query(
       "INSERT INTO tb_treatment_plans
-                 (hn, regimen, phase, phase_start, phase_end_expected,
-                  drugs, duration_months, is_current, notes, created_at)
-             VALUES (?1, ?2, 'continuation', ?3, ?4, ?5, ?6, 0, NULL, ?7)",
+               (hn, regimen, phase, phase_start, phase_end_expected,
+                drugs, duration_months, is_current, notes, created_at)
+           VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, NULL, ?9)",
     )
     .bind(hn)
     .bind(regimen)
-    .bind(cont_start.format("%Y-%m-%d").to_string())
-    .bind(cont_end.format("%Y-%m-%d").to_string())
-    .bind(HR)
-    .bind(continuation_months as i64)
+    .bind(&phase.phase)
+    .bind(phase_start.format("%Y-%m-%d").to_string())
+    .bind(phase_end.format("%Y-%m-%d").to_string())
+    .bind(&drugs_json)
+    .bind(months)
+    .bind(is_current)
     .bind(now)
     .execute(&mut **tx)
     .await?;
+
+    phase_start = phase_end;
   }
 
   Ok(())

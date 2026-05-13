@@ -1,10 +1,35 @@
 use serde::{Deserialize, Serialize};
 
+/// A single drug item returned from HOSxP `drugitems` search.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DrugItem {
+  pub icode: String,
+  pub name: String,
+  pub shortname: Option<String>,
+  pub units: Option<String>,
+}
+
+/// A drug class definition — user assigns a letter (e.g. "H") to one or more icodes.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DrugClassEntry {
   pub class: String,
   pub icodes: Vec<String>,
   pub name: String,
+}
+
+/// One phase within a regimen (e.g. intensive 2 months with H,R,Z,E).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RegimenPhase {
+  pub phase: String,
+  pub months: u32,
+  pub drug_classes: Vec<String>,
+}
+
+/// A complete treatment regimen — user can define any number of phases.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RegimenEntry {
+  pub name: String,
+  pub phases: Vec<RegimenPhase>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

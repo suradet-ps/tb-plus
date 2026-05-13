@@ -14,21 +14,25 @@ import {
   Download,
   Wifi,
   WifiOff,
+  AlertTriangle,
+  Search,
 } from 'lucide-vue-next'
 import { invoke } from '@tauri-apps/api/core'
 import { save as saveDialog } from '@tauri-apps/plugin-dialog'
-import { useSettingsStore, type DbConfig } from '@/stores/settings'
+import { useSettingsStore, type DbConfig, type RegimenPhase } from '@/stores/settings'
 import DrugChip from '@/components/shared/DrugChip.vue'
 
 const settingsStore = useSettingsStore()
 
 // ── Section navigation ───────────────────────────────────────────────
-type Section = 'mysql' | 'drugcodes' | 'staff' | 'backup'
+type Section = 'mysql' | 'hosxp' | 'drugcodes' | 'alerts' | 'staff' | 'backup'
 const activeSection = ref<Section>('mysql')
 
 const navItems: { id: Section; label: string; icon: string }[] = [
   { id: 'mysql',     label: 'ฐานข้อมูล MySQL', icon: 'Database'  },
+  { id: 'hosxp',     label: 'ตาราง HOSxP',    icon: 'Server'     },
   { id: 'drugcodes', label: 'ยาและสูตรยา',       icon: 'Pill'      },
+  { id: 'alerts',    label: 'การแจ้งเตือน',     icon: 'AlertTriangle' },
   { id: 'staff',     label: 'ผู้ใช้งาน',         icon: 'Users'     },
   { id: 'backup',    label: 'สำรองข้อมูล',       icon: 'HardDrive' },
 ]
@@ -93,61 +97,162 @@ function showSettingsSaveError(error: unknown) {
   settingsSaveError.value = String(error)
 }
 
-// ── Drug codes table (read-only) ─────────────────────────────────────
-const drugInfo: Record<string, { name: string; thaiName: string }> = {
-  H: { name: 'Isoniazid (INH / H)',    thaiName: 'ไอโซไนอะซิด'   },
-  R: { name: 'Rifampicin (RIF / R)',   thaiName: 'ไรแฟมพิซิน'    },
-  E: { name: 'Ethambutol (EMB / E)',   thaiName: 'อิแทมบูทอล'    },
-  Z: { name: 'Pyrazinamide (PZA / Z)', thaiName: 'ไพราซินาไมด์'  },
+// ── HOSxP / Alert save ──────────────────────────────────────────────
+const hosxpSaved = ref(false)
+async function saveHosxp() {
+  await settingsStore.saveHosxpSettings()
+  hosxpSaved.value = true
+  setTimeout(() => { hosxpSaved.value = false }, 2500)
 }
 
+const alertsSaved = ref(false)
+async function saveAlerts() {
+  await settingsStore.saveAlertThresholds()
+  alertsSaved.value = true
+  setTimeout(() => { alertsSaved.value = false }, 2500)
+}
+
+// ── Drug classes display (dynamic from store) ────────────────────────
 const drugTable = computed(() =>
-  (['H', 'R', 'E', 'Z'] as const).map((cls) => ({
-    cls,
-    name:     drugInfo[cls].name,
-    thaiName: drugInfo[cls].thaiName,
-    codes:    settingsStore.drugCodes[cls],
+  settingsStore.drugClasses.map((entry) => ({
+    cls: entry.class,
+    name: entry.name,
+    thaiName: '',
+    codes: entry.icodes,
   })),
 )
 
-// ── Drug code editing ─────────────────────────────────────────────────
-const newDrugCodes = ref<Record<string, string>>({ H: '', R: '', E: '', Z: '' })
+// ── Drug class management ────────────────────────────────────────────
+const newClassLetter = ref('')
+const newClassName = ref('')
+const newDrugCodes = ref<Record<string, string>>({})
+const drugSearchQuery = ref('')
+const drugSearchResults = ref<any[]>([])
+const isSearching = ref(false)
 
-function addDrugCode(cls: 'H' | 'R' | 'E' | 'Z') {
+async function searchDrugs() {
+  if (!drugSearchQuery.value.trim()) return
+  isSearching.value = true
+  try {
+    drugSearchResults.value = await settingsStore.searchDrugs(drugSearchQuery.value.trim())
+  } catch {
+    drugSearchResults.value = []
+  } finally {
+    isSearching.value = false
+  }
+}
+
+function addSearchCodeToClass(cls: string, icode: string) {
+  const entry = settingsStore.drugClasses.find(c => c.class === cls)
+  if (entry && !entry.icodes.includes(icode)) {
+    entry.icodes.push(icode)
+    settingsStore.syncDrugCodesFromClasses()
+  }
+}
+
+function addDrugClass() {
+  const letter = newClassLetter.value.trim().toUpperCase()
+  const name = newClassName.value.trim()
+  if (!letter || !name) return
+  if (settingsStore.drugClasses.find(c => c.class === letter)) return
+  settingsStore.drugClasses.push({ class: letter, icodes: [], name })
+  newClassLetter.value = ''
+  newClassName.value = ''
+  saveDrugClasses()
+}
+
+function removeDrugClass(cls: string) {
+  settingsStore.drugClasses = settingsStore.drugClasses.filter(c => c.class !== cls)
+  settingsStore.syncDrugCodesFromClasses()
+  saveDrugClasses()
+}
+
+async function saveDrugClasses() {
+  try {
+    await settingsStore.saveDrugClasses()
+    showSettingsSaved('บันทึกกลุ่มยาแล้ว')
+  } catch (e) { showSettingsSaveError(e) }
+}
+
+function addDrugCode(cls: string) {
   const code = newDrugCodes.value[cls]?.trim()
-  if (code && !settingsStore.drugCodes[cls].includes(code)) {
-    settingsStore.drugCodes[cls].push(code)
+  if (!code) return
+  const entry = settingsStore.drugClasses.find(c => c.class === cls)
+  if (entry && !entry.icodes.includes(code)) {
+    entry.icodes.push(code)
     newDrugCodes.value[cls] = ''
+    settingsStore.syncDrugCodesFromClasses()
   }
 }
 
-function removeDrugCode(cls: 'H' | 'R' | 'E' | 'Z', idx: number) {
-  if (settingsStore.drugCodes[cls].length > 1) {
-    settingsStore.drugCodes[cls].splice(idx, 1)
+function removeDrugCode(cls: string, idx: number) {
+  const entry = settingsStore.drugClasses.find(c => c.class === cls)
+  if (entry && entry.icodes.length > 1) {
+    entry.icodes.splice(idx, 1)
+    settingsStore.syncDrugCodesFromClasses()
   }
 }
 
-// ── Regimen management ───────────────────────────────────────────────
-const newRegimen = ref('')
+// ── Regimen management (structured) ─────────────────────────────────
+const newRegimenName = ref('')
+const editingRegimen = ref<{ name: string; phases: RegimenPhase[] } | null>(null)
+const editingRegimenIdx = ref(-1)
 
-async function addRegimen() {
-  try {
-    const changed = await settingsStore.addRegimen(newRegimen.value)
-    if (changed) {
-      newRegimen.value = ''
-      showSettingsSaved('บันทึกสูตรการรักษาแล้ว')
+function addRegimenEntry() {
+  const name = newRegimenName.value.trim().toUpperCase()
+  if (!name) return
+  if (settingsStore.regimenDefinitions.find(r => r.name === name)) return
+  settingsStore.regimenDefinitions.push({ name, phases: [] })
+  newRegimenName.value = ''
+  saveRegimens()
+}
+
+function removeRegimenEntry(name: string) {
+  settingsStore.regimenDefinitions = settingsStore.regimenDefinitions.filter(r => r.name !== name)
+  saveRegimens()
+}
+
+function editRegimenPhases(name: string) {
+  const entry = settingsStore.regimenDefinitions.find(r => r.name === name)
+  if (entry) {
+    editingRegimenIdx.value = settingsStore.regimenDefinitions.indexOf(entry)
+    editingRegimen.value = {
+      name: entry.name,
+      phases: entry.phases.map(p => ({ ...p, drug_classes: [...p.drug_classes] })),
     }
-  } catch (e) {
-    showSettingsSaveError(e)
   }
 }
 
-async function removeRegimen(regimen: string) {
+function addPhase() {
+  if (!editingRegimen.value) return
+  editingRegimen.value.phases.push({ phase: '', months: 2, drug_classes: [] })
+}
+
+function removePhase(idx: number) {
+  if (!editingRegimen.value) return
+  editingRegimen.value.phases.splice(idx, 1)
+}
+
+function savePhaseEdit() {
+  if (!editingRegimen.value) return
+  if (editingRegimenIdx.value >= 0) {
+    settingsStore.regimenDefinitions[editingRegimenIdx.value] = { ...editingRegimen.value }
+  }
+  editingRegimen.value = null
+  editingRegimenIdx.value = -1
+  saveRegimens()
+}
+
+function togglePhaseDrug(phase: RegimenPhase, cls: string) {
+  const idx = phase.drug_classes.indexOf(cls)
+  if (idx >= 0) phase.drug_classes.splice(idx, 1)
+  else phase.drug_classes.push(cls)
+}
+
+async function saveRegimens() {
   try {
-    const changed = await settingsStore.removeRegimen(regimen)
-    if (changed) {
-      showSettingsSaved('ลบสูตรการรักษาแล้ว')
-    }
+    await settingsStore.saveRegimenDefinitions()
+    showSettingsSaved('บันทึกสูตรการรักษาแล้ว')
   } catch (e) {
     showSettingsSaveError(e)
   }
@@ -234,10 +339,12 @@ async function downloadBackup() {
           :aria-current="activeSection === item.id ? 'page' : undefined"
           @click="activeSection = item.id"
         >
-          <Database  v-if="item.icon === 'Database'"  :size="15" />
-          <Pill      v-else-if="item.icon === 'Pill'"      :size="15" />
-          <Users     v-else-if="item.icon === 'Users'"     :size="15" />
-          <HardDrive v-else-if="item.icon === 'HardDrive'" :size="15" />
+          <Database      v-if="item.icon === 'Database'"      :size="15" />
+          <Server        v-else-if="item.icon === 'Server'"        :size="15" />
+          <Pill          v-else-if="item.icon === 'Pill'"          :size="15" />
+          <AlertTriangle v-else-if="item.icon === 'AlertTriangle'" :size="15" />
+          <Users         v-else-if="item.icon === 'Users'"         :size="15" />
+          <HardDrive     v-else-if="item.icon === 'HardDrive'"     :size="15" />
           {{ item.label }}
         </button>
       </nav>
@@ -378,7 +485,55 @@ async function downloadBackup() {
         </template>
 
         <!-- ══════════════════════════════════════════════════
-             Section 2 — Drug Codes
+             Section 2 — HOSxP Config
+        ══════════════════════════════════════════════════ -->
+        <template v-else-if="activeSection === 'hosxp'">
+          <div class="settings-card">
+            <div class="card-top-row">
+              <div>
+                <h2 class="card-title">กำหนดค่าตาราง HOSxP</h2>
+                <p class="card-subtitle">ชื่อตารางในฐานข้อมูล HOSxP และรหัสคลินิกวัณโรค</p>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Clinic Code</label>
+                <input v-model="settingsStore.hosxpSettings.clinic_code" class="form-input" placeholder="009" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">ตาราง opitemrece</label>
+                <input v-model="settingsStore.hosxpSettings.table_opitemrece" class="form-input" placeholder="opitemrece" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">ตาราง patient</label>
+                <input v-model="settingsStore.hosxpSettings.table_patient" class="form-input" placeholder="patient" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">ตาราง drugitems</label>
+                <input v-model="settingsStore.hosxpSettings.table_drugitems" class="form-input" placeholder="drugitems" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">ตาราง ovst</label>
+                <input v-model="settingsStore.hosxpSettings.table_ovst" class="form-input" placeholder="ovst" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">ตาราง oapp</label>
+                <input v-model="settingsStore.hosxpSettings.table_oapp" class="form-input" placeholder="oapp" />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn-primary" @click="saveHosxp">
+                <CheckCircle :size="13" /> บันทึก
+              </button>
+              <span v-if="hosxpSaved" class="test-result test-success">
+                <CheckCircle :size="14" /> บันทึกแล้ว
+              </span>
+            </div>
+          </div>
+        </template>
+
+        <!-- ══════════════════════════════════════════════════
+             Section 3 — Drug Codes
         ══════════════════════════════════════════════════ -->
         <template v-else-if="activeSection === 'drugcodes'">
           <div class="settings-card">
@@ -387,9 +542,49 @@ async function downloadBackup() {
 
             <!-- Drug Codes sub-section -->
             <div class="sub-section">
-              <h3 class="sub-title">รหัสยา (Drug Codes)</h3>
-              <p class="sub-desc">รหัสยาที่ระบบใช้ query ประวัติการจ่ายยาจาก HOSxP</p>
-              <table class="drug-table">
+              <h3 class="sub-title">กลุ่มยา (Drug Classes)</h3>
+              <p class="sub-desc">เพิ่มกลุ่มยาโดยกำหนดตัวย่อ และค้นหารหัสยาจาก HOSxP</p>
+
+              <div class="add-class-row">
+                <input v-model="newClassLetter" class="form-input" style="width:70px" placeholder="ตัวย่อ" maxlength="2" />
+                <input v-model="newClassName" class="form-input" style="flex:1" placeholder="ชื่อกลุ่มยา เช่น Isoniazid" />
+                <button class="btn-primary" @click="addDrugClass">
+                  <Plus :size="14" /> เพิ่มกลุ่ม
+                </button>
+              </div>
+
+              <div class="drug-search-row">
+                <input
+                  v-model="drugSearchQuery"
+                  class="form-input"
+                  placeholder="ค้นหายาจาก HOSxP ด้วยชื่อ หรือ icode..."
+                  @keydown.enter="searchDrugs"
+                />
+                <button class="btn-secondary" :disabled="isSearching" @click="searchDrugs">
+                  <Search :size="14" /> ค้นหา
+                </button>
+              </div>
+              <div v-if="drugSearchResults.length" class="drug-search-results">
+                <div v-for="item in drugSearchResults" :key="item.icode" class="drug-search-item">
+                  <span class="ds-icode">{{ item.icode }}</span>
+                  <span class="ds-name">{{ item.name }}</span>
+                  <div class="ds-assign">
+                    <button
+                      v-for="cls in settingsStore.drugClasses"
+                      :key="cls.class"
+                      class="ds-btn"
+                      :class="{ 'ds-btn--on': cls.icodes.includes(item.icode) }"
+                      @click="addSearchCodeToClass(cls.class, item.icode)"
+                    >
+                      {{ cls.class }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div v-if="drugTable.length === 0" class="empty-hint">
+                ยังไม่มีกลุ่มยา — เพิ่มกลุ่มยาด้านบนก่อน
+              </div>
+              <table v-else class="drug-table">
                 <thead>
                   <tr>
                     <th class="drug-th">กลุ่มยา</th>
@@ -405,7 +600,13 @@ async function downloadBackup() {
                     </td>
                     <td class="drug-td-name">
                       <span class="drug-full-name">{{ drug.name }}</span>
-                      <span class="drug-thai-name">{{ drug.thaiName }}</span>
+                      <button
+                        class="btn-ghost-danger-sm"
+                        @click="removeDrugClass(drug.cls)"
+                        title="ลบกลุ่มยา"
+                      >
+                        <Trash2 :size="12" />
+                      </button>
                     </td>
                     <td class="drug-td-codes">
                       <span
@@ -441,37 +642,39 @@ async function downloadBackup() {
             <!-- Regimens sub-section -->
             <div class="sub-section">
               <h3 class="sub-title">สูตรการรักษา (Treatment Regimens)</h3>
-              <p class="sub-desc">สูตรยาที่ใช้ในการลงทะเบียนผู้ป่วย ระบบจะแปลงเป็นระยะการรักษาอัตโนมัติ</p>
+              <p class="sub-desc">เพิ่มหรือแก้ไขสูตรยา แต่ละสูตรประกอบด้วยหลายระยะ (phase)</p>
 
-              <div v-if="settingsStore.regimens.length" class="regimen-list">
-                <div
-                  v-for="reg in settingsStore.regimens"
-                  :key="reg"
-                  class="regimen-item"
-                >
-                  <span class="regimen-name">{{ reg }}</span>
-                  <button
-                    class="staff-delete"
-                    :disabled="settingsStore.regimens.length <= 1"
-                    @click="removeRegimen(reg)"
-                    :title="`ลบสูตร ${reg}`"
-                  >
-                    <Trash2 :size="14" />
-                  </button>
-                </div>
+              <div class="add-class-row">
+                <input v-model="newRegimenName" class="form-input" placeholder="ชื่อสูตร เช่น 2HRZE/4HR" @keydown.enter="addRegimenEntry" />
+                <button class="btn-primary" @click="addRegimenEntry">
+                  <Plus :size="14" /> เพิ่มสูตร
+                </button>
               </div>
 
-              <div class="staff-add-row" style="margin-top: 12px">
-                <input
-                  v-model="newRegimen"
-                  class="form-input"
-                  placeholder="เช่น 2HRZE/4HR หรือ 2HRZE/6HR..."
-                  @keydown.enter="addRegimen"
-                />
-                <button class="btn-primary" @click="addRegimen">
-                  <Plus :size="14" />
-                  เพิ่มสูตร
-                </button>
+              <div v-if="settingsStore.regimenDefinitions.length" class="regimen-list">
+                <div
+                  v-for="reg in settingsStore.regimenDefinitions"
+                  :key="reg.name"
+                  class="regimen-item"
+                >
+                  <div class="regimen-info">
+                    <span class="regimen-name">{{ reg.name }}</span>
+                    <div class="regimen-phases">
+                      <span v-for="(ph, i) in reg.phases" :key="i" class="phase-tag">
+                        {{ ph.phase }} {{ ph.months }}m [{{ ph.drug_classes.join(',') }}]
+                      </span>
+                    </div>
+                  </div>
+                  <div class="class-header-actions">
+                    <button class="btn-secondary-sm" @click="editRegimenPhases(reg.name)">แก้ไข</button>
+                    <button class="staff-delete" @click="removeRegimenEntry(reg.name)" :title="`ลบสูตร ${reg.name}`">
+                      <Trash2 :size="14" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="empty-hint">
+                ยังไม่มีสูตรยา — เพิ่มสูตรยาด้านบน
               </div>
 
               <span v-if="settingsSaveSuccess" class="test-result test-success">
@@ -482,11 +685,83 @@ async function downloadBackup() {
                 บันทึกสูตรการรักษาไม่สำเร็จ: {{ settingsSaveError }}
               </p>
             </div>
+
+            <!-- Phase editor modal -->
+            <Teleport to="body">
+              <div v-if="editingRegimen" class="modal-overlay" @click.self="editingRegimen = null">
+                <div class="modal-card">
+                  <h3 style="margin-bottom:16px">{{ editingRegimen.name }}</h3>
+                  <div v-for="(ph, idx) in editingRegimen.phases" :key="idx" class="phase-row">
+                    <input v-model="ph.phase" class="form-input" style="width:130px" placeholder="intensive" />
+                    <input v-model.number="ph.months" class="form-input" style="width:60px" type="number" min="1" placeholder="2" />
+                    <span class="phase-label">เดือน</span>
+                    <div class="drug-toggle-group">
+                      <button
+                        v-for="cls in settingsStore.drugClasses"
+                        :key="cls.class"
+                        class="toggle-btn"
+                        :class="{ active: ph.drug_classes.includes(cls.class) }"
+                        @click="togglePhaseDrug(ph, cls.class)"
+                      >
+                        {{ cls.class }}
+                      </button>
+                    </div>
+                    <button class="btn-ghost-danger-sm" @click="removePhase(idx)">
+                      <Trash2 :size="13" />
+                    </button>
+                  </div>
+                  <div class="phase-actions">
+                    <button class="btn-secondary" @click="addPhase"><Plus :size="13" /> เพิ่มระยะ</button>
+                    <button class="btn-primary" @click="savePhaseEdit">บันทึก</button>
+                  </div>
+                </div>
+              </div>
+            </Teleport>
           </div>
         </template>
 
         <!-- ══════════════════════════════════════════════════
-             Section 3 — Staff Names
+             Section 4 — Alert Thresholds
+        ══════════════════════════════════════════════════ -->
+        <template v-else-if="activeSection === 'alerts'">
+          <div class="settings-card">
+            <h2 class="card-title">ค่าการแจ้งเตือน</h2>
+            <p class="card-subtitle">กำหนดเกณฑ์การแจ้งเตือนสำหรับระบบติดตามผู้ป่วย TB</p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">overdue_days</label>
+                <input v-model.number="settingsStore.alertThresholds.overdue_days" class="form-input" type="number" min="1" />
+                <span class="input-hint">จำนวนวันที่ไม่ได้รับยา → overdue alert</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">lost_followup_days</label>
+                <input v-model.number="settingsStore.alertThresholds.lost_followup_days" class="form-input" type="number" min="1" />
+                <span class="input-hint">จำนวนวันที่ขาดติดตาม → lost to follow-up</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">e_overrun_lookback_days</label>
+                <input v-model.number="settingsStore.alertThresholds.e_overrun_lookback_days" class="form-input" type="number" min="1" />
+                <span class="input-hint">ย้อนหลังตรวจสอบ Ethambutol overrun</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">phase_transition_lookback_days</label>
+                <input v-model.number="settingsStore.alertThresholds.phase_transition_lookback_days" class="form-input" type="number" min="1" />
+                <span class="input-hint">ย้อนหลังตรวจสอบ phase transition</span>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn-primary" @click="saveAlerts">
+                <CheckCircle :size="13" /> บันทึก
+              </button>
+              <span v-if="alertsSaved" class="test-result test-success">
+                <CheckCircle :size="14" /> บันทึกแล้ว
+              </span>
+            </div>
+          </div>
+        </template>
+
+        <!-- ══════════════════════════════════════════════════
+             Section 5 — Staff Names
         ══════════════════════════════════════════════════ -->
         <template v-else-if="activeSection === 'staff'">
           <div class="settings-card">
@@ -507,12 +782,11 @@ async function downloadBackup() {
                   <div class="staff-avatar">{{ name.charAt(0) }}</div>
                   <span class="staff-name">{{ name }}</span>
                 </div>
-                <button
-                  class="staff-delete"
-                  :title="`ลบ ${name}`"
-                  :aria-label="`ลบ ${name}`"
-                  @click="removeStaff(name)"
-                >
+                  <button
+                    class="staff-delete"
+                    @click="removeStaff(name)"
+                    :title="`ลบ ${name}`"
+                  >
                   <Trash2 :size="14" />
                 </button>
               </div>
@@ -1122,10 +1396,11 @@ async function downloadBackup() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: 10px 12px;
   background: var(--color-bg-alt);
   border-radius: var(--radius-sm);
   border: var(--border);
+  gap: 8px;
 }
 
 .regimen-name {
@@ -1281,5 +1556,193 @@ async function downloadBackup() {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ── Drug search ── */
+.drug-search-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.drug-search-row .form-input { flex: 1; }
+
+.drug-search-results {
+  max-height: 200px;
+  overflow-y: auto;
+  border: var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
+
+.drug-search-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  font-size: 13px;
+}
+.drug-search-item:last-child { border-bottom: none; }
+
+.ds-icode { font-family: monospace; font-weight: 600; width: 80px; }
+.ds-name { flex: 1; }
+
+.ds-assign { display: flex; gap: 4px; }
+
+.ds-btn {
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: var(--border);
+  background: var(--color-bg);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: monospace;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: all 0.1s;
+}
+.ds-btn--on { background: var(--color-blue); color: #fff; border-color: var(--color-blue); }
+
+/* ── Input hint ── */
+.input-hint {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.empty-hint {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  padding: 16px;
+  text-align: center;
+  border: 1px dashed rgba(0,0,0,0.12);
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+}
+.empty-hint a { color: var(--color-blue); }
+
+.regimen-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.regimen-phases {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.phase-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--color-badge-bg);
+  color: var(--color-blue);
+}
+
+/* ── Add class/regimen row ── */
+.add-class-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* ── Button variants ── */
+.btn-secondary-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-bg);
+  border: var(--border);
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: background 0.13s;
+}
+.btn-secondary-sm:hover { background: var(--color-bg-alt); }
+
+.btn-ghost-danger-sm {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: color 0.13s, background 0.13s;
+}
+.btn-ghost-danger-sm:hover { color: var(--color-orange); background: rgba(221,91,0,0.08); }
+
+/* ── Phase editor modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-card {
+  background: var(--color-bg);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  min-width: 520px;
+  max-width: 640px;
+  box-shadow: var(--shadow-deep);
+}
+
+.phase-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
+}
+
+.phase-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.drug-toggle-group {
+  display: flex;
+  gap: 4px;
+}
+
+.toggle-btn {
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  border: var(--border);
+  background: var(--color-bg);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: monospace;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: all 0.1s;
+}
+.toggle-btn.active {
+  background: var(--color-blue);
+  color: #fff;
+  border-color: var(--color-blue);
+}
+
+.phase-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
 }
 </style>

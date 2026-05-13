@@ -173,15 +173,15 @@ function unfocus(e: Event) {
             <!-- Regimen -->
             <div class="form-group">
               <label class="form-label" for="regimen">สูตรยาที่ใช้</label>
-              <select id="regimen" v-model="regimen" class="form-select">
-                <option
-                  v-for="reg in settingsStore.regimens"
-                  :key="reg"
-                  :value="reg"
-                >
-                  {{ reg }}
-                </option>
-              </select>
+                <select id="regimen" v-model="regimen" class="form-select">
+                  <option
+                    v-for="reg in settingsStore.regimenDefinitions"
+                    :key="reg.name"
+                    :value="reg.name"
+                  >
+                    {{ reg.name }}
+                  </option>
+                </select>
             </div>
 
             <!-- Treatment start date (required) -->

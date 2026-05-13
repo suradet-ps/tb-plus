@@ -157,6 +157,17 @@ pub fn run() {
       commands::settings::save_db_config,
       commands::settings::load_db_config,
       commands::settings::delete_db_config,
+      commands::settings::search_hosxp_drugs,
+      commands::settings::save_drug_classes,
+      commands::settings::save_regimen_definitions,
+      commands::settings::get_regimen_definitions,
+      commands::settings::save_hosxp_config,
+      commands::settings::load_hosxp_config,
+      commands::settings::save_alert_config,
+      commands::settings::load_alert_config,
+      commands::settings::load_drug_classes,
+      commands::settings::mark_setup_complete,
+      commands::settings::is_setup_complete,
       commands::appointments::get_appointments,
     ])
     .run(tauri::generate_context!())

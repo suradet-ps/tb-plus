@@ -1,7 +1,8 @@
 pub mod crypto;
 
 use crate::models::settings::{
-  AlertConfig, DrugClassEntry, GeocodeConfig, HosxpConfig, PaginationConfig, SplashMessages,
+  AlertConfig, DrugClassEntry, GeocodeConfig, HosxpConfig, PaginationConfig, RegimenEntry,
+  SplashMessages,
 };
 use anyhow::Result;
 use chrono::Local;
@@ -87,10 +88,9 @@ impl SettingsManager {
       }
     }
 
-    // Seed JSON defaults (drug_classes, regimens, staff_names, etc.)
-    self
-      .seed_json_default("drug_classes", &default_drug_classes(), &now)
-      .await?;
+    // Seed JSON defaults — ONLY infrastructure configs that are universal.
+    // Hospital-specific data (drug_classes, regimen_definitions) are intentionally
+    // NOT seeded; they are configured fresh during the setup wizard.
     self
       .seed_json_default("regimens", &default_regimens(), &now)
       .await?;
@@ -273,7 +273,7 @@ impl SettingsManager {
       self
         .get_json::<Vec<DrugClassEntry>>("drug_classes")
         .await?
-        .unwrap_or_else(default_drug_classes),
+        .unwrap_or_default(),
     )
   }
 
@@ -347,37 +347,35 @@ impl SettingsManager {
         .unwrap_or_else(default_regimens),
     )
   }
+
+  pub async fn get_regimen_definitions(&self) -> Result<Vec<RegimenEntry>> {
+    Ok(
+      self
+        .get_json::<Vec<RegimenEntry>>("regimen_definitions")
+        .await?
+        .unwrap_or_default(),
+    )
+  }
+
+  /// Look up a regimen definition by name, returning its phases.
+  pub async fn resolve_regimen_phases(
+    &self,
+    regimen_name: &str,
+  ) -> Result<Option<Vec<crate::models::settings::RegimenPhase>>> {
+    let defs = self.get_regimen_definitions().await?;
+    Ok(
+      defs
+        .into_iter()
+        .find(|r| r.name == regimen_name)
+        .map(|r| r.phases),
+    )
+  }
 }
 
 // ── Default factory functions ────────────────────────────────────────────────
 
-fn default_drug_classes() -> Vec<DrugClassEntry> {
-  vec![
-    DrugClassEntry {
-      class: "H".into(),
-      icodes: vec!["1430104".into()],
-      name: "Isoniazid".into(),
-    },
-    DrugClassEntry {
-      class: "R".into(),
-      icodes: vec!["1000265".into(), "1000264".into()],
-      name: "Rifampicin".into(),
-    },
-    DrugClassEntry {
-      class: "E".into(),
-      icodes: vec!["1600004".into(), "1000129".into()],
-      name: "Ethambutol".into(),
-    },
-    DrugClassEntry {
-      class: "Z".into(),
-      icodes: vec!["1000258".into()],
-      name: "Pyrazinamide".into(),
-    },
-  ]
-}
-
 fn default_regimens() -> Vec<String> {
-  vec!["2HRZE/4HR".into(), "2HRZE/6HR".into()]
+  vec![]
 }
 
 fn default_staff_names() -> Vec<String> {
@@ -389,35 +387,9 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_default_drug_classes_contains_all_four() {
-    let classes = default_drug_classes();
-    assert_eq!(classes.len(), 4);
-    let letters: Vec<_> = classes.iter().map(|c| c.class.as_str()).collect();
-    assert!(letters.contains(&"H"));
-    assert!(letters.contains(&"R"));
-    assert!(letters.contains(&"E"));
-    assert!(letters.contains(&"Z"));
-  }
-
-  #[test]
-  fn test_default_r_has_two_icodes() {
-    let classes = default_drug_classes();
-    let r = classes.iter().find(|c| c.class == "R").unwrap();
-    assert_eq!(r.icodes.len(), 2);
-  }
-
-  #[test]
-  fn test_default_e_has_two_icodes() {
-    let classes = default_drug_classes();
-    let e = classes.iter().find(|c| c.class == "E").unwrap();
-    assert_eq!(e.icodes.len(), 2);
-  }
-
-  #[test]
-  fn test_default_regimens() {
+  fn test_default_regimens_is_empty() {
     let r = default_regimens();
-    assert!(r.contains(&"2HRZE/4HR".to_string()));
-    assert!(r.contains(&"2HRZE/6HR".to_string()));
+    assert!(r.is_empty());
   }
 
   #[test]

@@ -43,6 +43,8 @@ pub struct PatientDrugRecord {
   pub patient_status: Option<String>,
 }
 
+use crate::models::settings::RegimenPhase;
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EnrollmentInput {
   pub hn: String,
@@ -52,6 +54,11 @@ pub struct EnrollmentInput {
   pub treatment_start_date: String,
   pub enrolled_by: Option<String>,
   pub notes: Option<String>,
+  /// Optional pre-resolved phase definitions. When `None`, the backend
+  /// will attempt to look up the regimen name in `regimen_definitions`
+  /// settings, or fall back to parsing the regimen string.
+  #[serde(default)]
+  pub regimen_phases: Option<Vec<RegimenPhase>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

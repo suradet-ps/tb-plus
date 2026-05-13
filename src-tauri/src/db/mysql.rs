@@ -2,6 +2,7 @@ use crate::models::dispensing::DispensingRecord;
 use crate::models::patient::{
   AppointmentRecord, PatientDemographics, PatientDrugRecord, SearchFilters,
 };
+use crate::models::settings::DrugItem;
 use anyhow::Result;
 use sqlx::{MySqlPool, QueryBuilder};
 use std::collections::HashMap;
@@ -456,6 +457,51 @@ pub async fn get_tb_appointments(
     .fetch_all(pool)
     .await
     .map_err(anyhow::Error::from)
+}
+
+/// Search for drugs in HOSxP `drugitems` by name, icode, or shortname.
+/// Used during setup wizard to let users find icodes for drug class configuration.
+/// Returns up to `limit` results, ordered by name.
+#[derive(sqlx::FromRow)]
+struct DrugItemRow {
+  icode: String,
+  name: String,
+  shortname: Option<String>,
+  units: Option<String>,
+}
+
+pub async fn search_drugs(
+  pool: &MySqlPool,
+  query: &str,
+  hosxp_config: &crate::models::settings::HosxpConfig,
+  limit: u32,
+) -> Result<Vec<DrugItem>> {
+  let sql = format!(
+    "SELECT icode, name, shortname, units \
+         FROM {} \
+         WHERE name LIKE ? OR icode LIKE ? \
+         ORDER BY name \
+         LIMIT ?",
+    hosxp_config.table_drugitems,
+  );
+  let pattern = format!("%{}%", query);
+  let rows: Vec<DrugItemRow> = sqlx::query_as(&sql)
+    .bind(&pattern)
+    .bind(&pattern)
+    .bind(limit as i64)
+    .fetch_all(pool)
+    .await?;
+  Ok(
+    rows
+      .into_iter()
+      .map(|r| DrugItem {
+        icode: r.icode,
+        name: r.name,
+        shortname: r.shortname,
+        units: r.units,
+      })
+      .collect(),
+  )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
