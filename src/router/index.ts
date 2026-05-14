@@ -1,13 +1,13 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import ScreeningView from '@/views/ScreeningView.vue'
-import ActiveView from '@/views/ActiveView.vue'
-import DischargedView from '@/views/DischargedView.vue'
-import PatientDetailView from '@/views/PatientDetailView.vue'
-import ReportsView from '@/views/ReportsView.vue'
-import SettingsView from '@/views/SettingsView.vue'
-import AppointmentsView from '@/views/AppointmentsView.vue'
-import AboutView from '@/views/AboutView.vue'
-import MappingView from '@/views/MappingView.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import AboutView from '@/views/AboutView.vue';
+import ActiveView from '@/views/ActiveView.vue';
+import AppointmentsView from '@/views/AppointmentsView.vue';
+import DischargedView from '@/views/DischargedView.vue';
+import MappingView from '@/views/MappingView.vue';
+import PatientDetailView from '@/views/PatientDetailView.vue';
+import ReportsView from '@/views/ReportsView.vue';
+import ScreeningView from '@/views/ScreeningView.vue';
+import SettingsView from '@/views/SettingsView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -72,6 +72,6 @@ const router = createRouter({
       meta: { title: 'เกี่ยวกับโปรแกรม' },
     },
   ],
-})
+});
 
-export default router
+export default router;

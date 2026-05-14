@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { PatientAlert } from '@/types/alert'
+import type { PatientAlert } from '@/types/alert';
 
-const props = defineProps<{ alert: PatientAlert }>()
+const props = defineProps<{ alert: PatientAlert }>();
 
-const isRed = props.alert.severity === 'red'
+const _isRed = props.alert.severity === 'red';
 </script>
 
 <template>

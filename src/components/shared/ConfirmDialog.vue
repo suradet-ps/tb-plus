@@ -1,5 +1,5 @@
 <script setup lang="ts">
-type DialogVariant = 'default' | 'danger'
+type DialogVariant = 'default' | 'danger';
 
 const {
   modelValue,
@@ -9,44 +9,44 @@ const {
   cancelText = 'ยกเลิก',
   variant = 'default' as DialogVariant,
 } = defineProps<{
-  modelValue: boolean
-  title: string
-  message: string
-  confirmText?: string
-  cancelText?: string
-  variant?: DialogVariant
-}>()
+  modelValue: boolean;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  variant?: DialogVariant;
+}>();
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-  (e: 'confirm'): void
-  (e: 'cancel'): void
-}>()
+  (e: 'update:modelValue', value: boolean): void;
+  (e: 'confirm'): void;
+  (e: 'cancel'): void;
+}>();
 
 function close() {
-  emit('update:modelValue', false)
+  emit('update:modelValue', false);
 }
 
-function onConfirm() {
-  emit('confirm')
-  close()
+function _onConfirm() {
+  emit('confirm');
+  close();
 }
 
 function onCancel() {
-  emit('cancel')
-  close()
+  emit('cancel');
+  close();
 }
 
-function onOverlayPointerDown(event: MouseEvent) {
+function _onOverlayPointerDown(event: MouseEvent) {
   // Only close when clicking directly on the backdrop, not on the dialog panel
   if (event.target === event.currentTarget) {
-    onCancel()
+    onCancel();
   }
 }
 
-function onKeydown(event: KeyboardEvent) {
+function _onKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape') {
-    onCancel()
+    onCancel();
   }
 }
 </script>

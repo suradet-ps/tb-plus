@@ -1,147 +1,168 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { ChevronDown, ChevronUp, Microscope, Scan, Pill, Activity, StickyNote, User } from 'lucide-vue-next'
-import type { Followup } from '@/types/treatment'
+import { computed, ref } from 'vue';
+import type { Followup } from '@/types/treatment';
 
 const props = defineProps<{
-  followups: Followup[]
-}>()
+  followups: Followup[];
+}>();
 
 // ── Sort order toggle ─────────────────────────────────────────────────────
 
-const newestFirst = ref(true)
+const newestFirst = ref(true);
 
-const sortedFollowups = computed<Followup[]>(() => {
-  const list = [...props.followups].sort((a, b) =>
-    a.followup_date.localeCompare(b.followup_date),
-  )
-  return newestFirst.value ? list.reverse() : list
-})
+const _sortedFollowups = computed<Followup[]>(() => {
+  const list = [...props.followups].sort((a, b) => a.followup_date.localeCompare(b.followup_date));
+  return newestFirst.value ? list.reverse() : list;
+});
 
 // ── Expandable items ──────────────────────────────────────────────────────
 
-const expandedIds = ref<Set<number>>(new Set())
+const expandedIds = ref<Set<number>>(new Set());
 
-function toggleExpanded(id: number) {
+function _toggleExpanded(id: number) {
   if (expandedIds.value.has(id)) {
-    expandedIds.value.delete(id)
+    expandedIds.value.delete(id);
   } else {
-    expandedIds.value.add(id)
+    expandedIds.value.add(id);
   }
 }
 
-function isExpanded(id: number): boolean {
-  return expandedIds.value.has(id)
+function _isExpanded(id: number): boolean {
+  return expandedIds.value.has(id);
 }
 
 // ── Date helpers ──────────────────────────────────────────────────────────
 
-function toThaiDate(iso: string): string {
+function _toThaiDate(iso: string): string {
   try {
-    const [y, m, d] = iso.split('-').map(Number)
-    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`
+    const [y, m, d] = iso.split('-').map(Number);
+    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
   } catch {
-    return iso
+    return iso;
   }
 }
 
-function toThaiDateLong(iso: string): string {
+function _toThaiDateLong(iso: string): string {
   const MONTH_TH = [
-    '', 'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
-    'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.',
-  ]
+    '',
+    'ม.ค.',
+    'ก.พ.',
+    'มี.ค.',
+    'เม.ย.',
+    'พ.ค.',
+    'มิ.ย.',
+    'ก.ค.',
+    'ส.ค.',
+    'ก.ย.',
+    'ต.ค.',
+    'พ.ย.',
+    'ธ.ค.',
+  ];
   try {
-    const [y, m, d] = iso.split('-').map(Number)
-    return `${d} ${MONTH_TH[m]} ${y + 543}`
+    const [y, m, d] = iso.split('-').map(Number);
+    return `${d} ${MONTH_TH[m]} ${y + 543}`;
   } catch {
-    return iso
+    return iso;
   }
 }
 
 // ── Sputum helpers ────────────────────────────────────────────────────────
 
-type SputumResult = 'negative' | 'positive' | 'not_done' | null
+type SputumResult = 'negative' | 'positive' | 'not_done' | null;
 
 interface BadgeConfig {
-  label: string
-  bg: string
-  color: string
+  label: string;
+  bg: string;
+  color: string;
 }
 
-function sputumConfig(v: SputumResult): BadgeConfig {
+function _sputumConfig(v: SputumResult): BadgeConfig {
   switch (v) {
-    case 'negative': return { label: 'ผลลบ',       bg: 'rgba(26,174,57,0.1)',   color: '#1aae39' }
-    case 'positive': return { label: 'ผลบวก',      bg: 'rgba(221,91,0,0.1)',    color: '#dd5b00' }
-    case 'not_done': return { label: 'ไม่ได้ตรวจ', bg: 'rgba(0,0,0,0.06)',      color: '#a39e98' }
-    default:         return { label: '-',           bg: 'rgba(0,0,0,0.04)',      color: '#a39e98' }
+    case 'negative':
+      return { label: 'ผลลบ', bg: 'rgba(26,174,57,0.1)', color: '#1aae39' };
+    case 'positive':
+      return { label: 'ผลบวก', bg: 'rgba(221,91,0,0.1)', color: '#dd5b00' };
+    case 'not_done':
+      return { label: 'ไม่ได้ตรวจ', bg: 'rgba(0,0,0,0.06)', color: '#a39e98' };
+    default:
+      return { label: '-', bg: 'rgba(0,0,0,0.04)', color: '#a39e98' };
   }
 }
 
 // ── X-ray helpers ─────────────────────────────────────────────────────────
 
-type XrayResult = 'improved' | 'stable' | 'worse' | 'not_done' | null
+type XrayResult = 'improved' | 'stable' | 'worse' | 'not_done' | null;
 
-function xrayConfig(v: XrayResult): BadgeConfig {
+function _xrayConfig(v: XrayResult): BadgeConfig {
   switch (v) {
-    case 'improved': return { label: 'ดีขึ้น',      bg: 'rgba(42,157,153,0.1)', color: '#2a9d99' }
-    case 'stable':   return { label: 'คงที่',        bg: 'rgba(0,0,0,0.06)',     color: '#615d59' }
-    case 'worse':    return { label: 'แย่ลง',        bg: 'rgba(221,91,0,0.1)',   color: '#dd5b00' }
-    case 'not_done': return { label: 'ไม่ได้ตรวจ',  bg: 'rgba(0,0,0,0.06)',     color: '#a39e98' }
-    default:         return { label: '-',            bg: 'rgba(0,0,0,0.04)',     color: '#a39e98' }
+    case 'improved':
+      return { label: 'ดีขึ้น', bg: 'rgba(42,157,153,0.1)', color: '#2a9d99' };
+    case 'stable':
+      return { label: 'คงที่', bg: 'rgba(0,0,0,0.06)', color: '#615d59' };
+    case 'worse':
+      return { label: 'แย่ลง', bg: 'rgba(221,91,0,0.1)', color: '#dd5b00' };
+    case 'not_done':
+      return { label: 'ไม่ได้ตรวจ', bg: 'rgba(0,0,0,0.06)', color: '#a39e98' };
+    default:
+      return { label: '-', bg: 'rgba(0,0,0,0.04)', color: '#a39e98' };
   }
 }
 
 // ── Adherence helpers ─────────────────────────────────────────────────────
 
-type Adherence = 'good' | 'fair' | 'poor' | null
+type Adherence = 'good' | 'fair' | 'poor' | null;
 
-function adherenceConfig(v: Adherence): BadgeConfig {
+function _adherenceConfig(v: Adherence): BadgeConfig {
   switch (v) {
-    case 'good': return { label: 'การรับยา: ดี',       bg: 'rgba(26,174,57,0.1)',   color: '#1aae39' }
-    case 'fair': return { label: 'การรับยา: พอใช้',    bg: 'rgba(245,166,35,0.12)', color: '#c78b00' }
-    case 'poor': return { label: 'การรับยา: ไม่ดี',    bg: 'rgba(221,91,0,0.1)',    color: '#dd5b00' }
-    default:     return { label: 'การรับยา: -',        bg: 'rgba(0,0,0,0.04)',      color: '#a39e98' }
+    case 'good':
+      return { label: 'การรับยา: ดี', bg: 'rgba(26,174,57,0.1)', color: '#1aae39' };
+    case 'fair':
+      return { label: 'การรับยา: พอใช้', bg: 'rgba(245,166,35,0.12)', color: '#c78b00' };
+    case 'poor':
+      return { label: 'การรับยา: ไม่ดี', bg: 'rgba(221,91,0,0.1)', color: '#dd5b00' };
+    default:
+      return { label: 'การรับยา: -', bg: 'rgba(0,0,0,0.04)', color: '#a39e98' };
   }
 }
 
 // ── Side effects ──────────────────────────────────────────────────────────
 
 function parseSideEffects(json: string | null): string[] {
-  if (!json) return []
+  if (!json) return [];
   try {
-    const parsed = JSON.parse(json)
-    return Array.isArray(parsed) ? (parsed as string[]) : []
+    const parsed = JSON.parse(json);
+    return Array.isArray(parsed) ? (parsed as string[]) : [];
   } catch {
-    return []
+    return [];
   }
 }
 
-function isOpticNeuritis(se: string): boolean {
-  return se.toLowerCase().includes('ตาพร่า') || se.toLowerCase().includes('ตาบอด')
+function _isOpticNeuritis(se: string): boolean {
+  return se.toLowerCase().includes('ตาพร่า') || se.toLowerCase().includes('ตาบอด');
 }
 
 // ── Dispensed drugs ───────────────────────────────────────────────────────
 
-function parseDispensedDrugs(json: string | null): string[] {
-  if (!json) return []
+function _parseDispensedDrugs(json: string | null): string[] {
+  if (!json) return [];
   try {
-    const parsed = JSON.parse(json)
-    return Array.isArray(parsed) ? (parsed as string[]) : []
+    const parsed = JSON.parse(json);
+    return Array.isArray(parsed) ? (parsed as string[]) : [];
   } catch {
-    return []
+    return [];
   }
 }
 
 // ── Summary line ──────────────────────────────────────────────────────────
 
-function hasMeaningfulData(f: Followup): boolean {
+function _hasMeaningfulData(f: Followup): boolean {
   return !!(
     f.sputum_result ||
     f.xray_result ||
     f.adherence ||
     parseSideEffects(f.side_effects).length > 0 ||
     f.notes
-  )
+  );
 }
 </script>
 

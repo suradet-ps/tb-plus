@@ -1,10 +1,10 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    size?: number
+    size?: number;
   }>(),
   { size: 36 },
-)
+);
 </script>
 
 <template>

@@ -1,26 +1,26 @@
 <script setup lang="ts">
-type FilterStatus = 'all' | 'active' | 'completed' | 'transferred' | 'died' | 'defaulted'
-type FilterTbType = 'all' | 'pulmonary' | 'extra_pulmonary'
-type FilterGeocode = 'all' | 'success' | 'pending' | 'failed' | 'missing_address'
+type FilterStatus = 'all' | 'active' | 'completed' | 'transferred' | 'died' | 'defaulted';
+type FilterTbType = 'all' | 'pulmonary' | 'extra_pulmonary';
+type FilterGeocode = 'all' | 'success' | 'pending' | 'failed' | 'missing_address';
 
-const props = defineProps<{
-  search: string
-  status: FilterStatus
-  tbType: FilterTbType
-  geocodeStatus: FilterGeocode
-  enrolledFrom: string
-  enrolledTo: string
-}>()
+const _props = defineProps<{
+  search: string;
+  status: FilterStatus;
+  tbType: FilterTbType;
+  geocodeStatus: FilterGeocode;
+  enrolledFrom: string;
+  enrolledTo: string;
+}>();
 
-const emit = defineEmits<{
-  'update:search': [value: string]
-  'update:status': [value: FilterStatus]
-  'update:tbType': [value: FilterTbType]
-  'update:geocodeStatus': [value: FilterGeocode]
-  'update:enrolledFrom': [value: string]
-  'update:enrolledTo': [value: string]
-  reset: []
-}>()
+const _emit = defineEmits<{
+  'update:search': [value: string];
+  'update:status': [value: FilterStatus];
+  'update:tbType': [value: FilterTbType];
+  'update:geocodeStatus': [value: FilterGeocode];
+  'update:enrolledFrom': [value: string];
+  'update:enrolledTo': [value: string];
+  reset: [];
+}>();
 </script>
 
 <template>

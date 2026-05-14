@@ -1,83 +1,88 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-vue-next'
-import DrugChip from '@/components/shared/DrugChip.vue'
-import type { DispensingRecord } from '@/types/dispensing'
+import { computed, ref } from 'vue';
+import type { DispensingRecord } from '@/types/dispensing';
 
 const props = defineProps<{
-  records: DispensingRecord[]
-}>()
+  records: DispensingRecord[];
+}>();
 
 // ── Sorting ───────────────────────────────────────────────────────────────
 
-type SortKey = 'date' | 'drug' | 'class' | 'qty'
-type SortDir = 'asc' | 'desc'
+type SortKey = 'date' | 'drug' | 'class' | 'qty';
+type SortDir = 'asc' | 'desc';
 
-const sortKey = ref<SortKey>('date')
-const sortDir = ref<SortDir>('desc')
+const sortKey = ref<SortKey>('date');
+const sortDir = ref<SortDir>('desc');
 
-function toggleSort(key: SortKey) {
+function _toggleSort(key: SortKey) {
   if (sortKey.value === key) {
-    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc';
   } else {
-    sortKey.value = key
-    sortDir.value = key === 'date' ? 'desc' : 'asc'
+    sortKey.value = key;
+    sortDir.value = key === 'date' ? 'desc' : 'asc';
   }
 }
 
-const sortedRecords = computed<DispensingRecord[]>(() => {
-  const list = [...props.records]
-  const dir = sortDir.value === 'asc' ? 1 : -1
+const _sortedRecords = computed<DispensingRecord[]>(() => {
+  const list = [...props.records];
+  const dir = sortDir.value === 'asc' ? 1 : -1;
 
   return list.sort((a, b) => {
     switch (sortKey.value) {
       case 'date':
-        return dir * a.vstdate.localeCompare(b.vstdate)
+        return dir * a.vstdate.localeCompare(b.vstdate);
       case 'drug':
-        return dir * ((a.drug_name ?? a.icode).localeCompare(b.drug_name ?? b.icode, 'th'))
+        return dir * (a.drug_name ?? a.icode).localeCompare(b.drug_name ?? b.icode, 'th');
       case 'class': {
-        const classOrder: Record<string, number> = { H: 1, R: 2, Z: 3, E: 4 }
-        const aOrd = classOrder[a.drug_class ?? ''] ?? 99
-        const bOrd = classOrder[b.drug_class ?? ''] ?? 99
-        return dir * (aOrd - bOrd)
+        const classOrder: Record<string, number> = { H: 1, R: 2, Z: 3, E: 4 };
+        const aOrd = classOrder[a.drug_class ?? ''] ?? 99;
+        const bOrd = classOrder[b.drug_class ?? ''] ?? 99;
+        return dir * (aOrd - bOrd);
       }
       case 'qty':
-        return dir * ((a.qty ?? 0) - (b.qty ?? 0))
+        return dir * ((a.qty ?? 0) - (b.qty ?? 0));
       default:
-        return 0
+        return 0;
     }
-  })
-})
+  });
+});
 
 // ── Stats ─────────────────────────────────────────────────────────────────
 
-const uniqueDates = computed(() => new Set(props.records.map((r) => r.vstdate)).size)
-const uniqueClasses = computed(() => new Set(props.records.map((r) => r.drug_class).filter(Boolean)).size)
+const _uniqueDates = computed(() => new Set(props.records.map((r) => r.vstdate)).size);
+const _uniqueClasses = computed(
+  () => new Set(props.records.map((r) => r.drug_class).filter(Boolean)).size,
+);
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-function toThaiDate(iso: string): string {
+function _toThaiDate(iso: string): string {
   try {
-    const [y, m, d] = iso.split('-').map(Number)
-    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`
+    const [y, m, d] = iso.split('-').map(Number);
+    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
   } catch {
-    return iso
+    return iso;
   }
 }
 
-function rowClass(drugClass: string | null): string {
+function _rowClass(drugClass: string | null): string {
   switch (drugClass) {
-    case 'H': return 'row-H'
-    case 'R': return 'row-R'
-    case 'Z': return 'row-Z'
-    case 'E': return 'row-E'
-    default:  return 'row-unknown'
+    case 'H':
+      return 'row-H';
+    case 'R':
+      return 'row-R';
+    case 'Z':
+      return 'row-Z';
+    case 'E':
+      return 'row-E';
+    default:
+      return 'row-unknown';
   }
 }
 
-function sortIcon(key: SortKey): 'none' | 'asc' | 'desc' {
-  if (sortKey.value !== key) return 'none'
-  return sortDir.value
+function _sortIcon(key: SortKey): 'none' | 'asc' | 'desc' {
+  if (sortKey.value !== key) return 'none';
+  return sortDir.value;
 }
 </script>
 

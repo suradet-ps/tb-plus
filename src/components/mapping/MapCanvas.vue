@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import L from 'leaflet'
-import 'leaflet.markercluster'
-import type { MappingPatientRow } from '@/types/mapping'
+import L from 'leaflet';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import 'leaflet.markercluster';
+import type { MappingPatientRow } from '@/types/mapping';
 
 const props = defineProps<{
-  patients: MappingPatientRow[]
-  selectedHn: string | null
-}>()
+  patients: MappingPatientRow[];
+  selectedHn: string | null;
+}>();
 
 const emit = defineEmits<{
-  select: [hn: string]
-  mapError: [message: string]
-}>()
+  select: [hn: string];
+  mapError: [message: string];
+}>();
 
-const mapElement = ref<HTMLDivElement | null>(null)
-let map: L.Map | null = null
-let markerLayer: L.MarkerClusterGroup | null = null
-let tileLayer: L.TileLayer | null = null
+const mapElement = ref<HTMLDivElement | null>(null);
+let map: L.Map | null = null;
+let markerLayer: L.MarkerClusterGroup | null = null;
+let tileLayer: L.TileLayer | null = null;
 
 function createIcon(color: string, isSelected: boolean): L.DivIcon {
   return L.divIcon({
@@ -26,23 +26,23 @@ function createIcon(color: string, isSelected: boolean): L.DivIcon {
     iconSize: [18, 18],
     iconAnchor: [9, 9],
     popupAnchor: [0, -8],
-  })
+  });
 }
 
 function statusColor(patient: MappingPatientRow): string {
   switch (patient.tb_status) {
     case 'active':
-      return '#dd5b00'
+      return '#dd5b00';
     case 'completed':
-      return '#2a9d99'
+      return '#2a9d99';
     case 'defaulted':
-      return '#615d59'
+      return '#615d59';
     case 'died':
-      return '#31302e'
+      return '#31302e';
     case 'transferred':
-      return '#0075de'
+      return '#0075de';
     default:
-      return '#097fe8'
+      return '#097fe8';
   }
 }
 
@@ -53,83 +53,83 @@ function popupContent(patient: MappingPatientRow): string {
       <div class="tb-map-popup__meta">${patient.masked_hn}</div>
       <div class="tb-map-popup__meta">${patient.address_preview ?? 'ไม่ระบุที่อยู่'}</div>
     </div>
-  `
+  `;
 }
 
 function renderMarkers(): void {
-  if (!map || !markerLayer) return
+  if (!map || !markerLayer) return;
 
-  markerLayer.clearLayers()
+  markerLayer.clearLayers();
   const points = props.patients.filter(
     (patient) => typeof patient.lat === 'number' && typeof patient.lng === 'number',
-  )
+  );
 
   if (points.length === 0) {
-    map.setView([13.75, 100.5], 6)
-    return
+    map.setView([13.75, 100.5], 6);
+    return;
   }
 
-  const bounds = L.latLngBounds([])
+  const bounds = L.latLngBounds([]);
 
   for (const patient of points) {
     const marker = L.marker([patient.lat!, patient.lng!], {
       icon: createIcon(statusColor(patient), patient.hn === props.selectedHn),
       title: patient.masked_name,
-    })
-    marker.on('click', () => emit('select', patient.hn))
-    marker.bindPopup(popupContent(patient))
-    markerLayer.addLayer(marker)
-    bounds.extend(marker.getLatLng())
+    });
+    marker.on('click', () => emit('select', patient.hn));
+    marker.bindPopup(popupContent(patient));
+    markerLayer.addLayer(marker);
+    bounds.extend(marker.getLatLng());
   }
 
   if (bounds.isValid()) {
-    map.fitBounds(bounds.pad(0.18), { maxZoom: 13 })
+    map.fitBounds(bounds.pad(0.18), { maxZoom: 13 });
   }
 }
 
 onMounted(() => {
-  if (!mapElement.value) return
+  if (!mapElement.value) return;
 
   map = L.map(mapElement.value, {
     zoomControl: true,
     attributionControl: true,
-  }).setView([13.75, 100.5], 6)
+  }).setView([13.75, 100.5], 6);
 
   tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
-  })
+  });
 
   tileLayer.on('tileerror', () => {
-    emit('mapError', 'ไม่สามารถโหลดแผนที่พื้นหลังจาก OpenStreetMap ได้')
-  })
+    emit('mapError', 'ไม่สามารถโหลดแผนที่พื้นหลังจาก OpenStreetMap ได้');
+  });
 
-  tileLayer.addTo(map)
+  tileLayer.addTo(map);
   markerLayer = L.markerClusterGroup({
     showCoverageOnHover: false,
     spiderfyOnMaxZoom: true,
     maxClusterRadius: 44,
-  })
-  markerLayer.addTo(map)
-  renderMarkers()
-})
+  });
+  markerLayer.addTo(map);
+  renderMarkers();
+});
 
 watch(
   () => [props.patients, props.selectedHn] as const,
   () => {
-    renderMarkers()
+    renderMarkers();
   },
   { deep: true },
-)
+);
 
 onBeforeUnmount(() => {
-  markerLayer?.clearLayers()
-  markerLayer?.remove()
-  tileLayer?.remove()
-  map?.remove()
-  markerLayer = null
-  tileLayer = null
-  map = null
-})
+  markerLayer?.clearLayers();
+  markerLayer?.remove();
+  tileLayer?.remove();
+  map?.remove();
+  markerLayer = null;
+  tileLayer = null;
+  map = null;
+});
 </script>
 
 <template>

@@ -1,61 +1,53 @@
 <script setup lang="ts">
-import { computed, ref, watchEffect } from 'vue'
-import { ChevronDown, FileX } from 'lucide-vue-next'
-import DrugChip from '@/components/shared/DrugChip.vue'
-import { useScreeningStore } from '@/stores/screening'
-import type { PatientDrugRecord } from '@/types/patient'
+import { computed, ref, watchEffect } from 'vue';
+import { useScreeningStore } from '@/stores/screening';
+import type { PatientDrugRecord } from '@/types/patient';
 
-const store = useScreeningStore()
+const store = useScreeningStore();
 
 // ── Header checkbox ref (needed to set indeterminate via JS property) ──────────
-const headerCheckbox = ref<HTMLInputElement | null>(null)
+const headerCheckbox = ref<HTMLInputElement | null>(null);
 
 // ── Sort state ───────────────────────────────────────────────────────────────
-type SortKey =
-  | 'hn'
-  | 'full_name'
-  | 'age'
-  | 'first_dispensed'
-  | 'last_dispensed'
-  | 'visit_count'
-type SortDir = 'asc' | 'desc'
+type SortKey = 'hn' | 'full_name' | 'age' | 'first_dispensed' | 'last_dispensed' | 'visit_count';
+type SortDir = 'asc' | 'desc';
 
-const sortKey = ref<SortKey>('last_dispensed')
-const sortDir = ref<SortDir>('desc')
+const sortKey = ref<SortKey>('last_dispensed');
+const sortDir = ref<SortDir>('desc');
 
-function sortBy(key: SortKey) {
+function _sortBy(key: SortKey) {
   if (sortKey.value === key) {
-    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc';
   } else {
-    sortKey.value = key
-    sortDir.value = 'desc'
+    sortKey.value = key;
+    sortDir.value = 'desc';
   }
 }
 
 // ── Sorted results ────────────────────────────────────────────────────────────
-const sortedResults = computed<PatientDrugRecord[]>(() => {
-  const arr = [...store.results]
-  const key = sortKey.value
-  const dir = sortDir.value
+const _sortedResults = computed<PatientDrugRecord[]>(() => {
+  const arr = [...store.results];
+  const key = sortKey.value;
+  const dir = sortDir.value;
 
   arr.sort((a, b) => {
-    const av = a[key] as string | number | null | undefined
-    const bv = b[key] as string | number | null | undefined
+    const av = a[key] as string | number | null | undefined;
+    const bv = b[key] as string | number | null | undefined;
 
-    if (av === null || av === undefined) return 1
-    if (bv === null || bv === undefined) return -1
+    if (av === null || av === undefined) return 1;
+    if (bv === null || bv === undefined) return -1;
 
-    let result: number
+    let result: number;
     if (typeof av === 'number' && typeof bv === 'number') {
-      result = av - bv
+      result = av - bv;
     } else {
-      result = String(av).localeCompare(String(bv), 'th')
+      result = String(av).localeCompare(String(bv), 'th');
     }
-    return dir === 'asc' ? result : -result
-  })
+    return dir === 'asc' ? result : -result;
+  });
 
-  return arr
-})
+  return arr;
+});
 
 // ── Selection helpers ─────────────────────────────────────────────────────────
 // Selectable = not enrolled, OR enrolled but already discharged (non-active status)
@@ -63,59 +55,58 @@ const selectableRows = computed(() =>
   store.results.filter(
     (r) => !r.is_enrolled || (r.patient_status && r.patient_status !== 'active'),
   ),
-)
+);
 
 const allSelected = computed(
   () =>
     selectableRows.value.length > 0 &&
     selectableRows.value.every((r) => store.selectedHns.has(r.hn)),
-)
+);
 
 const someSelected = computed(
-  () =>
-    selectableRows.value.some((r) => store.selectedHns.has(r.hn)) && !allSelected.value,
-)
+  () => selectableRows.value.some((r) => store.selectedHns.has(r.hn)) && !allSelected.value,
+);
 
 // Sync indeterminate state — cannot be set via HTML attribute, must be a JS property
 watchEffect(() => {
   if (headerCheckbox.value) {
-    headerCheckbox.value.indeterminate = someSelected.value
+    headerCheckbox.value.indeterminate = someSelected.value;
   }
-})
+});
 
-function toggleAll() {
+function _toggleAll() {
   if (allSelected.value) {
-    store.clearSelection()
+    store.clearSelection();
   } else {
     selectableRows.value.forEach((r) => {
       if (!store.selectedHns.has(r.hn)) {
-        store.toggleSelect(r.hn)
+        store.toggleSelect(r.hn);
       }
-    })
+    });
   }
 }
 
-function toggleRow(row: PatientDrugRecord) {
+function _toggleRow(row: PatientDrugRecord) {
   // Actively enrolled patients cannot be re-enrolled; block only those
-  if (row.is_enrolled && (!row.patient_status || row.patient_status === 'active')) return
-  store.toggleSelect(row.hn)
+  if (row.is_enrolled && (!row.patient_status || row.patient_status === 'active')) return;
+  store.toggleSelect(row.hn);
 }
 
 // ── Formatters ────────────────────────────────────────────────────────────────
-function toThaiDate(isoDate: string | null | undefined): string {
-  if (!isoDate) return '-'
+function _toThaiDate(isoDate: string | null | undefined): string {
+  if (!isoDate) return '-';
   try {
-    const [y, m, d] = isoDate.split('-').map(Number)
-    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`
+    const [y, m, d] = isoDate.split('-').map(Number);
+    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
   } catch {
-    return '-'
+    return '-';
   }
 }
 
-function sexLabel(sex: string | null | undefined): string {
-  if (sex === 'M' || sex === '1') return '♂'
-  if (sex === 'F' || sex === '2') return '♀'
-  return '-'
+function _sexLabel(sex: string | null | undefined): string {
+  if (sex === 'M' || sex === '1') return '♂';
+  if (sex === 'F' || sex === '2') return '♀';
+  return '-';
 }
 </script>
 

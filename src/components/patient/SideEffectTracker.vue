@@ -1,31 +1,29 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { AlertTriangle, CheckCircle } from 'lucide-vue-next'
-import DrugChip from '@/components/shared/DrugChip.vue'
-import type { Followup, TreatmentPlan } from '@/types/treatment'
+import { computed } from 'vue';
+import type { Followup, TreatmentPlan } from '@/types/treatment';
 
 // ── Props ─────────────────────────────────────────────────────────────────
 
 const props = defineProps<{
-  followups: Followup[]
-  currentPlan: TreatmentPlan | null
-}>()
+  followups: Followup[];
+  currentPlan: TreatmentPlan | null;
+}>();
 
 // ── Side effect definitions ───────────────────────────────────────────────
 
 interface SideEffectDef {
-  key: string
-  labelTh: string
-  labelEn: string
-  isPriority?: boolean
+  key: string;
+  labelTh: string;
+  labelEn: string;
+  isPriority?: boolean;
 }
 
 interface DrugGroup {
-  drug: string
-  effects: SideEffectDef[]
+  drug: string;
+  effects: SideEffectDef[];
 }
 
-const DRUG_GROUPS: DrugGroup[] = [
+const _DRUG_GROUPS: DrugGroup[] = [
   {
     drug: 'H',
     effects: [
@@ -87,57 +85,57 @@ const DRUG_GROUPS: DrugGroup[] = [
       },
     ],
   },
-]
+];
 
 // ── Aggregate side-effect counts across all followups ─────────────────────
 
 const sideEffectCounts = computed<Record<string, number>>(() => {
-  const counts: Record<string, number> = {}
+  const counts: Record<string, number> = {};
   for (const f of props.followups) {
-    if (!f.side_effects) continue
+    if (!f.side_effects) continue;
     try {
-      const effects = JSON.parse(f.side_effects) as string[]
-      if (!Array.isArray(effects)) continue
+      const effects = JSON.parse(f.side_effects) as string[];
+      if (!Array.isArray(effects)) continue;
       for (const e of effects) {
-        counts[e] = (counts[e] ?? 0) + 1
+        counts[e] = (counts[e] ?? 0) + 1;
       }
     } catch {
       // skip malformed JSON
     }
   }
-  return counts
-})
+  return counts;
+});
 
 function getCount(key: string): number {
-  return sideEffectCounts.value[key] ?? 0
+  return sideEffectCounts.value[key] ?? 0;
 }
 
 /** Total unique side-effect occurrences across all followups */
-const totalReported = computed(() =>
+const _totalReported = computed(() =>
   Object.values(sideEffectCounts.value).reduce((a, b) => a + b, 0),
-)
+);
 
 /** Distinct side-effect types reported (any count > 0) */
-const distinctReported = computed(() =>
-  Object.values(sideEffectCounts.value).filter((c) => c > 0).length,
-)
+const _distinctReported = computed(
+  () => Object.values(sideEffectCounts.value).filter((c) => c > 0).length,
+);
 
 // ── E-related optic neuritis alert logic ──────────────────────────────────
 
-const hasOpticNeuritis = computed(() => getCount('ตาพร่า/ตาบอดสี') > 0)
+const hasOpticNeuritis = computed(() => getCount('ตาพร่า/ตาบอดสี') > 0);
 
 /** True if E is present in the current treatment plan's drug list */
 const isCurrentlyOnE = computed<boolean>(() => {
-  if (!props.currentPlan) return false
+  if (!props.currentPlan) return false;
   try {
-    const drugs = JSON.parse(props.currentPlan.drugs ?? '[]') as string[]
-    return Array.isArray(drugs) && drugs.map((d) => d.toUpperCase()).includes('E')
+    const drugs = JSON.parse(props.currentPlan.drugs ?? '[]') as string[];
+    return Array.isArray(drugs) && drugs.map((d) => d.toUpperCase()).includes('E');
   } catch {
-    return false
+    return false;
   }
-})
+});
 
-const showEPriorityAlert = computed(() => hasOpticNeuritis.value && isCurrentlyOnE.value)
+const _showEPriorityAlert = computed(() => hasOpticNeuritis.value && isCurrentlyOnE.value);
 
 // ── Active drugs in current plan ──────────────────────────────────────────
 
@@ -145,41 +143,43 @@ const showEPriorityAlert = computed(() => hasOpticNeuritis.value && isCurrentlyO
 const activeDrugLetters = computed<Set<string>>(() => {
   if (!props.currentPlan) {
     // no plan info — show all drugs as potentially active
-    return new Set(['H', 'R', 'Z', 'E'])
+    return new Set(['H', 'R', 'Z', 'E']);
   }
   try {
-    const drugs = JSON.parse(props.currentPlan.drugs ?? '[]') as string[]
-    return new Set(drugs.map((d) => d.toUpperCase()))
+    const drugs = JSON.parse(props.currentPlan.drugs ?? '[]') as string[];
+    return new Set(drugs.map((d) => d.toUpperCase()));
   } catch {
-    return new Set(['H', 'R', 'Z', 'E'])
+    return new Set(['H', 'R', 'Z', 'E']);
   }
-})
+});
 
-function isDrugActive(drug: string): boolean {
-  return activeDrugLetters.value.has(drug.toUpperCase())
+function _isDrugActive(drug: string): boolean {
+  return activeDrugLetters.value.has(drug.toUpperCase());
 }
 
 // ── Drug-specific color helper (for count badge tints) ───────────────────
 
 interface DrugColor {
-  bg: string
-  text: string
-  border: string
+  bg: string;
+  text: string;
+  border: string;
 }
 
 const DRUG_COLORS: Record<string, DrugColor> = {
-  H: { bg: 'rgba(42,157,153,0.12)',  text: '#2a9d99', border: 'rgba(42,157,153,0.3)' },
-  R: { bg: 'rgba(221,91,0,0.12)',    text: '#dd5b00', border: 'rgba(221,91,0,0.3)' },
-  E: { bg: 'rgba(0,117,222,0.12)',   text: '#0075de', border: 'rgba(0,117,222,0.3)' },
-  Z: { bg: 'rgba(82,52,16,0.10)',    text: '#523410', border: 'rgba(82,52,16,0.25)' },
-}
+  H: { bg: 'rgba(42,157,153,0.12)', text: '#2a9d99', border: 'rgba(42,157,153,0.3)' },
+  R: { bg: 'rgba(221,91,0,0.12)', text: '#dd5b00', border: 'rgba(221,91,0,0.3)' },
+  E: { bg: 'rgba(0,117,222,0.12)', text: '#0075de', border: 'rgba(0,117,222,0.3)' },
+  Z: { bg: 'rgba(82,52,16,0.10)', text: '#523410', border: 'rgba(82,52,16,0.25)' },
+};
 
-function drugColor(drug: string): DrugColor {
-  return DRUG_COLORS[drug.toUpperCase()] ?? {
-    bg: 'rgba(0,0,0,0.06)',
-    text: 'var(--color-text-secondary)',
-    border: 'rgba(0,0,0,0.12)',
-  }
+function _drugColor(drug: string): DrugColor {
+  return (
+    DRUG_COLORS[drug.toUpperCase()] ?? {
+      bg: 'rgba(0,0,0,0.06)',
+      text: 'var(--color-text-secondary)',
+      border: 'rgba(0,0,0,0.12)',
+    }
+  );
 }
 </script>
 

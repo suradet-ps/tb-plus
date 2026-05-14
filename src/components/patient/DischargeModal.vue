@@ -1,29 +1,28 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { invoke } from '@tauri-apps/api/core'
-import { LogOut, Loader2, AlertTriangle } from 'lucide-vue-next'
-import type { OutcomeInput } from '@/types/treatment'
+import { invoke } from '@tauri-apps/api/core';
+import { ref, watch } from 'vue';
+import type { OutcomeInput } from '@/types/treatment';
 
 // ── Props & Emits ─────────────────────────────────────────────────────────
 
 const props = defineProps<{
-  modelValue: boolean
-  hn: string
-  patientName: string
-}>()
+  modelValue: boolean;
+  hn: string;
+  patientName: string;
+}>();
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-  (e: 'discharged'): void
-}>()
+  (e: 'update:modelValue', value: boolean): void;
+  (e: 'discharged'): void;
+}>();
 
 // ── Outcome options ───────────────────────────────────────────────────────
 
 interface OutcomeOption {
-  value: string
-  labelTh: string
-  labelEn: string
-  color: string
+  value: string;
+  labelTh: string;
+  labelEn: string;
+  color: string;
 }
 
 const OUTCOME_OPTIONS: OutcomeOption[] = [
@@ -69,20 +68,20 @@ const OUTCOME_OPTIONS: OutcomeOption[] = [
     labelEn: 'Not evaluated',
     color: '#a39e98',
   },
-]
+];
 
 // ── Form state ────────────────────────────────────────────────────────────
 
 function todayISO(): string {
-  return new Date().toISOString().slice(0, 10)
+  return new Date().toISOString().slice(0, 10);
 }
 
 interface FormState {
-  outcome: string
-  outcome_date: string
-  treatment_end: string
-  notes: string
-  created_by: string
+  outcome: string;
+  outcome_date: string;
+  treatment_end: string;
+  notes: string;
+  created_by: string;
 }
 
 function createEmptyForm(): FormState {
@@ -92,22 +91,22 @@ function createEmptyForm(): FormState {
     treatment_end: todayISO(),
     notes: '',
     created_by: '',
-  }
+  };
 }
 
-const form = ref<FormState>(createEmptyForm())
-const isSubmitting = ref(false)
-const submitError = ref<string | null>(null)
+const form = ref<FormState>(createEmptyForm());
+const isSubmitting = ref(false);
+const submitError = ref<string | null>(null);
 
 // Derived: selected outcome config for colored preview
-const selectedOutcomeConfig = ref<OutcomeOption | null>(null)
+const selectedOutcomeConfig = ref<OutcomeOption | null>(null);
 
 watch(
   () => form.value.outcome,
   (val) => {
-    selectedOutcomeConfig.value = OUTCOME_OPTIONS.find((o) => o.value === val) ?? null
+    selectedOutcomeConfig.value = OUTCOME_OPTIONS.find((o) => o.value === val) ?? null;
   },
-)
+);
 
 // ── Reset on open ─────────────────────────────────────────────────────────
 
@@ -115,28 +114,28 @@ watch(
   () => props.modelValue,
   (open) => {
     if (open) {
-      form.value = createEmptyForm()
-      submitError.value = null
-      selectedOutcomeConfig.value = null
+      form.value = createEmptyForm();
+      submitError.value = null;
+      selectedOutcomeConfig.value = null;
     }
   },
-)
+);
 
 // ── Submit ────────────────────────────────────────────────────────────────
 
-async function handleSubmit() {
-  submitError.value = null
+async function _handleSubmit() {
+  submitError.value = null;
 
   if (!form.value.outcome) {
-    submitError.value = 'กรุณาเลือกผลการรักษา'
-    return
+    submitError.value = 'กรุณาเลือกผลการรักษา';
+    return;
   }
   if (!form.value.outcome_date) {
-    submitError.value = 'กรุณาระบุวันที่จำหน่าย'
-    return
+    submitError.value = 'กรุณาระบุวันที่จำหน่าย';
+    return;
   }
 
-  isSubmitting.value = true
+  isSubmitting.value = true;
   try {
     const input: OutcomeInput = {
       hn: props.hn,
@@ -145,30 +144,30 @@ async function handleSubmit() {
       treatment_end: form.value.treatment_end || null,
       notes: form.value.notes.trim() || null,
       created_by: form.value.created_by.trim() || null,
-    }
-    await invoke('discharge_patient', { outcome: input })
-    emit('discharged')
-    close()
+    };
+    await invoke('discharge_patient', { outcome: input });
+    emit('discharged');
+    close();
   } catch (e) {
-    submitError.value = String(e)
+    submitError.value = String(e);
   } finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
 }
 
 // ── Close helpers ─────────────────────────────────────────────────────────
 
 function close() {
-  if (isSubmitting.value) return
-  emit('update:modelValue', false)
+  if (isSubmitting.value) return;
+  emit('update:modelValue', false);
 }
 
-function onOverlayPointerDown(e: MouseEvent) {
-  if (e.target === e.currentTarget) close()
+function _onOverlayPointerDown(e: MouseEvent) {
+  if (e.target === e.currentTarget) close();
 }
 
-function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape') close()
+function _onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') close();
 }
 </script>
 

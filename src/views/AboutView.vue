@@ -1,30 +1,21 @@
 <script setup lang="ts">
-import {
-  Stethoscope,
-  ShieldCheck,
-  HardDrive,
-  Info,
-  CheckCircle,
-  Lock,
-  DatabaseZap,
-  Network,
-} from 'lucide-vue-next'
+import { DatabaseZap, Lock, Network } from 'lucide-vue-next';
 
 // Section 1: Feature list
-const features = [
+const _features = [
   'คัดกรองและลงทะเบียนผู้ป่วยจากระบบ HOSxP',
   'ติดตามความก้าวหน้าการรักษาและแจ้งเตือนอัตโนมัติ',
   'บันทึกผลติดตามรายเดือน น้ำหนัก ผลเสมหะ และอาการข้างเคียง',
-] as const
+] as const;
 
 // Section 2: Security points
 interface SecurityPoint {
-  icon: object
-  title: string
-  desc: string
+  icon: object;
+  title: string;
+  desc: string;
 }
 
-const securityPoints: SecurityPoint[] = [
+const _securityPoints: SecurityPoint[] = [
   {
     icon: Lock,
     title: 'อ่านอย่างเดียว (Read-Only)',
@@ -40,22 +31,22 @@ const securityPoints: SecurityPoint[] = [
     title: 'การเชื่อมต่อภายในเครือข่าย (Local Network Only)',
     desc: 'การเชื่อมต่อกับ HOSxP ทำผ่านเครือข่ายภายในโรงพยาบาลเท่านั้น ไม่มีการส่งข้อมูลออกสู่อินเทอร์เน็ต',
   },
-]
+];
 
 // Section 4: Version / system info
 interface InfoItem {
-  label: string
-  value: string
+  label: string;
+  value: string;
 }
 
-const infoItems: InfoItem[] = [
-  { label: 'โปรแกรม',           value: 'TB Plus' },
-  { label: 'เวอร์ชัน',          value: '0.1.5' },
-  { label: 'พัฒนาโดย',          value: 'ทีมเภสัชกรรม โรงพยาบาลสระโบสถ์' },
-  { label: 'แพลตฟอร์ม',         value: 'Tauri 2.5 + Vue 3.5' },
+const _infoItems: InfoItem[] = [
+  { label: 'โปรแกรม', value: 'TB Plus' },
+  { label: 'เวอร์ชัน', value: '0.1.5' },
+  { label: 'พัฒนาโดย', value: 'ทีมเภสัชกรรม โรงพยาบาลสระโบสถ์' },
+  { label: 'แพลตฟอร์ม', value: 'Tauri 2.5 + Vue 3.5' },
   { label: 'ฐานข้อมูลภายในเครื่อง', value: 'SQLite' },
-  { label: 'ฐานข้อมูล HIS',     value: 'HOSxP MySQL (Read-Only)' },
-]
+  { label: 'ฐานข้อมูล HIS', value: 'HOSxP MySQL (Read-Only)' },
+];
 </script>
 
 <template>

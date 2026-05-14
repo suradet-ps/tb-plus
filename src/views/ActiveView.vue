@@ -1,117 +1,113 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import {
-  RefreshCw,
-  Users,
-  AlertTriangle,
-  CheckCircle,
-  Loader2,
-  Activity,
-  Search,
-  Eye,
-} from 'lucide-vue-next'
-import { usePatientStore } from '@/stores/patient'
-import { useAlertStore } from '@/stores/alerts'
-import type { ActivePatientRow } from '@/types/patient'
-import type { TreatmentPlan } from '@/types/treatment'
+import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAlertStore } from '@/stores/alerts';
+import { usePatientStore } from '@/stores/patient';
+import type { ActivePatientRow } from '@/types/patient';
+import type { TreatmentPlan } from '@/types/treatment';
 
-const router = useRouter()
-const patientStore = usePatientStore()
-const alertStore = useAlertStore()
+const router = useRouter();
+const patientStore = usePatientStore();
+const alertStore = useAlertStore();
 
 onMounted(() => {
-  patientStore.fetchActivePatients()
-})
+  patientStore.fetchActivePatients();
+});
 
-type SortKey = 'alert' | 'month' | 'name' | 'hn'
-const sortBy = ref<SortKey>('alert')
-const sortAsc = ref(false)
+type SortKey = 'alert' | 'month' | 'name' | 'hn';
+const sortBy = ref<SortKey>('alert');
+const sortAsc = ref(false);
 
 function alertWeight(row: ActivePatientRow): number {
-  if (row.alerts.some((a) => a.severity === 'red')) return 0
-  if (row.alerts.some((a) => a.severity === 'yellow')) return 1
-  return 2
+  if (row.alerts.some((a) => a.severity === 'red')) return 0;
+  if (row.alerts.some((a) => a.severity === 'yellow')) return 1;
+  return 2;
 }
 
 const sortedPatients = computed<ActivePatientRow[]>(() => {
-  const list = [...patientStore.activePatients]
-  const dir = sortAsc.value ? 1 : -1
+  const list = [...patientStore.activePatients];
+  const dir = sortAsc.value ? 1 : -1;
   list.sort((a, b) => {
-    let cmp = 0
+    let cmp = 0;
     switch (sortBy.value) {
       case 'hn':
-        cmp = a.tb_patient.hn.localeCompare(b.tb_patient.hn)
-        break
+        cmp = a.tb_patient.hn.localeCompare(b.tb_patient.hn);
+        break;
       case 'month':
-        cmp = (a.current_month ?? 0) - (b.current_month ?? 0)
-        break
+        cmp = (a.current_month ?? 0) - (b.current_month ?? 0);
+        break;
       case 'name':
         cmp = (a.demographics?.full_name ?? a.tb_patient.hn).localeCompare(
-          b.demographics?.full_name ?? b.tb_patient.hn, 'th',
-        )
-        break
-      case 'alert':
+          b.demographics?.full_name ?? b.tb_patient.hn,
+          'th',
+        );
+        break;
       default:
-        cmp = alertWeight(a) - alertWeight(b)
-        break
+        cmp = alertWeight(a) - alertWeight(b);
+        break;
     }
-    return cmp * dir
-  })
-  return list
-})
+    return cmp * dir;
+  });
+  return list;
+});
 
-const searchQuery = ref('')
+const searchQuery = ref('');
 
-const filteredPatients = computed<ActivePatientRow[]>(() => {
-  const q = searchQuery.value.trim().toLowerCase()
-  if (!q) return sortedPatients.value
+const _filteredPatients = computed<ActivePatientRow[]>(() => {
+  const q = searchQuery.value.trim().toLowerCase();
+  if (!q) return sortedPatients.value;
   return sortedPatients.value.filter((p) => {
-    const hn = p.tb_patient.hn.toLowerCase()
-    const name = (p.demographics?.full_name ?? '').toLowerCase()
-    return hn.includes(q) || name.includes(q)
-  })
-})
+    const hn = p.tb_patient.hn.toLowerCase();
+    const name = (p.demographics?.full_name ?? '').toLowerCase();
+    return hn.includes(q) || name.includes(q);
+  });
+});
 
-function getEffectivePhase(plan: TreatmentPlan | null | undefined): 'intensive' | 'continuation' | null {
-  if (!plan) return null
+function getEffectivePhase(
+  plan: TreatmentPlan | null | undefined,
+): 'intensive' | 'continuation' | null {
+  if (!plan) return null;
   if (plan.phase === 'intensive' && plan.phase_end_expected) {
-    if (new Date() > new Date(plan.phase_end_expected)) return 'continuation'
+    if (new Date() > new Date(plan.phase_end_expected)) return 'continuation';
   }
-  return plan.phase as 'intensive' | 'continuation'
+  return plan.phase as 'intensive' | 'continuation';
 }
 
-const statsTotal = computed(() => patientStore.activePatients.length)
-const statsRedAlerts = computed(() => alertStore.redCount)
-const statsYellowAlerts = computed(() => alertStore.yellowAlerts.length)
+const _statsTotal = computed(() => patientStore.activePatients.length);
+const _statsRedAlerts = computed(() => alertStore.redCount);
+const _statsYellowAlerts = computed(() => alertStore.yellowAlerts.length);
 
-const statsIntensive = computed(
-  () => patientStore.activePatients.filter((p) => getEffectivePhase(p.current_plan) === 'intensive').length,
-)
-const statsContinuation = computed(
-  () => patientStore.activePatients.filter((p) => getEffectivePhase(p.current_plan) === 'continuation').length,
-)
+const _statsIntensive = computed(
+  () =>
+    patientStore.activePatients.filter((p) => getEffectivePhase(p.current_plan) === 'intensive')
+      .length,
+);
+const _statsContinuation = computed(
+  () =>
+    patientStore.activePatients.filter((p) => getEffectivePhase(p.current_plan) === 'continuation')
+      .length,
+);
 
-const isInitialLoad = computed(
+const _isInitialLoad = computed(
   () => patientStore.isLoading && patientStore.activePatients.length === 0,
-)
+);
 
-function viewDetail(hn: string) {
-  router.push(`/patient/${hn}`)
+function _viewDetail(hn: string) {
+  router.push(`/patient/${hn}`);
 }
 
-function toggleSort(key: SortKey) {
+function _toggleSort(key: SortKey) {
   if (sortBy.value === key) {
-    sortAsc.value = !sortAsc.value
+    sortAsc.value = !sortAsc.value;
   } else {
-    sortBy.value = key
-    sortAsc.value = key === 'name' || key === 'hn'
+    sortBy.value = key;
+    sortAsc.value = key === 'name' || key === 'hn';
   }
 }
 
-function sortIcon(key: SortKey): string {
-  if (sortBy.value !== key) return ''
-  return sortAsc.value ? '↑' : '↓'
+function _sortIcon(key: SortKey): string {
+  if (sortBy.value !== key) return '';
+  return sortAsc.value ? '↑' : '↓';
 }
 </script>
 

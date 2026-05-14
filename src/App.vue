@@ -1,59 +1,60 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
-import { getCurrentWindow } from '@tauri-apps/api/window'
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { onMounted, onUnmounted } from 'vue';
+import { useAlertStore } from '@/stores/alerts';
+import { useAppointmentsStore } from '@/stores/appointments';
+import { useSettingsStore } from '@/stores/settings';
 
-import AppSidebar from '@/components/layout/AppSidebar.vue'
-import { useAlertStore } from '@/stores/alerts'
-import { useSettingsStore } from '@/stores/settings'
-import { useAppointmentsStore } from '@/stores/appointments'
+const alertStore = useAlertStore();
+const settingsStore = useSettingsStore();
+const appointmentsStore = useAppointmentsStore();
 
-const alertStore = useAlertStore()
-const settingsStore = useSettingsStore()
-const appointmentsStore = useAppointmentsStore()
-
-let startupRetryTimer: ReturnType<typeof setInterval> | null = null
+let startupRetryTimer: ReturnType<typeof setInterval> | null = null;
 
 onMounted(async () => {
-  await getCurrentWindow().show()
-  const splashStart = Date.now()
+  await getCurrentWindow().show();
+  const splashStart = Date.now();
 
   // Load everything (MySQL config + drug classes + regimens + HOSxP + alerts)
-  await settingsStore.loadAllSettings()
-  await settingsStore.checkConnection()
-  alertStore.startAutoRefresh()
-  appointmentsStore.fetchAppointments()
+  await settingsStore.loadAllSettings();
+  await settingsStore.checkConnection();
+  alertStore.startAutoRefresh();
+  appointmentsStore.fetchAppointments();
 
   if (!settingsStore.isConnected) {
-    let attempts = 0
+    let attempts = 0;
     startupRetryTimer = setInterval(async () => {
-      attempts++
-      await settingsStore.checkConnection()
+      attempts++;
+      await settingsStore.checkConnection();
       if (settingsStore.isConnected || attempts >= 5) {
-        clearInterval(startupRetryTimer!)
-        startupRetryTimer = null
+        clearInterval(startupRetryTimer!);
+        startupRetryTimer = null;
         if (settingsStore.isConnected) {
-          appointmentsStore.fetchAppointments()
+          appointmentsStore.fetchAppointments();
         }
       }
-    }, 2000)
+    }, 2000);
   }
 
-  const elapsed = Date.now() - splashStart
-  setTimeout(() => {
-    const overlay = document.getElementById('splash-overlay')
-    if (overlay) {
-      overlay.classList.add('splash-fade-out')
-      setTimeout(() => overlay.remove(), 350)
-    }
-  }, Math.max(0, 800 - elapsed))
-})
+  const elapsed = Date.now() - splashStart;
+  setTimeout(
+    () => {
+      const overlay = document.getElementById('splash-overlay');
+      if (overlay) {
+        overlay.classList.add('splash-fade-out');
+        setTimeout(() => overlay.remove(), 350);
+      }
+    },
+    Math.max(0, 800 - elapsed),
+  );
+});
 
 onUnmounted(() => {
   if (startupRetryTimer) {
-    clearInterval(startupRetryTimer)
-    startupRetryTimer = null
+    clearInterval(startupRetryTimer);
+    startupRetryTimer = null;
   }
-})
+});
 </script>
 
 <template>

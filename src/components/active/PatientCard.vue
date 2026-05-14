@@ -1,108 +1,104 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { Eye, PlusCircle, LogOut } from 'lucide-vue-next'
-import AlertBadge from './AlertBadge.vue'
-import ProgressBar from './ProgressBar.vue'
-import DrugChip from '@/components/shared/DrugChip.vue'
-import type { ActivePatientRow } from '@/types/patient'
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import type { ActivePatientRow } from '@/types/patient';
 
 /** Parse regimen string "2HRZE/4HR" → continuation drug letters ["H","R"] */
 function getContinuationDrugsFromRegimen(regimen: string): string[] {
-  const parts = regimen.split('/')
-  if (parts.length < 2) return ['H', 'R']
-  const contPart = parts[1].replace(/^\d+/, '') // strip leading digit e.g. "4HR" → "HR"
-  return (['H', 'R', 'Z', 'E'] as const).filter((d) => contPart.toUpperCase().includes(d))
+  const parts = regimen.split('/');
+  if (parts.length < 2) return ['H', 'R'];
+  const contPart = parts[1].replace(/^\d+/, ''); // strip leading digit e.g. "4HR" → "HR"
+  return (['H', 'R', 'Z', 'E'] as const).filter((d) => contPart.toUpperCase().includes(d));
 }
 
-const props = defineProps<{ patient: ActivePatientRow }>()
+const props = defineProps<{ patient: ActivePatientRow }>();
 const emit = defineEmits<{
-  'view-detail': [hn: string]
-  'add-followup': [hn: string]
-  discharge: [hn: string]
-}>()
+  'view-detail': [hn: string];
+  'add-followup': [hn: string];
+  discharge: [hn: string];
+}>();
 
-const router = useRouter()
+const router = useRouter();
 
-const name = computed(() => props.patient.demographics?.full_name ?? props.patient.tb_patient.hn)
-const age = computed(() => props.patient.demographics?.age)
+const _name = computed(() => props.patient.demographics?.full_name ?? props.patient.tb_patient.hn);
+const _age = computed(() => props.patient.demographics?.age);
 
 // Derives the "real" current phase from the date, not just the SQLite record.
 // If the intensive phase end date has passed but the plan was never updated,
 // we still show "Continuation" so staff see the correct clinical picture.
 const effectivePhase = computed<'intensive' | 'continuation' | null>(() => {
-  const plan = props.patient.current_plan
-  if (!plan) return null
+  const plan = props.patient.current_plan;
+  if (!plan) return null;
   if (plan.phase === 'intensive' && plan.phase_end_expected) {
-    if (new Date() > new Date(plan.phase_end_expected)) return 'continuation'
+    if (new Date() > new Date(plan.phase_end_expected)) return 'continuation';
   }
-  return plan.phase as 'intensive' | 'continuation'
-})
+  return plan.phase as 'intensive' | 'continuation';
+});
 
 // True when the SQLite plan record hasn't been updated yet but the phase has
 // effectively changed based on the expected end date.
 const phaseIsStale = computed(
   () => !!props.patient.current_plan && effectivePhase.value !== props.patient.current_plan.phase,
-)
+);
 
-const phaseLabel = computed(() => {
-  if (effectivePhase.value === 'intensive') return 'Intensive'
-  if (effectivePhase.value === 'continuation') return 'Continuation'
-  return '-'
-})
+const _phaseLabel = computed(() => {
+  if (effectivePhase.value === 'intensive') return 'Intensive';
+  if (effectivePhase.value === 'continuation') return 'Continuation';
+  return '-';
+});
 
-const phaseColor = computed(() => {
-  if (effectivePhase.value === 'intensive') return '#dd5b00'
-  if (effectivePhase.value === 'continuation') return '#2a9d99'
-  return '#a39e98'
-})
+const _phaseColor = computed(() => {
+  if (effectivePhase.value === 'intensive') return '#dd5b00';
+  if (effectivePhase.value === 'continuation') return '#2a9d99';
+  return '#a39e98';
+});
 
-const tbTypeLabel = computed(() => {
-  const t = props.patient.tb_patient.tb_type
-  if (t === 'pulmonary') return 'ปอด'
-  if (t === 'extra_pulmonary') return 'นอกปอด'
-  return t ?? '-'
-})
+const _tbTypeLabel = computed(() => {
+  const t = props.patient.tb_patient.tb_type;
+  if (t === 'pulmonary') return 'ปอด';
+  if (t === 'extra_pulmonary') return 'นอกปอด';
+  return t ?? '-';
+});
 
-const hasRedAlert = computed(() => props.patient.alerts.some((a) => a.severity === 'red'))
-const hasYellowAlert = computed(() => props.patient.alerts.some((a) => a.severity === 'yellow'))
+const _hasRedAlert = computed(() => props.patient.alerts.some((a) => a.severity === 'red'));
+const _hasYellowAlert = computed(() => props.patient.alerts.some((a) => a.severity === 'yellow'));
 
-const sexSymbol = computed(() => {
-  const s = props.patient.demographics?.sex
-  if (!s) return null
-  return s === 'M' || s === '1' ? '♂' : '♀'
-})
+const _sexSymbol = computed(() => {
+  const s = props.patient.demographics?.sex;
+  if (!s) return null;
+  return s === 'M' || s === '1' ? '♂' : '♀';
+});
 
-const isOverdue = computed(() => (props.patient.days_since_last_dispensing ?? 0) > 35)
+const _isOverdue = computed(() => (props.patient.days_since_last_dispensing ?? 0) > 35);
 
 // Returns drug letters to display.
 // When the plan is stale (still says "intensive" but end date passed), derive
 // the expected continuation drugs from the regimen string.
-function getDisplayDrugs(): string[] {
-  const plan = props.patient.current_plan
-  if (!plan) return []
+function _getDisplayDrugs(): string[] {
+  const plan = props.patient.current_plan;
+  if (!plan) return [];
   if (phaseIsStale.value) {
-    return getContinuationDrugsFromRegimen(plan.regimen)
+    return getContinuationDrugsFromRegimen(plan.regimen);
   }
   try {
-    const drugs = JSON.parse(plan.drugs ?? '[]')
-    return Array.isArray(drugs) ? drugs : []
+    const drugs = JSON.parse(plan.drugs ?? '[]');
+    return Array.isArray(drugs) ? drugs : [];
   } catch {
-    return []
+    return [];
   }
 }
 
-function handleViewDetail() {
-  emit('view-detail', props.patient.tb_patient.hn)
-  router.push(`/patient/${props.patient.tb_patient.hn}`)
+function _handleViewDetail() {
+  emit('view-detail', props.patient.tb_patient.hn);
+  router.push(`/patient/${props.patient.tb_patient.hn}`);
 }
 
-function handleAddFollowup() {
-  emit('add-followup', props.patient.tb_patient.hn)
+function _handleAddFollowup() {
+  emit('add-followup', props.patient.tb_patient.hn);
 }
 
-function handleDischarge() {
-  emit('discharge', props.patient.tb_patient.hn)
+function _handleDischarge() {
+  emit('discharge', props.patient.tb_patient.hn);
 }
 </script>
 

@@ -1,185 +1,162 @@
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import {
-  ArrowLeft,
-  PlusCircle,
-  LogOut,
-  Loader2,
-  AlertTriangle,
-  RefreshCw,
-  MapPin,
-  Phone,
-  Calendar,
-  UserCheck,
-} from 'lucide-vue-next'
-import TreatmentTimeline from '@/components/patient/TreatmentTimeline.vue'
-import DispensingTable from '@/components/patient/DispensingTable.vue'
-import FollowupList from '@/components/patient/FollowupList.vue'
-import FollowupForm from '@/components/patient/FollowupForm.vue'
-import SideEffectTracker from '@/components/patient/SideEffectTracker.vue'
-import DischargeModal from '@/components/patient/DischargeModal.vue'
-import StatusBadge from '@/components/shared/StatusBadge.vue'
-import AlertBadge from '@/components/active/AlertBadge.vue'
-import DrugChip from '@/components/shared/DrugChip.vue'
-import { usePatientStore } from '@/stores/patient'
-import { useAlertStore } from '@/stores/alerts'
+import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAlertStore } from '@/stores/alerts';
+import { usePatientStore } from '@/stores/patient';
 
 // ── Props ─────────────────────────────────────────────────────────────────
 
-const props = defineProps<{ hn: string }>()
+const props = defineProps<{ hn: string }>();
 
 // ── Router & Stores ───────────────────────────────────────────────────────
 
-const router = useRouter()
-const patientStore = usePatientStore()
-const alertStore = useAlertStore()
+const router = useRouter();
+const patientStore = usePatientStore();
+const alertStore = useAlertStore();
 
 // ── Panel / modal visibility ──────────────────────────────────────────────
 
-const showFollowupForm = ref(false)
-const showDischargeModal = ref(false)
+const showFollowupForm = ref(false);
+const showDischargeModal = ref(false);
 
 // ── Tab state ─────────────────────────────────────────────────────────────
 
-type TabKey = 'timeline' | 'dispensing' | 'followups' | 'sideeffects'
+type TabKey = 'timeline' | 'dispensing' | 'followups' | 'sideeffects';
 
-const activeTab = ref<TabKey>('timeline')
+const _activeTab = ref<TabKey>('timeline');
 
 interface Tab {
-  key: TabKey
-  label: string
+  key: TabKey;
+  label: string;
 }
 
-const TABS: Tab[] = [
-  { key: 'timeline',    label: 'ไทม์ไลน์การรักษา' },
-  { key: 'dispensing',  label: 'ประวัติยา' },
-  { key: 'followups',   label: 'การติดตามผล' },
+const _TABS: Tab[] = [
+  { key: 'timeline', label: 'ไทม์ไลน์การรักษา' },
+  { key: 'dispensing', label: 'ประวัติยา' },
+  { key: 'followups', label: 'การติดตามผล' },
   { key: 'sideeffects', label: 'ผลข้างเคียง' },
-]
+];
 
 // ── Data loading ──────────────────────────────────────────────────────────
 
 onMounted(() => {
-  patientStore.fetchPatientDetail(props.hn)
-})
+  patientStore.fetchPatientDetail(props.hn);
+});
 
-function refresh() {
-  patientStore.fetchPatientDetail(props.hn)
+function _refresh() {
+  patientStore.fetchPatientDetail(props.hn);
 }
 
 // ── Computed ──────────────────────────────────────────────────────────────
 
-const detail    = computed(() => patientStore.currentPatient)
-const isLoading = computed(() => patientStore.isLoadingDetail)
-const loadError = computed(() => patientStore.error)
+const detail = computed(() => patientStore.currentPatient);
+const _isLoading = computed(() => patientStore.isLoadingDetail);
+const _loadError = computed(() => patientStore.error);
 
-const patientName = computed(
-  () => detail.value?.demographics?.full_name ?? props.hn,
-)
+const _patientName = computed(() => detail.value?.demographics?.full_name ?? props.hn);
 
 // Alerts for this patient from the central alert store
-const allAlerts    = computed(() => alertStore.alertsForPatient(props.hn))
-const redAlerts    = computed(() => allAlerts.value.filter((a) => a.severity === 'red'))
-const yellowAlerts = computed(() => allAlerts.value.filter((a) => a.severity === 'yellow'))
+const allAlerts = computed(() => alertStore.alertsForPatient(props.hn));
+const _redAlerts = computed(() => allAlerts.value.filter((a) => a.severity === 'red'));
+const _yellowAlerts = computed(() => allAlerts.value.filter((a) => a.severity === 'yellow'));
 
 /** Estimated current treatment month (1-based), used to pre-fill FollowupForm */
-const currentTreatmentMonth = computed<number | undefined>(() => {
-  const plan = detail.value?.current_plan
-  if (!plan?.phase_start) return undefined
-  const start = new Date(plan.phase_start)
-  const now   = new Date()
-  const diffDays = (now.getTime() - start.getTime()) / 86_400_000
-  return Math.max(1, Math.floor(diffDays / 30.44) + 1)
-})
+const _currentTreatmentMonth = computed<number | undefined>(() => {
+  const plan = detail.value?.current_plan;
+  if (!plan?.phase_start) return undefined;
+  const start = new Date(plan.phase_start);
+  const now = new Date();
+  const diffDays = (now.getTime() - start.getTime()) / 86_400_000;
+  return Math.max(1, Math.floor(diffDays / 30.44) + 1);
+});
 
 // Effective phase: derives from date comparison, not just the SQLite record.
 // If the intensive phase end date has passed but the plan was never updated,
 // we still show "Continuation" so staff see the correct clinical picture.
 const effectivePhase = computed<'intensive' | 'continuation' | null>(() => {
-  const plan = detail.value?.current_plan
-  if (!plan) return null
+  const plan = detail.value?.current_plan;
+  if (!plan) return null;
   if (plan.phase === 'intensive' && plan.phase_end_expected) {
-    if (new Date() > new Date(plan.phase_end_expected)) return 'continuation'
+    if (new Date() > new Date(plan.phase_end_expected)) return 'continuation';
   }
-  return plan.phase as 'intensive' | 'continuation'
-})
+  return plan.phase as 'intensive' | 'continuation';
+});
 
 // True when the plan record hasn't been updated but phase has changed by date.
 const phaseIsStale = computed(
   () => !!detail.value?.current_plan && effectivePhase.value !== detail.value.current_plan.phase,
-)
+);
 
 /** Drug letters to display — uses effective continuation drugs when plan is stale */
-const currentDrugs = computed<string[]>(() => {
-  const plan = detail.value?.current_plan
-  if (!plan) return []
+const _currentDrugs = computed<string[]>(() => {
+  const plan = detail.value?.current_plan;
+  if (!plan) return [];
   if (phaseIsStale.value) {
-    return getContinuationDrugsFromRegimen(plan.regimen)
+    return getContinuationDrugsFromRegimen(plan.regimen);
   }
   try {
-    const arr = JSON.parse(plan.drugs ?? '[]') as string[]
-    return Array.isArray(arr) ? arr : []
+    const arr = JSON.parse(plan.drugs ?? '[]') as string[];
+    return Array.isArray(arr) ? arr : [];
   } catch {
-    return []
+    return [];
   }
-})
+});
 
-const phaseLabel = computed(() => {
-  if (effectivePhase.value === 'intensive')    return 'ระยะเข้มข้น (Intensive)'
-  if (effectivePhase.value === 'continuation') return 'ระยะต่อเนื่อง (Continuation)'
-  return null
-})
+const _phaseLabel = computed(() => {
+  if (effectivePhase.value === 'intensive') return 'ระยะเข้มข้น (Intensive)';
+  if (effectivePhase.value === 'continuation') return 'ระยะต่อเนื่อง (Continuation)';
+  return null;
+});
 
-const phaseColor = computed(() => {
-  if (effectivePhase.value === 'intensive')    return '#dd5b00'
-  if (effectivePhase.value === 'continuation') return '#2a9d99'
-  return '#a39e98'
-})
+const _phaseColor = computed(() => {
+  if (effectivePhase.value === 'intensive') return '#dd5b00';
+  if (effectivePhase.value === 'continuation') return '#2a9d99';
+  return '#a39e98';
+});
 
-const tbTypeLabel = computed(() => {
-  const t = detail.value?.patient?.tb_type
-  if (t === 'pulmonary')       return 'วัณโรคปอด'
-  if (t === 'extra_pulmonary') return 'วัณโรคนอกปอด'
-  return null
-})
+const _tbTypeLabel = computed(() => {
+  const t = detail.value?.patient?.tb_type;
+  if (t === 'pulmonary') return 'วัณโรคปอด';
+  if (t === 'extra_pulmonary') return 'วัณโรคนอกปอด';
+  return null;
+});
 
 // ── Event handlers ────────────────────────────────────────────────────────
 
-function handleFollowupSaved() {
-  showFollowupForm.value = false
-  patientStore.fetchPatientDetail(props.hn)
+function _handleFollowupSaved() {
+  showFollowupForm.value = false;
+  patientStore.fetchPatientDetail(props.hn);
 }
 
-function handleDischarged() {
-  showDischargeModal.value = false
+function _handleDischarged() {
+  showDischargeModal.value = false;
   // Navigate back to active list; patient is no longer active
-  router.push('/active')
+  router.push('/active');
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-function toThaiDate(iso: string | null | undefined): string {
-  if (!iso) return '—'
+function _toThaiDate(iso: string | null | undefined): string {
+  if (!iso) return '—';
   try {
-    const [y, m, d] = iso.split('-').map(Number)
-    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`
+    const [y, m, d] = iso.split('-').map(Number);
+    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
   } catch {
-    return iso
+    return iso;
   }
 }
 
-function sexLabel(sex: string | null | undefined): string | null {
-  if (!sex) return null
-  return sex === 'M' || sex === '1' ? '♂ ชาย' : '♀ หญิง'
+function _sexLabel(sex: string | null | undefined): string | null {
+  if (!sex) return null;
+  return sex === 'M' || sex === '1' ? '♂ ชาย' : '♀ หญิง';
 }
 
 /** Parse regimen string "2HRZE/4HR" → continuation drug letters ["H","R"] */
 function getContinuationDrugsFromRegimen(regimen: string): string[] {
-  const parts = regimen.split('/')
-  if (parts.length < 2) return ['H', 'R']
-  const contPart = parts[1].replace(/^\d+/, '')
-  return (['H', 'R', 'Z', 'E'] as const).filter((d) => contPart.toUpperCase().includes(d))
+  const parts = regimen.split('/');
+  if (parts.length < 2) return ['H', 'R'];
+  const contPart = parts[1].replace(/^\d+/, '');
+  return (['H', 'R', 'Z', 'E'] as const).filter((d) => contPart.toUpperCase().includes(d));
 }
 </script>
 

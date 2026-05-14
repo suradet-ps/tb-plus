@@ -1,71 +1,60 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-import {
-  Loader2,
-  MapPinned,
-  Map,
-  TriangleAlert,
-  Activity,
-  RefreshCw,
-  ScanSearch,
-} from 'lucide-vue-next'
-import MapCanvas from '@/components/mapping/MapCanvas.vue'
-import MapFilters from '@/components/mapping/MapFilters.vue'
-import StatusBadge from '@/components/shared/StatusBadge.vue'
-import { useMappingStore } from '@/stores/mapping'
-import { useSettingsStore } from '@/stores/settings'
-import type { MappingPatientRow } from '@/types/mapping'
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { useMappingStore } from '@/stores/mapping';
+import { useSettingsStore } from '@/stores/settings';
+import type { MappingPatientRow } from '@/types/mapping';
 
-const mappingStore = useMappingStore()
-const settingsStore = useSettingsStore()
+const mappingStore = useMappingStore();
+const _settingsStore = useSettingsStore();
 
-const search = ref('')
-const status = ref<'all' | 'active' | 'completed' | 'transferred' | 'died' | 'defaulted'>('all')
-const tbType = ref<'all' | 'pulmonary' | 'extra_pulmonary'>('all')
-const geocodeStatus = ref<'all' | 'success' | 'pending' | 'failed' | 'missing_address'>('all')
-const enrolledFrom = ref('')
-const enrolledTo = ref('')
-const mapError = ref<string | null>(null)
-const isOnline = ref(window.navigator.onLine)
-const batchMessage = ref<string | null>(null)
+const search = ref('');
+const status = ref<'all' | 'active' | 'completed' | 'transferred' | 'died' | 'defaulted'>('all');
+const tbType = ref<'all' | 'pulmonary' | 'extra_pulmonary'>('all');
+const geocodeStatus = ref<'all' | 'success' | 'pending' | 'failed' | 'missing_address'>('all');
+const enrolledFrom = ref('');
+const enrolledTo = ref('');
+const _mapError = ref<string | null>(null);
+const isOnline = ref(window.navigator.onLine);
+const batchMessage = ref<string | null>(null);
 
 function handleOnline(): void {
-  isOnline.value = true
+  isOnline.value = true;
 }
 
 function handleOffline(): void {
-  isOnline.value = false
+  isOnline.value = false;
 }
 
 onMounted(() => {
-  mappingStore.fetchAll()
-  window.addEventListener('online', handleOnline)
-  window.addEventListener('offline', handleOffline)
-})
+  mappingStore.fetchAll();
+  window.addEventListener('online', handleOnline);
+  window.addEventListener('offline', handleOffline);
+});
 
 onUnmounted(() => {
-  window.removeEventListener('online', handleOnline)
-  window.removeEventListener('offline', handleOffline)
-})
+  window.removeEventListener('online', handleOnline);
+  window.removeEventListener('offline', handleOffline);
+});
 
-const summary = computed(() => ({
+const _summary = computed(() => ({
   total: mappingStore.summary?.total_patients ?? 0,
   active: mappingStore.summary?.active_patients ?? 0,
   mapped: mappingStore.summary?.mapped_patients ?? 0,
   unmapped: mappingStore.summary?.unmapped_patients ?? 0,
   missingAddress: mappingStore.summary?.missing_address_patients ?? 0,
-}))
+}));
 
 const filteredPatients = computed<MappingPatientRow[]>(() => {
-  const query = search.value.trim().toLowerCase()
+  const query = search.value.trim().toLowerCase();
 
   return mappingStore.patients.filter((patient) => {
-    if (status.value !== 'all' && patient.tb_status !== status.value) return false
-    if (tbType.value !== 'all' && patient.tb_type !== tbType.value) return false
-    if (geocodeStatus.value !== 'all' && patient.geocode_status !== geocodeStatus.value) return false
-    if (enrolledFrom.value && patient.enrolled_at < enrolledFrom.value) return false
-    if (enrolledTo.value && patient.enrolled_at > enrolledTo.value) return false
-    if (!query) return true
+    if (status.value !== 'all' && patient.tb_status !== status.value) return false;
+    if (tbType.value !== 'all' && patient.tb_type !== tbType.value) return false;
+    if (geocodeStatus.value !== 'all' && patient.geocode_status !== geocodeStatus.value)
+      return false;
+    if (enrolledFrom.value && patient.enrolled_at < enrolledFrom.value) return false;
+    if (enrolledTo.value && patient.enrolled_at > enrolledTo.value) return false;
+    if (!query) return true;
 
     const haystacks = [
       patient.masked_name,
@@ -75,68 +64,68 @@ const filteredPatients = computed<MappingPatientRow[]>(() => {
       patient.tb_type ?? '',
     ]
       .join(' ')
-      .toLowerCase()
+      .toLowerCase();
 
-    return haystacks.includes(query)
-  })
-})
+    return haystacks.includes(query);
+  });
+});
 
-const selectedPatient = computed(() => {
-  const explicit = mappingStore.selectedPatient
+const _selectedPatient = computed(() => {
+  const explicit = mappingStore.selectedPatient;
   if (explicit && filteredPatients.value.some((patient) => patient.hn === explicit.hn)) {
-    return explicit
+    return explicit;
   }
-  return filteredPatients.value[0] ?? null
-})
+  return filteredPatients.value[0] ?? null;
+});
 
-const mappedPatients = computed(() =>
+const _mappedPatients = computed(() =>
   filteredPatients.value.filter((patient) => patient.lat !== null && patient.lng !== null),
-)
+);
 
-function resetFilters(): void {
-  search.value = ''
-  status.value = 'all'
-  tbType.value = 'all'
-  geocodeStatus.value = 'all'
-  enrolledFrom.value = ''
-  enrolledTo.value = ''
+function _resetFilters(): void {
+  search.value = '';
+  status.value = 'all';
+  tbType.value = 'all';
+  geocodeStatus.value = 'all';
+  enrolledFrom.value = '';
+  enrolledTo.value = '';
 }
 
-function geocodeStatusLabel(value: MappingPatientRow['geocode_status']): string {
+function _geocodeStatusLabel(value: MappingPatientRow['geocode_status']): string {
   switch (value) {
     case 'success':
-      return 'พร้อมแสดงบนแผนที่'
+      return 'พร้อมแสดงบนแผนที่';
     case 'failed':
-      return 'แปลงพิกัดไม่สำเร็จ'
+      return 'แปลงพิกัดไม่สำเร็จ';
     case 'missing_address':
-      return 'ไม่มีที่อยู่ใน HOSxP'
+      return 'ไม่มีที่อยู่ใน HOSxP';
     default:
-      return 'รอแปลงพิกัด'
+      return 'รอแปลงพิกัด';
   }
 }
 
-function geocodeStatusClass(value: MappingPatientRow['geocode_status']): string {
+function _geocodeStatusClass(value: MappingPatientRow['geocode_status']): string {
   switch (value) {
     case 'success':
-      return 'geo-pill geo-pill--success'
+      return 'geo-pill geo-pill--success';
     case 'failed':
-      return 'geo-pill geo-pill--failed'
+      return 'geo-pill geo-pill--failed';
     case 'missing_address':
-      return 'geo-pill geo-pill--muted'
+      return 'geo-pill geo-pill--muted';
     default:
-      return 'geo-pill geo-pill--pending'
+      return 'geo-pill geo-pill--pending';
   }
 }
 
-async function handleBatchGeocode(): Promise<void> {
-  batchMessage.value = null
-  const result = await mappingStore.batchGeocode(10)
-  batchMessage.value = `ประมวลผล ${result.processed} ราย • สำเร็จ ${result.succeeded} • ข้าม ${result.skipped} • ไม่สำเร็จ ${result.failed}`
+async function _handleBatchGeocode(): Promise<void> {
+  batchMessage.value = null;
+  const result = await mappingStore.batchGeocode(10);
+  batchMessage.value = `ประมวลผล ${result.processed} ราย • สำเร็จ ${result.succeeded} • ข้าม ${result.skipped} • ไม่สำเร็จ ${result.failed}`;
 }
 
-async function handleSingleGeocode(hn: string): Promise<void> {
-  batchMessage.value = null
-  await mappingStore.geocodePatient(hn)
+async function _handleSingleGeocode(hn: string): Promise<void> {
+  batchMessage.value = null;
+  await mappingStore.geocodePatient(hn);
 }
 </script>
 

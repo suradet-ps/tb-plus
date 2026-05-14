@@ -1,74 +1,73 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
-import { X, UserPlus, CheckCircle, AlertCircle, Loader2 } from 'lucide-vue-next'
-import { usePatientStore } from '@/stores/patient'
-import { useSettingsStore } from '@/stores/settings'
-import type { PatientDrugRecord, EnrollmentInput } from '@/types/patient'
+import { computed, ref, watch } from 'vue';
+import { usePatientStore } from '@/stores/patient';
+import { useSettingsStore } from '@/stores/settings';
+import type { EnrollmentInput, PatientDrugRecord } from '@/types/patient';
 
 const props = defineProps<{
-  modelValue: boolean
-  patients: PatientDrugRecord[]
-}>()
+  modelValue: boolean;
+  patients: PatientDrugRecord[];
+}>();
 
 const emit = defineEmits<{
-  'update:modelValue': [value: boolean]
-  enrolled: []
-}>()
+  'update:modelValue': [value: boolean];
+  enrolled: [];
+}>();
 
-const patientStore = usePatientStore()
-const settingsStore = useSettingsStore()
+const patientStore = usePatientStore();
+const _settingsStore = useSettingsStore();
 
 // ── Form state ────────────────────────────────────────────────────────────────
-const tbType = ref('pulmonary')
-const diagnosisDate = ref('')
-const regimen = ref('2HRZE/4HR')
-const treatmentStartDate = ref('')
-const enrolledBy = ref('')
-const notes = ref('')
-const isSubmitting = ref(false)
-const error = ref<string | null>(null)
-const success = ref(false)
+const tbType = ref('pulmonary');
+const diagnosisDate = ref('');
+const regimen = ref('2HRZE/4HR');
+const treatmentStartDate = ref('');
+const enrolledBy = ref('');
+const notes = ref('');
+const isSubmitting = ref(false);
+const error = ref<string | null>(null);
+const success = ref(false);
 
 // ── Re-enrollment detection ───────────────────────────────────────────────────
-const reenrollCount = computed(() =>
-  props.patients.filter(
-    (p) => p.is_enrolled && p.patient_status && p.patient_status !== 'active',
-  ).length,
-)
-const hasReenrollPatients = computed(() => reenrollCount.value > 0)
+const reenrollCount = computed(
+  () =>
+    props.patients.filter((p) => p.is_enrolled && p.patient_status && p.patient_status !== 'active')
+      .length,
+);
+const _hasReenrollPatients = computed(() => reenrollCount.value > 0);
 
 // ── Reset form whenever the modal opens ───────────────────────────────────────
 watch(
   () => props.modelValue,
   (val) => {
     if (val) {
-      tbType.value = 'pulmonary'
-      diagnosisDate.value = ''
-      regimen.value = '2HRZE/4HR'
-      treatmentStartDate.value = ''
-      enrolledBy.value = ''
-      notes.value = ''
-      error.value = null
-      success.value = false
-      isSubmitting.value = false
+      tbType.value = 'pulmonary';
+      diagnosisDate.value = '';
+      regimen.value = '2HRZE/4HR';
+      treatmentStartDate.value = '';
+      enrolledBy.value = '';
+      notes.value = '';
+      error.value = null;
+      success.value = false;
+      isSubmitting.value = false;
     }
   },
-)
+);
 
 // ── Actions ───────────────────────────────────────────────────────────────────
 function close() {
-  if (isSubmitting.value) return
-  emit('update:modelValue', false)
+  if (isSubmitting.value) return;
+  emit('update:modelValue', false);
 }
 
-async function submit() {
+async function _submit() {
   if (!treatmentStartDate.value) {
-    error.value = 'กรุณาระบุวันเริ่มการรักษา'
-    return
+    error.value = 'กรุณาระบุวันเริ่มการรักษา';
+    return;
   }
 
-  isSubmitting.value = true
-  error.value = null
+  isSubmitting.value = true;
+  error.value = null;
 
   try {
     for (const patient of props.patients) {
@@ -80,25 +79,25 @@ async function submit() {
         treatment_start_date: treatmentStartDate.value,
         enrolled_by: enrolledBy.value || null,
         notes: notes.value || null,
-      }
-      await patientStore.enrollPatient(input)
+      };
+      await patientStore.enrollPatient(input);
     }
 
-    success.value = true
+    success.value = true;
     setTimeout(() => {
-      emit('enrolled')
-      close()
-      success.value = false
-    }, 1200)
+      emit('enrolled');
+      close();
+      success.value = false;
+    }, 1200);
   } catch (e) {
-    error.value = String(e)
+    error.value = String(e);
   } finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
 }
 
-function unfocus(e: Event) {
-  (e.target as HTMLElement)?.blur()
+function _unfocus(e: Event) {
+  (e.target as HTMLElement)?.blur();
 }
 </script>
 

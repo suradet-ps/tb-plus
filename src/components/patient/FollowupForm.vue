@@ -1,33 +1,32 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { invoke } from '@tauri-apps/api/core'
-import { X, Loader2, AlertTriangle } from 'lucide-vue-next'
-import type { FollowupInput } from '@/types/treatment'
+import { invoke } from '@tauri-apps/api/core';
+import { ref, watch } from 'vue';
+import type { FollowupInput } from '@/types/treatment';
 
 // ── Props & Emits ─────────────────────────────────────────────────────────
 
 const props = defineProps<{
-  modelValue: boolean
-  hn: string
-  monthNumber?: number
-}>()
+  modelValue: boolean;
+  hn: string;
+  monthNumber?: number;
+}>();
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-  (e: 'saved'): void
-}>()
+  (e: 'update:modelValue', value: boolean): void;
+  (e: 'saved'): void;
+}>();
 
 // ── Side effect options ───────────────────────────────────────────────────
 
 interface SideEffectOption {
-  key: string
-  label: string
-  labelEn: string
-  drug: string
-  isPriority?: boolean
+  key: string;
+  label: string;
+  labelEn: string;
+  drug: string;
+  isPriority?: boolean;
 }
 
-const SIDE_EFFECT_OPTIONS: SideEffectOption[] = [
+const _SIDE_EFFECT_OPTIONS: SideEffectOption[] = [
   {
     key: 'ชาปลายมือเท้า',
     label: 'ชาปลายมือเท้า',
@@ -77,23 +76,23 @@ const SIDE_EFFECT_OPTIONS: SideEffectOption[] = [
     labelEn: 'Nausea / Vomiting',
     drug: '-',
   },
-]
+];
 
 // ── Form state ────────────────────────────────────────────────────────────
 
 function todayISO(): string {
-  return new Date().toISOString().slice(0, 10)
+  return new Date().toISOString().slice(0, 10);
 }
 
 interface FormState {
-  followup_date: string
-  month_number: number | null
-  weight_kg: number | null
-  sputum_result: string
-  xray_result: string
-  adherence: string
-  notes: string
-  created_by: string
+  followup_date: string;
+  month_number: number | null;
+  weight_kg: number | null;
+  sputum_result: string;
+  xray_result: string;
+  adherence: string;
+  notes: string;
+  created_by: string;
 }
 
 function createEmptyForm(): FormState {
@@ -106,20 +105,20 @@ function createEmptyForm(): FormState {
     adherence: '',
     notes: '',
     created_by: '',
-  }
+  };
 }
 
-const form = ref<FormState>(createEmptyForm())
-const selectedSideEffects = ref<string[]>([])
-const isSubmitting = ref(false)
-const submitError = ref<string | null>(null)
+const form = ref<FormState>(createEmptyForm());
+const selectedSideEffects = ref<string[]>([]);
+const isSubmitting = ref(false);
+const submitError = ref<string | null>(null);
 
 // Warn when optic neuritis (E side effect) is checked
-const hasOpticNeuritisChecked = ref(false)
+const hasOpticNeuritisChecked = ref(false);
 
 watch(selectedSideEffects, (list) => {
-  hasOpticNeuritisChecked.value = list.includes('ตาพร่า/ตาบอดสี')
-})
+  hasOpticNeuritisChecked.value = list.includes('ตาพร่า/ตาบอดสี');
+});
 
 // ── Reset on open ─────────────────────────────────────────────────────────
 
@@ -127,31 +126,31 @@ watch(
   () => props.modelValue,
   (open) => {
     if (open) {
-      form.value = createEmptyForm()
-      selectedSideEffects.value = []
-      submitError.value = null
+      form.value = createEmptyForm();
+      selectedSideEffects.value = [];
+      submitError.value = null;
     }
   },
-)
+);
 
 watch(
   () => props.monthNumber,
   (n) => {
-    form.value.month_number = n ?? null
+    form.value.month_number = n ?? null;
   },
-)
+);
 
 // ── Submit ────────────────────────────────────────────────────────────────
 
-async function handleSubmit() {
-  submitError.value = null
+async function _handleSubmit() {
+  submitError.value = null;
 
   if (!form.value.followup_date) {
-    submitError.value = 'กรุณาระบุวันที่ติดตามผล'
-    return
+    submitError.value = 'กรุณาระบุวันที่ติดตามผล';
+    return;
   }
 
-  isSubmitting.value = true
+  isSubmitting.value = true;
   try {
     const input: FollowupInput = {
       hn: props.hn,
@@ -164,30 +163,30 @@ async function handleSubmit() {
       adherence: form.value.adherence || null,
       notes: form.value.notes.trim() || null,
       created_by: form.value.created_by.trim() || null,
-    }
-    await invoke('add_followup', { followup: input })
-    emit('saved')
-    close()
+    };
+    await invoke('add_followup', { followup: input });
+    emit('saved');
+    close();
   } catch (e) {
-    submitError.value = String(e)
+    submitError.value = String(e);
   } finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
 }
 
 // ── Close helpers ─────────────────────────────────────────────────────────
 
 function close() {
-  if (isSubmitting.value) return
-  emit('update:modelValue', false)
+  if (isSubmitting.value) return;
+  emit('update:modelValue', false);
 }
 
-function onOverlayPointerDown(e: MouseEvent) {
-  if (e.target === e.currentTarget) close()
+function _onOverlayPointerDown(e: MouseEvent) {
+  if (e.target === e.currentTarget) close();
 }
 
-function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape') close()
+function _onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') close();
 }
 </script>
 

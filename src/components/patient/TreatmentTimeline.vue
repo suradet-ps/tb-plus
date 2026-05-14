@@ -1,52 +1,54 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { TreatmentPlan, Followup } from '@/types/treatment'
+import { computed } from 'vue';
+import type { Followup, TreatmentPlan } from '@/types/treatment';
 
 const props = defineProps<{
-  plans: TreatmentPlan[]
-  followups: Followup[]
-}>()
+  plans: TreatmentPlan[];
+  followups: Followup[];
+}>();
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
 function addMonths(date: Date, months: number): Date {
-  const d = new Date(date)
-  d.setMonth(d.getMonth() + months)
-  return d
+  const d = new Date(date);
+  d.setMonth(d.getMonth() + months);
+  return d;
 }
 
 /** Parse "2HRZE/4HR" → { intensiveMonths: 2, continuationMonths: 4 } */
 function parseRegimen(regimen: string): { intensiveMonths: number; continuationMonths: number } {
-  const match = regimen.match(/^(\d+)[A-Za-z]+\/(\d+)/)
+  const match = regimen.match(/^(\d+)[A-Za-z]+\/(\d+)/);
   if (match) {
     return {
       intensiveMonths: parseInt(match[1], 10),
       continuationMonths: parseInt(match[2], 10),
-    }
+    };
   }
   // sensible fallback for standard regimen
-  return { intensiveMonths: 2, continuationMonths: 4 }
+  return { intensiveMonths: 2, continuationMonths: 4 };
 }
 
 function toThaiDate(iso: string): string {
   try {
-    const [y, m, d] = iso.split('-').map(Number)
-    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`
+    const [y, m, d] = iso.split('-').map(Number);
+    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
   } catch {
-    return iso
+    return iso;
   }
 }
 
 // ── Plan resolution ───────────────────────────────────────────────────────
 
-const intensivePlan = computed(() => props.plans.find((p) => p.phase === 'intensive') ?? null)
-const continuationPlan = computed(() => props.plans.find((p) => p.phase === 'continuation') ?? null)
-const anyPlan = computed(() => intensivePlan.value ?? continuationPlan.value)
+const intensivePlan = computed(() => props.plans.find((p) => p.phase === 'intensive') ?? null);
+const continuationPlan = computed(
+  () => props.plans.find((p) => p.phase === 'continuation') ?? null,
+);
+const _anyPlan = computed(() => intensivePlan.value ?? continuationPlan.value);
 
 interface PhaseInfo {
-  start: Date
-  end: Date
-  durationMonths: number
+  start: Date;
+  end: Date;
+  durationMonths: number;
 }
 
 /**
@@ -55,24 +57,24 @@ interface PhaseInfo {
  */
 const intensiveInfo = computed<PhaseInfo | null>(() => {
   if (intensivePlan.value) {
-    const start = new Date(intensivePlan.value.phase_start)
+    const start = new Date(intensivePlan.value.phase_start);
     const end = intensivePlan.value.phase_end_expected
       ? new Date(intensivePlan.value.phase_end_expected)
-      : addMonths(new Date(start), intensivePlan.value.duration_months)
-    return { start, end, durationMonths: intensivePlan.value.duration_months }
+      : addMonths(new Date(start), intensivePlan.value.duration_months);
+    return { start, end, durationMonths: intensivePlan.value.duration_months };
   }
 
   // Back-compute from continuation plan
   if (continuationPlan.value) {
-    const parsed = parseRegimen(continuationPlan.value.regimen)
-    if (parsed.intensiveMonths === 0) return null
-    const contStart = new Date(continuationPlan.value.phase_start)
-    const intStart = addMonths(new Date(contStart), -parsed.intensiveMonths)
-    return { start: intStart, end: contStart, durationMonths: parsed.intensiveMonths }
+    const parsed = parseRegimen(continuationPlan.value.regimen);
+    if (parsed.intensiveMonths === 0) return null;
+    const contStart = new Date(continuationPlan.value.phase_start);
+    const intStart = addMonths(new Date(contStart), -parsed.intensiveMonths);
+    return { start: intStart, end: contStart, durationMonths: parsed.intensiveMonths };
   }
 
-  return null
-})
+  return null;
+});
 
 /**
  * Resolves continuation phase boundaries.
@@ -80,110 +82,112 @@ const intensiveInfo = computed<PhaseInfo | null>(() => {
  */
 const continuationInfo = computed<PhaseInfo | null>(() => {
   if (continuationPlan.value) {
-    const start = new Date(continuationPlan.value.phase_start)
+    const start = new Date(continuationPlan.value.phase_start);
     const end = continuationPlan.value.phase_end_expected
       ? new Date(continuationPlan.value.phase_end_expected)
-      : addMonths(new Date(start), continuationPlan.value.duration_months)
-    return { start, end, durationMonths: continuationPlan.value.duration_months }
+      : addMonths(new Date(start), continuationPlan.value.duration_months);
+    return { start, end, durationMonths: continuationPlan.value.duration_months };
   }
 
   // Derive from intensive plan + regimen
   if (intensivePlan.value) {
-    const parsed = parseRegimen(intensivePlan.value.regimen)
-    if (parsed.continuationMonths === 0) return null
+    const parsed = parseRegimen(intensivePlan.value.regimen);
+    if (parsed.continuationMonths === 0) return null;
     const intEnd = intensivePlan.value.phase_end_expected
       ? new Date(intensivePlan.value.phase_end_expected)
-      : addMonths(new Date(intensivePlan.value.phase_start), intensivePlan.value.duration_months)
-    const contEnd = addMonths(new Date(intEnd), parsed.continuationMonths)
-    return { start: intEnd, end: contEnd, durationMonths: parsed.continuationMonths }
+      : addMonths(new Date(intensivePlan.value.phase_start), intensivePlan.value.duration_months);
+    const contEnd = addMonths(new Date(intEnd), parsed.continuationMonths);
+    return { start: intEnd, end: contEnd, durationMonths: parsed.continuationMonths };
   }
 
-  return null
-})
+  return null;
+});
 
 // ── Timeline bounds ───────────────────────────────────────────────────────
 
-const overallStart = computed(() => intensiveInfo.value?.start ?? continuationInfo.value?.start ?? null)
-const overallEnd   = computed(() => continuationInfo.value?.end ?? intensiveInfo.value?.end ?? null)
+const overallStart = computed(
+  () => intensiveInfo.value?.start ?? continuationInfo.value?.start ?? null,
+);
+const overallEnd = computed(() => continuationInfo.value?.end ?? intensiveInfo.value?.end ?? null);
 
 const totalDays = computed(() => {
-  if (!overallStart.value || !overallEnd.value) return 1
-  const d = (overallEnd.value.getTime() - overallStart.value.getTime()) / 86_400_000
-  return Math.max(1, d)
-})
+  if (!overallStart.value || !overallEnd.value) return 1;
+  const d = (overallEnd.value.getTime() - overallStart.value.getTime()) / 86_400_000;
+  return Math.max(1, d);
+});
 
 // ── Percentage helpers ────────────────────────────────────────────────────
 
 function pctFromDate(date: Date): number {
-  if (!overallStart.value) return 0
-  const days = (date.getTime() - overallStart.value.getTime()) / 86_400_000
-  return Math.max(0, Math.min(100, (days / totalDays.value) * 100))
+  if (!overallStart.value) return 0;
+  const days = (date.getTime() - overallStart.value.getTime()) / 86_400_000;
+  return Math.max(0, Math.min(100, (days / totalDays.value) * 100));
 }
 
 const intensivePct = computed(() => {
-  if (!intensiveInfo.value) return 0
+  if (!intensiveInfo.value) return 0;
   const dur =
-    (intensiveInfo.value.end.getTime() - intensiveInfo.value.start.getTime()) / 86_400_000
-  return Math.min(100, (dur / totalDays.value) * 100)
-})
+    (intensiveInfo.value.end.getTime() - intensiveInfo.value.start.getTime()) / 86_400_000;
+  return Math.min(100, (dur / totalDays.value) * 100);
+});
 
-const continuationPct = computed(() => {
-  if (!continuationInfo.value) return 0
+const _continuationPct = computed(() => {
+  if (!continuationInfo.value) return 0;
   const dur =
-    (continuationInfo.value.end.getTime() - continuationInfo.value.start.getTime()) / 86_400_000
-  return Math.min(100 - intensivePct.value, (dur / totalDays.value) * 100)
-})
+    (continuationInfo.value.end.getTime() - continuationInfo.value.start.getTime()) / 86_400_000;
+  return Math.min(100 - intensivePct.value, (dur / totalDays.value) * 100);
+});
 
-const todayPct = computed<number | null>(() => {
-  if (!overallStart.value) return null
-  return pctFromDate(new Date())
-})
+const _todayPct = computed<number | null>(() => {
+  if (!overallStart.value) return null;
+  return pctFromDate(new Date());
+});
 
-function followupPct(date: string): number {
-  return pctFromDate(new Date(date))
+function _followupPct(date: string): number {
+  return pctFromDate(new Date(date));
 }
 
 // ── Month ticks ───────────────────────────────────────────────────────────
 
-const totalMonths = computed(
+const _totalMonths = computed(
   () => (intensiveInfo.value?.durationMonths ?? 0) + (continuationInfo.value?.durationMonths ?? 0),
-)
+);
 
 // ── Date labels ───────────────────────────────────────────────────────────
 
-const startLabel = computed(() =>
+const _startLabel = computed(() =>
   overallStart.value ? toThaiDate(overallStart.value.toISOString().slice(0, 10)) : '',
-)
-const endLabel = computed(() =>
+);
+const _endLabel = computed(() =>
   overallEnd.value ? toThaiDate(overallEnd.value.toISOString().slice(0, 10)) : '',
-)
+);
 
 // Boundary between phases (intensive end / continuation start)
-const showBoundary = computed(() => intensiveInfo.value !== null && continuationInfo.value !== null)
+const _showBoundary = computed(
+  () => intensiveInfo.value !== null && continuationInfo.value !== null,
+);
 
 const boundaryDate = computed(() => {
-  if (intensiveInfo.value) return intensiveInfo.value.end
-  if (continuationInfo.value) return continuationInfo.value.start
-  return null
-})
+  if (intensiveInfo.value) return intensiveInfo.value.end;
+  if (continuationInfo.value) return continuationInfo.value.start;
+  return null;
+});
 
-const boundaryPct = computed(() =>
-  boundaryDate.value ? pctFromDate(boundaryDate.value) : null
-)
+const boundaryPct = computed(() => (boundaryDate.value ? pctFromDate(boundaryDate.value) : null));
 
-const boundaryPctClamped = computed(() =>
-  boundaryPct.value !== null ? Math.max(1, Math.min(99, boundaryPct.value)) : null
-)
+const _boundaryPctClamped = computed(() =>
+  boundaryPct.value !== null ? Math.max(1, Math.min(99, boundaryPct.value)) : null,
+);
 
-const boundaryLabel = computed(() =>
-  boundaryDate.value ? toThaiDate(boundaryDate.value.toISOString().slice(0, 10)) : ''
-)
+const _boundaryLabel = computed(() =>
+  boundaryDate.value ? toThaiDate(boundaryDate.value.toISOString().slice(0, 10)) : '',
+);
 
 // ── Tooltip for each followup dot ─────────────────────────────────────────
 
-function dotTooltip(f: Followup): string {
-  const dateStr = toThaiDate(f.followup_date)
-  return f.month_number ? `ติดตามผล: ${dateStr} (เดือนที่ ${f.month_number})` : `ติดตามผล: ${dateStr}`
+function _dotTooltip(f: Followup): string {
+  const dateStr = toThaiDate(f.followup_date);
+  return f.month_number ? `ติดตามผล: ${dateStr} (เดือนที่ ${f.month_number})` : `ติดตามผล: ${dateStr}`;
 }
 </script>
 

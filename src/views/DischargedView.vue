@@ -1,67 +1,87 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
-import { RouterLink } from 'vue-router'
-import { RefreshCw, Users, CheckCircle, Loader2, AlertTriangle, UserMinus } from 'lucide-vue-next'
-import { usePatientStore } from '@/stores/patient'
+import { computed, onMounted } from 'vue';
+import { usePatientStore } from '@/stores/patient';
 
-const patientStore = usePatientStore()
+const patientStore = usePatientStore();
 
 onMounted(() => {
-  patientStore.fetchDischargedPatients()
-})
+  patientStore.fetchDischargedPatients();
+});
 
-const total = computed(() => patientStore.dischargedPatients.length)
+const _total = computed(() => patientStore.dischargedPatients.length);
 
-function getOutcomeLabel(p: import('@/types/patient').ActivePatientRow): string {
-  const outcome = p.outcome_value ?? p.tb_patient.status
+function _getOutcomeLabel(p: import('@/types/patient').ActivePatientRow): string {
+  const outcome = p.outcome_value ?? p.tb_patient.status;
   switch (outcome) {
-    case 'cured':               return 'หาย'
-    case 'treatment_completed': return 'รักษาครบ'
-    case 'treatment_failed':    return 'รักษาล้มเหลว'
-    case 'died':                return 'เสียชีวิต'
-    case 'lost_to_followup':    return 'ขาดการรักษา'
-    case 'transferred_out':     return 'ส่งต่อ'
-    case 'not_evaluated':       return 'ไม่ได้ประเมิน'
+    case 'cured':
+      return 'หาย';
+    case 'treatment_completed':
+      return 'รักษาครบ';
+    case 'treatment_failed':
+      return 'รักษาล้มเหลว';
+    case 'died':
+      return 'เสียชีวิต';
+    case 'lost_to_followup':
+      return 'ขาดการรักษา';
+    case 'transferred_out':
+      return 'ส่งต่อ';
+    case 'not_evaluated':
+      return 'ไม่ได้ประเมิน';
     // Fallback for legacy tb_patients.status values
-    case 'completed':           return 'รักษาครบ'
-    case 'transferred':         return 'ส่งต่อ'
-    case 'defaulted':           return 'ขาดการรักษา'
-    default:                    return outcome
+    case 'completed':
+      return 'รักษาครบ';
+    case 'transferred':
+      return 'ส่งต่อ';
+    case 'defaulted':
+      return 'ขาดการรักษา';
+    default:
+      return outcome;
   }
 }
 
-function getOutcomeColor(p: import('@/types/patient').ActivePatientRow): string {
-  const outcome = p.outcome_value ?? p.tb_patient.status
+function _getOutcomeColor(p: import('@/types/patient').ActivePatientRow): string {
+  const outcome = p.outcome_value ?? p.tb_patient.status;
   switch (outcome) {
-    case 'cured':               return '#1aae39'
-    case 'treatment_completed': return '#2a9d99'
-    case 'treatment_failed':    return '#dd5b00'
-    case 'died':                return '#615d59'
-    case 'lost_to_followup':    return '#dd5b00'
-    case 'transferred_out':     return '#0075de'
-    case 'not_evaluated':       return '#a39e98'
+    case 'cured':
+      return '#1aae39';
+    case 'treatment_completed':
+      return '#2a9d99';
+    case 'treatment_failed':
+      return '#dd5b00';
+    case 'died':
+      return '#615d59';
+    case 'lost_to_followup':
+      return '#dd5b00';
+    case 'transferred_out':
+      return '#0075de';
+    case 'not_evaluated':
+      return '#a39e98';
     // Fallback for legacy tb_patients.status values
-    case 'completed':           return '#2a9d99'
-    case 'transferred':         return '#0075de'
-    case 'defaulted':           return '#dd5b00'
-    default:                    return '#a39e98'
+    case 'completed':
+      return '#2a9d99';
+    case 'transferred':
+      return '#0075de';
+    case 'defaulted':
+      return '#dd5b00';
+    default:
+      return '#a39e98';
   }
 }
 
-function toThaiDate(iso: string | null | undefined): string {
-  if (!iso) return '—'
+function _toThaiDate(iso: string | null | undefined): string {
+  if (!iso) return '—';
   try {
-    const [y, m, d] = iso.split('-').map(Number)
-    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`
+    const [y, m, d] = iso.split('-').map(Number);
+    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
   } catch {
-    return iso ?? '—'
+    return iso ?? '—';
   }
 }
 
-function getTbTypeLabel(tbType: string | null | undefined): string {
-  if (tbType === 'pulmonary') return 'วัณโรคปอด'
-  if (tbType === 'extra_pulmonary') return 'วัณโรคนอกปอด'
-  return '—'
+function _getTbTypeLabel(tbType: string | null | undefined): string {
+  if (tbType === 'pulmonary') return 'วัณโรคปอด';
+  if (tbType === 'extra_pulmonary') return 'วัณโรคนอกปอด';
+  return '—';
 }
 </script>
 

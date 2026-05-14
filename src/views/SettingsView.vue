@@ -1,307 +1,301 @@
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue'
-import {
-  Database,
-  Server,
-  Pill,
-  Users,
-  HardDrive,
-  CheckCircle,
-  XCircle,
-  Loader2,
-  Plus,
-  Trash2,
-  Download,
-  Wifi,
-  WifiOff,
-  AlertTriangle,
-  Search,
-} from 'lucide-vue-next'
-import { invoke } from '@tauri-apps/api/core'
-import { save as saveDialog } from '@tauri-apps/plugin-dialog'
-import { useSettingsStore, type DbConfig, type RegimenPhase } from '@/stores/settings'
-import DrugChip from '@/components/shared/DrugChip.vue'
+import { invoke } from '@tauri-apps/api/core';
+import { save as saveDialog } from '@tauri-apps/plugin-dialog';
+import { reactive, ref, watch } from 'vue';
+import { type DbConfig, type RegimenPhase, useSettingsStore } from '@/stores/settings';
 
-const settingsStore = useSettingsStore()
+const settingsStore = useSettingsStore();
 
 // ── Section navigation ───────────────────────────────────────────────
-type Section = 'mysql' | 'hosxp' | 'drugcodes' | 'alerts' | 'staff' | 'backup'
-const activeSection = ref<Section>('mysql')
+type Section = 'mysql' | 'hosxp' | 'drugcodes' | 'alerts' | 'staff' | 'backup';
+const activeSection = ref<Section>('mysql');
 
-const navItems: { id: Section; label: string; icon: string }[] = [
-  { id: 'mysql',     label: 'ฐานข้อมูล MySQL', icon: 'Database'  },
-  { id: 'hosxp',     label: 'คลินิกวัณโรค',    icon: 'Server'     },
-  { id: 'drugcodes', label: 'ยาและสูตรยา',       icon: 'Pill'      },
-  { id: 'alerts',    label: 'การแจ้งเตือน',     icon: 'AlertTriangle' },
-  { id: 'staff',     label: 'ผู้ใช้งาน',         icon: 'Users'     },
-  { id: 'backup',    label: 'สำรองข้อมูล',       icon: 'HardDrive' },
-]
+const _navItems: { id: Section; label: string; icon: string }[] = [
+  { id: 'mysql', label: 'ฐานข้อมูล MySQL', icon: 'Database' },
+  { id: 'hosxp', label: 'คลินิกวัณโรค', icon: 'Server' },
+  { id: 'drugcodes', label: 'ยาและสูตรยา', icon: 'Pill' },
+  { id: 'alerts', label: 'การแจ้งเตือน', icon: 'AlertTriangle' },
+  { id: 'staff', label: 'ผู้ใช้งาน', icon: 'Users' },
+  { id: 'backup', label: 'สำรองข้อมูล', icon: 'HardDrive' },
+];
 
 // ── MySQL connection form ────────────────────────────────────────────
-const mysqlForm = reactive<DbConfig>({ ...settingsStore.dbConfig })
-const testResult = ref<'idle' | 'testing' | 'success' | 'fail'>('idle')
-const testError  = ref('')
-const isSaving   = ref(false)
-const savedSuccess = ref(false)
-const settingsSaveError = ref<string | null>(null)
-const settingsSaveSuccess = ref<string | null>(null)
+const mysqlForm = reactive<DbConfig>({ ...settingsStore.dbConfig });
+const testResult = ref<'idle' | 'testing' | 'success' | 'fail'>('idle');
+const testError = ref('');
+const isSaving = ref(false);
+const savedSuccess = ref(false);
+const settingsSaveError = ref<string | null>(null);
+const settingsSaveSuccess = ref<string | null>(null);
 
 // Keep the form in sync with the store — handles loadSavedConfig() being called
 // after this component mounts (e.g. navigating to /settings after app init).
 watch(
   () => settingsStore.dbConfig,
-  (cfg) => { Object.assign(mysqlForm, cfg) },
+  (cfg) => {
+    Object.assign(mysqlForm, cfg);
+  },
   { immediate: true },
-)
+);
 
 watch(activeSection, () => {
-  settingsSaveError.value = null
-  settingsSaveSuccess.value = null
-})
+  settingsSaveError.value = null;
+  settingsSaveSuccess.value = null;
+});
 
-async function testConnection() {
-  testResult.value = 'testing'
-  testError.value  = ''
-  const ok = await settingsStore.testConnection(mysqlForm)
-  testResult.value = ok ? 'success' : 'fail'
-  if (!ok) testError.value = settingsStore.connectionError ?? 'การเชื่อมต่อล้มเหลว'
+async function _testConnection() {
+  testResult.value = 'testing';
+  testError.value = '';
+  const ok = await settingsStore.testConnection(mysqlForm);
+  testResult.value = ok ? 'success' : 'fail';
+  if (!ok) testError.value = settingsStore.connectionError ?? 'การเชื่อมต่อล้มเหลว';
 }
 
-async function saveAndConnect() {
-  isSaving.value = true
-  savedSuccess.value = false
-  testResult.value = 'idle'
+async function _saveAndConnect() {
+  isSaving.value = true;
+  savedSuccess.value = false;
+  testResult.value = 'idle';
   try {
-    await settingsStore.connect({ ...mysqlForm })
+    await settingsStore.connect({ ...mysqlForm });
     if (settingsStore.isConnected) {
-      savedSuccess.value = true
-      setTimeout(() => { savedSuccess.value = false }, 3000)
+      savedSuccess.value = true;
+      setTimeout(() => {
+        savedSuccess.value = false;
+      }, 3000);
     }
   } finally {
-    isSaving.value = false
+    isSaving.value = false;
   }
 }
 
 function showSettingsSaved(message: string) {
-  settingsSaveError.value = null
-  settingsSaveSuccess.value = message
+  settingsSaveError.value = null;
+  settingsSaveSuccess.value = message;
   setTimeout(() => {
     if (settingsSaveSuccess.value === message) {
-      settingsSaveSuccess.value = null
+      settingsSaveSuccess.value = null;
     }
-  }, 2500)
+  }, 2500);
 }
 
 function showSettingsSaveError(error: unknown) {
-  settingsSaveSuccess.value = null
-  settingsSaveError.value = String(error)
+  settingsSaveSuccess.value = null;
+  settingsSaveError.value = String(error);
 }
 
 // ── HOSxP clinic search ────────────────────────────────────────────
-const clinicSearchQuery = ref('')
-const clinicSearchResults = ref<{ clinic: string; name: string | null }[]>([])
-const isClinicSearching = ref(false)
-const clinicSearchError = ref('')
+const clinicSearchQuery = ref('');
+const clinicSearchResults = ref<{ clinic: string; name: string | null }[]>([]);
+const isClinicSearching = ref(false);
+const clinicSearchError = ref('');
 
-async function searchClinics() {
-  if (!clinicSearchQuery.value.trim()) return
-  isClinicSearching.value = true
-  clinicSearchError.value = ''
-  clinicSearchResults.value = []
+async function _searchClinics() {
+  if (!clinicSearchQuery.value.trim()) return;
+  isClinicSearching.value = true;
+  clinicSearchError.value = '';
+  clinicSearchResults.value = [];
   try {
-    clinicSearchResults.value = await settingsStore.searchClinics(clinicSearchQuery.value.trim())
+    clinicSearchResults.value = await settingsStore.searchClinics(clinicSearchQuery.value.trim());
     if (clinicSearchResults.value.length === 0) {
-      clinicSearchError.value = 'ไม่พบคลินิก'
+      clinicSearchError.value = 'ไม่พบคลินิก';
     }
   } catch (e) {
-    clinicSearchError.value = String(e)
+    clinicSearchError.value = String(e);
   } finally {
-    isClinicSearching.value = false
+    isClinicSearching.value = false;
   }
 }
 
-function selectClinic(code: string) {
-  settingsStore.hosxpSettings.clinic_code = code
+function _selectClinic(code: string) {
+  settingsStore.hosxpSettings.clinic_code = code;
 }
 
 // ── HOSxP / Alert save ──────────────────────────────────────────────
-const hosxpSaved = ref(false)
-async function saveHosxp() {
-  await settingsStore.saveHosxpSettings()
-  hosxpSaved.value = true
-  setTimeout(() => { hosxpSaved.value = false }, 2500)
+const hosxpSaved = ref(false);
+async function _saveHosxp() {
+  await settingsStore.saveHosxpSettings();
+  hosxpSaved.value = true;
+  setTimeout(() => {
+    hosxpSaved.value = false;
+  }, 2500);
 }
 
-const alertsSaved = ref(false)
-async function saveAlerts() {
-  await settingsStore.saveAlertThresholds()
-  alertsSaved.value = true
-  setTimeout(() => { alertsSaved.value = false }, 2500)
+const alertsSaved = ref(false);
+async function _saveAlerts() {
+  await settingsStore.saveAlertThresholds();
+  alertsSaved.value = true;
+  setTimeout(() => {
+    alertsSaved.value = false;
+  }, 2500);
 }
 
 // ── Drug class management — search-first flow ────────────────────────
-const drugSearchQuery = ref('')
-const drugSearchResults = ref<any[]>([])
-const isSearching = ref(false)
-const assignLetters = ref<Record<string, string>>({})
+const drugSearchQuery = ref('');
+const drugSearchResults = ref<any[]>([]);
+const isSearching = ref(false);
+const assignLetters = ref<Record<string, string>>({});
 
-const searchErrorMsg = ref('')
+const searchErrorMsg = ref('');
 
-async function searchDrugs() {
-  if (!drugSearchQuery.value.trim()) return
-  isSearching.value = true
-  searchErrorMsg.value = ''
-  drugSearchResults.value = []
+async function _searchDrugs() {
+  if (!drugSearchQuery.value.trim()) return;
+  isSearching.value = true;
+  searchErrorMsg.value = '';
+  drugSearchResults.value = [];
   try {
-    drugSearchResults.value = await settingsStore.searchDrugs(drugSearchQuery.value.trim())
-    assignLetters.value = {}
+    drugSearchResults.value = await settingsStore.searchDrugs(drugSearchQuery.value.trim());
+    assignLetters.value = {};
     if (drugSearchResults.value.length === 0) {
-      searchErrorMsg.value = 'ไม่พบรายการยา — ตรวจสอบชื่อหรือ icode'
+      searchErrorMsg.value = 'ไม่พบรายการยา — ตรวจสอบชื่อหรือ icode';
     }
   } catch (e) {
-    searchErrorMsg.value = String(e)
+    searchErrorMsg.value = String(e);
   } finally {
-    isSearching.value = false
+    isSearching.value = false;
   }
 }
 
-function assignIcodeToClass(icode: string, drugName: string) {
-  const letter = assignLetters.value[icode]?.trim().toUpperCase()
-  if (!letter) return
-  let entry = settingsStore.drugClasses.find(c => c.class === letter)
+function _assignIcodeToClass(icode: string, drugName: string) {
+  const letter = assignLetters.value[icode]?.trim().toUpperCase();
+  if (!letter) return;
+  let entry = settingsStore.drugClasses.find((c) => c.class === letter);
   if (!entry) {
     // Create new class with this icode
-    settingsStore.drugClasses.push({ class: letter, icodes: [icode], name: drugName })
+    settingsStore.drugClasses.push({ class: letter, icodes: [icode], name: drugName });
   } else if (!entry.icodes.includes(icode)) {
-    entry.icodes.push(icode)
+    entry.icodes.push(icode);
   }
-  assignLetters.value[icode] = ''
-  settingsStore.syncDrugCodesFromClasses()
-  saveDrugClasses()
+  assignLetters.value[icode] = '';
+  settingsStore.syncDrugCodesFromClasses();
+  saveDrugClasses();
 }
 
-function removeDrugClass(cls: string) {
-  settingsStore.drugClasses = settingsStore.drugClasses.filter(c => c.class !== cls)
-  settingsStore.syncDrugCodesFromClasses()
-  saveDrugClasses()
+function _removeDrugClass(cls: string) {
+  settingsStore.drugClasses = settingsStore.drugClasses.filter((c) => c.class !== cls);
+  settingsStore.syncDrugCodesFromClasses();
+  saveDrugClasses();
 }
 
-function removeDrugIcode(cls: string, icode: string) {
-  const entry = settingsStore.drugClasses.find(c => c.class === cls)
+function _removeDrugIcode(cls: string, icode: string) {
+  const entry = settingsStore.drugClasses.find((c) => c.class === cls);
   if (entry && entry.icodes.length > 1) {
-    entry.icodes = entry.icodes.filter(c => c !== icode)
-    settingsStore.syncDrugCodesFromClasses()
-    saveDrugClasses()
+    entry.icodes = entry.icodes.filter((c) => c !== icode);
+    settingsStore.syncDrugCodesFromClasses();
+    saveDrugClasses();
   }
 }
 
 async function saveDrugClasses() {
   try {
-    await settingsStore.saveDrugClasses()
-    showSettingsSaved('บันทึกกลุ่มยาแล้ว')
-  } catch (e) { showSettingsSaveError(e) }
+    await settingsStore.saveDrugClasses();
+    showSettingsSaved('บันทึกกลุ่มยาแล้ว');
+  } catch (e) {
+    showSettingsSaveError(e);
+  }
 }
 
 // ── Regimen management (structured) ─────────────────────────────────
-const newRegimenName = ref('')
-const editingRegimen = ref<{ name: string; phases: RegimenPhase[] } | null>(null)
-const editingRegimenIdx = ref(-1)
+const newRegimenName = ref('');
+const editingRegimen = ref<{ name: string; phases: RegimenPhase[] } | null>(null);
+const editingRegimenIdx = ref(-1);
 
-function addRegimenEntry() {
-  const name = newRegimenName.value.trim().toUpperCase()
-  if (!name) return
-  if (settingsStore.regimenDefinitions.find(r => r.name === name)) return
-  settingsStore.regimenDefinitions.push({ name, phases: [] })
-  newRegimenName.value = ''
-  saveRegimens()
+function _addRegimenEntry() {
+  const name = newRegimenName.value.trim().toUpperCase();
+  if (!name) return;
+  if (settingsStore.regimenDefinitions.find((r) => r.name === name)) return;
+  settingsStore.regimenDefinitions.push({ name, phases: [] });
+  newRegimenName.value = '';
+  saveRegimens();
 }
 
-function removeRegimenEntry(name: string) {
-  settingsStore.regimenDefinitions = settingsStore.regimenDefinitions.filter(r => r.name !== name)
-  saveRegimens()
+function _removeRegimenEntry(name: string) {
+  settingsStore.regimenDefinitions = settingsStore.regimenDefinitions.filter(
+    (r) => r.name !== name,
+  );
+  saveRegimens();
 }
 
-function editRegimenPhases(name: string) {
-  const entry = settingsStore.regimenDefinitions.find(r => r.name === name)
+function _editRegimenPhases(name: string) {
+  const entry = settingsStore.regimenDefinitions.find((r) => r.name === name);
   if (entry) {
-    editingRegimenIdx.value = settingsStore.regimenDefinitions.indexOf(entry)
+    editingRegimenIdx.value = settingsStore.regimenDefinitions.indexOf(entry);
     editingRegimen.value = {
       name: entry.name,
-      phases: entry.phases.map(p => ({ ...p, drug_classes: [...p.drug_classes] })),
-    }
+      phases: entry.phases.map((p) => ({ ...p, drug_classes: [...p.drug_classes] })),
+    };
   }
 }
 
-function addPhase() {
-  if (!editingRegimen.value) return
-  editingRegimen.value.phases.push({ phase: '', months: 2, drug_classes: [] })
+function _addPhase() {
+  if (!editingRegimen.value) return;
+  editingRegimen.value.phases.push({ phase: '', months: 2, drug_classes: [] });
 }
 
-function removePhase(idx: number) {
-  if (!editingRegimen.value) return
-  editingRegimen.value.phases.splice(idx, 1)
+function _removePhase(idx: number) {
+  if (!editingRegimen.value) return;
+  editingRegimen.value.phases.splice(idx, 1);
 }
 
-function savePhaseEdit() {
-  if (!editingRegimen.value) return
+function _savePhaseEdit() {
+  if (!editingRegimen.value) return;
   if (editingRegimenIdx.value >= 0) {
-    settingsStore.regimenDefinitions[editingRegimenIdx.value] = { ...editingRegimen.value }
+    settingsStore.regimenDefinitions[editingRegimenIdx.value] = { ...editingRegimen.value };
   }
-  editingRegimen.value = null
-  editingRegimenIdx.value = -1
-  saveRegimens()
+  editingRegimen.value = null;
+  editingRegimenIdx.value = -1;
+  saveRegimens();
 }
 
-function togglePhaseDrug(phase: RegimenPhase, cls: string) {
-  const idx = phase.drug_classes.indexOf(cls)
-  if (idx >= 0) phase.drug_classes.splice(idx, 1)
-  else phase.drug_classes.push(cls)
+function _togglePhaseDrug(phase: RegimenPhase, cls: string) {
+  const idx = phase.drug_classes.indexOf(cls);
+  if (idx >= 0) phase.drug_classes.splice(idx, 1);
+  else phase.drug_classes.push(cls);
 }
 
 async function saveRegimens() {
   try {
-    await settingsStore.saveRegimenDefinitions()
-    showSettingsSaved('บันทึกสูตรการรักษาแล้ว')
+    await settingsStore.saveRegimenDefinitions();
+    showSettingsSaved('บันทึกสูตรการรักษาแล้ว');
   } catch (e) {
-    showSettingsSaveError(e)
+    showSettingsSaveError(e);
   }
 }
 
 // ── Staff names ──────────────────────────────────────────────────────
-const newStaff = ref('')
+const newStaff = ref('');
 
-async function addStaff() {
+async function _addStaff() {
   try {
-    const changed = await settingsStore.addStaffName(newStaff.value)
+    const changed = await settingsStore.addStaffName(newStaff.value);
     if (changed) {
-      newStaff.value = ''
-      showSettingsSaved('บันทึกรายชื่อผู้ใช้งานแล้ว')
+      newStaff.value = '';
+      showSettingsSaved('บันทึกรายชื่อผู้ใช้งานแล้ว');
     }
   } catch (e) {
-    showSettingsSaveError(e)
+    showSettingsSaveError(e);
   }
 }
 
-async function removeStaff(name: string) {
+async function _removeStaff(name: string) {
   try {
-    const changed = await settingsStore.removeStaffName(name)
+    const changed = await settingsStore.removeStaffName(name);
     if (changed) {
-      showSettingsSaved('ลบรายชื่อผู้ใช้งานแล้ว')
+      showSettingsSaved('ลบรายชื่อผู้ใช้งานแล้ว');
     }
   } catch (e) {
-    showSettingsSaveError(e)
+    showSettingsSaveError(e);
   }
 }
 
 // ── Backup ───────────────────────────────────────────────────────────
-const isBackingUp = ref(false)
-const backupError = ref<string | null>(null)
-const backupSuccess = ref(false)
+const isBackingUp = ref(false);
+const backupError = ref<string | null>(null);
+const backupSuccess = ref(false);
 
-async function downloadBackup() {
-  isBackingUp.value  = true
-  backupError.value  = null
-  backupSuccess.value = false
+async function _downloadBackup() {
+  isBackingUp.value = true;
+  backupError.value = null;
+  backupSuccess.value = false;
   try {
     const targetPath = await saveDialog({
       defaultPath: `tb-plus-backup-${new Date().toISOString().slice(0, 10)}.db`,
@@ -311,18 +305,20 @@ async function downloadBackup() {
           extensions: ['db', 'sqlite', 'sqlite3'],
         },
       ],
-    })
+    });
     if (!targetPath) {
-      return
+      return;
     }
 
-    await invoke('backup_sqlite', { targetPath })
-    backupSuccess.value = true
-    setTimeout(() => { backupSuccess.value = false }, 4000)
+    await invoke('backup_sqlite', { targetPath });
+    backupSuccess.value = true;
+    setTimeout(() => {
+      backupSuccess.value = false;
+    }, 4000);
   } catch (e) {
-    backupError.value = String(e)
+    backupError.value = String(e);
   } finally {
-    isBackingUp.value = false
+    isBackingUp.value = false;
   }
 }
 </script>

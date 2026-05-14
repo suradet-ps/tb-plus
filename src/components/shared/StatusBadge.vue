@@ -1,35 +1,35 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from 'vue';
 
-type Status = 'active' | 'completed' | 'transferred' | 'died' | 'defaulted'
+type Status = 'active' | 'completed' | 'transferred' | 'died' | 'defaulted';
 
 const props = defineProps<{
-  status: string
-}>()
+  status: string;
+}>();
 
 interface StatusConfig {
-  label: string
-  bg: string
-  color: string
+  label: string;
+  bg: string;
+  color: string;
 }
 
 const statusMap: Record<Status, StatusConfig> = {
-  active:      { label: 'กำลังรักษา',    bg: 'rgba(26, 174, 57, 0.1)',  color: '#1aae39' },
-  completed:   { label: 'รักษาหาย/ครบ',  bg: 'rgba(42, 157, 153, 0.1)', color: '#2a9d99' },
-  transferred: { label: 'ส่งต่อ',         bg: '#f2f9ff',                 color: '#097fe8' },
-  died:        { label: 'เสียชีวิต',      bg: 'rgba(49, 48, 46, 0.1)',   color: '#615d59' },
-  defaulted:   { label: 'ขาดการรักษา',   bg: 'rgba(221, 91, 0, 0.1)',   color: '#dd5b00' },
-}
+  active: { label: 'กำลังรักษา', bg: 'rgba(26, 174, 57, 0.1)', color: '#1aae39' },
+  completed: { label: 'รักษาหาย/ครบ', bg: 'rgba(42, 157, 153, 0.1)', color: '#2a9d99' },
+  transferred: { label: 'ส่งต่อ', bg: '#f2f9ff', color: '#097fe8' },
+  died: { label: 'เสียชีวิต', bg: 'rgba(49, 48, 46, 0.1)', color: '#615d59' },
+  defaulted: { label: 'ขาดการรักษา', bg: 'rgba(221, 91, 0, 0.1)', color: '#dd5b00' },
+};
 
-const config = computed<StatusConfig>(() => {
+const _config = computed<StatusConfig>(() => {
   return (
     statusMap[props.status as Status] ?? {
       label: props.status,
       bg: 'rgba(0, 0, 0, 0.06)',
       color: 'var(--color-text-secondary)',
     }
-  )
-})
+  );
+});
 </script>
 
 <template>

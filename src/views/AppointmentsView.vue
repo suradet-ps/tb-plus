@@ -1,35 +1,34 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { RefreshCw, Calendar, CalendarDays, AlertCircle } from 'lucide-vue-next'
-import { useAppointmentsStore } from '@/stores/appointments'
-import { useSettingsStore } from '@/stores/settings'
+import { onMounted } from 'vue';
+import { useAppointmentsStore } from '@/stores/appointments';
+import { useSettingsStore } from '@/stores/settings';
 
-const store = useAppointmentsStore()
-const settingsStore = useSettingsStore()
+const store = useAppointmentsStore();
+const settingsStore = useSettingsStore();
 
-const todayISO = store.todayISO
-const daysOptions = [7, 14, 30, 60]
+const _todayISO = store.todayISO;
+const _daysOptions = [7, 14, 30, 60];
 
-function toThaiDate(isoDate: string | null | undefined): string {
-  if (!isoDate) return '-'
+function _toThaiDate(isoDate: string | null | undefined): string {
+  if (!isoDate) return '-';
   try {
-    const [y, m, d] = isoDate.split('-').map(Number)
-    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`
+    const [y, m, d] = isoDate.split('-').map(Number);
+    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
   } catch {
-    return '-'
+    return '-';
   }
 }
 
-function setDays(days: number) {
-  store.daysAhead = days
-  store.fetchAppointments(days)
+function _setDays(days: number) {
+  store.daysAhead = days;
+  store.fetchAppointments(days);
 }
 
 onMounted(() => {
   if (settingsStore.isConnected) {
-    store.fetchAppointments()
+    store.fetchAppointments();
   }
-})
+});
 </script>
 
 <template>

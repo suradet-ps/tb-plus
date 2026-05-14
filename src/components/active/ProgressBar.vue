@@ -1,24 +1,24 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from 'vue';
 
 const props = defineProps<{
-  currentMonth: number | null
-  totalMonths: number | null
-  phase?: string | null
-}>()
+  currentMonth: number | null;
+  totalMonths: number | null;
+  phase?: string | null;
+}>();
 
-const pct = computed(() => {
-  if (!props.currentMonth || !props.totalMonths || props.totalMonths === 0) return 0
-  return Math.min(100, Math.round((props.currentMonth / props.totalMonths) * 100))
-})
+const _pct = computed(() => {
+  if (!props.currentMonth || !props.totalMonths || props.totalMonths === 0) return 0;
+  return Math.min(100, Math.round((props.currentMonth / props.totalMonths) * 100));
+});
 
-const isOverrun = computed(() => (props.currentMonth ?? 0) > (props.totalMonths ?? 999))
+const isOverrun = computed(() => (props.currentMonth ?? 0) > (props.totalMonths ?? 999));
 
-const barColor = computed(() => {
-  if (isOverrun.value) return '#dd5b00'
-  if (props.phase === 'intensive') return '#dd5b00'
-  return '#2a9d99'
-})
+const _barColor = computed(() => {
+  if (isOverrun.value) return '#dd5b00';
+  if (props.phase === 'intensive') return '#dd5b00';
+  return '#2a9d99';
+});
 </script>
 
 <template>

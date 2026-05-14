@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
-import { Search, RotateCcw, UserPlus, Loader2 } from 'lucide-vue-next'
-import PatientTable from '@/components/screening/PatientTable.vue'
-import EnrollModal from '@/components/screening/EnrollModal.vue'
-import { useScreeningStore } from '@/stores/screening'
-import { useSettingsStore } from '@/stores/settings'
+import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { useScreeningStore } from '@/stores/screening';
+import { useSettingsStore } from '@/stores/settings';
 
-const screeningStore = useScreeningStore()
-const settingsStore = useSettingsStore()
-const showEnrollModal = ref(false)
+const screeningStore = useScreeningStore();
+const settingsStore = useSettingsStore();
+const _showEnrollModal = ref(false);
 
 onMounted(() => {
   // Only auto-search if MySQL is already connected.
@@ -16,9 +13,9 @@ onMounted(() => {
   // between webview JS startup and lib.rs async task), the watcher below will
   // trigger the search as soon as isConnected flips to true.
   if (settingsStore.isConnected) {
-    screeningStore.search()
+    screeningStore.search();
   }
-})
+});
 
 // Watch for MySQL coming online after mount (handles the splash-screen
 // race condition where Vue mounts before lib.rs finishes auto-connecting).
@@ -28,38 +25,38 @@ const stopConnectionWatch = watch(
   () => settingsStore.isConnected,
   (connected, wasConnected) => {
     if (connected && !wasConnected && screeningStore.results.length === 0) {
-      screeningStore.search()
+      screeningStore.search();
     }
   },
-)
+);
 
 onUnmounted(() => {
-  stopConnectionWatch()
-})
+  stopConnectionWatch();
+});
 
-function resetFilters() {
+function _resetFilters() {
   screeningStore.filters = {
     enrollment_status: 'all',
     page: 1,
     page_size: 50,
     hn_search: undefined,
     name_search: undefined,
-  }
-  screeningStore.search()
+  };
+  screeningStore.search();
 }
 
-function handleEnrolled() {
-  screeningStore.clearSelection()
-  screeningStore.search()
+function _handleEnrolled() {
+  screeningStore.clearSelection();
+  screeningStore.search();
 }
 
-function toggleDrugFilter(drug: string) {
-  const classes = screeningStore.filters.drug_classes ?? []
-  const idx = classes.indexOf(drug)
+function _toggleDrugFilter(drug: string) {
+  const classes = screeningStore.filters.drug_classes ?? [];
+  const idx = classes.indexOf(drug);
   if (idx >= 0) {
-    screeningStore.filters.drug_classes = classes.filter((d) => d !== drug)
+    screeningStore.filters.drug_classes = classes.filter((d) => d !== drug);
   } else {
-    screeningStore.filters.drug_classes = [...classes, drug]
+    screeningStore.filters.drug_classes = [...classes, drug];
   }
 }
 </script>

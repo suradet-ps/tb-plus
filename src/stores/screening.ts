@@ -1,24 +1,24 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { invoke } from '@tauri-apps/api/core'
-import type { PatientDrugRecord, SearchFilters } from '@/types/patient'
+import { invoke } from '@tauri-apps/api/core';
+import { defineStore } from 'pinia';
+import { computed, ref } from 'vue';
+import type { PatientDrugRecord, SearchFilters } from '@/types/patient';
 
 export const useScreeningStore = defineStore('screening', () => {
-  const results = ref<PatientDrugRecord[]>([])
-  const isLoading = ref(false)
-  const error = ref<string | null>(null)
-  const selectedHns = ref<Set<string>>(new Set())
-  const today = new Date()
+  const results = ref<PatientDrugRecord[]>([]);
+  const isLoading = ref(false);
+  const error = ref<string | null>(null);
+  const selectedHns = ref<Set<string>>(new Set());
+  const today = new Date();
   function formatDate(d: Date): string {
-    const y = d.getFullYear()
-    const m = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    return `${y}-${m}-${day}`
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
   }
-  const dateTo = formatDate(today)
-  const oneYearAgo = new Date(today)
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
-  const dateFrom = formatDate(oneYearAgo)
+  const dateTo = formatDate(today);
+  const oneYearAgo = new Date(today);
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  const dateFrom = formatDate(oneYearAgo);
 
   const filters = ref<SearchFilters>({
     date_from: dateFrom,
@@ -26,34 +26,34 @@ export const useScreeningStore = defineStore('screening', () => {
     enrollment_status: 'all',
     page: 1,
     page_size: 50,
-  })
-  const totalCount = ref(0)
+  });
+  const totalCount = ref(0);
 
   async function search(): Promise<void> {
     try {
-      isLoading.value = true
-      error.value = null
+      isLoading.value = true;
+      error.value = null;
       const data = await invoke<PatientDrugRecord[]>('search_tb_patients', {
         filters: filters.value,
-      })
-      results.value = data
+      });
+      results.value = data;
     } catch (e) {
-      error.value = String(e)
+      error.value = String(e);
     } finally {
-      isLoading.value = false
+      isLoading.value = false;
     }
   }
 
   function toggleSelect(hn: string): void {
     if (selectedHns.value.has(hn)) {
-      selectedHns.value.delete(hn)
+      selectedHns.value.delete(hn);
     } else {
-      selectedHns.value.add(hn)
+      selectedHns.value.add(hn);
     }
   }
 
   function clearSelection(): void {
-    selectedHns.value.clear()
+    selectedHns.value.clear();
   }
 
   const selectedRecords = computed(() =>
@@ -62,7 +62,7 @@ export const useScreeningStore = defineStore('screening', () => {
         selectedHns.value.has(r.hn) &&
         (!r.is_enrolled || (r.patient_status && r.patient_status !== 'active')),
     ),
-  )
+  );
 
   return {
     results,
@@ -75,5 +75,5 @@ export const useScreeningStore = defineStore('screening', () => {
     search,
     toggleSelect,
     clearSelection,
-  }
-})
+  };
+});

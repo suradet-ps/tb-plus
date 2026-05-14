@@ -1,32 +1,32 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from 'vue';
 
-type DrugClass = 'H' | 'R' | 'Z' | 'E'
-type ChipSize = 'sm' | 'md'
+type DrugClass = 'H' | 'R' | 'Z' | 'E';
+type ChipSize = 'sm' | 'md';
 
 const props = withDefaults(
   defineProps<{
-    drug: string
-    size?: ChipSize
+    drug: string;
+    size?: ChipSize;
   }>(),
   {
     size: 'sm',
   },
-)
+);
 
 interface DrugConfig {
-  bg: string
-  color: string
-  title: string
-  label: string
+  bg: string;
+  color: string;
+  title: string;
+  label: string;
 }
 
 const drugMap: Record<DrugClass, DrugConfig> = {
-  H: { bg: '#e8f8f7', color: '#2a9d99', title: 'Isoniazid (INH)',    label: 'H' },
-  R: { bg: '#fdf0e8', color: '#dd5b00', title: 'Rifampicin (RIF)',   label: 'R' },
+  H: { bg: '#e8f8f7', color: '#2a9d99', title: 'Isoniazid (INH)', label: 'H' },
+  R: { bg: '#fdf0e8', color: '#dd5b00', title: 'Rifampicin (RIF)', label: 'R' },
   Z: { bg: '#f0ebe6', color: '#523410', title: 'Pyrazinamide (PZA)', label: 'Z' },
-  E: { bg: '#e8f2fd', color: '#0075de', title: 'Ethambutol (EMB)',   label: 'E' },
-}
+  E: { bg: '#e8f2fd', color: '#0075de', title: 'Ethambutol (EMB)', label: 'E' },
+};
 
 /** Map HOSxP drug icodes → drug class letter.
  *  Handles legacy enrollment data that stored icodes instead of class letters.
@@ -38,26 +38,26 @@ const icodeToClass: Record<string, DrugClass> = {
   '1600004': 'E',
   '1000129': 'E',
   '1000258': 'Z',
-}
+};
 
 const resolvedClass = computed<DrugClass | null>(() => {
-  const upper = props.drug.toUpperCase() as DrugClass
-  if (drugMap[upper]) return upper
+  const upper = props.drug.toUpperCase() as DrugClass;
+  if (drugMap[upper]) return upper;
   // Fall back to icode lookup (legacy data)
-  return icodeToClass[props.drug] ?? null
-})
+  return icodeToClass[props.drug] ?? null;
+});
 
-const config = computed<DrugConfig>(() => {
+const _config = computed<DrugConfig>(() => {
   if (resolvedClass.value) {
-    return drugMap[resolvedClass.value]
+    return drugMap[resolvedClass.value];
   }
   return {
     bg: 'rgba(0, 0, 0, 0.06)',
     color: 'var(--color-text-secondary)',
     title: props.drug,
     label: props.drug,
-  }
-})
+  };
+});
 </script>
 
 <template>

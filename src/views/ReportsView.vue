@@ -1,65 +1,60 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import {
-  Users,
-  TrendingUp,
-  Pill,
-  AlertTriangle,
-  Clock,
-  Calendar,
-  Download,
-  Loader2,
-  RefreshCw,
-} from 'lucide-vue-next'
-import { usePatientStore } from '@/stores/patient'
-import type { TreatmentPlan } from '@/types/treatment'
+import { computed, onMounted, ref } from 'vue';
+import { usePatientStore } from '@/stores/patient';
+import type { TreatmentPlan } from '@/types/treatment';
 
-const patientStore = usePatientStore()
+const patientStore = usePatientStore();
 
-const activeReport = ref<string | null>(null)
+const _activeReport = ref<string | null>(null);
 
 onMounted(() => {
-  patientStore.fetchActivePatients()
-})
+  patientStore.fetchActivePatients();
+});
 
-function getEffectivePhase(plan: TreatmentPlan | null | undefined): 'intensive' | 'continuation' | null {
-  if (!plan) return null
+function getEffectivePhase(
+  plan: TreatmentPlan | null | undefined,
+): 'intensive' | 'continuation' | null {
+  if (!plan) return null;
   if (plan.phase === 'intensive' && plan.phase_end_expected) {
-    if (new Date() > new Date(plan.phase_end_expected)) return 'continuation'
+    if (new Date() > new Date(plan.phase_end_expected)) return 'continuation';
   }
-  return plan.phase as 'intensive' | 'continuation'
+  return plan.phase as 'intensive' | 'continuation';
 }
 
 // ── Derived stats ────────────────────────────────────────────────────
-const totalActive = computed(() => patientStore.activePatients.length)
+const totalActive = computed(() => patientStore.activePatients.length);
 
-const intensiveCount = computed(
-  () => patientStore.activePatients.filter((p) => getEffectivePhase(p.current_plan) === 'intensive').length,
-)
+const _intensiveCount = computed(
+  () =>
+    patientStore.activePatients.filter((p) => getEffectivePhase(p.current_plan) === 'intensive')
+      .length,
+);
 
-const continuationCount = computed(
-  () => patientStore.activePatients.filter((p) => getEffectivePhase(p.current_plan) === 'continuation').length,
-)
+const _continuationCount = computed(
+  () =>
+    patientStore.activePatients.filter((p) => getEffectivePhase(p.current_plan) === 'continuation')
+      .length,
+);
 
 const overdueCount = computed(
   () => patientStore.activePatients.filter((p) => (p.days_since_last_dispensing ?? 0) > 35).length,
-)
+);
 
 // ── Report cards definition ───────────────────────────────────────────
 interface ReportCard {
-  id: string
-  titleTh: string
-  icon: string
-  iconColor: string
-  iconBg: string
-  valueColor: string
-  value: string | number
-  label: string
-  description: string
-  available: boolean
+  id: string;
+  titleTh: string;
+  icon: string;
+  iconColor: string;
+  iconBg: string;
+  valueColor: string;
+  value: string | number;
+  label: string;
+  description: string;
+  available: boolean;
 }
 
-const reportCards = computed<ReportCard[]>(() => [
+const _reportCards = computed<ReportCard[]>(() => [
   {
     id: 'census',
     titleTh: 'สถิติผู้ป่วย',
@@ -132,19 +127,11 @@ const reportCards = computed<ReportCard[]>(() => [
     description: 'การวิเคราะห์ cohort แบ่งตามเดือนลงทะเบียน',
     available: false,
   },
-])
+]);
 
 // ── CSV export ────────────────────────────────────────────────────────
-function exportCSV() {
-  const headers = [
-    'HN',
-    'ชื่อ-สกุล',
-    'สูตรยา',
-    'Phase',
-    'เดือนที่',
-    'รับยาล่าสุด',
-    'สถานะการแจ้งเตือน',
-  ]
+function _exportCSV() {
+  const headers = ['HN', 'ชื่อ-สกุล', 'สูตรยา', 'Phase', 'เดือนที่', 'รับยาล่าสุด', 'สถานะการแจ้งเตือน'];
 
   const rows = patientStore.activePatients.map((p) => [
     p.tb_patient.hn,
@@ -155,30 +142,26 @@ function exportCSV() {
       : getEffectivePhase(p.current_plan) === 'continuation'
         ? 'ระยะต่อเนื่อง'
         : '-',
-    p.current_month !== null
-      ? `${p.current_month}/${p.total_months ?? '?'}`
-      : '-',
-    p.days_since_last_dispensing !== null
-      ? `${p.days_since_last_dispensing} วันที่แล้ว`
-      : '-',
+    p.current_month !== null ? `${p.current_month}/${p.total_months ?? '?'}` : '-',
+    p.days_since_last_dispensing !== null ? `${p.days_since_last_dispensing} วันที่แล้ว` : '-',
     p.alerts.some((a) => a.severity === 'red')
       ? 'แจ้งเตือนสีแดง'
       : p.alerts.length
         ? 'เฝ้าระวัง'
         : 'ปกติ',
-  ])
+  ]);
 
   const csv = [headers, ...rows]
     .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
-    .join('\n')
+    .join('\n');
 
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `tb-plus-report-${new Date().toISOString().slice(0, 10)}.csv`
-  a.click()
-  URL.revokeObjectURL(url)
+  const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `tb-plus-report-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 </script>
 

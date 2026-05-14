@@ -1,37 +1,34 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
 import {
-  Microscope,
-  Users,
-  UserMinus,
-  CalendarDays,
-  MapPinned,
   BarChart2,
-  Settings,
-  Database,
-  WifiOff,
+  CalendarDays,
   Info,
-} from 'lucide-vue-next'
-import TbClinicLogo from '@/components/shared/TbClinicLogo.vue'
-import { useAlertStore } from '@/stores/alerts'
-import { useSettingsStore } from '@/stores/settings'
-import { useAppointmentsStore } from '@/stores/appointments'
+  MapPinned,
+  Microscope,
+  Settings,
+  UserMinus,
+  Users,
+} from 'lucide-vue-next';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import { useAlertStore } from '@/stores/alerts';
+import { useAppointmentsStore } from '@/stores/appointments';
+import { useSettingsStore } from '@/stores/settings';
 
-const route = useRoute()
-const alertStore = useAlertStore()
-const settingsStore = useSettingsStore()
-const appointmentsStore = useAppointmentsStore()
+const route = useRoute();
+const alertStore = useAlertStore();
+const settingsStore = useSettingsStore();
+const appointmentsStore = useAppointmentsStore();
 
 interface NavItem {
-  path: string
-  label: string
-  icon: object
-  showAlerts?: boolean
-  showApptCount?: boolean
+  path: string;
+  label: string;
+  icon: object;
+  showAlerts?: boolean;
+  showApptCount?: boolean;
 }
 
-const navItems: NavItem[] = [
+const _navItems: NavItem[] = [
   { path: '/screening', label: 'คัดกรองผู้ป่วย', icon: Microscope },
   { path: '/active', label: 'ผู้ป่วยในการรักษา', icon: Users, showAlerts: true },
   { path: '/discharged', label: 'การจำหน่ายผู้ป่วย', icon: UserMinus },
@@ -40,16 +37,16 @@ const navItems: NavItem[] = [
   { path: '/reports', label: 'รายงาน', icon: BarChart2 },
   { path: '/settings', label: 'ตั้งค่า', icon: Settings },
   { path: '/about', label: 'เกี่ยวกับโปรแกรม', icon: Info },
-]
+];
 
-function isActive(path: string): boolean {
-  if (path === '/') return route.path === '/'
-  return route.path === path || route.path.startsWith(path + '/')
+function _isActive(path: string): boolean {
+  if (path === '/') return route.path === '/';
+  return route.path === path || route.path.startsWith(`${path}/`);
 }
 
-const redCount = computed(() => alertStore.redCount)
-const isConnected = computed(() => settingsStore.isConnected)
-const todayApptCount = computed(() => appointmentsStore.todayAppointments.length)
+const _redCount = computed(() => alertStore.redCount);
+const _isConnected = computed(() => settingsStore.isConnected);
+const _todayApptCount = computed(() => appointmentsStore.todayAppointments.length);
 </script>
 
 <template>
