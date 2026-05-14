@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { AlertTriangle, CheckCircle, Loader2, RefreshCw, UserMinus, Users } from 'lucide-vue-next';
 import { computed, onMounted } from 'vue';
+import { RouterLink } from 'vue-router';
 import { usePatientStore } from '@/stores/patient';
 
 const patientStore = usePatientStore();
@@ -8,9 +10,9 @@ onMounted(() => {
   patientStore.fetchDischargedPatients();
 });
 
-const _total = computed(() => patientStore.dischargedPatients.length);
+const total = computed(() => patientStore.dischargedPatients.length);
 
-function _getOutcomeLabel(p: import('@/types/patient').ActivePatientRow): string {
+function getOutcomeLabel(p: import('@/types/patient').ActivePatientRow): string {
   const outcome = p.outcome_value ?? p.tb_patient.status;
   switch (outcome) {
     case 'cured':
@@ -39,7 +41,7 @@ function _getOutcomeLabel(p: import('@/types/patient').ActivePatientRow): string
   }
 }
 
-function _getOutcomeColor(p: import('@/types/patient').ActivePatientRow): string {
+function getOutcomeColor(p: import('@/types/patient').ActivePatientRow): string {
   const outcome = p.outcome_value ?? p.tb_patient.status;
   switch (outcome) {
     case 'cured':
@@ -68,7 +70,7 @@ function _getOutcomeColor(p: import('@/types/patient').ActivePatientRow): string
   }
 }
 
-function _toThaiDate(iso: string | null | undefined): string {
+function toThaiDate(iso: string | null | undefined): string {
   if (!iso) return '—';
   try {
     const [y, m, d] = iso.split('-').map(Number);
@@ -78,7 +80,7 @@ function _toThaiDate(iso: string | null | undefined): string {
   }
 }
 
-function _getTbTypeLabel(tbType: string | null | undefined): string {
+function getTbTypeLabel(tbType: string | null | undefined): string {
   if (tbType === 'pulmonary') return 'วัณโรคปอด';
   if (tbType === 'extra_pulmonary') return 'วัณโรคนอกปอด';
   return '—';

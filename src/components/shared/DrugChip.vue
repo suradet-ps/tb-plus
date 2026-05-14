@@ -47,7 +47,7 @@ const resolvedClass = computed<DrugClass | null>(() => {
   return icodeToClass[props.drug] ?? null;
 });
 
-const _config = computed<DrugConfig>(() => {
+const config = computed<DrugConfig>(() => {
   if (resolvedClass.value) {
     return drugMap[resolvedClass.value];
   }

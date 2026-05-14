@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api/core';
+import { AlertTriangle, Loader2, X } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import type { FollowupInput } from '@/types/treatment';
 
@@ -26,7 +27,7 @@ interface SideEffectOption {
   isPriority?: boolean;
 }
 
-const _SIDE_EFFECT_OPTIONS: SideEffectOption[] = [
+const SIDE_EFFECT_OPTIONS: SideEffectOption[] = [
   {
     key: 'ชาปลายมือเท้า',
     label: 'ชาปลายมือเท้า',
@@ -142,7 +143,7 @@ watch(
 
 // ── Submit ────────────────────────────────────────────────────────────────
 
-async function _handleSubmit() {
+async function handleSubmit() {
   submitError.value = null;
 
   if (!form.value.followup_date) {
@@ -181,11 +182,11 @@ function close() {
   emit('update:modelValue', false);
 }
 
-function _onOverlayPointerDown(e: MouseEvent) {
+function onOverlayPointerDown(e: MouseEvent) {
   if (e.target === e.currentTarget) close();
 }
 
-function _onKeydown(e: KeyboardEvent) {
+function onKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') close();
 }
 </script>

@@ -1,11 +1,14 @@
 <script setup lang="ts">
+import { Loader2, RotateCcw, Search, UserPlus } from 'lucide-vue-next';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
+import EnrollModal from '@/components/screening/EnrollModal.vue';
+import PatientTable from '@/components/screening/PatientTable.vue';
 import { useScreeningStore } from '@/stores/screening';
 import { useSettingsStore } from '@/stores/settings';
 
 const screeningStore = useScreeningStore();
 const settingsStore = useSettingsStore();
-const _showEnrollModal = ref(false);
+const showEnrollModal = ref(false);
 
 onMounted(() => {
   // Only auto-search if MySQL is already connected.
@@ -34,9 +37,8 @@ onUnmounted(() => {
   stopConnectionWatch();
 });
 
-function _resetFilters() {
+function resetFilters() {
   screeningStore.filters = {
-    enrollment_status: 'all',
     page: 1,
     page_size: 50,
     hn_search: undefined,
@@ -45,12 +47,11 @@ function _resetFilters() {
   screeningStore.search();
 }
 
-function _handleEnrolled() {
-  screeningStore.clearSelection();
+function handleEnrolled() {
   screeningStore.search();
 }
 
-function _toggleDrugFilter(drug: string) {
+function toggleDrugFilter(drug: string) {
   const classes = screeningStore.filters.drug_classes ?? [];
   const idx = classes.indexOf(drug);
   if (idx >= 0) {

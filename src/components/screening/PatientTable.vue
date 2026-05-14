@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { ChevronDown, FileX } from 'lucide-vue-next';
 import { computed, ref, watchEffect } from 'vue';
+import DrugChip from '@/components/shared/DrugChip.vue';
 import { useScreeningStore } from '@/stores/screening';
 import type { PatientDrugRecord } from '@/types/patient';
 
@@ -15,7 +17,7 @@ type SortDir = 'asc' | 'desc';
 const sortKey = ref<SortKey>('last_dispensed');
 const sortDir = ref<SortDir>('desc');
 
-function _sortBy(key: SortKey) {
+function sortBy(key: SortKey) {
   if (sortKey.value === key) {
     sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc';
   } else {
@@ -25,7 +27,7 @@ function _sortBy(key: SortKey) {
 }
 
 // ── Sorted results ────────────────────────────────────────────────────────────
-const _sortedResults = computed<PatientDrugRecord[]>(() => {
+const sortedResults = computed<PatientDrugRecord[]>(() => {
   const arr = [...store.results];
   const key = sortKey.value;
   const dir = sortDir.value;
@@ -74,7 +76,7 @@ watchEffect(() => {
   }
 });
 
-function _toggleAll() {
+function toggleAll() {
   if (allSelected.value) {
     store.clearSelection();
   } else {
@@ -86,14 +88,14 @@ function _toggleAll() {
   }
 }
 
-function _toggleRow(row: PatientDrugRecord) {
+function toggleRow(row: PatientDrugRecord) {
   // Actively enrolled patients cannot be re-enrolled; block only those
   if (row.is_enrolled && (!row.patient_status || row.patient_status === 'active')) return;
   store.toggleSelect(row.hn);
 }
 
 // ── Formatters ────────────────────────────────────────────────────────────────
-function _toThaiDate(isoDate: string | null | undefined): string {
+function toThaiDate(isoDate: string | null | undefined): string {
   if (!isoDate) return '-';
   try {
     const [y, m, d] = isoDate.split('-').map(Number);
@@ -103,7 +105,7 @@ function _toThaiDate(isoDate: string | null | undefined): string {
   }
 }
 
-function _sexLabel(sex: string | null | undefined): string {
+function sexLabel(sex: string | null | undefined): string {
   if (sex === 'M' || sex === '1') return '♂';
   if (sex === 'F' || sex === '2') return '♀';
   return '-';

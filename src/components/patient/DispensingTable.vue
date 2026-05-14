@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import DrugChip from '@/components/shared/DrugChip.vue';
 import type { DispensingRecord } from '@/types/dispensing';
 
 const props = defineProps<{
@@ -14,7 +16,7 @@ type SortDir = 'asc' | 'desc';
 const sortKey = ref<SortKey>('date');
 const sortDir = ref<SortDir>('desc');
 
-function _toggleSort(key: SortKey) {
+function toggleSort(key: SortKey) {
   if (sortKey.value === key) {
     sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc';
   } else {
@@ -23,7 +25,7 @@ function _toggleSort(key: SortKey) {
   }
 }
 
-const _sortedRecords = computed<DispensingRecord[]>(() => {
+const sortedRecords = computed<DispensingRecord[]>(() => {
   const list = [...props.records];
   const dir = sortDir.value === 'asc' ? 1 : -1;
 
@@ -49,14 +51,14 @@ const _sortedRecords = computed<DispensingRecord[]>(() => {
 
 // ── Stats ─────────────────────────────────────────────────────────────────
 
-const _uniqueDates = computed(() => new Set(props.records.map((r) => r.vstdate)).size);
-const _uniqueClasses = computed(
+const uniqueDates = computed(() => new Set(props.records.map((r) => r.vstdate)).size);
+const uniqueClasses = computed(
   () => new Set(props.records.map((r) => r.drug_class).filter(Boolean)).size,
 );
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-function _toThaiDate(iso: string): string {
+function toThaiDate(iso: string): string {
   try {
     const [y, m, d] = iso.split('-').map(Number);
     return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
@@ -65,7 +67,7 @@ function _toThaiDate(iso: string): string {
   }
 }
 
-function _rowClass(drugClass: string | null): string {
+function rowClass(drugClass: string | null): string {
   switch (drugClass) {
     case 'H':
       return 'row-H';
@@ -80,7 +82,7 @@ function _rowClass(drugClass: string | null): string {
   }
 }
 
-function _sortIcon(key: SortKey): 'none' | 'asc' | 'desc' {
+function sortIcon(key: SortKey): 'none' | 'asc' | 'desc' {
   if (sortKey.value !== key) return 'none';
   return sortDir.value;
 }

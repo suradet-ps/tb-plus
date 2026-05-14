@@ -1,4 +1,14 @@
 <script setup lang="ts">
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle,
+  Eye,
+  Loader2,
+  RefreshCw,
+  Search,
+  Users,
+} from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAlertStore } from '@/stores/alerts';
@@ -53,7 +63,7 @@ const sortedPatients = computed<ActivePatientRow[]>(() => {
 
 const searchQuery = ref('');
 
-const _filteredPatients = computed<ActivePatientRow[]>(() => {
+const filteredPatients = computed<ActivePatientRow[]>(() => {
   const q = searchQuery.value.trim().toLowerCase();
   if (!q) return sortedPatients.value;
   return sortedPatients.value.filter((p) => {
@@ -73,30 +83,30 @@ function getEffectivePhase(
   return plan.phase as 'intensive' | 'continuation';
 }
 
-const _statsTotal = computed(() => patientStore.activePatients.length);
-const _statsRedAlerts = computed(() => alertStore.redCount);
-const _statsYellowAlerts = computed(() => alertStore.yellowAlerts.length);
+const statsTotal = computed(() => patientStore.activePatients.length);
+const statsRedAlerts = computed(() => alertStore.redCount);
+const statsYellowAlerts = computed(() => alertStore.yellowAlerts.length);
 
-const _statsIntensive = computed(
+const statsIntensive = computed(
   () =>
     patientStore.activePatients.filter((p) => getEffectivePhase(p.current_plan) === 'intensive')
       .length,
 );
-const _statsContinuation = computed(
+const statsContinuation = computed(
   () =>
     patientStore.activePatients.filter((p) => getEffectivePhase(p.current_plan) === 'continuation')
       .length,
 );
 
-const _isInitialLoad = computed(
+const isInitialLoad = computed(
   () => patientStore.isLoading && patientStore.activePatients.length === 0,
 );
 
-function _viewDetail(hn: string) {
+function viewDetail(hn: string) {
   router.push(`/patient/${hn}`);
 }
 
-function _toggleSort(key: SortKey) {
+function toggleSort(key: SortKey) {
   if (sortBy.value === key) {
     sortAsc.value = !sortAsc.value;
   } else {
@@ -105,7 +115,7 @@ function _toggleSort(key: SortKey) {
   }
 }
 
-function _sortIcon(key: SortKey): string {
+function sortIcon(key: SortKey): string {
   if (sortBy.value !== key) return '';
   return sortAsc.value ? '↑' : '↓';
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api/core';
+import { AlertTriangle, Loader2, LogOut } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import type { OutcomeInput } from '@/types/treatment';
 
@@ -123,7 +124,7 @@ watch(
 
 // ── Submit ────────────────────────────────────────────────────────────────
 
-async function _handleSubmit() {
+async function handleSubmit() {
   submitError.value = null;
 
   if (!form.value.outcome) {
@@ -162,11 +163,11 @@ function close() {
   emit('update:modelValue', false);
 }
 
-function _onOverlayPointerDown(e: MouseEvent) {
+function onOverlayPointerDown(e: MouseEvent) {
   if (e.target === e.currentTarget) close();
 }
 
-function _onKeydown(e: KeyboardEvent) {
+function onKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') close();
 }
 </script>

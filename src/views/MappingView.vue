@@ -1,11 +1,23 @@
 <script setup lang="ts">
+import {
+  Activity,
+  Loader2,
+  Map as MapIcon,
+  MapPinned,
+  RefreshCw,
+  ScanSearch,
+  TriangleAlert,
+} from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
+import MapCanvas from '@/components/mapping/MapCanvas.vue';
+import MapFilters from '@/components/mapping/MapFilters.vue';
+import StatusBadge from '@/components/shared/StatusBadge.vue';
 import { useMappingStore } from '@/stores/mapping';
 import { useSettingsStore } from '@/stores/settings';
 import type { MappingPatientRow } from '@/types/mapping';
 
 const mappingStore = useMappingStore();
-const _settingsStore = useSettingsStore();
+const settingsStore = useSettingsStore();
 
 const search = ref('');
 const status = ref<'all' | 'active' | 'completed' | 'transferred' | 'died' | 'defaulted'>('all');
@@ -13,7 +25,7 @@ const tbType = ref<'all' | 'pulmonary' | 'extra_pulmonary'>('all');
 const geocodeStatus = ref<'all' | 'success' | 'pending' | 'failed' | 'missing_address'>('all');
 const enrolledFrom = ref('');
 const enrolledTo = ref('');
-const _mapError = ref<string | null>(null);
+const mapError = ref<string | null>(null);
 const isOnline = ref(window.navigator.onLine);
 const batchMessage = ref<string | null>(null);
 
@@ -36,7 +48,7 @@ onUnmounted(() => {
   window.removeEventListener('offline', handleOffline);
 });
 
-const _summary = computed(() => ({
+const summary = computed(() => ({
   total: mappingStore.summary?.total_patients ?? 0,
   active: mappingStore.summary?.active_patients ?? 0,
   mapped: mappingStore.summary?.mapped_patients ?? 0,
@@ -70,7 +82,7 @@ const filteredPatients = computed<MappingPatientRow[]>(() => {
   });
 });
 
-const _selectedPatient = computed(() => {
+const selectedPatient = computed(() => {
   const explicit = mappingStore.selectedPatient;
   if (explicit && filteredPatients.value.some((patient) => patient.hn === explicit.hn)) {
     return explicit;
@@ -78,11 +90,11 @@ const _selectedPatient = computed(() => {
   return filteredPatients.value[0] ?? null;
 });
 
-const _mappedPatients = computed(() =>
+const mappedPatients = computed(() =>
   filteredPatients.value.filter((patient) => patient.lat !== null && patient.lng !== null),
 );
 
-function _resetFilters(): void {
+function resetFilters(): void {
   search.value = '';
   status.value = 'all';
   tbType.value = 'all';
@@ -91,7 +103,7 @@ function _resetFilters(): void {
   enrolledTo.value = '';
 }
 
-function _geocodeStatusLabel(value: MappingPatientRow['geocode_status']): string {
+function geocodeStatusLabel(value: MappingPatientRow['geocode_status']): string {
   switch (value) {
     case 'success':
       return 'พร้อมแสดงบนแผนที่';
@@ -104,7 +116,7 @@ function _geocodeStatusLabel(value: MappingPatientRow['geocode_status']): string
   }
 }
 
-function _geocodeStatusClass(value: MappingPatientRow['geocode_status']): string {
+function geocodeStatusClass(value: MappingPatientRow['geocode_status']): string {
   switch (value) {
     case 'success':
       return 'geo-pill geo-pill--success';
@@ -117,13 +129,13 @@ function _geocodeStatusClass(value: MappingPatientRow['geocode_status']): string
   }
 }
 
-async function _handleBatchGeocode(): Promise<void> {
+async function handleBatchGeocode(): Promise<void> {
   batchMessage.value = null;
   const result = await mappingStore.batchGeocode(10);
   batchMessage.value = `ประมวลผล ${result.processed} ราย • สำเร็จ ${result.succeeded} • ข้าม ${result.skipped} • ไม่สำเร็จ ${result.failed}`;
 }
 
-async function _handleSingleGeocode(hn: string): Promise<void> {
+async function handleSingleGeocode(hn: string): Promise<void> {
   batchMessage.value = null;
   await mappingStore.geocodePatient(hn);
 }
@@ -167,7 +179,7 @@ async function _handleSingleGeocode(hn: string): Promise<void> {
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon stat-icon--teal"><Map :size="16" /></div>
+        <div class="stat-icon stat-icon--teal"><MapIcon :size="16" /></div>
         <div>
           <div class="stat-value stat-value--teal">{{ summary.mapped }}</div>
           <div class="stat-label">พร้อมแสดงบนแผนที่</div>

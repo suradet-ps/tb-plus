@@ -1,8 +1,31 @@
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api/core';
 import { save as saveDialog } from '@tauri-apps/plugin-dialog';
+import {
+  AlertTriangle,
+  CheckCircle,
+  Database,
+  Download,
+  HardDrive,
+  Loader2,
+  Pill,
+  Plus,
+  Search,
+  Server,
+  Trash2,
+  Users,
+  Wifi,
+  WifiOff,
+  XCircle,
+} from 'lucide-vue-next';
 import { reactive, ref, watch } from 'vue';
-import { type DbConfig, type RegimenPhase, useSettingsStore } from '@/stores/settings';
+import DrugChip from '@/components/shared/DrugChip.vue';
+import {
+  type DbConfig,
+  type DrugItem,
+  type RegimenPhase,
+  useSettingsStore,
+} from '@/stores/settings';
 
 const settingsStore = useSettingsStore();
 
@@ -10,7 +33,7 @@ const settingsStore = useSettingsStore();
 type Section = 'mysql' | 'hosxp' | 'drugcodes' | 'alerts' | 'staff' | 'backup';
 const activeSection = ref<Section>('mysql');
 
-const _navItems: { id: Section; label: string; icon: string }[] = [
+const navItems: { id: Section; label: string; icon: string }[] = [
   { id: 'mysql', label: 'ฐานข้อมูล MySQL', icon: 'Database' },
   { id: 'hosxp', label: 'คลินิกวัณโรค', icon: 'Server' },
   { id: 'drugcodes', label: 'ยาและสูตรยา', icon: 'Pill' },
@@ -43,7 +66,7 @@ watch(activeSection, () => {
   settingsSaveSuccess.value = null;
 });
 
-async function _testConnection() {
+async function testConnection() {
   testResult.value = 'testing';
   testError.value = '';
   const ok = await settingsStore.testConnection(mysqlForm);
@@ -51,7 +74,7 @@ async function _testConnection() {
   if (!ok) testError.value = settingsStore.connectionError ?? 'การเชื่อมต่อล้มเหลว';
 }
 
-async function _saveAndConnect() {
+async function saveAndConnect() {
   isSaving.value = true;
   savedSuccess.value = false;
   testResult.value = 'idle';
@@ -89,7 +112,7 @@ const clinicSearchResults = ref<{ clinic: string; name: string | null }[]>([]);
 const isClinicSearching = ref(false);
 const clinicSearchError = ref('');
 
-async function _searchClinics() {
+async function searchClinics() {
   if (!clinicSearchQuery.value.trim()) return;
   isClinicSearching.value = true;
   clinicSearchError.value = '';
@@ -106,13 +129,13 @@ async function _searchClinics() {
   }
 }
 
-function _selectClinic(code: string) {
+function selectClinic(code: string) {
   settingsStore.hosxpSettings.clinic_code = code;
 }
 
 // ── HOSxP / Alert save ──────────────────────────────────────────────
 const hosxpSaved = ref(false);
-async function _saveHosxp() {
+async function saveHosxp() {
   await settingsStore.saveHosxpSettings();
   hosxpSaved.value = true;
   setTimeout(() => {
@@ -121,7 +144,7 @@ async function _saveHosxp() {
 }
 
 const alertsSaved = ref(false);
-async function _saveAlerts() {
+async function saveAlerts() {
   await settingsStore.saveAlertThresholds();
   alertsSaved.value = true;
   setTimeout(() => {
@@ -131,13 +154,13 @@ async function _saveAlerts() {
 
 // ── Drug class management — search-first flow ────────────────────────
 const drugSearchQuery = ref('');
-const drugSearchResults = ref<any[]>([]);
+const drugSearchResults = ref<DrugItem[]>([]);
 const isSearching = ref(false);
 const assignLetters = ref<Record<string, string>>({});
 
 const searchErrorMsg = ref('');
 
-async function _searchDrugs() {
+async function searchDrugs() {
   if (!drugSearchQuery.value.trim()) return;
   isSearching.value = true;
   searchErrorMsg.value = '';
@@ -155,7 +178,7 @@ async function _searchDrugs() {
   }
 }
 
-function _assignIcodeToClass(icode: string, drugName: string) {
+function assignIcodeToClass(icode: string, drugName: string) {
   const letter = assignLetters.value[icode]?.trim().toUpperCase();
   if (!letter) return;
   let entry = settingsStore.drugClasses.find((c) => c.class === letter);
@@ -170,13 +193,13 @@ function _assignIcodeToClass(icode: string, drugName: string) {
   saveDrugClasses();
 }
 
-function _removeDrugClass(cls: string) {
+function removeDrugClass(cls: string) {
   settingsStore.drugClasses = settingsStore.drugClasses.filter((c) => c.class !== cls);
   settingsStore.syncDrugCodesFromClasses();
   saveDrugClasses();
 }
 
-function _removeDrugIcode(cls: string, icode: string) {
+function removeDrugIcode(cls: string, icode: string) {
   const entry = settingsStore.drugClasses.find((c) => c.class === cls);
   if (entry && entry.icodes.length > 1) {
     entry.icodes = entry.icodes.filter((c) => c !== icode);
@@ -199,7 +222,7 @@ const newRegimenName = ref('');
 const editingRegimen = ref<{ name: string; phases: RegimenPhase[] } | null>(null);
 const editingRegimenIdx = ref(-1);
 
-function _addRegimenEntry() {
+function addRegimenEntry() {
   const name = newRegimenName.value.trim().toUpperCase();
   if (!name) return;
   if (settingsStore.regimenDefinitions.find((r) => r.name === name)) return;
@@ -208,14 +231,14 @@ function _addRegimenEntry() {
   saveRegimens();
 }
 
-function _removeRegimenEntry(name: string) {
+function removeRegimenEntry(name: string) {
   settingsStore.regimenDefinitions = settingsStore.regimenDefinitions.filter(
     (r) => r.name !== name,
   );
   saveRegimens();
 }
 
-function _editRegimenPhases(name: string) {
+function editRegimenPhases(name: string) {
   const entry = settingsStore.regimenDefinitions.find((r) => r.name === name);
   if (entry) {
     editingRegimenIdx.value = settingsStore.regimenDefinitions.indexOf(entry);
@@ -226,27 +249,30 @@ function _editRegimenPhases(name: string) {
   }
 }
 
-function _addPhase() {
+function addPhase() {
   if (!editingRegimen.value) return;
   editingRegimen.value.phases.push({ phase: '', months: 2, drug_classes: [] });
 }
 
-function _removePhase(idx: number) {
+function removePhase(idx: number) {
   if (!editingRegimen.value) return;
   editingRegimen.value.phases.splice(idx, 1);
 }
 
-function _savePhaseEdit() {
+function savePhaseEdit() {
   if (!editingRegimen.value) return;
   if (editingRegimenIdx.value >= 0) {
-    settingsStore.regimenDefinitions[editingRegimenIdx.value] = { ...editingRegimen.value };
+    settingsStore.regimenDefinitions[editingRegimenIdx.value] = {
+      name: editingRegimen.value.name,
+      phases: editingRegimen.value.phases,
+    };
   }
   editingRegimen.value = null;
   editingRegimenIdx.value = -1;
   saveRegimens();
 }
 
-function _togglePhaseDrug(phase: RegimenPhase, cls: string) {
+function togglePhaseDrug(phase: RegimenPhase, cls: string) {
   const idx = phase.drug_classes.indexOf(cls);
   if (idx >= 0) phase.drug_classes.splice(idx, 1);
   else phase.drug_classes.push(cls);
@@ -264,7 +290,7 @@ async function saveRegimens() {
 // ── Staff names ──────────────────────────────────────────────────────
 const newStaff = ref('');
 
-async function _addStaff() {
+async function addStaff() {
   try {
     const changed = await settingsStore.addStaffName(newStaff.value);
     if (changed) {
@@ -276,9 +302,9 @@ async function _addStaff() {
   }
 }
 
-async function _removeStaff(name: string) {
+async function removeStaff(_name: string) {
   try {
-    const changed = await settingsStore.removeStaffName(name);
+    const changed = await settingsStore.removeStaffName(_name);
     if (changed) {
       showSettingsSaved('ลบรายชื่อผู้ใช้งานแล้ว');
     }
@@ -292,8 +318,7 @@ const isBackingUp = ref(false);
 const backupError = ref<string | null>(null);
 const backupSuccess = ref(false);
 
-async function _downloadBackup() {
-  isBackingUp.value = true;
+async function downloadBackup() {
   backupError.value = null;
   backupSuccess.value = false;
   try {

@@ -21,7 +21,7 @@ const statusMap: Record<Status, StatusConfig> = {
   defaulted: { label: 'ขาดการรักษา', bg: 'rgba(221, 91, 0, 0.1)', color: '#dd5b00' },
 };
 
-const _config = computed<StatusConfig>(() => {
+const config = computed<StatusConfig>(() => {
   return (
     statusMap[props.status as Status] ?? {
       label: props.status,

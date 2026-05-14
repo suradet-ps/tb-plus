@@ -1,11 +1,22 @@
 <script setup lang="ts">
+import {
+  AlertTriangle,
+  Calendar,
+  Clock,
+  Download,
+  Loader2,
+  Pill,
+  RefreshCw,
+  TrendingUp,
+  Users,
+} from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
 import { usePatientStore } from '@/stores/patient';
 import type { TreatmentPlan } from '@/types/treatment';
 
 const patientStore = usePatientStore();
 
-const _activeReport = ref<string | null>(null);
+const activeReport = ref<string | null>(null);
 
 onMounted(() => {
   patientStore.fetchActivePatients();
@@ -24,13 +35,13 @@ function getEffectivePhase(
 // ── Derived stats ────────────────────────────────────────────────────
 const totalActive = computed(() => patientStore.activePatients.length);
 
-const _intensiveCount = computed(
+const intensiveCount = computed(
   () =>
     patientStore.activePatients.filter((p) => getEffectivePhase(p.current_plan) === 'intensive')
       .length,
 );
 
-const _continuationCount = computed(
+const continuationCount = computed(
   () =>
     patientStore.activePatients.filter((p) => getEffectivePhase(p.current_plan) === 'continuation')
       .length,
@@ -54,7 +65,7 @@ interface ReportCard {
   available: boolean;
 }
 
-const _reportCards = computed<ReportCard[]>(() => [
+const reportCards = computed<ReportCard[]>(() => [
   {
     id: 'census',
     titleTh: 'สถิติผู้ป่วย',
@@ -130,7 +141,7 @@ const _reportCards = computed<ReportCard[]>(() => [
 ]);
 
 // ── CSV export ────────────────────────────────────────────────────────
-function _exportCSV() {
+function exportCSV() {
   const headers = ['HN', 'ชื่อ-สกุล', 'สูตรยา', 'Phase', 'เดือนที่', 'รับยาล่าสุด', 'สถานะการแจ้งเตือน'];
 
   const rows = patientStore.activePatients.map((p) => [

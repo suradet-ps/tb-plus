@@ -1,4 +1,14 @@
 <script setup lang="ts">
+import {
+  Activity,
+  ChevronDown,
+  ChevronUp,
+  Microscope,
+  Pill,
+  Scan,
+  StickyNote,
+  User,
+} from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import type { Followup } from '@/types/treatment';
 
@@ -10,7 +20,7 @@ const props = defineProps<{
 
 const newestFirst = ref(true);
 
-const _sortedFollowups = computed<Followup[]>(() => {
+const sortedFollowups = computed<Followup[]>(() => {
   const list = [...props.followups].sort((a, b) => a.followup_date.localeCompare(b.followup_date));
   return newestFirst.value ? list.reverse() : list;
 });
@@ -19,7 +29,7 @@ const _sortedFollowups = computed<Followup[]>(() => {
 
 const expandedIds = ref<Set<number>>(new Set());
 
-function _toggleExpanded(id: number) {
+function toggleExpanded(id: number) {
   if (expandedIds.value.has(id)) {
     expandedIds.value.delete(id);
   } else {
@@ -27,13 +37,13 @@ function _toggleExpanded(id: number) {
   }
 }
 
-function _isExpanded(id: number): boolean {
+function isExpanded(id: number): boolean {
   return expandedIds.value.has(id);
 }
 
 // ── Date helpers ──────────────────────────────────────────────────────────
 
-function _toThaiDate(iso: string): string {
+function toThaiDate(iso: string): string {
   try {
     const [y, m, d] = iso.split('-').map(Number);
     return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
@@ -42,7 +52,7 @@ function _toThaiDate(iso: string): string {
   }
 }
 
-function _toThaiDateLong(iso: string): string {
+function toThaiDateLong(iso: string): string {
   const MONTH_TH = [
     '',
     'ม.ค.',
@@ -76,7 +86,7 @@ interface BadgeConfig {
   color: string;
 }
 
-function _sputumConfig(v: SputumResult): BadgeConfig {
+function sputumConfig(v: SputumResult): BadgeConfig {
   switch (v) {
     case 'negative':
       return { label: 'ผลลบ', bg: 'rgba(26,174,57,0.1)', color: '#1aae39' };
@@ -93,7 +103,7 @@ function _sputumConfig(v: SputumResult): BadgeConfig {
 
 type XrayResult = 'improved' | 'stable' | 'worse' | 'not_done' | null;
 
-function _xrayConfig(v: XrayResult): BadgeConfig {
+function xrayConfig(v: XrayResult): BadgeConfig {
   switch (v) {
     case 'improved':
       return { label: 'ดีขึ้น', bg: 'rgba(42,157,153,0.1)', color: '#2a9d99' };
@@ -112,7 +122,7 @@ function _xrayConfig(v: XrayResult): BadgeConfig {
 
 type Adherence = 'good' | 'fair' | 'poor' | null;
 
-function _adherenceConfig(v: Adherence): BadgeConfig {
+function adherenceConfig(v: Adherence): BadgeConfig {
   switch (v) {
     case 'good':
       return { label: 'การรับยา: ดี', bg: 'rgba(26,174,57,0.1)', color: '#1aae39' };
@@ -137,13 +147,13 @@ function parseSideEffects(json: string | null): string[] {
   }
 }
 
-function _isOpticNeuritis(se: string): boolean {
+function isOpticNeuritis(se: string): boolean {
   return se.toLowerCase().includes('ตาพร่า') || se.toLowerCase().includes('ตาบอด');
 }
 
 // ── Dispensed drugs ───────────────────────────────────────────────────────
 
-function _parseDispensedDrugs(json: string | null): string[] {
+function parseDispensedDrugs(json: string | null): string[] {
   if (!json) return [];
   try {
     const parsed = JSON.parse(json);
@@ -155,7 +165,7 @@ function _parseDispensedDrugs(json: string | null): string[] {
 
 // ── Summary line ──────────────────────────────────────────────────────────
 
-function _hasMeaningfulData(f: Followup): boolean {
+function hasMeaningfulData(f: Followup): boolean {
   return !!(
     f.sputum_result ||
     f.xray_result ||

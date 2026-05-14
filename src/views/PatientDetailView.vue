@@ -1,6 +1,27 @@
 <script setup lang="ts">
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Calendar,
+  Loader2,
+  LogOut,
+  MapPin,
+  Phone,
+  PlusCircle,
+  RefreshCw,
+  UserCheck,
+} from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import AlertBadge from '@/components/active/AlertBadge.vue';
+import DischargeModal from '@/components/patient/DischargeModal.vue';
+import DispensingTable from '@/components/patient/DispensingTable.vue';
+import FollowupForm from '@/components/patient/FollowupForm.vue';
+import FollowupList from '@/components/patient/FollowupList.vue';
+import SideEffectTracker from '@/components/patient/SideEffectTracker.vue';
+import TreatmentTimeline from '@/components/patient/TreatmentTimeline.vue';
+import DrugChip from '@/components/shared/DrugChip.vue';
+import StatusBadge from '@/components/shared/StatusBadge.vue';
 import { useAlertStore } from '@/stores/alerts';
 import { usePatientStore } from '@/stores/patient';
 
@@ -23,14 +44,14 @@ const showDischargeModal = ref(false);
 
 type TabKey = 'timeline' | 'dispensing' | 'followups' | 'sideeffects';
 
-const _activeTab = ref<TabKey>('timeline');
+const activeTab = ref<TabKey>('timeline');
 
 interface Tab {
   key: TabKey;
   label: string;
 }
 
-const _TABS: Tab[] = [
+const TABS: Tab[] = [
   { key: 'timeline', label: 'ไทม์ไลน์การรักษา' },
   { key: 'dispensing', label: 'ประวัติยา' },
   { key: 'followups', label: 'การติดตามผล' },
@@ -43,25 +64,25 @@ onMounted(() => {
   patientStore.fetchPatientDetail(props.hn);
 });
 
-function _refresh() {
+function refresh() {
   patientStore.fetchPatientDetail(props.hn);
 }
 
 // ── Computed ──────────────────────────────────────────────────────────────
 
 const detail = computed(() => patientStore.currentPatient);
-const _isLoading = computed(() => patientStore.isLoadingDetail);
-const _loadError = computed(() => patientStore.error);
+const isLoading = computed(() => patientStore.isLoadingDetail);
+const loadError = computed(() => patientStore.error);
 
-const _patientName = computed(() => detail.value?.demographics?.full_name ?? props.hn);
+const patientName = computed(() => detail.value?.demographics?.full_name ?? props.hn);
 
 // Alerts for this patient from the central alert store
 const allAlerts = computed(() => alertStore.alertsForPatient(props.hn));
-const _redAlerts = computed(() => allAlerts.value.filter((a) => a.severity === 'red'));
-const _yellowAlerts = computed(() => allAlerts.value.filter((a) => a.severity === 'yellow'));
+const redAlerts = computed(() => allAlerts.value.filter((a) => a.severity === 'red'));
+const yellowAlerts = computed(() => allAlerts.value.filter((a) => a.severity === 'yellow'));
 
 /** Estimated current treatment month (1-based), used to pre-fill FollowupForm */
-const _currentTreatmentMonth = computed<number | undefined>(() => {
+const currentTreatmentMonth = computed<number | undefined>(() => {
   const plan = detail.value?.current_plan;
   if (!plan?.phase_start) return undefined;
   const start = new Date(plan.phase_start);
@@ -88,7 +109,7 @@ const phaseIsStale = computed(
 );
 
 /** Drug letters to display — uses effective continuation drugs when plan is stale */
-const _currentDrugs = computed<string[]>(() => {
+const currentDrugs = computed<string[]>(() => {
   const plan = detail.value?.current_plan;
   if (!plan) return [];
   if (phaseIsStale.value) {
@@ -102,19 +123,19 @@ const _currentDrugs = computed<string[]>(() => {
   }
 });
 
-const _phaseLabel = computed(() => {
+const phaseLabel = computed(() => {
   if (effectivePhase.value === 'intensive') return 'ระยะเข้มข้น (Intensive)';
   if (effectivePhase.value === 'continuation') return 'ระยะต่อเนื่อง (Continuation)';
   return null;
 });
 
-const _phaseColor = computed(() => {
+const phaseColor = computed(() => {
   if (effectivePhase.value === 'intensive') return '#dd5b00';
   if (effectivePhase.value === 'continuation') return '#2a9d99';
   return '#a39e98';
 });
 
-const _tbTypeLabel = computed(() => {
+const tbTypeLabel = computed(() => {
   const t = detail.value?.patient?.tb_type;
   if (t === 'pulmonary') return 'วัณโรคปอด';
   if (t === 'extra_pulmonary') return 'วัณโรคนอกปอด';
@@ -123,12 +144,12 @@ const _tbTypeLabel = computed(() => {
 
 // ── Event handlers ────────────────────────────────────────────────────────
 
-function _handleFollowupSaved() {
+function handleFollowupSaved() {
   showFollowupForm.value = false;
   patientStore.fetchPatientDetail(props.hn);
 }
 
-function _handleDischarged() {
+function handleDischarged() {
   showDischargeModal.value = false;
   // Navigate back to active list; patient is no longer active
   router.push('/active');
@@ -136,7 +157,7 @@ function _handleDischarged() {
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-function _toThaiDate(iso: string | null | undefined): string {
+function toThaiDate(iso: string | null | undefined): string {
   if (!iso) return '—';
   try {
     const [y, m, d] = iso.split('-').map(Number);
@@ -146,7 +167,7 @@ function _toThaiDate(iso: string | null | undefined): string {
   }
 }
 
-function _sexLabel(sex: string | null | undefined): string | null {
+function sexLabel(sex: string | null | undefined): string | null {
   if (!sex) return null;
   return sex === 'M' || sex === '1' ? '♂ ชาย' : '♀ หญิง';
 }

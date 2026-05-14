@@ -2,15 +2,18 @@
 import {
   BarChart2,
   CalendarDays,
+  Database,
   Info,
   MapPinned,
   Microscope,
   Settings,
   UserMinus,
   Users,
+  WifiOff,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { RouterLink, useRoute } from 'vue-router';
+import TbClinicLogo from '@/components/shared/TbClinicLogo.vue';
 import { useAlertStore } from '@/stores/alerts';
 import { useAppointmentsStore } from '@/stores/appointments';
 import { useSettingsStore } from '@/stores/settings';
@@ -28,7 +31,7 @@ interface NavItem {
   showApptCount?: boolean;
 }
 
-const _navItems: NavItem[] = [
+const navItems: NavItem[] = [
   { path: '/screening', label: 'คัดกรองผู้ป่วย', icon: Microscope },
   { path: '/active', label: 'ผู้ป่วยในการรักษา', icon: Users, showAlerts: true },
   { path: '/discharged', label: 'การจำหน่ายผู้ป่วย', icon: UserMinus },
@@ -39,14 +42,14 @@ const _navItems: NavItem[] = [
   { path: '/about', label: 'เกี่ยวกับโปรแกรม', icon: Info },
 ];
 
-function _isActive(path: string): boolean {
+function isActive(path: string): boolean {
   if (path === '/') return route.path === '/';
   return route.path === path || route.path.startsWith(`${path}/`);
 }
 
-const _redCount = computed(() => alertStore.redCount);
-const _isConnected = computed(() => settingsStore.isConnected);
-const _todayApptCount = computed(() => appointmentsStore.todayAppointments.length);
+const redCount = computed(() => alertStore.redCount);
+const isConnected = computed(() => settingsStore.isConnected);
+const todayApptCount = computed(() => appointmentsStore.todayAppointments.length);
 </script>
 
 <template>

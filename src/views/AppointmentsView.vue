@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { AlertCircle, Calendar, CalendarDays, RefreshCw } from 'lucide-vue-next';
 import { onMounted } from 'vue';
 import { useAppointmentsStore } from '@/stores/appointments';
 import { useSettingsStore } from '@/stores/settings';
@@ -6,10 +7,10 @@ import { useSettingsStore } from '@/stores/settings';
 const store = useAppointmentsStore();
 const settingsStore = useSettingsStore();
 
-const _todayISO = store.todayISO;
-const _daysOptions = [7, 14, 30, 60];
+const todayISO = store.todayISO;
+const daysOptions = [7, 14, 30, 60];
 
-function _toThaiDate(isoDate: string | null | undefined): string {
+function toThaiDate(isoDate: string | null | undefined): string {
   if (!isoDate) return '-';
   try {
     const [y, m, d] = isoDate.split('-').map(Number);
@@ -19,7 +20,7 @@ function _toThaiDate(isoDate: string | null | undefined): string {
   }
 }
 
-function _setDays(days: number) {
+function setDays(days: number) {
   store.daysAhead = days;
   store.fetchAppointments(days);
 }

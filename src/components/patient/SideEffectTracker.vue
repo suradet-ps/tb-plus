@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { AlertTriangle, CheckCircle } from 'lucide-vue-next';
 import { computed } from 'vue';
+import DrugChip from '@/components/shared/DrugChip.vue';
 import type { Followup, TreatmentPlan } from '@/types/treatment';
 
 // ── Props ─────────────────────────────────────────────────────────────────
@@ -23,7 +25,7 @@ interface DrugGroup {
   effects: SideEffectDef[];
 }
 
-const _DRUG_GROUPS: DrugGroup[] = [
+const DRUG_GROUPS: DrugGroup[] = [
   {
     drug: 'H',
     effects: [
@@ -111,12 +113,12 @@ function getCount(key: string): number {
 }
 
 /** Total unique side-effect occurrences across all followups */
-const _totalReported = computed(() =>
+const totalReported = computed(() =>
   Object.values(sideEffectCounts.value).reduce((a, b) => a + b, 0),
 );
 
 /** Distinct side-effect types reported (any count > 0) */
-const _distinctReported = computed(
+const distinctReported = computed(
   () => Object.values(sideEffectCounts.value).filter((c) => c > 0).length,
 );
 
@@ -135,7 +137,7 @@ const isCurrentlyOnE = computed<boolean>(() => {
   }
 });
 
-const _showEPriorityAlert = computed(() => hasOpticNeuritis.value && isCurrentlyOnE.value);
+const showEPriorityAlert = computed(() => hasOpticNeuritis.value && isCurrentlyOnE.value);
 
 // ── Active drugs in current plan ──────────────────────────────────────────
 
@@ -153,7 +155,7 @@ const activeDrugLetters = computed<Set<string>>(() => {
   }
 });
 
-function _isDrugActive(drug: string): boolean {
+function isDrugActive(drug: string): boolean {
   return activeDrugLetters.value.has(drug.toUpperCase());
 }
 
@@ -172,7 +174,7 @@ const DRUG_COLORS: Record<string, DrugColor> = {
   Z: { bg: 'rgba(82,52,16,0.10)', text: '#523410', border: 'rgba(82,52,16,0.25)' },
 };
 
-function _drugColor(drug: string): DrugColor {
+function drugColor(drug: string): DrugColor {
   return (
     DRUG_COLORS[drug.toUpperCase()] ?? {
       bg: 'rgba(0,0,0,0.06)',

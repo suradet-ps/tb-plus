@@ -1,8 +1,17 @@
 <script setup lang="ts">
-import { DatabaseZap, Lock, Network } from 'lucide-vue-next';
+import {
+  CheckCircle,
+  DatabaseZap,
+  HardDrive,
+  Info,
+  Lock,
+  Network,
+  ShieldCheck,
+  Stethoscope,
+} from 'lucide-vue-next';
 
 // Section 1: Feature list
-const _features = [
+const features = [
   'คัดกรองและลงทะเบียนผู้ป่วยจากระบบ HOSxP',
   'ติดตามความก้าวหน้าการรักษาและแจ้งเตือนอัตโนมัติ',
   'บันทึกผลติดตามรายเดือน น้ำหนัก ผลเสมหะ และอาการข้างเคียง',
@@ -15,7 +24,7 @@ interface SecurityPoint {
   desc: string;
 }
 
-const _securityPoints: SecurityPoint[] = [
+const securityPoints: SecurityPoint[] = [
   {
     icon: Lock,
     title: 'อ่านอย่างเดียว (Read-Only)',
@@ -39,7 +48,7 @@ interface InfoItem {
   value: string;
 }
 
-const _infoItems: InfoItem[] = [
+const infoItems: InfoItem[] = [
   { label: 'โปรแกรม', value: 'TB Plus' },
   { label: 'เวอร์ชัน', value: '0.1.5' },
   { label: 'พัฒนาโดย', value: 'ทีมเภสัชกรรม โรงพยาบาลสระโบสถ์' },

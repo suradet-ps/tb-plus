@@ -7,14 +7,14 @@ const props = defineProps<{
   phase?: string | null;
 }>();
 
-const _pct = computed(() => {
+const pct = computed(() => {
   if (!props.currentMonth || !props.totalMonths || props.totalMonths === 0) return 0;
   return Math.min(100, Math.round((props.currentMonth / props.totalMonths) * 100));
 });
 
 const isOverrun = computed(() => (props.currentMonth ?? 0) > (props.totalMonths ?? 999));
 
-const _barColor = computed(() => {
+const barColor = computed(() => {
   if (isOverrun.value) return '#dd5b00';
   if (props.phase === 'intensive') return '#dd5b00';
   return '#2a9d99';

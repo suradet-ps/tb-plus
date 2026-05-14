@@ -43,7 +43,7 @@ const intensivePlan = computed(() => props.plans.find((p) => p.phase === 'intens
 const continuationPlan = computed(
   () => props.plans.find((p) => p.phase === 'continuation') ?? null,
 );
-const _anyPlan = computed(() => intensivePlan.value ?? continuationPlan.value);
+const anyPlan = computed(() => intensivePlan.value ?? continuationPlan.value);
 
 interface PhaseInfo {
   start: Date;
@@ -131,39 +131,39 @@ const intensivePct = computed(() => {
   return Math.min(100, (dur / totalDays.value) * 100);
 });
 
-const _continuationPct = computed(() => {
+const continuationPct = computed(() => {
   if (!continuationInfo.value) return 0;
   const dur =
     (continuationInfo.value.end.getTime() - continuationInfo.value.start.getTime()) / 86_400_000;
   return Math.min(100 - intensivePct.value, (dur / totalDays.value) * 100);
 });
 
-const _todayPct = computed<number | null>(() => {
+const todayPct = computed<number | null>(() => {
   if (!overallStart.value) return null;
   return pctFromDate(new Date());
 });
 
-function _followupPct(date: string): number {
+function followupPct(date: string): number {
   return pctFromDate(new Date(date));
 }
 
 // ── Month ticks ───────────────────────────────────────────────────────────
 
-const _totalMonths = computed(
+const totalMonths = computed(
   () => (intensiveInfo.value?.durationMonths ?? 0) + (continuationInfo.value?.durationMonths ?? 0),
 );
 
 // ── Date labels ───────────────────────────────────────────────────────────
 
-const _startLabel = computed(() =>
+const startLabel = computed(() =>
   overallStart.value ? toThaiDate(overallStart.value.toISOString().slice(0, 10)) : '',
 );
-const _endLabel = computed(() =>
+const endLabel = computed(() =>
   overallEnd.value ? toThaiDate(overallEnd.value.toISOString().slice(0, 10)) : '',
 );
 
 // Boundary between phases (intensive end / continuation start)
-const _showBoundary = computed(
+const showBoundary = computed(
   () => intensiveInfo.value !== null && continuationInfo.value !== null,
 );
 
@@ -175,17 +175,17 @@ const boundaryDate = computed(() => {
 
 const boundaryPct = computed(() => (boundaryDate.value ? pctFromDate(boundaryDate.value) : null));
 
-const _boundaryPctClamped = computed(() =>
+const boundaryPctClamped = computed(() =>
   boundaryPct.value !== null ? Math.max(1, Math.min(99, boundaryPct.value)) : null,
 );
 
-const _boundaryLabel = computed(() =>
+const boundaryLabel = computed(() =>
   boundaryDate.value ? toThaiDate(boundaryDate.value.toISOString().slice(0, 10)) : '',
 );
 
 // ── Tooltip for each followup dot ─────────────────────────────────────────
 
-function _dotTooltip(f: Followup): string {
+function dotTooltip(f: Followup): string {
   const dateStr = toThaiDate(f.followup_date);
   return f.month_number ? `ติดตามผล: ${dateStr} (เดือนที่ ${f.month_number})` : `ติดตามผล: ${dateStr}`;
 }

@@ -6,13 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": [
-      "src/**/*.ts",
-      "src/**/*.vue",
-      "src/**/*.tsx",
-      "src/**/*.js",
-      "src/**/*.css"
-    ]
+    "includes": ["src/**/*.ts", "src/**/*.vue", "src/**/*.tsx", "src/**/*.js", "src/**/*.css"]
   },
   "formatter": {
     "enabled": true,
@@ -50,5 +44,19 @@
     "formatter": {
       "enabled": true
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["src/**/*.vue"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off",
+            "noUnusedFunctionParameters": "off"
+          }
+        }
+      }
+    }
+  ]
 }

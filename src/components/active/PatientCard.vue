@@ -1,7 +1,11 @@
 <script setup lang="ts">
+import { Eye, LogOut, PlusCircle } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import DrugChip from '@/components/shared/DrugChip.vue';
 import type { ActivePatientRow } from '@/types/patient';
+import AlertBadge from './AlertBadge.vue';
+import ProgressBar from './ProgressBar.vue';
 
 /** Parse regimen string "2HRZE/4HR" → continuation drug letters ["H","R"] */
 function getContinuationDrugsFromRegimen(regimen: string): string[] {
@@ -20,8 +24,8 @@ const emit = defineEmits<{
 
 const router = useRouter();
 
-const _name = computed(() => props.patient.demographics?.full_name ?? props.patient.tb_patient.hn);
-const _age = computed(() => props.patient.demographics?.age);
+const name = computed(() => props.patient.demographics?.full_name ?? props.patient.tb_patient.hn);
+const age = computed(() => props.patient.demographics?.age);
 
 // Derives the "real" current phase from the date, not just the SQLite record.
 // If the intensive phase end date has passed but the plan was never updated,
@@ -41,40 +45,40 @@ const phaseIsStale = computed(
   () => !!props.patient.current_plan && effectivePhase.value !== props.patient.current_plan.phase,
 );
 
-const _phaseLabel = computed(() => {
+const phaseLabel = computed(() => {
   if (effectivePhase.value === 'intensive') return 'Intensive';
   if (effectivePhase.value === 'continuation') return 'Continuation';
   return '-';
 });
 
-const _phaseColor = computed(() => {
+const phaseColor = computed(() => {
   if (effectivePhase.value === 'intensive') return '#dd5b00';
   if (effectivePhase.value === 'continuation') return '#2a9d99';
   return '#a39e98';
 });
 
-const _tbTypeLabel = computed(() => {
+const tbTypeLabel = computed(() => {
   const t = props.patient.tb_patient.tb_type;
   if (t === 'pulmonary') return 'ปอด';
   if (t === 'extra_pulmonary') return 'นอกปอด';
   return t ?? '-';
 });
 
-const _hasRedAlert = computed(() => props.patient.alerts.some((a) => a.severity === 'red'));
-const _hasYellowAlert = computed(() => props.patient.alerts.some((a) => a.severity === 'yellow'));
+const hasRedAlert = computed(() => props.patient.alerts.some((a) => a.severity === 'red'));
+const hasYellowAlert = computed(() => props.patient.alerts.some((a) => a.severity === 'yellow'));
 
-const _sexSymbol = computed(() => {
+const sexSymbol = computed(() => {
   const s = props.patient.demographics?.sex;
   if (!s) return null;
   return s === 'M' || s === '1' ? '♂' : '♀';
 });
 
-const _isOverdue = computed(() => (props.patient.days_since_last_dispensing ?? 0) > 35);
+const isOverdue = computed(() => (props.patient.days_since_last_dispensing ?? 0) > 35);
 
 // Returns drug letters to display.
 // When the plan is stale (still says "intensive" but end date passed), derive
 // the expected continuation drugs from the regimen string.
-function _getDisplayDrugs(): string[] {
+function getDisplayDrugs(): string[] {
   const plan = props.patient.current_plan;
   if (!plan) return [];
   if (phaseIsStale.value) {
@@ -88,16 +92,16 @@ function _getDisplayDrugs(): string[] {
   }
 }
 
-function _handleViewDetail() {
+function handleViewDetail() {
   emit('view-detail', props.patient.tb_patient.hn);
   router.push(`/patient/${props.patient.tb_patient.hn}`);
 }
 
-function _handleAddFollowup() {
+function handleAddFollowup() {
   emit('add-followup', props.patient.tb_patient.hn);
 }
 
-function _handleDischarge() {
+function handleDischarge() {
   emit('discharge', props.patient.tb_patient.hn);
 }
 </script>

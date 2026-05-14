@@ -3,7 +3,7 @@ type FilterStatus = 'all' | 'active' | 'completed' | 'transferred' | 'died' | 'd
 type FilterTbType = 'all' | 'pulmonary' | 'extra_pulmonary';
 type FilterGeocode = 'all' | 'success' | 'pending' | 'failed' | 'missing_address';
 
-const _props = defineProps<{
+const props = defineProps<{
   search: string;
   status: FilterStatus;
   tbType: FilterTbType;
@@ -12,7 +12,7 @@ const _props = defineProps<{
   enrolledTo: string;
 }>();
 
-const _emit = defineEmits<{
+const emit = defineEmits<{
   'update:search': [value: string];
   'update:status': [value: FilterStatus];
   'update:tbType': [value: FilterTbType];

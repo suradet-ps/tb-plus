@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { AlertCircle, CheckCircle, Loader2, UserPlus, X } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import { usePatientStore } from '@/stores/patient';
 import { useSettingsStore } from '@/stores/settings';
@@ -15,7 +16,7 @@ const emit = defineEmits<{
 }>();
 
 const patientStore = usePatientStore();
-const _settingsStore = useSettingsStore();
+const settingsStore = useSettingsStore();
 
 // ── Form state ────────────────────────────────────────────────────────────────
 const tbType = ref('pulmonary');
@@ -34,7 +35,7 @@ const reenrollCount = computed(
     props.patients.filter((p) => p.is_enrolled && p.patient_status && p.patient_status !== 'active')
       .length,
 );
-const _hasReenrollPatients = computed(() => reenrollCount.value > 0);
+const hasReenrollPatients = computed(() => reenrollCount.value > 0);
 
 // ── Reset form whenever the modal opens ───────────────────────────────────────
 watch(
@@ -60,7 +61,7 @@ function close() {
   emit('update:modelValue', false);
 }
 
-async function _submit() {
+async function submit() {
   if (!treatmentStartDate.value) {
     error.value = 'กรุณาระบุวันเริ่มการรักษา';
     return;
@@ -96,7 +97,7 @@ async function _submit() {
   }
 }
 
-function _unfocus(e: Event) {
+function unfocus(e: Event) {
   (e.target as HTMLElement)?.blur();
 }
 </script>

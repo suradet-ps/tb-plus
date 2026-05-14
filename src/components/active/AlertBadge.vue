@@ -3,7 +3,7 @@ import type { PatientAlert } from '@/types/alert';
 
 const props = defineProps<{ alert: PatientAlert }>();
 
-const _isRed = props.alert.severity === 'red';
+const isRed = props.alert.severity === 'red';
 </script>
 
 <template>

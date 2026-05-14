@@ -72,7 +72,8 @@ function renderMarkers(): void {
   const bounds = L.latLngBounds([]);
 
   for (const patient of points) {
-    const marker = L.marker([patient.lat!, patient.lng!], {
+    if (patient.lat == null || patient.lng == null) continue;
+    const marker = L.marker([patient.lat, patient.lng], {
       icon: createIcon(statusColor(patient), patient.hn === props.selectedHn),
       title: patient.masked_name,
     });

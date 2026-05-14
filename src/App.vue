@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { onMounted, onUnmounted } from 'vue';
+
+import AppSidebar from '@/components/layout/AppSidebar.vue';
 import { useAlertStore } from '@/stores/alerts';
 import { useAppointmentsStore } from '@/stores/appointments';
 import { useSettingsStore } from '@/stores/settings';
@@ -27,7 +29,9 @@ onMounted(async () => {
       attempts++;
       await settingsStore.checkConnection();
       if (settingsStore.isConnected || attempts >= 5) {
-        clearInterval(startupRetryTimer!);
+        if (startupRetryTimer) {
+          clearInterval(startupRetryTimer);
+        }
         startupRetryTimer = null;
         if (settingsStore.isConnected) {
           appointmentsStore.fetchAppointments();
