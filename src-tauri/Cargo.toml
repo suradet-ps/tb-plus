@@ -37,7 +37,7 @@ anyhow = "1"
 reqwest = { version = "0.13", features = ["json", "rustls"] }
 aes-gcm = "0.10"        # AES-256-GCM for settings encryption
 hkdf = "0.13"           # HKDF key derivation
-rand = "0.8"            # CSPRNG for key/nonce generation
+rand = "0.10"            # CSPRNG for key/nonce generation
 sha2 = "0.11"           # SHA-256 for HKDF
 base64 = "0.22"         # Base64 encoding for encrypted blobs
 
