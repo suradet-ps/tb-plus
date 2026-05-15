@@ -1,0 +1,64 @@
+/* ─── Design System CSS Variables ─────────────────────────────────── */
+:root {
+  /* Colors — text */
+  --color-text: rgba(0, 0, 0, 0.95);
+  --color-text-secondary: #615d59;
+  --color-text-muted: #a39e98;
+
+  /* Colors — surface */
+  --color-bg: #ffffff;
+  --color-bg-alt: #f6f5f4;
+  --color-bg-dark: #31302e;
+
+  /* Colors — brand / interactive */
+  --color-blue: #0075de;
+  --color-blue-active: #005bab;
+  --color-blue-focus: #097fe8;
+
+  /* Colors — badge */
+  --color-badge-bg: #f2f9ff;
+  --color-badge-text: #097fe8;
+
+  /* Colors — semantic */
+  --color-teal: #2a9d99;
+  --color-green: #1aae39;
+  --color-orange: #dd5b00;
+  --color-pink: #ff64c8;
+  --color-purple: #391c57;
+  --color-brown: #523410;
+
+  /* Drug class accent colors */
+  --drug-H: #2a9d99;
+  --drug-R: #dd5b00;
+  --drug-Z: #523410;
+  --drug-E: #0075de;
+
+  /* Borders */
+  --border: 1px solid rgba(0, 0, 0, 0.1);
+  --border-color: rgba(0, 0, 0, 0.1);
+
+  /* Shadows */
+  --shadow-card:
+    rgba(0, 0, 0, 0.04) 0px 4px 18px,
+    rgba(0, 0, 0, 0.027) 0px 2.025px 7.84688px,
+    rgba(0, 0, 0, 0.02) 0px 0.8px 2.925px,
+    rgba(0, 0, 0, 0.01) 0px 0.175px 1.04062px;
+  --shadow-deep:
+    rgba(0, 0, 0, 0.01) 0px 1px 3px,
+    rgba(0, 0, 0, 0.02) 0px 3px 7px,
+    rgba(0, 0, 0, 0.02) 0px 7px 15px,
+    rgba(0, 0, 0, 0.04) 0px 14px 28px,
+    rgba(0, 0, 0, 0.05) 0px 23px 52px;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-card: 12px;
+  --radius-pill: 9999px;
+
+  /* Typography */
+  --font: "Inter", -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+
+  /* Layout */
+  --sidebar-width: 240px;
+}
