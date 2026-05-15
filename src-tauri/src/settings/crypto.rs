@@ -2,8 +2,8 @@ use aes_gcm::aead::{Aead, KeyInit, OsRng};
 use aes_gcm::{Aes256Gcm, Key, Nonce};
 use anyhow::{Context, Result};
 use base64::Engine;
+use aes_gcm::aead::rand_core::RngCore;
 use hkdf::Hkdf;
-use rand::RngCore;
 use sha2::Sha256;
 
 const KEY_SIZE: usize = 32;
