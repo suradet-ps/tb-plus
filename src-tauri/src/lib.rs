@@ -155,6 +155,7 @@ pub fn run() {
       commands::settings::connect_mysql,
       commands::settings::get_mysql_status,
       commands::settings::backup_sqlite,
+      commands::settings::restore_sqlite,
       commands::settings::save_db_config,
       commands::settings::load_db_config,
       commands::settings::delete_db_config,

@@ -104,6 +104,68 @@ pub async fn backup_sqlite(app: tauri::AppHandle, target_path: String) -> Result
   Ok(())
 }
 
+/// Restore the SQLite database from a user-selected backup file.
+///
+/// Validates that the backup contains expected TB clinic tables, then replaces
+/// the current database. The app should be restarted after a successful restore.
+#[tauri::command]
+pub async fn restore_sqlite(app: tauri::AppHandle, source_path: String) -> Result<(), String> {
+  use tauri::Manager;
+
+  let source = PathBuf::from(&source_path);
+  if !source.exists() {
+    return Err("ไม่พบไฟล์สำรองข้อมูลที่เลือก".to_string());
+  }
+
+  // Validate that the backup file is a reasonable SQLite database by checking
+  // for the presence of core TB clinic tables.
+  let backup_url = format!(
+    "sqlite://{}?mode=ro",
+    source.to_str().ok_or("เส้นทางไฟล์ไม่ถูกต้อง")?
+  );
+  let backup_pool = sqlx::sqlite::SqlitePoolOptions::new()
+    .max_connections(1)
+    .connect(&backup_url)
+    .await
+    .map_err(|_| "ไฟล์ที่เลือกไม่ใช่ฐานข้อมูล SQLite ที่ถูกต้อง")?;
+
+  let expected_tables = [
+    "tb_patients",
+    "tb_treatment_plans",
+    "tb_followups",
+    "tb_outcomes",
+  ];
+  for table in &expected_tables {
+    let exists: Option<i64> = sqlx::query_scalar(&format!(
+      "SELECT 1 FROM sqlite_master WHERE type='table' AND name='{}'",
+      table
+    ))
+    .fetch_optional(&backup_pool)
+    .await
+    .map_err(|e| e.to_string())?;
+    if exists.is_none() {
+      return Err(format!("ไฟล์สำรองข้อมูลไม่มีตารางที่จำเป็น: {}", table));
+    }
+  }
+
+  // Close the backup pool so the file handle is released before copying.
+  backup_pool.close().await;
+
+  // Replace the current database file with the backup.
+  let app_data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+  let db_path = app_data_dir.join("tb_plus.db");
+
+  std::fs::copy(&source, &db_path)
+    .map_err(|e| format!("ไม่สามารถแทนที่ฐานข้อมูลได้ — กรุณาปิดแอปพลิเคชันแล้วลองอีกครั้ง ({})", e))?;
+
+  // Remove WAL and SHM files that may belong to the old database to prevent
+  // compatibility issues when the app restarts.
+  let _ = std::fs::remove_file(app_data_dir.join("tb_plus.db-wal"));
+  let _ = std::fs::remove_file(app_data_dir.join("tb_plus.db-shm"));
+
+  Ok(())
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Persistent connection settings — stored in SQLite app_settings with encryption
 // ─────────────────────────────────────────────────────────────────────────────

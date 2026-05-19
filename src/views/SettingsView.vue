@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api/core';
-import { save as saveDialog } from '@tauri-apps/plugin-dialog';
+import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog';
 import {
   AlertTriangle,
   CheckCircle,
@@ -13,6 +13,7 @@ import {
   Search,
   Server,
   Trash2,
+  Upload,
   Users,
   Wifi,
   WifiOff,
@@ -345,6 +346,55 @@ async function downloadBackup() {
   } finally {
     isBackingUp.value = false;
   }
+}
+
+// ── Restore ──────────────────────────────────────────────────────────
+const isRestoring = ref(false);
+const restoreError = ref<string | null>(null);
+const restoreSuccess = ref(false);
+const showRestoreConfirm = ref(false);
+const pendingRestorePath = ref<string | null>(null);
+
+async function selectBackupFile() {
+  restoreError.value = null;
+  restoreSuccess.value = false;
+  try {
+    const selected = await openDialog({
+      filters: [
+        {
+          name: 'SQLite Database',
+          extensions: ['db', 'sqlite', 'sqlite3'],
+        },
+      ],
+    });
+    if (!selected || Array.isArray(selected)) return;
+
+    pendingRestorePath.value = selected;
+    showRestoreConfirm.value = true;
+  } catch (e) {
+    restoreError.value = String(e);
+  }
+}
+
+async function confirmRestore() {
+  if (!pendingRestorePath.value) return;
+  isRestoring.value = true;
+  restoreError.value = null;
+  showRestoreConfirm.value = false;
+  try {
+    await invoke('restore_sqlite', { sourcePath: pendingRestorePath.value });
+    restoreSuccess.value = true;
+    pendingRestorePath.value = null;
+  } catch (e) {
+    restoreError.value = String(e);
+  } finally {
+    isRestoring.value = false;
+  }
+}
+
+function cancelRestore() {
+  showRestoreConfirm.value = false;
+  pendingRestorePath.value = null;
 }
 </script>
 
@@ -850,13 +900,13 @@ async function downloadBackup() {
         </template>
 
         <!-- ══════════════════════════════════════════════════
-             Section 4 — Backup
+             Section 4 — Backup & Restore
         ══════════════════════════════════════════════════ -->
         <template v-else-if="activeSection === 'backup'">
           <div class="settings-card">
-            <h2 class="card-title">สำรองข้อมูล SQLite</h2>
+            <h2 class="card-title">สำรองและกู้คืนข้อมูล</h2>
             <p class="card-subtitle">
-              ดาวน์โหลดและบันทึกไฟล์ฐานข้อมูลสำหรับการสำรองข้อมูล โดยเลือกตำแหน่งปลายทางก่อนทุกครั้ง
+              ส่งออกไฟล์ฐานข้อมูลสำหรับการสำรองข้อมูล หรือนำเข้าไฟล์สำรองเพื่อกู้คืนข้อมูล
             </p>
 
             <div class="backup-body">
@@ -876,24 +926,43 @@ async function downloadBackup() {
                 </div>
               </div>
 
-              <!-- Download button -->
-              <button
-                class="btn-ghost-download"
-                :disabled="isBackingUp"
-                @click="downloadBackup"
-              >
-                <Loader2   v-if="isBackingUp"   :size="14" class="spin" />
-                <Download  v-else               :size="14" />
-                เลือกตำแหน่งและบันทึกไฟล์ฐานข้อมูล
-              </button>
+              <!-- Action buttons -->
+              <div class="backup-actions">
+                <button
+                  class="btn-ghost-download"
+                  :disabled="isBackingUp"
+                  @click="downloadBackup"
+                >
+                  <Loader2   v-if="isBackingUp"   :size="14" class="spin" />
+                  <Download  v-else               :size="14" />
+                  สำรองข้อมูล (Export)
+                </button>
+
+                <button
+                  class="btn-ghost-restore"
+                  :disabled="isRestoring"
+                  @click="selectBackupFile"
+                >
+                  <Loader2   v-if="isRestoring"   :size="14" class="spin" />
+                  <Upload    v-else               :size="14" />
+                  กู้คืนข้อมูล (Import)
+                </button>
+              </div>
 
               <!-- Success / error feedback -->
               <span v-if="backupSuccess" class="test-result test-success">
                 <CheckCircle :size="14" />
                 สำรองข้อมูลสำเร็จ
               </span>
+              <span v-if="restoreSuccess" class="test-result test-success">
+                <CheckCircle :size="14" />
+                กู้คืนข้อมูลสำเร็จ — กรุณาปิดและเปิดแอปพลิเคชันใหม่
+              </span>
               <p v-if="backupError" class="error-note">
                 ไม่สามารถสำรองข้อมูลได้: {{ backupError }}
+              </p>
+              <p v-if="restoreError" class="error-note">
+                ไม่สามารถกู้คืนข้อมูลได้: {{ restoreError }}
               </p>
             </div>
 
@@ -901,6 +970,7 @@ async function downloadBackup() {
               <strong>คำแนะนำ:</strong>
               ควรสำรองข้อมูลเป็นประจำทุกสัปดาห์หรือทุกเดือน
               เก็บไฟล์ไว้ในที่ปลอดภัย เช่น Google Drive หรือ USB Flash Drive
+              การกู้คืนข้อมูลจะแทนที่ฐานข้อมูลปัจจุบันทั้งหมด — กรุณาตรวจสอบไฟล์สำรองก่อนนำเข้า
             </div>
           </div>
         </template>
@@ -908,6 +978,32 @@ async function downloadBackup() {
       </div><!-- /settings-content -->
     </div><!-- /settings-layout -->
   </div><!-- /view-root -->
+
+  <!-- Restore confirmation modal -->
+  <Teleport to="body">
+    <div v-if="showRestoreConfirm" class="modal-overlay" @click.self="cancelRestore">
+      <div class="modal-card restore-confirm-modal">
+        <div class="restore-confirm-icon">
+          <AlertTriangle :size="28" />
+        </div>
+        <h3 class="restore-confirm-title">ยืนยันการกู้คืนข้อมูล</h3>
+        <p class="restore-confirm-desc">
+          การกู้คืนข้อมูลจะ<strong>แทนที่ฐานข้อมูลปัจจุบันทั้งหมด</strong> ด้วยข้อมูลจากไฟล์สำรอง
+          ข้อมูลปัจจุบันที่ยังไม่ได้สำรองจะหายไปถาวร
+        </p>
+        <p class="restore-confirm-file">
+          ไฟล์: <strong>{{ pendingRestorePath }}</strong>
+        </p>
+        <div class="restore-confirm-actions">
+          <button class="btn-secondary" @click="cancelRestore">ยกเลิก</button>
+          <button class="btn-primary btn-restore-confirm" @click="confirmRestore">
+            <Upload :size="14" />
+            กู้คืนข้อมูล
+          </button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -1179,6 +1275,38 @@ async function downloadBackup() {
 .btn-ghost-download:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.btn-ghost-restore {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--color-bg);
+  border: var(--border);
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  transition: background 0.13s, border-color 0.13s;
+}
+
+.btn-ghost-restore:hover:not(:disabled) {
+  background: var(--color-bg-alt);
+  border-color: rgba(0, 0, 0, 0.18);
+}
+
+.btn-ghost-restore:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.backup-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 /* ── Test-result inline feedback ────────────────────────────────────── */
@@ -1742,5 +1870,59 @@ async function downloadBackup() {
 .clinic-badge strong {
   font-family: monospace;
   font-size: 16px;
+}
+
+/* ── Restore confirmation modal ─────────────────────────────────── */
+.restore-confirm-modal {
+  text-align: center;
+  max-width: 440px;
+  min-width: 360px;
+}
+
+.restore-confirm-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: rgba(221, 91, 0, 0.1);
+  color: var(--color-orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.restore-confirm-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 8px;
+}
+
+.restore-confirm-desc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+
+.restore-confirm-file {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin: 0 0 20px;
+  word-break: break-all;
+}
+
+.restore-confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn-restore-confirm {
+  background: var(--color-orange);
+}
+
+.btn-restore-confirm:hover:not(:disabled) {
+  background: #c44e00;
 }
 </style>
