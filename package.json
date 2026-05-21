@@ -1,7 +1,7 @@
 {
   "name": "tb-plus",
   "private": true,
-  "version": "0.1.5",
+  "version": "1.0.0",
   "description": "TB Plus — ระบบบริหารจัดการคลินิกวัณโรค โรงพยาบาลสระโบสถ์",
   "repository": "https://github.com/suradet-ps/tb-plus",
   "type": "module",

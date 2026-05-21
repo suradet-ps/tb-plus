@@ -1,6 +1,6 @@
 [package]
 name = "tb-plus"
-version = "0.1.5"
+version = "1.0.0"
 description = "TB Plus — ระบบบริหารจัดการคลินิกวัณโรค โรงพยาบาลสระโบสถ์"
 authors = ["Suradet Pratomsak"]
 license = "MIT"

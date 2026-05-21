@@ -50,7 +50,7 @@ interface InfoItem {
 
 const infoItems: InfoItem[] = [
   { label: 'โปรแกรม', value: 'TB Plus' },
-  { label: 'เวอร์ชัน', value: '0.1.5' },
+  { label: 'เวอร์ชัน', value: '1.0.0' },
   { label: 'พัฒนาโดย', value: 'ทีมเภสัชกรรม โรงพยาบาลสระโบสถ์' },
   { label: 'แพลตฟอร์ม', value: 'Tauri 2.5 + Vue 3.5' },
   { label: 'ฐานข้อมูลภายในเครื่อง', value: 'SQLite' },
