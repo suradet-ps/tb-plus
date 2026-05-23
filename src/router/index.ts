@@ -1,14 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import AboutView from '@/views/AboutView.vue';
-import ActiveView from '@/views/ActiveView.vue';
-import AppointmentsView from '@/views/AppointmentsView.vue';
-import DischargedView from '@/views/DischargedView.vue';
-import DosageAssessmentView from '@/views/DosageAssessmentView.vue';
-import MappingView from '@/views/MappingView.vue';
-import PatientDetailView from '@/views/PatientDetailView.vue';
-import ReportsView from '@/views/ReportsView.vue';
-import ScreeningView from '@/views/ScreeningView.vue';
-import SettingsView from '@/views/SettingsView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -20,62 +10,62 @@ const router = createRouter({
     {
       path: '/screening',
       name: 'screening',
-      component: ScreeningView,
+      component: () => import('@/views/ScreeningView.vue'),
       meta: { title: 'คัดกรองผู้ป่วย' },
     },
     {
       path: '/active',
       name: 'active',
-      component: ActiveView,
+      component: () => import('@/views/ActiveView.vue'),
       meta: { title: 'ผู้ป่วยในการรักษา' },
     },
     {
       path: '/discharged',
       name: 'discharged',
-      component: DischargedView,
+      component: () => import('@/views/DischargedView.vue'),
       meta: { title: 'ผู้ป่วยจำหน่ายแล้ว' },
     },
     {
       path: '/appointments',
       name: 'appointments',
-      component: AppointmentsView,
+      component: () => import('@/views/AppointmentsView.vue'),
       meta: { title: 'การนัดหมาย' },
     },
     {
       path: '/dosage-assessment',
       name: 'dosage-assessment',
-      component: DosageAssessmentView,
+      component: () => import('@/views/DosageAssessmentView.vue'),
       meta: { title: 'การประเมินขนาดยา' },
     },
     {
       path: '/patient/:hn',
       name: 'patient-detail',
-      component: PatientDetailView,
+      component: () => import('@/views/PatientDetailView.vue'),
       props: true,
       meta: { title: 'รายละเอียดผู้ป่วย' },
     },
     {
       path: '/mapping',
       name: 'mapping',
-      component: MappingView,
+      component: () => import('@/views/MappingView.vue'),
       meta: { title: 'แผนที่การกระจายโรค' },
     },
     {
       path: '/reports',
       name: 'reports',
-      component: ReportsView,
+      component: () => import('@/views/ReportsView.vue'),
       meta: { title: 'รายงาน' },
     },
     {
       path: '/settings',
       name: 'settings',
-      component: SettingsView,
+      component: () => import('@/views/SettingsView.vue'),
       meta: { title: 'ตั้งค่า' },
     },
     {
       path: '/about',
       name: 'about',
-      component: AboutView,
+      component: () => import('@/views/AboutView.vue'),
       meta: { title: 'เกี่ยวกับโปรแกรม' },
     },
   ],

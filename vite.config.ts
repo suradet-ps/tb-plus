@@ -26,4 +26,25 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes('/node_modules/.pnpm/leaflet')) {
+            return 'leaflet';
+          }
+          if (id.includes('lucide-vue-next')) {
+            return 'lucide';
+          }
+          if (
+            id.includes('/node_modules/.pnpm/vue') ||
+            id.includes('/node_modules/.pnpm/vue-router') ||
+            id.includes('/node_modules/.pnpm/pinia')
+          ) {
+            return 'vue';
+          }
+        },
+      },
+    },
+  },
 }));
