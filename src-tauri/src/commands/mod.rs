@@ -4,5 +4,6 @@ pub mod dosage;
 pub mod followups;
 pub mod mapping;
 pub mod patients;
+pub mod reports;
 pub mod screening;
 pub mod settings;

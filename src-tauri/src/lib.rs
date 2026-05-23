@@ -176,6 +176,7 @@ pub fn run() {
       commands::settings::mark_setup_complete,
       commands::settings::is_setup_complete,
       commands::appointments::get_appointments,
+      commands::reports::get_drug_consumption,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

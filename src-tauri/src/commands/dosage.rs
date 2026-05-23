@@ -55,10 +55,18 @@ pub async fn assess_patient_dosage(
     .find(|entry| entry.name.eq_ignore_ascii_case(&regimen_name))
     .ok_or_else(|| format!("ไม่พบสูตรยา {}", regimen_name))?;
 
-  let rules = settings.get_dosage_rules().await.map_err(|e| e.to_string())?;
+  let rules = settings
+    .get_dosage_rules()
+    .await
+    .map_err(|e| e.to_string())?;
   let configured_drugs = load_candidate_map(pool, &settings).await?;
 
-  Ok(build_assessment_result(patient, regimen, rules, configured_drugs))
+  Ok(build_assessment_result(
+    patient,
+    regimen,
+    rules,
+    configured_drugs,
+  ))
 }
 
 async fn load_candidate_map(
@@ -188,42 +196,49 @@ fn build_assessment_item(
     .and_then(|item| item.units.clone())
     .or_else(|| rule.units.clone());
 
-  let (target_min_mg_day, target_max_mg_day, suggested_units_per_day, suggested_daily_dose_mg, dose_delta_mg, within_target_range, note) =
-    match weight {
-      Some(weight_kg) => {
-        let target_min = weight_kg * rule.min_mg_per_kg_day;
-        let target_max = weight_kg * rule.max_mg_per_kg_day;
-        match choose_dose(target_min, target_max, strength.as_deref()) {
-          Some(result) => (
-            Some(target_min),
-            Some(target_max),
-            Some(result.units_per_day),
-            Some(result.daily_dose_mg),
-            Some(result.delta_mg),
-            result.within_target_range,
-            Some(result.note),
-          ),
-          None => (
-            Some(target_min),
-            Some(target_max),
-            None,
-            None,
-            None,
-            false,
-            Some("ไม่สามารถอ่านค่า strength เพื่อคำนวณจำนวนเม็ดยาได้".to_string()),
-          ),
-        }
+  let (
+    target_min_mg_day,
+    target_max_mg_day,
+    suggested_units_per_day,
+    suggested_daily_dose_mg,
+    dose_delta_mg,
+    within_target_range,
+    note,
+  ) = match weight {
+    Some(weight_kg) => {
+      let target_min = weight_kg * rule.min_mg_per_kg_day;
+      let target_max = weight_kg * rule.max_mg_per_kg_day;
+      match choose_dose(target_min, target_max, strength.as_deref()) {
+        Some(result) => (
+          Some(target_min),
+          Some(target_max),
+          Some(result.units_per_day),
+          Some(result.daily_dose_mg),
+          Some(result.delta_mg),
+          result.within_target_range,
+          Some(result.note),
+        ),
+        None => (
+          Some(target_min),
+          Some(target_max),
+          None,
+          None,
+          None,
+          false,
+          Some("ไม่สามารถอ่านค่า strength เพื่อคำนวณจำนวนเม็ดยาได้".to_string()),
+        ),
       }
-      None => (
-        None,
-        None,
-        None,
-        None,
-        None,
-        false,
-        Some("รอน้ำหนักล่าสุดจาก HOSxP".to_string()),
-      ),
-    };
+    }
+    None => (
+      None,
+      None,
+      None,
+      None,
+      None,
+      false,
+      Some("รอน้ำหนักล่าสุดจาก HOSxP".to_string()),
+    ),
+  };
 
   DosageAssessmentItem {
     class: rule.class.to_uppercase(),
@@ -251,10 +266,16 @@ struct DoseChoice {
   note: String,
 }
 
-fn choose_dose(target_min: f64, target_max: f64, strength_text: Option<&str>) -> Option<DoseChoice> {
+fn choose_dose(
+  target_min: f64,
+  target_max: f64,
+  strength_text: Option<&str>,
+) -> Option<DoseChoice> {
   let strength_mg = parse_strength_mg(strength_text?)?;
   let midpoint = (target_min + target_max) / 2.0;
-  let max_units = ((target_max / strength_mg).ceil() as u32).saturating_add(2).max(1);
+  let max_units = ((target_max / strength_mg).ceil() as u32)
+    .saturating_add(2)
+    .max(1);
 
   let best = (1..=max_units).min_by(|left, right| {
     compare_candidates(*left, *right, strength_mg, target_min, target_max, midpoint)
@@ -321,10 +342,10 @@ fn parse_strength_mg(strength_text: &str) -> Option<f64> {
     }
   }
 
-  if !token.is_empty() {
-    if let Ok(value) = token.parse::<f64>() {
-      values.push(value);
-    }
+  if !token.is_empty()
+    && let Ok(value) = token.parse::<f64>()
+  {
+    values.push(value);
   }
 
   values.into_iter().find(|value| *value > 0.0)

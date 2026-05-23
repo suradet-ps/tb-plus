@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { invoke } from '@tauri-apps/api/core';
 import {
   AlertTriangle,
   Calendar,
@@ -11,15 +12,25 @@ import {
   Users,
 } from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
+import { useAlertStore } from '@/stores/alerts';
 import { usePatientStore } from '@/stores/patient';
+import type { DrugConsumptionRow } from '@/types/reports';
 import type { TreatmentPlan } from '@/types/treatment';
 
 const patientStore = usePatientStore();
+const alertStore = useAlertStore();
 
 const activeReport = ref<string | null>(null);
 
+const drugConsumption = ref<DrugConsumptionRow[]>([]);
+const isLoadingDrugConsumption = ref(false);
+
+const cohortViewMonth = ref<string | null>(null);
+
 onMounted(() => {
   patientStore.fetchActivePatients();
+  patientStore.fetchDischargedPatients();
+  alertStore.refresh();
 });
 
 function getEffectivePhase(
@@ -51,7 +62,145 @@ const overdueCount = computed(
   () => patientStore.activePatients.filter((p) => (p.days_since_last_dispensing ?? 0) > 35).length,
 );
 
-// ── Report cards definition ───────────────────────────────────────────
+const lostCount = computed(
+  () => patientStore.activePatients.filter((p) => (p.days_since_last_dispensing ?? 0) > 60).length,
+);
+
+// ── Success rate ─────────────────────────────────────────────────────
+const dischargeStatuses = computed(() => {
+  const m = { success: 0, failure: 0, other: 0 };
+  for (const p of patientStore.dischargedPatients) {
+    const ov = p.outcome_value;
+    if (ov === 'cured' || ov === 'treatment_completed') m.success++;
+    else if (ov === 'treatment_failed' || ov === 'died' || ov === 'lost_to_followup') m.failure++;
+    else m.other++;
+  }
+  return m;
+});
+
+const totalDischarged = computed(() => patientStore.dischargedPatients.length);
+const successRate = computed(() => {
+  const total = totalDischarged.value;
+  if (total === 0) return null;
+  return Math.round((dischargeStatuses.value.success / total) * 100);
+});
+
+// ── E overrun patients ───────────────────────────────────────────────
+const eOverrunPatients = computed(() =>
+  patientStore.activePatients.filter((p) =>
+    p.alerts.some((a) => a.alert_type === 'ethambutol_overrun'),
+  ),
+);
+
+// ── Overdue / lost patients ──────────────────────────────────────────
+const overduePatients = computed(() =>
+  patientStore.activePatients.filter((p) => {
+    const d = p.days_since_last_dispensing ?? 0;
+    return d > 35 && d <= 60;
+  }),
+);
+
+const lostPatientsList = computed(() =>
+  patientStore.activePatients.filter((p) => (p.days_since_last_dispensing ?? 0) > 60),
+);
+
+// ── Cohort data ──────────────────────────────────────────────────────
+const allEnrolled = computed(() => [
+  ...patientStore.activePatients.map((p) => ({
+    hn: p.tb_patient.hn,
+    name: p.demographics?.full_name ?? p.tb_patient.hn,
+    enrolled_at: p.tb_patient.enrolled_at,
+    status: p.tb_patient.status,
+    outcome: null as string | null,
+  })),
+  ...patientStore.dischargedPatients.map((p) => ({
+    hn: p.tb_patient.hn,
+    name: p.demographics?.full_name ?? p.tb_patient.hn,
+    enrolled_at: p.tb_patient.enrolled_at,
+    status: p.tb_patient.status,
+    outcome: p.outcome_value,
+  })),
+]);
+
+const cohortGroups = computed(() => {
+  const groups = new Map<
+    string,
+    { total: number; active: number; success: number; failure: number }
+  >();
+  for (const p of allEnrolled.value) {
+    const month = p.enrolled_at.slice(0, 7);
+    let g = groups.get(month);
+    if (!g) {
+      g = { total: 0, active: 0, success: 0, failure: 0 };
+      groups.set(month, g);
+    }
+    g.total++;
+    if (p.status === 'active') g.active++;
+    else if (p.outcome === 'cured' || p.outcome === 'treatment_completed') g.success++;
+    else if (
+      p.outcome === 'treatment_failed' ||
+      p.outcome === 'died' ||
+      p.outcome === 'lost_to_followup'
+    )
+      g.failure++;
+  }
+  return Array.from(groups.entries())
+    .map(([month, counts]) => ({
+      month,
+      ...counts,
+      success_rate: counts.total > 0 ? Math.round((counts.success / counts.total) * 100) : 0,
+    }))
+    .sort((a, b) => b.month.localeCompare(a.month));
+});
+
+const cohortDetailPatients = computed(() => {
+  const month = cohortViewMonth.value;
+  if (!month) return [];
+  return allEnrolled.value
+    .filter((p) => p.enrolled_at.startsWith(month))
+    .sort((a, b) => a.name.localeCompare(b.name));
+});
+
+// ── Drug consumption ─────────────────────────────────────────────────
+async function fetchDrugConsumption() {
+  if (drugConsumption.value.length > 0) return;
+  isLoadingDrugConsumption.value = true;
+  try {
+    drugConsumption.value = await invoke<DrugConsumptionRow[]>('get_drug_consumption', {
+      monthsBack: 12,
+    });
+  } catch {
+    drugConsumption.value = [];
+  } finally {
+    isLoadingDrugConsumption.value = false;
+  }
+}
+
+const drugConsumptionByMonth = computed(() => {
+  const map = new Map<string, DrugConsumptionRow[]>();
+  for (const row of drugConsumption.value) {
+    let arr = map.get(row.month);
+    if (!arr) {
+      arr = [];
+      map.set(row.month, arr);
+    }
+    arr.push(row);
+  }
+  return Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]));
+});
+
+// ── Toggle report ────────────────────────────────────────────────────
+function toggleReport(id: string) {
+  if (activeReport.value === id) {
+    activeReport.value = null;
+    return;
+  }
+  activeReport.value = id;
+  if (id === 'drug-consumption') fetchDrugConsumption();
+  if (id === 'monthly-cohort') cohortViewMonth.value = null;
+}
+
+// ── Report cards ─────────────────────────────────────────────────────
 interface ReportCard {
   id: string;
   titleTh: string;
@@ -62,7 +211,6 @@ interface ReportCard {
   value: string | number;
   label: string;
   description: string;
-  available: boolean;
 }
 
 const reportCards = computed<ReportCard[]>(() => [
@@ -75,8 +223,7 @@ const reportCards = computed<ReportCard[]>(() => [
     valueColor: '#0075de',
     value: totalActive.value,
     label: 'ผู้ป่วยทั้งหมด (active)',
-    description: 'จำนวนผู้ป่วยแบ่งตามสถานะ',
-    available: true,
+    description: 'จำนวนผู้ป่วยแบ่งตามสถานะและระยะการรักษา',
   },
   {
     id: 'success-rate',
@@ -85,10 +232,9 @@ const reportCards = computed<ReportCard[]>(() => [
     iconColor: '#2a9d99',
     iconBg: 'rgba(42,157,153,0.1)',
     valueColor: '#2a9d99',
-    value: '-',
-    label: 'หาย + รักษาครบ / ทั้งหมด',
+    value: successRate.value !== null ? `${successRate.value}%` : '-',
+    label: `หาย + รักษาครบ / ทั้งหมด (${totalDischarged.value} ราย)`,
     description: 'อัตราสำเร็จในการรักษา (%)',
-    available: false,
   },
   {
     id: 'drug-consumption',
@@ -97,10 +243,12 @@ const reportCards = computed<ReportCard[]>(() => [
     iconColor: '#dd5b00',
     iconBg: 'rgba(221,91,0,0.1)',
     valueColor: '#dd5b00',
-    value: '-',
-    label: 'รายการจ่ายยาต่อเดือน',
-    description: 'ปริมาณยา TB ที่จ่ายไป แบ่งตามประเภท',
-    available: false,
+    value: drugConsumption.value.length > 0 ? drugConsumptionByMonth.value.length : '-',
+    label:
+      drugConsumption.value.length > 0
+        ? `${drugConsumptionByMonth.value.length} เดือนล่าสุด`
+        : 'รายการจ่ายยาต่อเดือน',
+    description: 'ปริมาณยา TB ที่จ่ายไป แบ่งตามประเภทและเดือน',
   },
   {
     id: 'ethambutol-overrun',
@@ -109,10 +257,9 @@ const reportCards = computed<ReportCard[]>(() => [
     iconColor: '#dd5b00',
     iconBg: 'rgba(221,91,0,0.1)',
     valueColor: '#dd5b00',
-    value: '-',
-    label: 'ผู้ป่วยที่ได้รับ E เกินระยะ',
+    value: eOverrunPatients.value.length,
+    label: `ผู้ป่วยที่ได้รับ E เกินระยะ (${eOverrunPatients.value.length} ราย)`,
     description: 'รายชื่อผู้ป่วยที่ได้รับ Ethambutol เกินกำหนด',
-    available: false,
   },
   {
     id: 'lost-followup',
@@ -121,10 +268,9 @@ const reportCards = computed<ReportCard[]>(() => [
     iconColor: '#dd5b00',
     iconBg: 'rgba(221,91,0,0.1)',
     valueColor: '#dd5b00',
-    value: overdueCount.value,
-    label: 'ผู้ป่วยไม่ได้รับยา > 35 วัน',
+    value: overdueCount.value + lostCount.value,
+    label: `เกินกำหนด ${overdueCount.value} · ขาดติดตาม ${lostCount.value}`,
     description: 'ผู้ป่วยที่ไม่ได้รับยานาน > 35 วัน (แจ้งเตือน) หรือ > 60 วัน (ขาดการติดตาม)',
-    available: true,
   },
   {
     id: 'monthly-cohort',
@@ -133,10 +279,9 @@ const reportCards = computed<ReportCard[]>(() => [
     iconColor: '#0075de',
     iconBg: 'rgba(0,117,222,0.1)',
     valueColor: '#0075de',
-    value: '-',
-    label: 'วิเคราะห์ตามเดือนที่ลงทะเบียน',
+    value: cohortGroups.value.length,
+    label: `${cohortGroups.value.length} กลุ่มตามเดือนลงทะเบียน`,
     description: 'การวิเคราะห์ cohort แบ่งตามเดือนลงทะเบียน',
-    available: false,
   },
 ]);
 
@@ -190,7 +335,11 @@ function exportCSV() {
           class="btn-ghost"
           :disabled="patientStore.isLoading"
           title="รีเฟรชข้อมูล"
-          @click="patientStore.fetchActivePatients()"
+          @click="
+            patientStore.fetchActivePatients();
+            patientStore.fetchDischargedPatients();
+            alertStore.refresh();
+          "
         >
           <Loader2 v-if="patientStore.isLoading" :size="13" class="spin" />
           <RefreshCw v-else :size="13" />
@@ -232,14 +381,10 @@ function exportCSV() {
         v-for="card in reportCards"
         :key="card.id"
         class="report-card"
-        :class="{
-          'card-active': activeReport === card.id,
-          'card-unavailable': !card.available,
-        }"
-        :title="card.available ? card.description : 'รายงานนี้จะพร้อมใช้งานในเวอร์ชันถัดไป'"
-        @click="activeReport = activeReport === card.id ? null : card.id"
+        :class="{ 'card-active': activeReport === card.id }"
+        :title="card.description"
+        @click="toggleReport(card.id)"
       >
-        <!-- Icon -->
         <div
           class="report-card-icon"
           :style="{ color: card.iconColor, background: card.iconBg }"
@@ -252,21 +397,419 @@ function exportCSV() {
           <Calendar      v-else-if="card.icon === 'Calendar'"      :size="19" />
         </div>
 
-        <!-- Body -->
         <div class="report-card-body">
           <div class="report-title">{{ card.titleTh }}</div>
           <div
             class="report-value"
-            :style="{ color: card.available ? card.valueColor : 'var(--color-text-muted)' }"
+            :style="{ color: card.valueColor }"
           >
             {{ card.value }}
           </div>
           <div class="report-label">{{ card.label }}</div>
           <div class="report-desc">{{ card.description }}</div>
         </div>
+      </div>
+    </div>
 
-        <!-- "Coming soon" badge for unavailable cards -->
-        <span v-if="!card.available" class="coming-soon-tag">เร็วๆ นี้</span>
+    <!-- ── Expandable report detail sections ── -->
+
+    <!-- Census detail -->
+    <div v-if="activeReport === 'census'" class="report-detail">
+      <div class="detail-header">
+        <h3>รายละเอียดสถิติผู้ป่วย</h3>
+      </div>
+      <div class="detail-grid-4">
+        <div class="stat-box">
+          <span class="stat-val">{{ totalActive }}</span>
+          <span class="stat-lbl">Active</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-val stat-orange">{{ intensiveCount }}</span>
+          <span class="stat-lbl">ระยะเข้มข้น</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-val stat-teal">{{ continuationCount }}</span>
+          <span class="stat-lbl">ระยะต่อเนื่อง</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-val">
+            {{ patientStore.dischargedPatients.length }}
+          </span>
+          <span class="stat-lbl">จำหน่ายแล้ว</span>
+        </div>
+      </div>
+
+      <!-- TB type breakdown -->
+      <div class="detail-subsection">
+        <h4>แบ่งตามประเภทผู้ป่วย</h4>
+        <table class="data-table mini-table">
+          <thead>
+            <tr>
+              <th>ประเภท</th>
+              <th class="col-center">จำนวน</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ปอด (Pulmonary)</td>
+              <td class="col-center">
+                {{ patientStore.activePatients.filter((p) => p.tb_patient.tb_type === 'pulmonary').length }}
+              </td>
+            </tr>
+            <tr>
+              <td>นอกปอด (Extra-pulmonary)</td>
+              <td class="col-center">
+                {{ patientStore.activePatients.filter((p) => p.tb_patient.tb_type === 'extra_pulmonary').length }}
+              </td>
+            </tr>
+            <tr>
+              <td>ไม่ระบุ</td>
+              <td class="col-center">
+                {{ patientStore.activePatients.filter((p) => !p.tb_patient.tb_type).length }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="detail-subsection">
+        <h4>สถานะผู้ป่วยทั้งหมด (ตั้งแต่เริ่ม)</h4>
+        <table class="data-table mini-table">
+          <thead>
+            <tr>
+              <th>สถานะ</th>
+              <th class="col-center">จำนวน</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Active (กำลังรักษา)</td><td class="col-center">{{ totalActive }}</td></tr>
+            <tr><td>รักษาหาย (Cured)</td>
+              <td class="col-center">
+                {{ patientStore.dischargedPatients.filter((p) => p.outcome_value === 'cured').length }}
+              </td>
+            </tr>
+            <tr><td>รักษาครบ (Completed)</td>
+              <td class="col-center">
+                {{ patientStore.dischargedPatients.filter((p) => p.outcome_value === 'treatment_completed').length }}
+              </td>
+            </tr>
+            <tr><td>เสียชีวิต (Died)</td>
+              <td class="col-center">
+                {{ patientStore.dischargedPatients.filter((p) => p.outcome_value === 'died').length }}
+              </td>
+            </tr>
+            <tr><td>ขาดการติดตาม (Defaulted)</td>
+              <td class="col-center">
+                {{ patientStore.dischargedPatients.filter((p) => p.outcome_value === 'lost_to_followup').length }}
+              </td>
+            </tr>
+            <tr><td>ส่งต่อ (Transferred)</td>
+              <td class="col-center">
+                {{ patientStore.dischargedPatients.filter((p) => p.outcome_value === 'transferred_out').length }}
+              </td>
+            </tr>
+            <tr><td>รักษาล้มเหลว (Failed)</td>
+              <td class="col-center">
+                {{ patientStore.dischargedPatients.filter((p) => p.outcome_value === 'treatment_failed').length }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Success rate detail -->
+    <div v-if="activeReport === 'success-rate'" class="report-detail">
+      <div class="detail-header">
+        <h3>อัตราความสำเร็จในการรักษา</h3>
+      </div>
+      <div class="detail-grid-4">
+        <div class="stat-box">
+          <span class="stat-val stat-teal">
+            {{ successRate !== null ? `${successRate}%` : '-' }}
+          </span>
+          <span class="stat-lbl">อัตราสำเร็จ</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-val stat-green">{{ dischargeStatuses.success }}</span>
+          <span class="stat-lbl">สำเร็จ (Cured + Completed)</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-val stat-orange">{{ dischargeStatuses.failure }}</span>
+          <span class="stat-lbl">ล้มเหลว (Failed + Died + Defaulted)</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-val">{{ totalDischarged }}</span>
+          <span class="stat-lbl">จำหน่ายแล้วทั้งหมด</span>
+        </div>
+      </div>
+
+      <div class="detail-subsection">
+        <h4>รายชื่อผู้ป่วยที่จำหน่ายแล้ว</h4>
+        <div v-if="patientStore.isLoadingDischarged" class="mini-loader">
+          <Loader2 :size="16" class="spin" /> กำลังโหลด...
+        </div>
+        <div v-else-if="patientStore.dischargedPatients.length === 0" class="mini-empty">
+          ยังไม่มีผู้ป่วยที่จำหน่าย
+        </div>
+        <div v-else class="table-scroll">
+          <table class="data-table mini-table">
+            <thead>
+              <tr>
+                <th>HN</th>
+                <th>ชื่อ-สกุล</th>
+                <th>ผลการรักษา</th>
+                <th>วันที่จำหน่าย</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="p in patientStore.dischargedPatients"
+                :key="p.tb_patient.hn"
+              >
+                <td class="mono">{{ p.tb_patient.hn }}</td>
+                <td>{{ p.demographics?.full_name ?? '—' }}</td>
+                <td>
+                  <span
+                    class="outcome-pill"
+                    :class="{
+                      'outcome-success': p.outcome_value === 'cured' || p.outcome_value === 'treatment_completed',
+                      'outcome-fail': p.outcome_value === 'died' || p.outcome_value === 'treatment_failed',
+                      'outcome-warn': p.outcome_value === 'lost_to_followup',
+                      'outcome-info': p.outcome_value === 'transferred_out',
+                    }"
+                  >
+                    {{ p.outcome_value ?? '—' }}
+                  </span>
+                </td>
+                <td>{{ p.tb_patient.updated_at?.slice(0, 10) ?? '—' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Drug consumption detail -->
+    <div v-if="activeReport === 'drug-consumption'" class="report-detail">
+      <div class="detail-header">
+        <h3>ปริมาณการใช้ยา TB รายเดือน</h3>
+      </div>
+
+      <div v-if="isLoadingDrugConsumption" class="mini-loader">
+        <Loader2 :size="16" class="spin" /> กำลังโหลด...
+      </div>
+      <div v-else-if="drugConsumption.length === 0" class="mini-empty">
+        ไม่พบข้อมูลการใช้ยา (MySQL อาจไม่ได้เชื่อมต่อ)
+      </div>
+      <div v-else>
+        <div
+          v-for="[month, rows] in drugConsumptionByMonth"
+          :key="month"
+          class="month-group"
+        >
+          <h4 class="month-label">{{ month }}</h4>
+          <table class="data-table mini-table">
+            <thead>
+              <tr>
+                <th>กลุ่มยา</th>
+                <th class="col-center">ปริมาณที่จ่าย</th>
+                <th class="col-center">วันที่จ่าย</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="r in rows" :key="r.drug_class">
+                <td>
+                  <span class="drug-chip" :class="`drug-${r.drug_class.toLowerCase()}`">
+                    {{ r.drug_class }}
+                  </span>
+                </td>
+                <td class="col-center mono">{{ r.total_qty.toFixed(1) }}</td>
+                <td class="col-center mono">{{ r.dispensed_days }} วัน</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ethambutol overrun detail -->
+    <div v-if="activeReport === 'ethambutol-overrun'" class="report-detail">
+      <div class="detail-header">
+        <h3>Ethambutol Overrun — ผู้ป่วยที่ได้รับ E เกินระยะ</h3>
+      </div>
+
+      <div v-if="eOverrunPatients.length === 0" class="mini-empty">
+        ไม่มีผู้ป่วยที่ได้รับ Ethambutol เกินกำหนด
+      </div>
+      <div v-else class="table-scroll">
+        <table class="data-table mini-table">
+          <thead>
+            <tr>
+              <th>HN</th>
+              <th>ชื่อ-สกุล</th>
+              <th>สูตรยา</th>
+              <th class="col-center">เดือนที่</th>
+              <th>รายละเอียด</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="p in eOverrunPatients" :key="p.tb_patient.hn">
+              <td class="mono">{{ p.tb_patient.hn }}</td>
+              <td>{{ p.demographics?.full_name ?? '—' }}</td>
+              <td>
+                <span v-if="p.current_plan?.regimen" class="regimen-tag">
+                  {{ p.current_plan.regimen }}
+                </span>
+                <span v-else class="muted-dash">—</span>
+              </td>
+              <td class="col-center">
+                {{ p.current_month !== null ? `${p.current_month}/${p.total_months ?? '?'}` : '—' }}
+              </td>
+              <td>
+                <span class="alert-pill alert-red" v-if="p.alerts.find(a => a.alert_type === 'ethambutol_overrun')?.details">
+                  {{ p.alerts.find(a => a.alert_type === 'ethambutol_overrun')?.details }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Lost to follow-up detail -->
+    <div v-if="activeReport === 'lost-followup'" class="report-detail">
+      <div class="detail-header">
+        <h3>ผู้ป่วยที่ไม่ได้รับยา</h3>
+      </div>
+
+      <div class="detail-grid-2">
+        <div class="stat-box">
+          <span class="stat-val stat-orange">{{ overdueCount }}</span>
+          <span class="stat-lbl">เกินกำหนด (> 35 วัน)</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-val stat-red">{{ lostCount }}</span>
+          <span class="stat-lbl">ขาดติดตาม (> 60 วัน)</span>
+        </div>
+      </div>
+
+      <div v-if="overduePatients.length > 0" class="detail-subsection">
+        <h4>เกินกำหนด (35–60 วัน)</h4>
+        <table class="data-table mini-table">
+          <thead>
+            <tr>
+              <th>HN</th>
+              <th>ชื่อ-สกุล</th>
+              <th>ไม่ได้รับยา</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="p in overduePatients" :key="p.tb_patient.hn">
+              <td class="mono">{{ p.tb_patient.hn }}</td>
+              <td>{{ p.demographics?.full_name ?? '—' }}</td>
+              <td class="overdue-cell">{{ p.days_since_last_dispensing }} วัน</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div v-if="lostPatientsList.length > 0" class="detail-subsection">
+        <h4>ขาดการติดตาม (> 60 วัน)</h4>
+        <table class="data-table mini-table">
+          <thead>
+            <tr>
+              <th>HN</th>
+              <th>ชื่อ-สกุล</th>
+              <th>ไม่ได้รับยา</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="p in lostPatientsList" :key="p.tb_patient.hn">
+              <td class="mono">{{ p.tb_patient.hn }}</td>
+              <td>{{ p.demographics?.full_name ?? '—' }}</td>
+              <td class="overdue-cell overrun">{{ p.days_since_last_dispensing }} วัน</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Monthly cohort detail -->
+    <div v-if="activeReport === 'monthly-cohort'" class="report-detail">
+      <div class="detail-header">
+        <h3>Cohort ตามเดือนที่ลงทะเบียน</h3>
+      </div>
+
+      <div v-if="cohortGroups.length === 0" class="mini-empty">
+        ไม่มีข้อมูล cohort
+      </div>
+      <div v-else>
+        <table class="data-table mini-table cohort-table">
+          <thead>
+            <tr>
+              <th>เดือน</th>
+              <th class="col-center">ทั้งหมด</th>
+              <th class="col-center">กำลังรักษา</th>
+              <th class="col-center">สำเร็จ</th>
+              <th class="col-center">ล้มเหลว</th>
+              <th class="col-center">อัตราสำเร็จ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="g in cohortGroups"
+              :key="g.month"
+              :class="{ 'row-selected': cohortViewMonth === g.month }"
+              @click="cohortViewMonth = cohortViewMonth === g.month ? null : g.month"
+            >
+              <td class="mono">{{ g.month }}</td>
+              <td class="col-center">{{ g.total }}</td>
+              <td class="col-center">{{ g.active }}</td>
+              <td class="col-center stat-teal">{{ g.success }}</td>
+              <td class="col-center stat-orange">{{ g.failure }}</td>
+              <td class="col-center">
+                <span
+                  class="rate-pill"
+                  :class="{
+                    'rate-good': g.success_rate >= 80,
+                    'rate-ok': g.success_rate >= 50 && g.success_rate < 80,
+                    'rate-bad': g.success_rate < 50,
+                  }"
+                >
+                  {{ g.success_rate }}%
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Expanded patient list for selected cohort month -->
+        <div v-if="cohortViewMonth && cohortDetailPatients.length > 0" class="detail-subsection">
+          <h4>ผู้ป่วยในเดือน {{ cohortViewMonth }}</h4>
+          <table class="data-table mini-table">
+            <thead>
+              <tr>
+                <th>HN</th>
+                <th>ชื่อ-สกุล</th>
+                <th>สถานะ</th>
+                <th>ผลการรักษา</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="p in cohortDetailPatients" :key="p.hn">
+                <td class="mono">{{ p.hn }}</td>
+                <td>{{ p.name }}</td>
+                <td>
+                  <span class="status-pill" :class="`status-${p.status}`">
+                    {{ p.status === 'active' ? 'กำลังรักษา' : p.status }}
+                  </span>
+                </td>
+                <td>{{ p.outcome ?? '—' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -318,25 +861,18 @@ function exportCSV() {
               :key="p.tb_patient.hn"
               :class="{ 'row-overdue': (p.days_since_last_dispensing ?? 0) > 35 }"
             >
-              <!-- HN -->
               <td class="mono">{{ p.tb_patient.hn }}</td>
-
-              <!-- Name -->
               <td>
                 <span class="patient-name">
                   {{ p.demographics?.full_name ?? '—' }}
                 </span>
               </td>
-
-              <!-- Regimen -->
               <td>
                 <span v-if="p.current_plan?.regimen" class="regimen-tag">
                   {{ p.current_plan.regimen }}
                 </span>
                 <span v-else class="muted-dash">—</span>
               </td>
-
-              <!-- Phase -->
               <td>
                 <span
                   v-if="getEffectivePhase(p.current_plan)"
@@ -347,16 +883,12 @@ function exportCSV() {
                 </span>
                 <span v-else class="muted-dash">—</span>
               </td>
-
-              <!-- Month progress -->
               <td class="col-center">
                 <span v-if="p.current_month !== null" class="month-progress">
                   {{ p.current_month }}<span class="month-sep">/</span>{{ p.total_months ?? '?' }}
                 </span>
                 <span v-else class="muted-dash">—</span>
               </td>
-
-              <!-- Last dispensing -->
               <td
                 :class="{
                   'overdue-cell': (p.days_since_last_dispensing ?? 0) > 35,
@@ -367,8 +899,6 @@ function exportCSV() {
                 </span>
                 <span v-else class="muted-dash">—</span>
               </td>
-
-              <!-- Alert status -->
               <td>
                 <span
                   v-if="p.alerts.some((a) => a.severity === 'red')"
@@ -564,14 +1094,6 @@ function exportCSV() {
   background: var(--color-badge-bg);
 }
 
-.card-unavailable {
-  cursor: default;
-}
-
-.card-unavailable:hover {
-  box-shadow: var(--shadow-card);
-}
-
 /* Icon container */
 .report-card-icon {
   padding: 8px;
@@ -582,7 +1104,6 @@ function exportCSV() {
   justify-content: center;
 }
 
-/* Card body */
 .report-card-body {
   flex: 1;
   min-width: 0;
@@ -617,20 +1138,195 @@ function exportCSV() {
   line-height: 1.4;
 }
 
-/* "Coming soon" badge */
-.coming-soon-tag {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: var(--color-bg-alt);
+/* ── Expandable report details ──────────────────────────────────────── */
+.report-detail {
+  background: var(--color-bg);
   border: var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 20px 24px;
+  margin-bottom: 28px;
+}
+
+.detail-header {
+  margin-bottom: 18px;
+}
+
+.detail-header h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+  letter-spacing: -0.15px;
+}
+
+.detail-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.detail-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-box {
+  background: var(--color-badge-bg);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-val {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  color: var(--color-text);
+}
+
+.stat-lbl {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.stat-orange { color: var(--color-orange); }
+.stat-teal   { color: var(--color-teal); }
+.stat-green  { color: #1aae39; }
+.stat-red    { color: var(--color-orange); }
+
+.detail-subsection {
+  margin-top: 20px;
+}
+
+.detail-subsection h4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 10px;
+  letter-spacing: -0.1px;
+}
+
+.mini-loader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  padding: 24px 0;
+}
+
+.mini-empty {
+  text-align: center;
+  padding: 32px 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+/* Mini table variant — higher specificity to override .data-table defaults */
+.data-table.mini-table {
+  font-size: 12px;
+}
+
+.data-table.mini-table th {
+  padding: 7px 12px;
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.data-table.mini-table td {
+  padding: 7px 12px;
+  font-size: 12px;
+}
+
+/* Month group in drug consumption */
+.month-group {
+  margin-bottom: 18px;
+}
+
+.month-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  margin: 0 0 6px;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+
+.drug-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
   border-radius: var(--radius-pill);
   font-size: 10px;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  padding: 2px 7px;
-  letter-spacing: 0.2px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
+
+.drug-h { background: rgba(0, 117, 222, 0.1); color: #0075de; }
+.drug-r { background: rgba(221, 91, 0, 0.1); color: #dd5b00; }
+.drug-e { background: rgba(42, 157, 153, 0.1); color: #2a9d99; }
+.drug-z { background: rgba(173, 126, 38, 0.1); color: #ad7e26; }
+
+/* Outcome pill */
+.outcome-pill {
+  display: inline-flex;
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.outcome-success { background: rgba(26, 174, 57, 0.1); color: #1aae39; }
+.outcome-fail    { background: rgba(221, 91, 0, 0.1); color: #dd5b00; }
+.outcome-warn    { background: rgba(245, 166, 35, 0.1); color: #c78b00; }
+.outcome-info    { background: rgba(0, 117, 222, 0.1); color: #0075de; }
+
+/* Cohort table */
+.cohort-table tbody tr {
+  cursor: pointer;
+}
+
+.cohort-table tbody tr:hover {
+  background: var(--color-bg-alt);
+}
+
+.row-selected {
+  background: var(--color-badge-bg) !important;
+}
+
+.rate-pill {
+  display: inline-flex;
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.rate-good { background: rgba(26, 174, 57, 0.1); color: #1aae39; }
+.rate-ok   { background: rgba(245, 166, 35, 0.1); color: #c78b00; }
+.rate-bad  { background: rgba(221, 91, 0, 0.1); color: #dd5b00; }
+
+/* Status pill */
+.status-pill {
+  display: inline-flex;
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-active      { background: rgba(0, 117, 222, 0.1); color: #0075de; }
+.status-completed   { background: rgba(26, 174, 57, 0.1); color: #1aae39; }
+.status-died        { background: rgba(221, 91, 0, 0.1); color: #dd5b00; }
+.status-defaulted   { background: rgba(221, 91, 0, 0.1); color: #dd5b00; }
+.status-transferred { background: rgba(0, 117, 222, 0.1); color: #0075de; }
 
 /* ── Report table card ───────────────────────────────────────────────── */
 .report-table-card {
@@ -684,7 +1380,7 @@ function exportCSV() {
 }
 
 .data-table th {
-  padding: 9px 14px;
+  padding: 10px 14px;
   text-align: left;
   font-size: 11px;
   font-weight: 600;
@@ -692,6 +1388,7 @@ function exportCSV() {
   background: var(--color-bg-alt);
   white-space: nowrap;
   border-bottom: var(--border);
+  vertical-align: middle;
 }
 
 .data-table td {
@@ -715,6 +1412,15 @@ function exportCSV() {
 }
 
 .col-center {
+  text-align: center;
+}
+
+/* Override .data-table th's text-align:left for centered columns */
+.data-table th.col-center {
+  text-align: center;
+}
+
+.data-table.mini-table th.col-center {
   text-align: center;
 }
 
@@ -774,6 +1480,10 @@ function exportCSV() {
 .overdue-cell {
   color: var(--color-orange);
   font-weight: 600;
+}
+
+.overdue-cell.overrun {
+  color: #c0392b;
 }
 
 .muted-dash {

@@ -1,6 +1,4 @@
-use crate::models::settings::{
-  AlertConfig, DosageRule, DrugClassEntry, HosxpConfig, RegimenEntry,
-};
+use crate::models::settings::{AlertConfig, DosageRule, DrugClassEntry, HosxpConfig, RegimenEntry};
 use crate::settings::SettingsManager;
 use serde::{Deserialize, Serialize};
 use sqlx::MySqlPool;

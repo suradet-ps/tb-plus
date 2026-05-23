@@ -3,6 +3,7 @@ use crate::models::dosage::{DosageDrugCandidate, DosagePatientSummary};
 use crate::models::patient::{
   AppointmentRecord, PatientDemographics, PatientDrugRecord, SearchFilters,
 };
+use crate::models::reports::DrugConsumptionRow;
 use crate::models::settings::DrugItem;
 use anyhow::Result;
 use sqlx::{MySqlPool, QueryBuilder};
@@ -392,13 +393,15 @@ pub async fn get_drug_items_by_icodes(
     rows
       .into_iter()
       .filter_map(|row| {
-        class_by_icode.get(&row.icode).map(|class| DosageDrugCandidate {
-          class: class.clone(),
-          icode: row.icode,
-          drug_name: row.name,
-          strength: row.strength,
-          units: row.units,
-        })
+        class_by_icode
+          .get(&row.icode)
+          .map(|class| DosageDrugCandidate {
+            class: class.clone(),
+            icode: row.icode,
+            drug_name: row.name,
+            strength: row.strength,
+            units: row.units,
+          })
       })
       .collect(),
   )
@@ -629,6 +632,79 @@ pub async fn search_drugs(pool: &MySqlPool, query: &str, limit: u32) -> Result<V
       })
       .collect(),
   )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Report queries
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Aggregate TB drug consumption by calendar month for the last N months.
+/// Returns total quantity and dispensed-day count per month per drug class.
+#[derive(sqlx::FromRow)]
+struct DrugConsumptionRaw {
+  month: String,
+  icode: String,
+  total_qty: f64,
+  dispensed_days: i64,
+}
+
+pub async fn get_drug_consumption_by_month(
+  pool: &MySqlPool,
+  all_icodes: &[String],
+  icode_to_class_map: &HashMap<String, String>,
+  months_back: i32,
+) -> Result<Vec<DrugConsumptionRow>> {
+  if all_icodes.is_empty() {
+    return Ok(Vec::new());
+  }
+
+  let placeholders = in_placeholders(all_icodes.len());
+  let sql = format!(
+    "SELECT \
+            DATE_FORMAT(o.vstdate, '%Y-%m') AS month, \
+            o.icode, \
+            COALESCE(SUM(CAST(o.qty AS DOUBLE)), 0) AS total_qty, \
+            COUNT(DISTINCT o.vstdate) AS dispensed_days \
+        FROM opitemrece o \
+        WHERE o.icode IN ({placeholders}) \
+          AND o.vstdate >= DATE_SUB(CURDATE(), INTERVAL ? MONTH) \
+        GROUP BY DATE_FORMAT(o.vstdate, '%Y-%m'), o.icode \
+        ORDER BY month DESC, o.icode"
+  );
+
+  let mut q = sqlx::query_as::<_, DrugConsumptionRaw>(&sql);
+  for icode in all_icodes {
+    q = q.bind(icode.as_str());
+  }
+  q = q.bind(months_back);
+
+  let rows = q.fetch_all(pool).await?;
+
+  // Aggregate by month + drug class
+  let mut combined: Vec<DrugConsumptionRow> = Vec::new();
+  for row in rows {
+    let drug_class = icode_to_class_map
+      .get(&row.icode)
+      .cloned()
+      .unwrap_or_else(|| row.icode.clone());
+
+    if let Some(existing) = combined
+      .iter_mut()
+      .find(|r: &&mut DrugConsumptionRow| r.month == row.month && r.drug_class == drug_class)
+    {
+      existing.total_qty += row.total_qty;
+      existing.dispensed_days += row.dispensed_days;
+    } else {
+      combined.push(DrugConsumptionRow {
+        month: row.month,
+        drug_class,
+        total_qty: row.total_qty,
+        dispensed_days: row.dispensed_days,
+      });
+    }
+  }
+
+  Ok(combined)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
