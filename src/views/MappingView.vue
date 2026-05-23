@@ -147,7 +147,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
       <div>
         <h1 class="page-title">แผนที่การกระจายโรค</h1>
         <p class="page-subtitle">
-          แสดงตำแหน่งผู้ป่วยที่ลงทะเบียนแล้วจากข้อมูลที่อยู่ใน HOSxP โดย cache พิกัดไว้ใน SQLite ภายในเครื่อง
+          แสดงตำแหน่งผู้ป่วยที่ลงทะเบียนแล้ว
         </p>
       </div>
 
