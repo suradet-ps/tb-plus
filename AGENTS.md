@@ -462,7 +462,10 @@ Key pointers into `DESIGN.md`:
 | Routing | Vue Router 4 |
 | Icons | lucide-vue-next |
 | Build tool | Vite |
+| Package manager | pnpm |
 | Styling | **See `DESIGN.md`** — all colors, typography, spacing, and component styles are defined there |
+
+> **Package manager**: Always use `pnpm` (not npm, not bun). Run `pnpm install` for dependencies, `pnpm dev` for dev server, `pnpm build` for production build, `pnpm tauri dev` / `pnpm tauri build` for Tauri commands. Lock file is `pnpm-lock.yaml`.
 
 ---
 

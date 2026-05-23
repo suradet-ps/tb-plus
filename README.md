@@ -47,19 +47,19 @@ A modern desktop application built with Tauri (Rust) and Vue (TypeScript) for ma
 2. **Install frontend dependencies**:
 
    ```bash
-   bun install
+   pnpm install
    ```
 
 3. **Run the development server**:
 
    ```bash
-   bun run tauri dev
+   pnpm tauri dev
    ```
 
 4. **Build for release** (generates OS specific execution binary):
 
    ```bash
-   bun run tauri build
+   pnpm tauri build
    ```
 
 ## License

@@ -8,7 +8,7 @@ on:
       - "src/**"
       - "src-tauri/**"
       - "package.json"
-      - "bun.lockb"
+      - "pnpm-lock.yaml"
       - "src-tauri/Cargo.toml"
       - "src-tauri/Cargo.lock"
       - ".github/workflows/test-build.yml"
@@ -28,16 +28,22 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.2
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6.0.8
         with:
-          bun-version: latest
+          version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6.4.0
+        with:
+          node-version: 24
+          cache: pnpm
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
       - name: Rust Cache
-        uses: swatinem/rust-cache@v2
+        uses: swatinem/rust-cache@v2.9.1
         with:
           workspaces: "./src-tauri -> target"
 
@@ -47,7 +53,7 @@ jobs:
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Install frontend dependencies
-        run: bun install
+        run: pnpm install
 
       - name: Build Tauri App (Test Only)
-        run: bun run tauri build
+        run: pnpm tauri build
