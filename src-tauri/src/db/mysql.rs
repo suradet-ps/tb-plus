@@ -1,4 +1,5 @@
 use crate::models::dispensing::DispensingRecord;
+use crate::models::dosage::{DosageDrugCandidate, DosagePatientSummary};
 use crate::models::patient::{
   AppointmentRecord, PatientDemographics, PatientDrugRecord, SearchFilters,
 };
@@ -13,6 +14,7 @@ const TABLE_PATIENT: &str = "patient";
 const TABLE_DRUGITEMS: &str = "drugitems";
 const TABLE_OAPP: &str = "oapp";
 const TABLE_CLINIC: &str = "clinic";
+const TABLE_OPDSCREEN: &str = "opdscreen";
 
 // ---------------------------------------------------------------------------
 // Private helpers
@@ -83,6 +85,17 @@ struct DemographicsRow {
   address: Option<String>,
   phone: Option<String>,
   birthday: Option<String>,
+}
+
+#[derive(sqlx::FromRow)]
+struct DosagePatientRow {
+  hn: String,
+  full_name: String,
+  age: Option<i64>,
+  sex: Option<String>,
+  birthday: Option<String>,
+  latest_weight_kg: Option<f64>,
+  latest_weight_date: Option<String>,
 }
 
 // ---------------------------------------------------------------------------
@@ -304,6 +317,93 @@ pub async fn get_patient_demographics_by_hns(
   )
 }
 
+pub async fn get_patient_latest_weight_summary(
+  pool: &MySqlPool,
+  hn: &str,
+) -> Result<Option<DosagePatientSummary>> {
+  let sql = format!(
+    "SELECT \
+            p.hn, \
+            CONCAT(COALESCE(p.pname, ''), p.fname, ' ', p.lname) AS full_name, \
+            TIMESTAMPDIFF(YEAR, p.birthday, CURDATE()) AS age, \
+            p.sex, \
+            DATE_FORMAT(p.birthday, '%Y-%m-%d') AS birthday, \
+            ( \
+              SELECT CAST(os.bw AS DOUBLE) \
+              FROM {TABLE_OPDSCREEN} os \
+              WHERE os.hn = p.hn AND os.bw IS NOT NULL \
+              ORDER BY os.vstdate DESC \
+              LIMIT 1 \
+            ) AS latest_weight_kg, \
+            ( \
+              SELECT DATE_FORMAT(os.vstdate, '%Y-%m-%d') \
+              FROM {TABLE_OPDSCREEN} os \
+              WHERE os.hn = p.hn AND os.bw IS NOT NULL \
+              ORDER BY os.vstdate DESC \
+              LIMIT 1 \
+            ) AS latest_weight_date \
+        FROM {TABLE_PATIENT} p \
+        WHERE p.hn = ? \
+        LIMIT 1"
+  );
+
+  let row = sqlx::query_as::<_, DosagePatientRow>(&sql)
+    .bind(hn)
+    .fetch_optional(pool)
+    .await?;
+
+  Ok(row.map(|r| DosagePatientSummary {
+    hn: r.hn,
+    full_name: r.full_name,
+    age: r.age,
+    sex: r.sex,
+    birthday: r.birthday,
+    latest_weight_kg: r.latest_weight_kg,
+    latest_weight_date: r.latest_weight_date,
+  }))
+}
+
+pub async fn get_drug_items_by_icodes(
+  pool: &MySqlPool,
+  class_by_icode: &HashMap<String, String>,
+) -> Result<Vec<DosageDrugCandidate>> {
+  if class_by_icode.is_empty() {
+    return Ok(Vec::new());
+  }
+
+  let mut icodes: Vec<String> = class_by_icode.keys().cloned().collect();
+  icodes.sort();
+
+  let sql = format!(
+    "SELECT icode, name, strength, units \
+         FROM {TABLE_DRUGITEMS} \
+         WHERE icode IN ({}) \
+         ORDER BY name, icode",
+    in_placeholders(icodes.len())
+  );
+
+  let mut q = sqlx::query_as::<_, DrugItemRow>(&sql);
+  for icode in &icodes {
+    q = q.bind(icode.as_str());
+  }
+
+  let rows = q.fetch_all(pool).await?;
+  Ok(
+    rows
+      .into_iter()
+      .filter_map(|row| {
+        class_by_icode.get(&row.icode).map(|class| DosageDrugCandidate {
+          class: class.clone(),
+          icode: row.icode,
+          drug_name: row.name,
+          strength: row.strength,
+          units: row.units,
+        })
+      })
+      .collect(),
+  )
+}
+
 /// Fetch every TB drug dispensing record for one HN from `opitemrece`, newest
 /// first.  Drug class (H / R / E / Z) is resolved inline via a SQL CASE
 /// expression so that the result maps directly onto `DispensingRecord`.
@@ -498,12 +598,13 @@ pub async fn search_clinics(pool: &MySqlPool, query: &str, limit: u32) -> Result
 struct DrugItemRow {
   icode: String,
   name: String,
+  strength: Option<String>,
   units: Option<String>,
 }
 
 pub async fn search_drugs(pool: &MySqlPool, query: &str, limit: u32) -> Result<Vec<DrugItem>> {
   let sql = format!(
-    "SELECT icode, name, units \
+    "SELECT icode, name, strength, units \
          FROM {TABLE_DRUGITEMS} \
          WHERE name LIKE ? OR icode LIKE ? \
          ORDER BY name \
@@ -523,6 +624,7 @@ pub async fn search_drugs(pool: &MySqlPool, query: &str, limit: u32) -> Result<V
         icode: r.icode,
         name: r.name,
         shortname: None,
+        strength: r.strength,
         units: r.units,
       })
       .collect(),

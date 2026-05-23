@@ -1,8 +1,8 @@
 pub mod crypto;
 
 use crate::models::settings::{
-  AlertConfig, DrugClassEntry, GeocodeConfig, HosxpConfig, PaginationConfig, RegimenEntry,
-  SplashMessages,
+  AlertConfig, DosageRule, DrugClassEntry, GeocodeConfig, HosxpConfig, PaginationConfig,
+  RegimenEntry, SplashMessages,
 };
 use anyhow::Result;
 use chrono::Local;
@@ -360,6 +360,15 @@ impl SettingsManager {
     Ok(
       self
         .get_json::<Vec<RegimenEntry>>("regimen_definitions")
+        .await?
+        .unwrap_or_default(),
+    )
+  }
+
+  pub async fn get_dosage_rules(&self) -> Result<Vec<DosageRule>> {
+    Ok(
+      self
+        .get_json::<Vec<DosageRule>>("dosage_rules")
         .await?
         .unwrap_or_default(),
     )

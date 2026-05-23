@@ -36,7 +36,26 @@ export interface DrugItem {
   icode: string;
   name: string;
   shortname: string | null;
+  strength: string | null;
   units: string | null;
+}
+
+export interface DosageDrugCandidate {
+  class: string;
+  icode: string;
+  drug_name: string;
+  strength: string | null;
+  units: string | null;
+}
+
+export interface DosageRule {
+  class: string;
+  icode: string;
+  drug_name: string;
+  strength: string | null;
+  units: string | null;
+  min_mg_per_kg_day: number;
+  max_mg_per_kg_day: number;
 }
 
 export interface RegimenPhase {
@@ -68,6 +87,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const staffNames = ref<string[]>([]);
   const drugClasses = ref<DrugClassEntry[]>([]);
   const regimenDefinitions = ref<RegimenEntry[]>([]);
+  const dosageRules = ref<DosageRule[]>([]);
   const hosxpSettings = ref<HosxpSettings>({ clinic_code: '009' });
   const alertThresholds = ref<AlertThresholds>({
     overdue_days: 35,
@@ -184,6 +204,11 @@ export const useSettingsStore = defineStore('settings', () => {
       regimenDefinitions.value = [];
     }
     try {
+      dosageRules.value = await invoke<DosageRule[]>('load_dosage_rules');
+    } catch {
+      dosageRules.value = [];
+    }
+    try {
       hosxpSettings.value = await invoke<HosxpSettings>('load_hosxp_config');
     } catch {
       /* keep defaults */
@@ -265,6 +290,14 @@ export const useSettingsStore = defineStore('settings', () => {
     await invoke('save_regimen_definitions', { regimens: regimenDefinitions.value });
   }
 
+  async function saveDosageRules(): Promise<void> {
+    await invoke('save_dosage_rules', { rules: dosageRules.value });
+  }
+
+  async function loadConfiguredDosageDrugs(): Promise<DosageDrugCandidate[]> {
+    return await invoke<DosageDrugCandidate[]>('get_configured_dosage_drugs');
+  }
+
   // ── HOSxP config ────────────────────────────────────────────────────────
 
   async function saveHosxpSettings(): Promise<void> {
@@ -300,6 +333,7 @@ export const useSettingsStore = defineStore('settings', () => {
     drugCodes,
     drugClasses,
     regimenDefinitions,
+    dosageRules,
     hosxpSettings,
     alertThresholds,
     syncDrugCodesFromClasses,
@@ -315,6 +349,8 @@ export const useSettingsStore = defineStore('settings', () => {
     searchClinics,
     saveDrugClasses,
     saveRegimenDefinitions,
+    saveDosageRules,
+    loadConfiguredDosageDrugs,
     loadAllSettings,
     saveHosxpSettings,
     saveAlertThresholds,

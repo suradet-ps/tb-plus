@@ -3,6 +3,7 @@ import AboutView from '@/views/AboutView.vue';
 import ActiveView from '@/views/ActiveView.vue';
 import AppointmentsView from '@/views/AppointmentsView.vue';
 import DischargedView from '@/views/DischargedView.vue';
+import DosageAssessmentView from '@/views/DosageAssessmentView.vue';
 import MappingView from '@/views/MappingView.vue';
 import PatientDetailView from '@/views/PatientDetailView.vue';
 import ReportsView from '@/views/ReportsView.vue';
@@ -39,6 +40,12 @@ const router = createRouter({
       name: 'appointments',
       component: AppointmentsView,
       meta: { title: 'การนัดหมาย' },
+    },
+    {
+      path: '/dosage-assessment',
+      name: 'dosage-assessment',
+      component: DosageAssessmentView,
+      meta: { title: 'การประเมินขนาดยา' },
     },
     {
       path: '/patient/:hn',

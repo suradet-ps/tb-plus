@@ -1,4 +1,6 @@
-use crate::models::settings::{AlertConfig, DrugClassEntry, HosxpConfig, RegimenEntry};
+use crate::models::settings::{
+  AlertConfig, DosageRule, DrugClassEntry, HosxpConfig, RegimenEntry,
+};
 use crate::settings::SettingsManager;
 use serde::{Deserialize, Serialize};
 use sqlx::MySqlPool;
@@ -303,6 +305,18 @@ pub async fn save_regimen_definitions(
     .map_err(|e| e.to_string())
 }
 
+/// Save dosage rules used by the dose-assessment feature.
+#[tauri::command]
+pub async fn save_dosage_rules(
+  settings: State<'_, SettingsManager>,
+  rules: Vec<DosageRule>,
+) -> Result<(), String> {
+  settings
+    .set_json("dosage_rules", &rules)
+    .await
+    .map_err(|e| e.to_string())
+}
+
 /// Get the current regimen definitions.
 #[tauri::command]
 pub async fn get_regimen_definitions(
@@ -312,6 +326,14 @@ pub async fn get_regimen_definitions(
     .get_regimen_definitions()
     .await
     .map_err(|e| e.to_string())
+}
+
+/// Load dosage rules.
+#[tauri::command]
+pub async fn load_dosage_rules(
+  settings: State<'_, SettingsManager>,
+) -> Result<Vec<DosageRule>, String> {
+  settings.get_dosage_rules().await.map_err(|e| e.to_string())
 }
 
 /// Save HOSxP table/clinic configuration.

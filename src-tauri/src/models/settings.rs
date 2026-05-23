@@ -6,6 +6,7 @@ pub struct DrugItem {
   pub icode: String,
   pub name: String,
   pub shortname: Option<String>,
+  pub strength: Option<String>,
   pub units: Option<String>,
 }
 
@@ -30,6 +31,17 @@ pub struct RegimenPhase {
 pub struct RegimenEntry {
   pub name: String,
   pub phases: Vec<RegimenPhase>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DosageRule {
+  pub class: String,
+  pub icode: String,
+  pub drug_name: String,
+  pub strength: Option<String>,
+  pub units: Option<String>,
+  pub min_mg_per_kg_day: f64,
+  pub max_mg_per_kg_day: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

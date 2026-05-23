@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   BarChart2,
+  Calculator,
   CalendarDays,
   Database,
   Info,
@@ -36,6 +37,7 @@ const navItems: NavItem[] = [
   { path: '/active', label: 'ผู้ป่วยในการรักษา', icon: Users, showAlerts: true },
   { path: '/discharged', label: 'การจำหน่ายผู้ป่วย', icon: UserMinus },
   { path: '/appointments', label: 'การนัดหมาย', icon: CalendarDays, showApptCount: true },
+  { path: '/dosage-assessment', label: 'การประเมินขนาดยา', icon: Calculator },
   { path: '/mapping', label: 'แผนที่การกระจายโรค', icon: MapPinned },
   { path: '/reports', label: 'รายงาน', icon: BarChart2 },
   { path: '/settings', label: 'ตั้งค่า', icon: Settings },

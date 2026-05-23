@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog';
 import {
   AlertTriangle,
+  Calculator,
   CheckCircle,
   Database,
   Download,
@@ -23,6 +24,8 @@ import { reactive, ref, watch } from 'vue';
 import DrugChip from '@/components/shared/DrugChip.vue';
 import {
   type DbConfig,
+  type DosageDrugCandidate,
+  type DosageRule,
   type DrugItem,
   type RegimenPhase,
   useSettingsStore,
@@ -31,13 +34,14 @@ import {
 const settingsStore = useSettingsStore();
 
 // ── Section navigation ───────────────────────────────────────────────
-type Section = 'mysql' | 'hosxp' | 'drugcodes' | 'alerts' | 'staff' | 'backup';
+type Section = 'mysql' | 'hosxp' | 'drugcodes' | 'dosage' | 'alerts' | 'staff' | 'backup';
 const activeSection = ref<Section>('mysql');
 
 const navItems: { id: Section; label: string; icon: string }[] = [
   { id: 'mysql', label: 'ฐานข้อมูล MySQL', icon: 'Database' },
   { id: 'hosxp', label: 'คลินิกวัณโรค', icon: 'Server' },
   { id: 'drugcodes', label: 'ยาและสูตรยา', icon: 'Pill' },
+  { id: 'dosage', label: 'ขนาดยารักษา', icon: 'Calculator' },
   { id: 'alerts', label: 'การแจ้งเตือน', icon: 'AlertTriangle' },
   { id: 'staff', label: 'ผู้ใช้งาน', icon: 'Users' },
   { id: 'backup', label: 'สำรองข้อมูล', icon: 'HardDrive' },
@@ -66,6 +70,18 @@ watch(activeSection, () => {
   settingsSaveError.value = null;
   settingsSaveSuccess.value = null;
 });
+
+const dosageCandidates = ref<DosageDrugCandidate[]>([]);
+const isLoadingDosageCandidates = ref(false);
+
+watch(
+  () => activeSection.value,
+  (section) => {
+    if (section === 'dosage' && settingsStore.isConnected) {
+      void loadDosageCandidates();
+    }
+  },
+);
 
 async function testConnection() {
   testResult.value = 'testing';
@@ -288,6 +304,74 @@ async function saveRegimens() {
   }
 }
 
+async function loadDosageCandidates() {
+  isLoadingDosageCandidates.value = true;
+  try {
+    dosageCandidates.value = await settingsStore.loadConfiguredDosageDrugs();
+    const existingRules = new Map(
+      settingsStore.dosageRules.map((rule) => [rule.icode, rule] satisfies [string, DosageRule]),
+    );
+    settingsStore.dosageRules = dosageCandidates.value.map((candidate) => {
+      const existing = existingRules.get(candidate.icode);
+      return {
+        class: candidate.class,
+        icode: candidate.icode,
+        drug_name: candidate.drug_name,
+        strength: candidate.strength,
+        units: candidate.units,
+        min_mg_per_kg_day: existing?.min_mg_per_kg_day ?? 0,
+        max_mg_per_kg_day: existing?.max_mg_per_kg_day ?? 0,
+      };
+    });
+  } catch (e) {
+    showSettingsSaveError(e);
+    dosageCandidates.value = [];
+  } finally {
+    isLoadingDosageCandidates.value = false;
+  }
+}
+
+async function saveDosageRules() {
+  const validRules = settingsStore.dosageRules.filter(
+    (rule) =>
+      rule.min_mg_per_kg_day > 0 &&
+      rule.max_mg_per_kg_day > 0 &&
+      rule.max_mg_per_kg_day >= rule.min_mg_per_kg_day,
+  );
+
+  if (!validRules.length) {
+    showSettingsSaveError('กรุณากรอกขนาดยาอย่างน้อย 1 รายการก่อนบันทึก');
+    return;
+  }
+
+  try {
+    const previousRules = settingsStore.dosageRules;
+    settingsStore.dosageRules = validRules;
+    await settingsStore.saveDosageRules();
+    settingsStore.dosageRules = dosageCandidates.value.map((candidate) => {
+      const savedRule = validRules.find((rule) => rule.icode === candidate.icode);
+      return {
+        class: candidate.class,
+        icode: candidate.icode,
+        drug_name: candidate.drug_name,
+        strength: candidate.strength,
+        units: candidate.units,
+        min_mg_per_kg_day: savedRule?.min_mg_per_kg_day ?? 0,
+        max_mg_per_kg_day: savedRule?.max_mg_per_kg_day ?? 0,
+      };
+    });
+
+    const skippedCount = previousRules.length - validRules.length;
+    showSettingsSaved(
+      skippedCount > 0
+        ? `บันทึกขนาดยาแล้ว ${validRules.length} รายการ และข้าม ${skippedCount} รายการที่ยังกรอกไม่ครบ`
+        : 'บันทึกขนาดยาที่ใช้รักษาแล้ว',
+    );
+  } catch (e) {
+    showSettingsSaveError(e);
+  }
+}
+
 // ── Staff names ──────────────────────────────────────────────────────
 const newStaff = ref('');
 
@@ -422,6 +506,7 @@ function cancelRestore() {
           <Database      v-if="item.icon === 'Database'"      :size="15" />
           <Server        v-else-if="item.icon === 'Server'"        :size="15" />
           <Pill          v-else-if="item.icon === 'Pill'"          :size="15" />
+          <Calculator    v-else-if="item.icon === 'Calculator'"    :size="15" />
           <AlertTriangle v-else-if="item.icon === 'AlertTriangle'" :size="15" />
           <Users         v-else-if="item.icon === 'Users'"         :size="15" />
           <HardDrive     v-else-if="item.icon === 'HardDrive'"     :size="15" />
@@ -799,7 +884,93 @@ function cancelRestore() {
         </template>
 
         <!-- ══════════════════════════════════════════════════
-             Section 4 — Alert Thresholds
+             Section 4 — Dosage Rules
+        ══════════════════════════════════════════════════ -->
+        <template v-else-if="activeSection === 'dosage'">
+          <div class="settings-card">
+            <h2 class="card-title">ตั้งค่าขนาดยาที่ใช้รักษา</h2>
+            <p class="card-subtitle">
+              ระบบจะดึงยาที่กำหนดไว้แล้วจากหมวด "ยาและสูตรยา" มาให้ระบุช่วงขนาดยา เช่น 5-10 mg/kg/day
+            </p>
+
+            <div v-if="!settingsStore.isConnected" class="info-note">
+              ต้องเชื่อมต่อ HOSxP ก่อนจึงจะดึงรายการยาและ strength จาก drugitems ได้
+            </div>
+            <div v-else-if="isLoadingDosageCandidates" class="empty-hint">
+              กำลังโหลดรายการยาที่ตั้งค่าไว้...
+            </div>
+            <div v-else-if="!settingsStore.drugClasses.length" class="empty-hint">
+              ยังไม่มีกลุ่มยา กรุณากำหนดกลุ่มยาในหมวด "ยาและสูตรยา" ก่อน
+            </div>
+            <div v-else-if="!settingsStore.dosageRules.length" class="empty-hint">
+              ไม่พบรายการยาใน HOSxP สำหรับตั้งค่าขนาดยา
+            </div>
+            <template v-else>
+              <div class="dosage-grid dosage-grid--head">
+                <span>ยา</span>
+                <span>icode / strength</span>
+                <span>ต่ำสุด (mg/kg/day)</span>
+                <span>สูงสุด (mg/kg/day)</span>
+              </div>
+              <div
+                v-for="rule in settingsStore.dosageRules"
+                :key="rule.icode"
+                class="dosage-grid dosage-grid--row"
+              >
+                <div class="dosage-drug-cell">
+                  <DrugChip :drug="rule.class" size="md" />
+                  <div>
+                    <div class="dosage-drug-name">{{ rule.drug_name }}</div>
+                    <div class="dosage-drug-meta">{{ rule.units ?? 'หน่วย' }}</div>
+                  </div>
+                </div>
+                <div class="dosage-code-cell">
+                  <span class="cs-icode">{{ rule.icode }}</span>
+                  <span class="dosage-strength">{{ rule.strength ?? 'ไม่พบ strength' }}</span>
+                </div>
+                <input
+                  v-model.number="rule.min_mg_per_kg_day"
+                  class="form-input"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                />
+                <input
+                  v-model.number="rule.max_mg_per_kg_day"
+                  class="form-input"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                />
+              </div>
+
+              <div class="form-actions">
+                <button class="btn-secondary" @click="loadDosageCandidates">
+                  <Search :size="13" /> โหลดรายการยาใหม่
+                </button>
+                <button class="btn-primary" @click="saveDosageRules">
+                  <CheckCircle :size="13" /> บันทึกขนาดยา
+                </button>
+              </div>
+
+              <span v-if="settingsSaveSuccess" class="test-result test-success">
+                <CheckCircle :size="14" />
+                {{ settingsSaveSuccess }}
+              </span>
+              <p v-if="settingsSaveError" class="error-note">
+                {{ settingsSaveError }}
+              </p>
+
+              <div class="info-note">
+                หลังบันทึกแล้ว หน้า "การประเมินขนาดยา" จะนำค่าช่วงนี้ไปคำนวณ target mg/day
+                และแนะนำจำนวนยาต่อวันให้ใกล้จำนวนเต็มที่สุดตาม strength ของยาแต่ละรายการ
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <!-- ══════════════════════════════════════════════════
+             Section 5 — Alert Thresholds
         ══════════════════════════════════════════════════ -->
         <template v-else-if="activeSection === 'alerts'">
           <div class="settings-card">
@@ -839,7 +1010,7 @@ function cancelRestore() {
         </template>
 
         <!-- ══════════════════════════════════════════════════
-             Section 5 — Staff Names
+             Section 6 — Staff Names
         ══════════════════════════════════════════════════ -->
         <template v-else-if="activeSection === 'staff'">
           <div class="settings-card">
@@ -900,7 +1071,7 @@ function cancelRestore() {
         </template>
 
         <!-- ══════════════════════════════════════════════════
-             Section 4 — Backup & Restore
+             Section 7 — Backup & Restore
         ══════════════════════════════════════════════════ -->
         <template v-else-if="activeSection === 'backup'">
           <div class="settings-card">
@@ -1398,6 +1569,64 @@ function cancelRestore() {
   font-size: 12px;
   color: var(--color-text-muted);
   margin: 0 0 12px;
+}
+
+.dosage-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(96px, 120px) minmax(96px, 120px);
+  gap: 10px;
+  align-items: center;
+}
+
+.dosage-grid > * {
+  min-width: 0;
+}
+
+.dosage-grid--head {
+  padding: 0 0 8px;
+  margin-bottom: 8px;
+  border-bottom: var(--border);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dosage-grid--row {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dosage-grid--row:last-of-type {
+  border-bottom: none;
+}
+
+.dosage-drug-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dosage-drug-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.dosage-drug-meta,
+.dosage-strength {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.dosage-code-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-start;
 }
 
 /* ── Regimen management ──────────────────────────────────────────────────────── */
@@ -1916,6 +2145,21 @@ function cancelRestore() {
   display: flex;
   gap: 10px;
   justify-content: center;
+}
+
+@media (max-width: 960px) {
+  .settings-layout {
+    flex-direction: column;
+  }
+
+  .settings-nav {
+    width: 100%;
+    position: static;
+  }
+
+  .dosage-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .btn-restore-confirm {
