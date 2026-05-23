@@ -534,7 +534,7 @@ pub async fn was_ze_dispensed_recently(
   Ok(count > 0)
 }
 
-/// Fetch upcoming TB clinic appointments from HOSxP `oapp` (clinic code `009`).
+/// Fetch upcoming TB clinic appointments from HOSxP `oapp`.
 ///
 /// Returns every appointment whose `nextdate` falls between today and
 /// `today + days_ahead` days (inclusive), ordered by date ascending.

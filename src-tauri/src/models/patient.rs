@@ -100,7 +100,7 @@ pub struct SearchFilters {
   pub page_size: Option<i64>,
 }
 
-/// A single TB clinic appointment record fetched from HOSxP `oapp` (clinic = '009').
+/// A single TB clinic appointment record fetched from HOSxP `oapp`.
 #[derive(Debug, Serialize, Deserialize, Clone, sqlx::FromRow)]
 pub struct AppointmentRecord {
   pub hn: String,

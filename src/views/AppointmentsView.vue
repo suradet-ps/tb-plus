@@ -38,7 +38,7 @@ onMounted(() => {
     <div class="view-header">
       <div class="header-left">
         <h1 class="page-title">การนัดหมาย TB Plus</h1>
-        <p class="page-subtitle">ตารางนัดหมายจากระบบ HOSxP (รหัสคลินิก 009)</p>
+        <p class="page-subtitle">ตารางนัดหมายจากระบบ HOSxP</p>
       </div>
       <button
         class="btn-refresh"

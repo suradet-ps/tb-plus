@@ -88,7 +88,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const drugClasses = ref<DrugClassEntry[]>([]);
   const regimenDefinitions = ref<RegimenEntry[]>([]);
   const dosageRules = ref<DosageRule[]>([]);
-  const hosxpSettings = ref<HosxpSettings>({ clinic_code: '009' });
+  const hosxpSettings = ref<HosxpSettings>({ clinic_code: '' });
   const alertThresholds = ref<AlertThresholds>({
     overdue_days: 35,
     lost_followup_days: 60,
