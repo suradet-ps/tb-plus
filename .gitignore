@@ -25,3 +25,9 @@ dist-ssr
 
 # Tauri
 src-tauri/target/
+
+# Coverage reports
+coverage/
+*.lcov
+coverage-final.json
+.nyc_output/
