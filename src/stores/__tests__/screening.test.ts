@@ -51,14 +51,16 @@ describe('screening store', () => {
 
     it('should set isLoading to true while request is in flight', async () => {
       const store = useScreeningStore();
-      const { promise: pending, resolve: resolveInvoke } =
-        Promise.withResolvers<PatientDrugRecord[]>();
+      let resolveInvoke: ((v: PatientDrugRecord[]) => void) | undefined;
+      const pending = new Promise<PatientDrugRecord[]>((resolve) => {
+        resolveInvoke = resolve;
+      });
       vi.mocked(invoke).mockReturnValue(pending);
 
       const searchPromise = store.search();
       expect(store.isLoading).toBe(true);
 
-      resolveInvoke(makeRecords(1));
+      resolveInvoke?.(makeRecords(1));
       await searchPromise;
       expect(store.isLoading).toBe(false);
     });

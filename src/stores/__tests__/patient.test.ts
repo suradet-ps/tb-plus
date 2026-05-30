@@ -195,15 +195,17 @@ describe('patient store', () => {
   describe('loading state isolation', () => {
     it('should use separate loading flags for active patients vs detail', async () => {
       const store = usePatientStore();
-      const { promise: activePending, resolve: resolveActive } =
-        Promise.withResolvers<ActivePatientRow[]>();
+      let resolveActive: ((v: ActivePatientRow[]) => void) | undefined;
+      const activePending = new Promise<ActivePatientRow[]>((resolve) => {
+        resolveActive = resolve;
+      });
       vi.mocked(invoke).mockReturnValueOnce(activePending);
 
       const activePromise = store.fetchActivePatients();
       expect(store.isLoading).toBe(true);
       expect(store.isLoadingDetail).toBe(false);
 
-      resolveActive([]);
+      resolveActive?.([]);
       await activePromise;
       expect(store.isLoading).toBe(false);
     });

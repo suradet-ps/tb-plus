@@ -137,13 +137,16 @@ describe('settings store', () => {
 
     it('should set isConnecting to true during the call', async () => {
       const store = useSettingsStore();
-      const { promise: pending, resolve: resolveInvoke } = Promise.withResolvers<unknown>();
+      let resolveInvoke: ((v: unknown) => void) | undefined;
+      const pending = new Promise<unknown>((resolve) => {
+        resolveInvoke = resolve;
+      });
       vi.mocked(invoke).mockReturnValue(pending);
 
       const resultPromise = store.testConnection(createDbConfig());
       expect(store.isConnecting).toBe(true);
 
-      resolveInvoke(true);
+      resolveInvoke?.(true);
       await resultPromise;
       expect(store.isConnecting).toBe(false);
     });

@@ -57,13 +57,16 @@ describe('alert store', () => {
 
     it('should set isLoading to true during fetch', async () => {
       const store = useAlertStore();
-      const { promise: pending, resolve: resolveInvoke } = Promise.withResolvers<unknown>();
+      let resolveInvoke: ((v: unknown) => void) | undefined;
+      const pending = new Promise<unknown>((resolve) => {
+        resolveInvoke = resolve;
+      });
       vi.mocked(invoke).mockReturnValue(pending);
 
       const refreshPromise = store.refresh();
       expect(store.isLoading).toBe(true);
 
-      resolveInvoke([]);
+      resolveInvoke?.([]);
       await refreshPromise;
       expect(store.isLoading).toBe(false);
     });

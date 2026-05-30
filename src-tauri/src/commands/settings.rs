@@ -136,13 +136,12 @@ pub async fn restore_sqlite(app: tauri::AppHandle, source_path: String) -> Resul
     "tb_outcomes",
   ];
   for table in &expected_tables {
-    let exists: Option<i64> = sqlx::query_scalar(&format!(
-      "SELECT 1 FROM sqlite_master WHERE type='table' AND name='{}'",
-      table
-    ))
-    .fetch_optional(&backup_pool)
-    .await
-    .map_err(|e| e.to_string())?;
+    let exists: Option<i64> =
+      sqlx::query_scalar("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?")
+        .bind(table)
+        .fetch_optional(&backup_pool)
+        .await
+        .map_err(|e| e.to_string())?;
     if exists.is_none() {
       return Err(format!("ไฟล์สำรองข้อมูลไม่มีตารางที่จำเป็น: {}", table));
     }

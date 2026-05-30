@@ -174,7 +174,7 @@ pub async fn search_tb_patients(
   sql.push_str(&format!(" LIMIT {} OFFSET {}", page_size, offset));
 
   // Bind parameters in the same order they appear in the SQL
-  let mut q = sqlx::query_as::<_, ScreeningRow>(&sql);
+  let mut q = sqlx::query_as::<_, ScreeningRow>(sqlx::AssertSqlSafe(sql.as_str()));
   for icode in &icodes {
     q = q.bind(icode.as_str());
   }
@@ -348,7 +348,7 @@ pub async fn get_patient_latest_weight_summary(
         LIMIT 1"
   );
 
-  let row = sqlx::query_as::<_, DosagePatientRow>(&sql)
+  let row = sqlx::query_as::<_, DosagePatientRow>(sqlx::AssertSqlSafe(sql.as_str()))
     .bind(hn)
     .fetch_optional(pool)
     .await?;
@@ -383,7 +383,7 @@ pub async fn get_drug_items_by_icodes(
     in_placeholders(icodes.len())
   );
 
-  let mut q = sqlx::query_as::<_, DrugItemRow>(&sql);
+  let mut q = sqlx::query_as::<_, DrugItemRow>(sqlx::AssertSqlSafe(sql.as_str()));
   for icode in &icodes {
     q = q.bind(icode.as_str());
   }
@@ -441,7 +441,7 @@ pub async fn get_dispensing_history(
         ORDER BY o.vstdate DESC, o.icode"
   );
 
-  let mut q = sqlx::query_as::<_, DispensingRecord>(&sql);
+  let mut q = sqlx::query_as::<_, DispensingRecord>(sqlx::AssertSqlSafe(sql.as_str()));
   q = q.bind(hn);
   for icode in all_icodes {
     q = q.bind(icode.as_str());
@@ -469,7 +469,7 @@ pub async fn get_last_dispensing_date(
            AND icode IN ({placeholders})"
   );
 
-  let mut q = sqlx::query_scalar::<_, Option<String>>(&sql);
+  let mut q = sqlx::query_scalar::<_, Option<String>>(sqlx::AssertSqlSafe(sql.as_str()));
   q = q.bind(hn);
   for icode in all_icodes {
     q = q.bind(icode.as_str());
@@ -498,7 +498,7 @@ pub async fn was_ethambutol_dispensed_recently(
            AND vstdate >= CURDATE() - INTERVAL ? DAY"
   );
 
-  let mut q = sqlx::query_scalar::<_, i64>(&sql);
+  let mut q = sqlx::query_scalar::<_, i64>(sqlx::AssertSqlSafe(sql.as_str()));
   q = q.bind(hn);
   for icode in e_icodes {
     q = q.bind(icode.as_str());
@@ -526,7 +526,7 @@ pub async fn was_ze_dispensed_recently(
            AND vstdate >= CURDATE() - INTERVAL ? DAY"
   );
 
-  let mut q = sqlx::query_scalar::<_, i64>(&sql);
+  let mut q = sqlx::query_scalar::<_, i64>(sqlx::AssertSqlSafe(sql.as_str()));
   q = q.bind(hn);
   for icode in ze_icodes {
     q = q.bind(icode.as_str());
@@ -560,7 +560,7 @@ pub async fn get_tb_appointments(
         ORDER BY a.nextdate ASC",
   );
 
-  sqlx::query_as::<_, AppointmentRecord>(&sql)
+  sqlx::query_as::<_, AppointmentRecord>(sqlx::AssertSqlSafe(sql.as_str()))
     .bind(clinic_code)
     .bind(days_ahead)
     .fetch_all(pool)
@@ -585,7 +585,7 @@ pub async fn search_clinics(pool: &MySqlPool, query: &str, limit: u32) -> Result
          LIMIT ?",
   );
   let pattern = format!("%{}%", query);
-  sqlx::query_as::<_, ClinicRow>(&sql)
+  sqlx::query_as::<_, ClinicRow>(sqlx::AssertSqlSafe(sql.as_str()))
     .bind(&pattern)
     .bind(&pattern)
     .bind(limit as i64)
@@ -614,7 +614,7 @@ pub async fn search_drugs(pool: &MySqlPool, query: &str, limit: u32) -> Result<V
          LIMIT ?",
   );
   let pattern = format!("%{}%", query);
-  let rows: Vec<DrugItemRow> = sqlx::query_as(&sql)
+  let rows: Vec<DrugItemRow> = sqlx::query_as(sqlx::AssertSqlSafe(sql.as_str()))
     .bind(&pattern)
     .bind(&pattern)
     .bind(limit as i64)
@@ -672,7 +672,7 @@ pub async fn get_drug_consumption_by_month(
         ORDER BY month DESC, o.icode"
   );
 
-  let mut q = sqlx::query_as::<_, DrugConsumptionRaw>(&sql);
+  let mut q = sqlx::query_as::<_, DrugConsumptionRaw>(sqlx::AssertSqlSafe(sql.as_str()));
   for icode in all_icodes {
     q = q.bind(icode.as_str());
   }
