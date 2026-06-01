@@ -1,11 +1,11 @@
-use crate::commands::patients::compute_alerts_for_patient;
 use crate::commands::settings::MySqlState;
-use crate::db;
-use crate::models::alert::PatientAlert;
-use crate::settings::SettingsManager;
 use chrono::{Datelike, Local, NaiveDate};
 use sqlx::SqlitePool;
 use tauri::State;
+use tb_database;
+use tb_database::SettingsManager;
+use tb_logic::alerts::compute_alerts_for_patient;
+use tb_models::alert::PatientAlert;
 
 #[tauri::command]
 pub async fn get_patient_alerts(
@@ -13,7 +13,7 @@ pub async fn get_patient_alerts(
   mysql: State<'_, MySqlState>,
   settings: State<'_, SettingsManager>,
 ) -> Result<Vec<PatientAlert>, String> {
-  let patients = db::sqlite::get_active_patients(&sqlite)
+  let patients = tb_database::sqlite::get_active_patients(&sqlite)
     .await
     .map_err(|e| e.to_string())?;
 
@@ -37,12 +37,12 @@ pub async fn get_patient_alerts(
   let mut all_alerts: Vec<PatientAlert> = Vec::new();
 
   for patient in &patients {
-    let current_plan = db::sqlite::get_current_treatment_plan(&sqlite, &patient.hn)
+    let current_plan = tb_database::sqlite::get_current_treatment_plan(&sqlite, &patient.hn)
       .await
       .ok()
       .flatten();
 
-    let first_start = db::sqlite::get_first_phase_start(&sqlite, &patient.hn)
+    let first_start = tb_database::sqlite::get_first_phase_start(&sqlite, &patient.hn)
       .await
       .ok()
       .flatten();
@@ -55,13 +55,13 @@ pub async fn get_patient_alerts(
       })
     });
 
-    let total_months = db::sqlite::get_all_treatment_plans(&sqlite, &patient.hn)
+    let total_months = tb_database::sqlite::get_all_treatment_plans(&sqlite, &patient.hn)
       .await
       .ok()
       .map(|plans| plans.iter().map(|p| p.duration_months).sum::<i64>());
 
     let days_since_last = if let Some(pool) = mysql_pool {
-      db::mysql::get_last_dispensing_date(pool, &patient.hn, &all_icodes)
+      tb_database::mysql::get_last_dispensing_date(pool, &patient.hn, &all_icodes)
         .await
         .ok()
         .flatten()

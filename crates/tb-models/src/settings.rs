@@ -1,5 +1,19 @@
 use serde::{Deserialize, Serialize};
 
+/// MySQL connection configuration (stored encrypted).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DbConfig {
+  pub host: String,
+  pub port: u16,
+  pub database: String,
+  pub username: String,
+  pub password: String,
+  #[serde(default)]
+  pub staff_names: Vec<String>,
+  #[serde(default)]
+  pub regimens: Vec<String>,
+}
+
 /// A single drug item returned from HOSxP `drugitems` search.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DrugItem {

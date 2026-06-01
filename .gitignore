@@ -26,6 +26,9 @@ dist-ssr
 # Tauri
 src-tauri/target/
 
+# Workspace target (cargo build output at workspace root)
+target/
+
 # Coverage reports
 coverage/
 *.lcov

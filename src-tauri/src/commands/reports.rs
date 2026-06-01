@@ -1,8 +1,8 @@
 use crate::commands::settings::MySqlState;
-use crate::db;
-use crate::models::reports::DrugConsumptionRow;
-use crate::settings::SettingsManager;
 use tauri::State;
+use tb_database;
+use tb_database::SettingsManager;
+use tb_models::reports::DrugConsumptionRow;
 
 #[tauri::command]
 pub async fn get_drug_consumption(
@@ -24,7 +24,7 @@ pub async fn get_drug_consumption(
 
   let months = months_back.unwrap_or(12).clamp(1, 60);
 
-  db::mysql::get_drug_consumption_by_month(pool, &all_icodes, &icode_to_class_map, months)
+  tb_database::mysql::get_drug_consumption_by_month(pool, &all_icodes, &icode_to_class_map, months)
     .await
     .map_err(|e| e.to_string())
 }

@@ -1,11 +1,13 @@
-use crate::models::settings::{AlertConfig, DosageRule, DrugClassEntry, HosxpConfig, RegimenEntry};
-use crate::settings::SettingsManager;
 use serde::{Deserialize, Serialize};
 use sqlx::MySqlPool;
 use sqlx::mysql::MySqlPoolOptions;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tauri::State;
+use tb_database::SettingsManager;
+use tb_models::settings::{
+  AlertConfig, DbConfig, DosageRule, DrugClassEntry, HosxpConfig, RegimenEntry,
+};
 use tokio::sync::Mutex;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -17,19 +19,6 @@ pub struct ClinicResult {
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared types
 // ─────────────────────────────────────────────────────────────────────────────
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct DbConfig {
-  pub host: String,
-  pub port: u16,
-  pub database: String,
-  pub username: String,
-  pub password: String,
-  #[serde(default)]
-  pub staff_names: Vec<String>,
-  #[serde(default)]
-  pub regimens: Vec<String>,
-}
 
 /// Tauri managed state: an optional live MySQL connection pool.
 pub type MySqlState = Arc<Mutex<Option<MySqlPool>>>;
@@ -244,12 +233,12 @@ pub async fn delete_db_config(settings: State<'_, SettingsManager>) -> Result<()
 pub async fn search_hosxp_drugs(
   mysql: State<'_, MySqlState>,
   query: String,
-) -> Result<Vec<crate::models::settings::DrugItem>, String> {
+) -> Result<Vec<tb_models::settings::DrugItem>, String> {
   let guard = mysql.lock().await;
   let pool = guard
     .as_ref()
     .ok_or_else(|| "MySQL ยังไม่ได้เชื่อมต่อ".to_string())?;
-  crate::db::mysql::search_drugs(pool, &query, 20)
+  tb_database::mysql::search_drugs(pool, &query, 20)
     .await
     .map_err(|e| e.to_string())
 }
@@ -264,7 +253,7 @@ pub async fn search_hosxp_clinics(
   let pool = guard
     .as_ref()
     .ok_or_else(|| "MySQL ยังไม่ได้เชื่อมต่อ".to_string())?;
-  let rows = crate::db::mysql::search_clinics(pool, &query, 20)
+  let rows = tb_database::mysql::search_clinics(pool, &query, 20)
     .await
     .map_err(|e| e.to_string())?;
   Ok(

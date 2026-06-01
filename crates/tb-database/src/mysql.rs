@@ -1,13 +1,13 @@
-use crate::models::dispensing::DispensingRecord;
-use crate::models::dosage::{DosageDrugCandidate, DosagePatientSummary};
-use crate::models::patient::{
-  AppointmentRecord, PatientDemographics, PatientDrugRecord, SearchFilters,
-};
-use crate::models::reports::DrugConsumptionRow;
-use crate::models::settings::DrugItem;
 use anyhow::Result;
 use sqlx::{MySqlPool, QueryBuilder};
 use std::collections::HashMap;
+use tb_models::dispensing::DispensingRecord;
+use tb_models::dosage::{DosageDrugCandidate, DosagePatientSummary};
+use tb_models::patient::{
+  AppointmentRecord, PatientDemographics, PatientDrugRecord, SearchFilters,
+};
+use tb_models::reports::DrugConsumptionRow;
+use tb_models::settings::DrugItem;
 
 // ── HOSxP table names (hardcoded defaults, not configurable) ─────────
 const TABLE_OPITEMRECE: &str = "opitemrece";
@@ -714,6 +714,7 @@ pub async fn get_drug_consumption_by_month(
 #[cfg(test)]
 mod tests {
   use super::*;
+  use std::collections::HashMap;
 
   fn default_class_map() -> HashMap<String, Vec<String>> {
     let mut m = HashMap::new();

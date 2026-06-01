@@ -1,8 +1,8 @@
 use crate::commands::settings::MySqlState;
-use crate::db;
-use crate::models::patient::AppointmentRecord;
-use crate::settings::SettingsManager;
 use tauri::State;
+use tb_database;
+use tb_database::SettingsManager;
+use tb_models::patient::AppointmentRecord;
 
 /// Fetch upcoming TB clinic appointments from HOSxP.
 #[tauri::command]
@@ -21,7 +21,7 @@ pub async fn get_appointments(
         .await
         .map_err(|e| e.to_string())?
         .clinic_code;
-      db::mysql::get_tb_appointments(pool, days, clinic_code)
+      tb_database::mysql::get_tb_appointments(pool, days, clinic_code)
         .await
         .map_err(|e| e.to_string())
     }

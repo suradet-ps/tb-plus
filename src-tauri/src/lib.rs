@@ -1,14 +1,11 @@
 mod commands;
-mod db;
-mod models;
-mod settings;
 
 use commands::settings::MySqlState;
-use settings::SettingsManager;
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::sqlite::SqlitePoolOptions;
 use std::sync::Arc;
 use tauri::{Emitter, Manager};
+use tb_database::SettingsManager;
 use tokio::sync::Mutex;
 
 pub fn run() {

@@ -3,10 +3,10 @@ use chrono::{Datelike, Local, NaiveDate};
 use sqlx::SqlitePool;
 use std::collections::HashMap;
 
-use crate::models::mapping::TbPatientLocation;
-use crate::models::patient::{EnrollmentInput, TbPatient};
-use crate::models::settings::RegimenPhase;
-use crate::models::treatment::{
+use tb_models::mapping::TbPatientLocation;
+use tb_models::patient::{EnrollmentInput, TbPatient};
+use tb_models::settings::RegimenPhase;
+use tb_models::treatment::{
   Followup, FollowupInput, Outcome, OutcomeInput, TreatmentPlan, TreatmentPlanUpdate,
 };
 
@@ -696,6 +696,7 @@ pub async fn get_intensive_phase_end(pool: &SqlitePool, hn: &str) -> Result<Opti
 #[cfg(test)]
 mod tests {
   use super::*;
+  use chrono::NaiveDate;
 
   // ---------------------------------------------------------------------------
   // days_in_month

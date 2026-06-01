@@ -1,0 +1,3 @@
+# Clippy configuration for TB Plus workspace
+# Lint levels are set in Cargo.toml under [workspace.lints.clippy]
+# This file is for Clippy-specific parameters only (thresholds, allowances, etc.)

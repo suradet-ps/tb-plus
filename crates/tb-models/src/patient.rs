@@ -1,6 +1,6 @@
-use crate::models::alert::PatientAlert;
-use crate::models::dispensing::DispensingRecord;
-use crate::models::treatment::{Followup, Outcome, TreatmentPlan};
+use crate::alert::PatientAlert;
+use crate::dispensing::DispensingRecord;
+use crate::treatment::{Followup, Outcome, TreatmentPlan};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone, sqlx::FromRow)]
@@ -43,7 +43,7 @@ pub struct PatientDrugRecord {
   pub patient_status: Option<String>,
 }
 
-use crate::models::settings::RegimenPhase;
+use crate::settings::RegimenPhase;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EnrollmentInput {

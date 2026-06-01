@@ -1,15 +1,15 @@
 pub mod crypto;
 
-use crate::models::settings::{
-  AlertConfig, DosageRule, DrugClassEntry, GeocodeConfig, HosxpConfig, PaginationConfig,
-  RegimenEntry, SplashMessages,
-};
 use anyhow::Result;
 use chrono::Local;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use sqlx::SqlitePool;
 use std::collections::HashMap;
+use tb_models::settings::{
+  AlertConfig, DosageRule, DrugClassEntry, GeocodeConfig, HosxpConfig, PaginationConfig,
+  RegimenEntry, SplashMessages,
+};
 
 const KEY_FILENAME: &str = ".tb_key";
 
@@ -378,7 +378,7 @@ impl SettingsManager {
   pub async fn resolve_regimen_phases(
     &self,
     regimen_name: &str,
-  ) -> Result<Option<Vec<crate::models::settings::RegimenPhase>>> {
+  ) -> Result<Option<Vec<tb_models::settings::RegimenPhase>>> {
     let defs = self.get_regimen_definitions().await?;
     Ok(
       defs
@@ -390,14 +390,12 @@ impl SettingsManager {
 
   /// Load the complete DbConfig (with decrypted password) from app_settings.
   /// Returns `None` when no MySQL config has been saved yet.
-  pub async fn get_db_config(&self) -> Result<Option<crate::commands::settings::DbConfig>> {
+  pub async fn get_db_config(&self) -> Result<Option<tb_models::settings::DbConfig>> {
     self.load_db_config_inner().await
   }
 
   /// Internal helper used by both `get_db_config` and `load_db_config` command.
-  pub(crate) async fn load_db_config_inner(
-    &self,
-  ) -> Result<Option<crate::commands::settings::DbConfig>> {
+  pub async fn load_db_config_inner(&self) -> Result<Option<tb_models::settings::DbConfig>> {
     let host = self.get_encrypted("mysql.host").await?;
     if host.as_deref().unwrap_or("").is_empty() {
       return Ok(None);
@@ -422,7 +420,7 @@ impl SettingsManager {
     let staff_names = self.get_staff_names().await?;
     let regimens = self.get_regimens().await?;
 
-    Ok(Some(crate::commands::settings::DbConfig {
+    Ok(Some(tb_models::settings::DbConfig {
       host: host.unwrap_or_default(),
       port,
       database,
