@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { AlertTriangle, Loader2, X } from '@lucide/vue';
 import { invoke } from '@tauri-apps/api/core';
-import { AlertTriangle, Loader2, X } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import type { FollowupInput } from '@/types/treatment';
 
-// ── Props & Emits ─────────────────────────────────────────────────────────
+// -- Props & Emits --
 
 const props = defineProps<{
   modelValue: boolean;
@@ -17,7 +17,7 @@ const emit = defineEmits<{
   (e: 'saved'): void;
 }>();
 
-// ── Side effect options ───────────────────────────────────────────────────
+// -- Side effect options --
 
 interface SideEffectOption {
   key: string;
@@ -79,7 +79,7 @@ const SIDE_EFFECT_OPTIONS: SideEffectOption[] = [
   },
 ];
 
-// ── Form state ────────────────────────────────────────────────────────────
+// -- Form state --
 
 function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
@@ -121,7 +121,7 @@ watch(selectedSideEffects, (list) => {
   hasOpticNeuritisChecked.value = list.includes('ตาพร่า/ตาบอดสี');
 });
 
-// ── Reset on open ─────────────────────────────────────────────────────────
+// -- Reset on open --
 
 watch(
   () => props.modelValue,
@@ -141,7 +141,7 @@ watch(
   },
 );
 
-// ── Submit ────────────────────────────────────────────────────────────────
+// -- Submit --
 
 async function handleSubmit() {
   submitError.value = null;
@@ -175,7 +175,7 @@ async function handleSubmit() {
   }
 }
 
-// ── Close helpers ─────────────────────────────────────────────────────────
+// -- Close helpers --
 
 function close() {
   if (isSubmitting.value) return;
@@ -210,7 +210,7 @@ function onKeydown(e: KeyboardEvent) {
           tabindex="-1"
           @pointerdown.stop
         >
-          <!-- ── Header ──────────────────────────────────────────── -->
+          <!-- Header -->
           <div class="panel-header">
             <div class="panel-header-info">
               <h2 id="fup-panel-title" class="panel-title">บันทึกการติดตามผล</h2>
@@ -227,7 +227,7 @@ function onKeydown(e: KeyboardEvent) {
             </button>
           </div>
 
-          <!-- ── Body ───────────────────────────────────────────── -->
+          <!-- Body -->
           <div class="panel-body">
             <form
               id="followup-form"
@@ -415,7 +415,7 @@ function onKeydown(e: KeyboardEvent) {
             </form>
           </div>
 
-          <!-- ── Footer ──────────────────────────────────────────── -->
+          <!-- Footer -->
           <div class="panel-footer">
             <button
               type="button"
@@ -442,22 +442,21 @@ function onKeydown(e: KeyboardEvent) {
 </template>
 
 <style scoped>
-/* ── Overlay ──────────────────────────────────────────────────────── */
+/* -- Overlay -- */
 .panel-overlay {
   position: fixed;
   inset: 0;
-  z-index: 900;
-  background: rgba(0, 0, 0, 0.28);
+  z-index: var(--z-panel);
+  background: var(--color-overlay-light);
   display: flex;
   align-items: stretch;
   justify-content: flex-end;
 }
 
-/* ── Panel ────────────────────────────────────────────────────────── */
 .panel {
   width: 420px;
   max-width: 100vw;
-  background: var(--color-bg);
+  background: var(--color-surface);
   box-shadow: var(--shadow-deep);
   display: flex;
   flex-direction: column;
@@ -465,16 +464,15 @@ function onKeydown(e: KeyboardEvent) {
   outline: none;
 }
 
-/* ── Header ───────────────────────────────────────────────────────── */
 .panel-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  padding: 20px 20px 16px;
-  border-bottom: var(--border);
+  gap: var(--space-6);
+  padding: var(--space-10) var(--space-10) var(--space-8);
+  border-bottom: var(--border-standard);
   flex-shrink: 0;
-  background: var(--color-bg);
+  background: var(--color-surface);
 }
 
 .panel-header-info {
@@ -484,17 +482,17 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .panel-title {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--text-heading-sm);
+  font-weight: var(--weight-heading);
   color: var(--color-text);
   letter-spacing: -0.125px;
   margin: 0;
 }
 
 .panel-hn {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
-  font-weight: 600;
+  font-weight: var(--weight-emphasis);
   letter-spacing: 0.3px;
 }
 
@@ -505,16 +503,16 @@ function onKeydown(e: KeyboardEvent) {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px;
+  padding: var(--space-3);
   color: var(--color-text-muted);
   border-radius: var(--radius-sm);
   flex-shrink: 0;
-  transition: color 0.15s, background 0.15s;
+  transition: var(--transition-icon-btn);
 }
 
 .btn-close:hover:not(:disabled) {
   color: var(--color-text);
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
 }
 
 .btn-close:disabled {
@@ -522,23 +520,21 @@ function onKeydown(e: KeyboardEvent) {
   cursor: not-allowed;
 }
 
-/* ── Body ─────────────────────────────────────────────────────────── */
 .panel-body {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: var(--space-10);
 }
 
-/* ── Form ─────────────────────────────────────────────────────────── */
 .followup-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-8);
 }
 
 .form-row-2 {
   display: flex;
-  gap: 12px;
+  gap: var(--space-6);
 }
 
 .form-row-2 > .form-group {
@@ -553,36 +549,35 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .form-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-secondary);
   user-select: none;
 }
 
 .required {
-  color: var(--color-orange);
+  color: var(--color-warning);
   margin-left: 1px;
 }
 
-/* ── Inputs ───────────────────────────────────────────────────────── */
 .form-input,
 .form-textarea {
-  font-family: var(--font);
-  font-size: 13px;
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm);
   color: var(--color-text);
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-sm);
-  padding: 8px 10px;
+  padding: var(--input-padding-lg);
   width: 100%;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: var(--transition-input);
 }
 
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: var(--color-blue);
-  box-shadow: 0 0 0 3px rgba(0, 117, 222, 0.12);
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-focus-ring);
 }
 
 .form-input:disabled,
@@ -597,7 +592,6 @@ function onKeydown(e: KeyboardEvent) {
   line-height: 1.55;
 }
 
-/* ── Select wrapper ───────────────────────────────────────────────── */
 .select-wrap {
   position: relative;
 }
@@ -605,7 +599,7 @@ function onKeydown(e: KeyboardEvent) {
 .select-wrap::after {
   content: '';
   position: absolute;
-  right: 10px;
+  right: var(--space-5);
   top: 50%;
   transform: translateY(-50%);
   width: 0;
@@ -617,23 +611,23 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .form-select {
-  font-family: var(--font);
-  font-size: 13px;
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm);
   color: var(--color-text);
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-sm);
-  padding: 8px 30px 8px 10px;
+  padding: var(--input-padding-lg) 30px var(--input-padding-lg) var(--space-5);
   width: 100%;
   appearance: none;
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: var(--transition-input);
 }
 
 .form-select:focus {
   outline: none;
-  border-color: var(--color-blue);
-  box-shadow: 0 0 0 3px rgba(0, 117, 222, 0.12);
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-focus-ring);
 }
 
 .form-select:disabled {
@@ -641,55 +635,53 @@ function onKeydown(e: KeyboardEvent) {
   cursor: not-allowed;
 }
 
-/* ── Side-effect priority alert ───────────────────────────────────── */
 .se-priority-alert {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  background: rgba(221, 91, 0, 0.08);
-  border: 1px solid rgba(221, 91, 0, 0.25);
+  gap: var(--space-4);
+  background: var(--alert-error-bg);
+  border: 1px solid var(--alert-error-border);
   border-radius: var(--radius-sm);
   padding: 9px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #b84a00;
-  line-height: 1.5;
-  margin-bottom: 2px;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-ui);
+  color: var(--palette-orange-dark);
+  line-height: var(--leading-body);
+  margin-bottom: var(--space-1);
 }
 
 .se-alert-icon {
   flex-shrink: 0;
   margin-top: 1px;
-  color: var(--color-orange);
+  color: var(--color-warning);
 }
 
-/* ── Checkbox list ────────────────────────────────────────────────── */
 .checkbox-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  background: var(--color-bg-alt);
-  border: var(--border);
+  gap: var(--space-1);
+  background: var(--color-surface-alt);
+  border: var(--border-standard);
   border-radius: var(--radius-sm);
-  padding: 6px 8px;
+  padding: var(--space-3) var(--space-4);
 }
 
 .checkbox-item {
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 6px 7px;
+  padding: var(--space-3) 7px;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.12s;
+  transition: var(--transition-btn);
 }
 
 .checkbox-item:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--tint-hover);
 }
 
 .checkbox-item-checked-priority {
-  background: rgba(221, 91, 0, 0.06);
+  background: var(--tint-orange);
   outline: 1px solid rgba(221, 91, 0, 0.2);
 }
 
@@ -698,7 +690,7 @@ function onKeydown(e: KeyboardEvent) {
   width: 15px;
   height: 15px;
   cursor: pointer;
-  accent-color: var(--color-blue);
+  accent-color: var(--color-accent);
   margin: 0;
 }
 
@@ -711,70 +703,68 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .checkbox-label-th {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text);
-  line-height: 1.3;
+  line-height: var(--leading-snug);
 }
 
 .checkbox-label-en {
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--color-text-muted);
-  line-height: 1.3;
+  line-height: var(--leading-snug);
 }
 
 .drug-tag {
   flex-shrink: 0;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-muted);
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-pill);
   padding: 1px 6px;
   white-space: nowrap;
 }
 
-/* ── Form error ───────────────────────────────────────────────────── */
 .form-error {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  background: rgba(221, 91, 0, 0.08);
-  border: 1px solid rgba(221, 91, 0, 0.2);
+  gap: var(--space-4);
+  background: var(--alert-error-bg);
+  border: 1px solid var(--alert-warning-border);
   border-radius: var(--radius-sm);
   padding: 9px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-orange);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-ui);
+  color: var(--color-warning);
   line-height: 1.45;
 }
 
-/* ── Footer ───────────────────────────────────────────────────────── */
 .panel-footer {
   display: flex;
-  gap: 8px;
-  padding: 14px 20px;
-  border-top: var(--border);
+  gap: var(--space-4);
+  padding: var(--space-7) var(--space-10);
+  border-top: var(--border-standard);
   flex-shrink: 0;
-  background: var(--color-bg);
+  background: var(--color-surface);
 }
 
 .btn-cancel {
   flex: 1;
-  padding: 9px 16px;
-  background: rgba(0, 0, 0, 0.05);
+  padding: 9px var(--space-8);
+  background: var(--btn-secondary-bg);
   border: none;
   border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
   cursor: pointer;
   color: var(--color-text-secondary);
-  transition: background 0.15s;
+  transition: var(--transition-btn);
 }
 
 .btn-cancel:hover:not(:disabled) {
-  background: rgba(0, 0, 0, 0.09);
+  background: var(--btn-secondary-hover);
 }
 
 .btn-save {
@@ -783,20 +773,20 @@ function onKeydown(e: KeyboardEvent) {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 9px 16px;
-  background: var(--color-blue);
+  padding: 9px var(--space-8);
+  background: var(--btn-primary-bg);
   border: none;
   border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
   cursor: pointer;
-  color: #fff;
-  transition: background 0.15s;
+  color: var(--btn-primary-text);
+  transition: var(--transition-btn);
 }
 
 .btn-save:hover:not(:disabled) {
-  background: var(--color-blue-active);
+  background: var(--btn-primary-hover);
 }
 
 .btn-cancel:disabled,
@@ -805,12 +795,11 @@ function onKeydown(e: KeyboardEvent) {
   cursor: not-allowed;
 }
 
-/* ── Panel slide-in transition ────────────────────────────────────── */
 .panel-enter-active {
-  transition: opacity 0.22s ease;
+  transition: opacity var(--duration-slow) var(--ease-standard);
 }
 .panel-leave-active {
-  transition: opacity 0.18s ease;
+  transition: opacity var(--duration-normal) var(--ease-standard);
 }
 .panel-enter-from,
 .panel-leave-to {
@@ -821,19 +810,19 @@ function onKeydown(e: KeyboardEvent) {
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .panel-leave-active .panel {
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.6, 1);
+  transition: transform var(--duration-slow) cubic-bezier(0.4, 0, 0.6, 1);
 }
 .panel-enter-from .panel,
 .panel-leave-to .panel {
   transform: translateX(100%);
 }
 
-/* ── Alert fade transition ────────────────────────────────────────── */
 .fade-enter-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: var(--transition-fade-slide);
 }
 .fade-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition: opacity var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-standard);
 }
 .fade-enter-from,
 .fade-leave-to {
@@ -841,9 +830,8 @@ function onKeydown(e: KeyboardEvent) {
   transform: translateY(-6px);
 }
 
-/* ── Spin animation ───────────────────────────────────────────────── */
 .spin {
-  animation: spin 0.9s linear infinite;
+  animation: spin var(--duration-animate) linear infinite;
   flex-shrink: 0;
 }
 

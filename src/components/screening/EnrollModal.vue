@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertCircle, CheckCircle, Loader2, UserPlus, X } from 'lucide-vue-next';
+import { AlertCircle, CheckCircle, Loader2, UserPlus, X } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import { usePatientStore } from '@/stores/patient';
 import { useSettingsStore } from '@/stores/settings';
@@ -18,7 +18,7 @@ const emit = defineEmits<{
 const patientStore = usePatientStore();
 const settingsStore = useSettingsStore();
 
-// ── Form state ────────────────────────────────────────────────────────────────
+// -- Form state --
 const tbType = ref('pulmonary');
 const diagnosisDate = ref('');
 const regimen = ref('2HRZE/4HR');
@@ -29,7 +29,7 @@ const isSubmitting = ref(false);
 const error = ref<string | null>(null);
 const success = ref(false);
 
-// ── Re-enrollment detection ───────────────────────────────────────────────────
+// -- Re-enrollment detection --
 const reenrollCount = computed(
   () =>
     props.patients.filter((p) => p.is_enrolled && p.patient_status && p.patient_status !== 'active')
@@ -37,7 +37,7 @@ const reenrollCount = computed(
 );
 const hasReenrollPatients = computed(() => reenrollCount.value > 0);
 
-// ── Reset form whenever the modal opens ───────────────────────────────────────
+// -- Reset form whenever the modal opens --
 watch(
   () => props.modelValue,
   (val) => {
@@ -55,7 +55,7 @@ watch(
   },
 );
 
-// ── Actions ───────────────────────────────────────────────────────────────────
+// -- Actions --
 function close() {
   if (isSubmitting.value) return;
   emit('update:modelValue', false);
@@ -107,7 +107,7 @@ function unfocus(e: Event) {
     <Transition name="modal-fade">
       <div v-if="modelValue" class="modal-overlay" @click.self="close">
         <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-          <!-- ── Header ──────────────────────────────────────────────────────── -->
+          <!-- Header -->
           <div class="modal-header">
             <div class="modal-title-row">
               <UserPlus :size="18" class="modal-title-icon" />
@@ -118,7 +118,7 @@ function unfocus(e: Event) {
             </button>
           </div>
 
-          <!-- ── Body ───────────────────────────────────────────────────────── -->
+          <!-- Body -->
           <div class="modal-body">
             <!-- Patient chips -->
             <div class="section-label">ผู้ป่วยที่จะลงทะเบียน ({{ patients.length }} ราย)</div>
@@ -247,7 +247,7 @@ function unfocus(e: Event) {
             </div>
           </div>
 
-          <!-- ── Footer ──────────────────────────────────────────────────────── -->
+          <!-- Footer -->
           <div class="modal-footer">
             <button class="btn-ghost" type="button" @click="close" :disabled="isSubmitting">
               ยกเลิก
@@ -270,36 +270,35 @@ function unfocus(e: Event) {
 </template>
 
 <style scoped>
-/* ── Modal transition ─────────────────────────────────────────────────────────── */
 .modal-fade-enter-active {
-  transition: opacity 0.2s ease;
+  transition: var(--transition-modal);
 }
+
 .modal-fade-leave-active {
-  transition: opacity 0.15s ease;
+  transition: opacity var(--duration-base) var(--ease-standard);
 }
+
 .modal-fade-enter-from,
 .modal-fade-leave-to {
   opacity: 0;
 }
 
-/* ── Overlay ──────────────────────────────────────────────────────────────────── */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  z-index: 1000;
+  background: var(--modal-overlay);
+  z-index: var(--z-modal);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: var(--space-8);
 }
 
-/* ── Panel ────────────────────────────────────────────────────────────────────── */
 .modal-panel {
-  background: var(--color-bg);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-deep);
-  width: 540px;
+  background: var(--modal-bg);
+  border-radius: var(--modal-radius);
+  box-shadow: var(--modal-shadow);
+  width: var(--modal-max);
   max-width: 95vw;
   max-height: 90vh;
   display: flex;
@@ -307,10 +306,9 @@ function unfocus(e: Event) {
   overflow: hidden;
 }
 
-/* ── Header ───────────────────────────────────────────────────────────────────── */
 .modal-header {
-  padding: 20px 24px 16px;
-  border-bottom: var(--border);
+  padding: var(--modal-header-padding);
+  border-bottom: var(--border-standard);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -320,18 +318,18 @@ function unfocus(e: Event) {
 .modal-title-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .modal-title-icon {
-  color: var(--color-blue);
+  color: var(--color-accent);
   flex-shrink: 0;
 }
 
 .modal-title {
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.25px;
+  font-size: var(--text-heading);
+  font-weight: var(--weight-heading);
+  letter-spacing: var(--tracking-heading);
   color: var(--color-text);
   margin: 0;
 }
@@ -346,12 +344,12 @@ function unfocus(e: Event) {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.12s, color 0.12s;
+  transition: var(--transition-icon-btn);
   flex-shrink: 0;
 }
 
 .close-btn:hover:not(:disabled) {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   color: var(--color-text);
 }
 
@@ -360,41 +358,38 @@ function unfocus(e: Event) {
   cursor: not-allowed;
 }
 
-/* ── Body ─────────────────────────────────────────────────────────────────────── */
 .modal-body {
-  padding: 20px 24px;
+  padding: var(--modal-body-padding);
   overflow-y: auto;
   flex: 1;
 }
 
-/* ── Section label ────────────────────────────────────────────────────────────── */
 .section-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-heading);
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--color-text-muted);
-  margin-bottom: 8px;
+  margin-bottom: var(--space-4);
 }
 
-/* ── Patient chips ────────────────────────────────────────────────────────────── */
 .patient-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 12px;
-  background: var(--color-bg-alt);
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background: var(--color-surface-alt);
   border-radius: var(--radius-md);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-2);
 }
 
 .patient-chip {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-pill);
-  padding: 4px 10px;
-  font-size: 12px;
-  font-weight: 500;
+  padding: var(--space-2) var(--space-5);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-ui);
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -402,8 +397,8 @@ function unfocus(e: Event) {
 }
 
 .patient-chip-hn {
-  font-family: monospace;
-  font-weight: 700;
+  font-family: var(--font-family-mono-simple);
+  font-weight: var(--weight-heading);
   color: var(--color-text);
 }
 
@@ -415,73 +410,68 @@ function unfocus(e: Event) {
   background: var(--color-badge-bg);
   color: var(--color-badge-text);
   border-color: rgba(9, 127, 232, 0.18);
-  font-weight: 600;
+  font-weight: var(--weight-emphasis);
 }
 
-/* ── Divider ──────────────────────────────────────────────────────────────────── */
 .form-divider {
   height: 1px;
-  background: rgba(0, 0, 0, 0.07);
-  margin: 20px 0;
+  background: var(--divider-color);
+  margin: var(--space-10) 0;
 }
 
-/* ── Form groups ──────────────────────────────────────────────────────────────── */
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: var(--space-8);
 }
 
 .form-label {
   display: block;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text);
-  margin-bottom: 6px;
+  margin-bottom: var(--space-3);
 }
 
 .required {
-  color: var(--color-orange);
-  margin-left: 2px;
+  color: var(--color-warning);
+  margin-left: var(--space-1);
 }
 
 .form-input,
 .form-select,
 .form-textarea {
   width: 100%;
-  padding: 7px 10px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  font-family: var(--font);
-  color: var(--color-text);
-  background: var(--color-bg);
+  padding: var(--input-padding-md);
+  border: 1px solid var(--input-border);
+  border-radius: var(--input-radius);
+  font-size: var(--input-font-size-md);
+  font-family: var(--font-family);
+  color: var(--input-text);
+  background: var(--input-bg);
   outline: none;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
+  transition: var(--transition-input);
 }
 
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
-  border-color: var(--color-blue);
-  box-shadow: 0 0 0 3px rgba(0, 117, 222, 0.1);
+  border-color: var(--input-border-focus);
+  box-shadow: var(--shadow-focus-ring);
 }
 
 .form-input--error {
-  border-color: var(--color-orange);
-  box-shadow: 0 0 0 3px rgba(221, 91, 0, 0.1);
+  border-color: var(--input-border-error);
+  box-shadow: var(--shadow-focus-ring-error);
 }
 
 .form-textarea {
   resize: vertical;
   min-height: 72px;
-  line-height: 1.5;
+  line-height: var(--leading-body);
 }
 
-/* ── Radio group ──────────────────────────────────────────────────────────────── */
 .radio-group {
   display: flex;
-  gap: 20px;
+  gap: var(--space-10);
   flex-wrap: wrap;
 }
 
@@ -496,98 +486,94 @@ function unfocus(e: Event) {
 .radio-label input[type='radio'] {
   width: 15px;
   height: 15px;
-  accent-color: var(--color-blue);
+  accent-color: var(--color-accent);
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .radio-text {
-  font-size: 14px;
+  font-size: var(--text-body);
   color: var(--color-text);
 }
 
-/* ── Alerts ───────────────────────────────────────────────────────────────────── */
 .error-alert,
 .success-alert {
   border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  font-size: 13px;
-  margin-bottom: 4px;
+  padding: var(--space-5) var(--space-6);
+  font-size: var(--text-body-sm);
+  margin-bottom: var(--space-2);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .error-alert {
-  background: rgba(221, 91, 0, 0.08);
-  border: 1px solid rgba(221, 91, 0, 0.22);
-  color: var(--color-orange);
+  background: var(--alert-error-bg);
+  border: 1px solid var(--border-color-error);
+  color: var(--color-warning);
 }
 
 .success-alert {
-  background: rgba(26, 174, 57, 0.08);
-  border: 1px solid rgba(26, 174, 57, 0.22);
-  color: var(--color-green);
+  background: var(--alert-success-bg);
+  border: 1px solid var(--border-color-green);
+  color: var(--color-success);
 }
 
 .alert-icon {
   flex-shrink: 0;
 }
 
-/* ── Re-enrollment warning ────────────────────────────────────────────────────── */
 .reenroll-warning {
   display: flex;
   align-items: flex-start;
   gap: 9px;
-  padding: 10px 13px;
+  padding: var(--space-5) 13px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(221, 91, 0, 0.2);
-  border-left: 3px solid var(--color-orange);
-  background: rgba(221, 91, 0, 0.06);
-  font-size: 13px;
-  color: var(--color-orange);
-  line-height: 1.5;
-  margin-top: 10px;
+  border: 1px solid var(--alert-warning-border);
+  border-left: 3px solid var(--color-warning);
+  background: var(--tint-orange);
+  font-size: var(--text-body-sm);
+  color: var(--color-warning);
+  line-height: var(--leading-body);
+  margin-top: var(--space-5);
 }
 
 .reenroll-warning-icon {
   flex-shrink: 0;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
 }
 
 .reenroll-warning strong {
-  font-weight: 700;
-  color: var(--color-orange);
+  font-weight: var(--weight-heading);
+  color: var(--color-warning);
 }
 
-/* ── Footer ───────────────────────────────────────────────────────────────────── */
 .modal-footer {
-  padding: 16px 24px;
-  border-top: var(--border);
+  padding: var(--modal-footer-padding);
+  border-top: var(--border-standard);
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
   flex-shrink: 0;
 }
 
-/* ── Buttons ──────────────────────────────────────────────────────────────────── */
 .btn-ghost {
   background: transparent;
   border: none;
-  padding: 7px 16px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: var(--btn-padding-lg);
+  font-size: var(--btn-font-size-lg);
+  font-weight: var(--weight-emphasis);
   cursor: pointer;
-  border-radius: var(--radius-sm);
+  border-radius: var(--btn-radius);
   color: var(--color-text-secondary);
-  transition: background 0.12s;
-  font-family: var(--font);
+  transition: var(--transition-btn);
+  font-family: var(--font-family);
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   color: var(--color-text);
 }
 
@@ -597,23 +583,23 @@ function unfocus(e: Event) {
 }
 
 .btn-primary {
-  background: var(--color-blue);
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   border: none;
-  padding: 7px 16px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: var(--btn-padding-lg);
+  font-size: var(--btn-font-size-lg);
+  font-weight: var(--weight-emphasis);
   cursor: pointer;
-  border-radius: var(--radius-sm);
+  border-radius: var(--btn-radius);
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition: background 0.12s;
-  font-family: var(--font);
+  gap: var(--space-3);
+  transition: var(--transition-btn);
+  font-family: var(--font-family);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--color-blue-active);
+  background: var(--btn-primary-hover);
 }
 
 .btn-primary:disabled {
@@ -621,9 +607,8 @@ function unfocus(e: Event) {
   cursor: not-allowed;
 }
 
-/* ── Spinner ──────────────────────────────────────────────────────────────────── */
 .spin {
-  animation: spin 0.9s linear infinite;
+  animation: spin var(--duration-animate) linear infinite;
 }
 
 @keyframes spin {

@@ -96,7 +96,7 @@ export const useSettingsStore = defineStore('settings', () => {
     phase_transition_lookback_days: 35,
   });
 
-  // ── Backward-compat: drugCodes derived from drugClasses ─────────────
+  // -- Backward-compat: drugCodes derived from drugClasses --
   const drugCodes = ref<Record<string, string[]>>({});
 
   function syncDrugCodesFromClasses() {
@@ -119,7 +119,7 @@ export const useSettingsStore = defineStore('settings', () => {
     await invoke('save_db_config', { config: buildAppConfig() });
   }
 
-  // ── MySQL connection ────────────────────────────────────────────────────
+  // -- MySQL connection --
 
   async function testConnection(config: DbConfig): Promise<boolean> {
     try {
@@ -189,7 +189,7 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
-  // ── Load ALL settings from backend (after restart) ──────────────────────
+  // -- Load ALL settings from backend (after restart) --
 
   async function loadAllSettings(): Promise<void> {
     try {
@@ -235,7 +235,7 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
-  // ── Staff names ─────────────────────────────────────────────────────────
+  // -- Staff names --
 
   async function addStaffName(name: string): Promise<boolean> {
     const trimmedName = name.trim();
@@ -265,7 +265,7 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
-  // ── Drug search (setup wizard) ──────────────────────────────────────────
+  // -- Drug search (setup wizard) --
 
   async function searchDrugs(query: string): Promise<DrugItem[]> {
     return await invoke<DrugItem[]>('search_hosxp_drugs', { query });
@@ -277,14 +277,14 @@ export const useSettingsStore = defineStore('settings', () => {
     });
   }
 
-  // ── Drug classes ────────────────────────────────────────────────────────
+  // -- Drug classes --
 
   async function saveDrugClasses(): Promise<void> {
     syncDrugCodesFromClasses();
     await invoke('save_drug_classes', { classes: drugClasses.value });
   }
 
-  // ── Regimen definitions (structured) ────────────────────────────────────
+  // -- Regimen definitions (structured) --
 
   async function saveRegimenDefinitions(): Promise<void> {
     await invoke('save_regimen_definitions', { regimens: regimenDefinitions.value });
@@ -298,19 +298,19 @@ export const useSettingsStore = defineStore('settings', () => {
     return await invoke<DosageDrugCandidate[]>('get_configured_dosage_drugs');
   }
 
-  // ── HOSxP config ────────────────────────────────────────────────────────
+  // -- HOSxP config --
 
   async function saveHosxpSettings(): Promise<void> {
     await invoke('save_hosxp_config', { config: hosxpSettings.value });
   }
 
-  // ── Alert thresholds ────────────────────────────────────────────────────
+  // -- Alert thresholds --
 
   async function saveAlertThresholds(): Promise<void> {
     await invoke('save_alert_config', { config: alertThresholds.value });
   }
 
-  // ── Setup status ────────────────────────────────────────────────────────
+  // -- Setup status --
 
   async function markSetupComplete(): Promise<void> {
     await invoke('mark_setup_complete');

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertCircle, Calendar, CalendarDays, RefreshCw } from 'lucide-vue-next';
+import { AlertCircle, Calendar, CalendarDays, RefreshCw } from '@lucide/vue';
 import { onMounted } from 'vue';
 import { useAppointmentsStore } from '@/stores/appointments';
 import { useSettingsStore } from '@/stores/settings';
@@ -34,7 +34,7 @@ onMounted(() => {
 
 <template>
   <div class="view-root">
-    <!-- ── Page Header ───────────────────────────────────────────────────── -->
+    <!-- Page Header -->
     <div class="view-header">
       <div class="header-left">
         <h1 class="page-title">การนัดหมาย TB Plus</h1>
@@ -51,7 +51,7 @@ onMounted(() => {
       </button>
     </div>
 
-    <!-- ── Days-ahead Filter Chips ───────────────────────────────────────── -->
+    <!-- Days-ahead Filter Chips -->
     <div class="filter-row">
       <span class="filter-label">แสดงนัดล่วงหน้า</span>
       <div class="day-chips">
@@ -67,7 +67,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- ── Not Connected State ───────────────────────────────────────────── -->
+    <!-- Not Connected State -->
     <div v-if="!settingsStore.isConnected" class="state-box state-box--warn">
       <AlertCircle :size="28" class="state-icon" stroke-width="1.75" />
       <div class="state-text">
@@ -76,7 +76,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- ── Error State ───────────────────────────────────────────────────── -->
+    <!-- Error State -->
     <div v-else-if="store.error && !store.isLoading" class="state-box state-box--error">
       <AlertCircle :size="28" class="state-icon" stroke-width="1.75" />
       <div class="state-text">
@@ -85,7 +85,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- ── Main Content ──────────────────────────────────────────────────── -->
+    <!-- Main Content -->
     <template v-else>
 
       <!-- Today's Appointments Highlight Card -->
@@ -163,20 +163,20 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* ── Page Root ──────────────────────────────────────────────────────────────── */
+/* -- Page Root -- */
 .view-root {
-  padding: 32px 32px 48px;
+  padding: var(--page-root-padding);
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* ── Header ─────────────────────────────────────────────────────────────────── */
+/* -- Header -- */
 .view-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-8);
 }
 
 .header-left {
@@ -186,32 +186,32 @@ onMounted(() => {
 }
 
 .page-title {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--text-display-sm);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.03em;
   color: var(--color-text);
-  line-height: 1.2;
+  line-height: var(--leading-tight);
 }
 
 .page-subtitle {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-muted);
-  line-height: 1.5;
+  line-height: var(--leading-body);
 }
 
-/* ── Refresh Button ──────────────────────────────────────────────────────────── */
+/* -- Refresh Button -- */
 .btn-refresh {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 14px;
+  padding: var(--btn-padding);
   border-radius: var(--radius-sm);
-  border: var(--border);
-  background: var(--color-bg);
+  border: var(--border-standard);
+  background: var(--color-surface);
   color: var(--color-text-secondary);
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 500;
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-ui);
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
@@ -221,7 +221,7 @@ onMounted(() => {
 }
 
 .btn-refresh:hover:not(:disabled) {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   color: var(--color-text);
 }
 
@@ -230,16 +230,16 @@ onMounted(() => {
   cursor: default;
 }
 
-/* ── Filter Row ──────────────────────────────────────────────────────────────── */
+/* -- Filter Row -- */
 .filter-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-6);
   flex-wrap: wrap;
 }
 
 .filter-label {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
@@ -253,12 +253,12 @@ onMounted(() => {
 .day-chip {
   padding: 4px 14px;
   border-radius: var(--radius-pill);
-  border: var(--border);
-  background: var(--color-bg);
+  border: var(--border-standard);
+  background: var(--color-surface);
   color: var(--color-text-secondary);
-  font-family: var(--font);
-  font-size: 12px;
-  font-weight: 500;
+  font-family: var(--font-family);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-ui);
   cursor: pointer;
   transition:
     background 0.12s,
@@ -267,26 +267,26 @@ onMounted(() => {
 }
 
 .day-chip:hover {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   color: var(--color-text);
 }
 
 .day-chip--active {
-  background: rgba(0, 117, 222, 0.1);
+  background: var(--tint-blue);
   border-color: rgba(0, 117, 222, 0.3);
   color: var(--color-blue);
-  font-weight: 600;
+  font-weight: var(--weight-emphasis);
 }
 
-/* ── State Boxes ─────────────────────────────────────────────────────────────── */
+/* -- State Boxes -- */
 .state-box {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px 24px;
+  gap: var(--space-8);
+  padding: var(--filter-card-padding);
   border-radius: var(--radius-card);
-  border: var(--border);
-  background: var(--color-bg);
+  border: var(--border-standard);
+  background: var(--color-surface);
   box-shadow: var(--shadow-card);
 }
 
@@ -313,8 +313,8 @@ onMounted(() => {
 }
 
 .state-title {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text);
 }
 
@@ -323,19 +323,19 @@ onMounted(() => {
   color: var(--color-text-muted);
 }
 
-/* ── Today Highlight Card ────────────────────────────────────────────────────── */
+/* -- Today Highlight Card -- */
 .today-card {
   border-radius: var(--radius-card);
   border: 1px solid rgba(42, 157, 153, 0.22);
   border-left: 3px solid var(--color-teal);
-  background: rgba(42, 157, 153, 0.06);
+  background: var(--tint-teal);
   overflow: hidden;
 }
 
 .today-card-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
   padding: 10px 16px;
   border-bottom: 1px solid rgba(42, 157, 153, 0.14);
 }
@@ -347,19 +347,19 @@ onMounted(() => {
 
 .today-title {
   flex: 1;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-teal);
 }
 
 .today-count-badge {
-  font-size: 11px;
-  font-weight: 700;
-  color: #ffffff;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-heading);
+  color: var(--color-surface);
   background: var(--color-teal);
   padding: 2px 9px;
   border-radius: var(--radius-pill);
-  line-height: 1.4;
+  line-height: var(--leading-normal);
 }
 
 .today-rows {
@@ -369,58 +369,58 @@ onMounted(() => {
 .today-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-8);
   padding: 7px 16px;
 }
 
 .today-hn {
-  font-family: monospace;
+  font-family: var(--font-family-mono-simple);
   font-size: 12.5px;
-  font-weight: 700;
+  font-weight: var(--weight-heading);
   color: var(--color-text);
   min-width: 84px;
 }
 
 .today-name {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
 }
 
-/* ── Table Card ──────────────────────────────────────────────────────────────── */
+/* -- Table Card -- */
 .table-card {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 
-/* ── Appointments Table ──────────────────────────────────────────────────────── */
+/* -- Appointments Table -- */
 .appt-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--text-body-sm);
 }
 
 .appt-table thead {
   position: sticky;
   top: 0;
-  background: var(--color-bg);
-  z-index: 1;
+  background: var(--color-surface);
+  z-index: var(--z-sticky);
 }
 
 .appt-table thead th {
   padding: 10px 16px;
   text-align: left;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-secondary);
-  border-bottom: var(--border);
+  border-bottom: var(--border-standard);
   white-space: nowrap;
 }
 
 .appt-table tbody tr {
-  border-bottom: var(--border);
+  border-bottom: var(--border-standard);
   transition: background 0.1s;
 }
 
@@ -429,7 +429,7 @@ onMounted(() => {
 }
 
 .appt-table tbody tr:hover {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
 }
 
 .appt-table tbody tr.row-today {
@@ -437,7 +437,7 @@ onMounted(() => {
 }
 
 .appt-table tbody tr.row-today:hover {
-  background: rgba(42, 157, 153, 0.1);
+  background: var(--status-completed-bg);
 }
 
 .appt-table td {
@@ -445,7 +445,7 @@ onMounted(() => {
   vertical-align: middle;
 }
 
-/* ── Table Cells ─────────────────────────────────────────────────────────────── */
+/* -- Table Cells -- */
 .date-cell {
   white-space: nowrap;
   display: flex;
@@ -454,13 +454,13 @@ onMounted(() => {
 }
 
 .date-today {
-  font-weight: 600;
+  font-weight: var(--weight-emphasis);
   color: var(--color-teal);
 }
 
 .today-pill {
-  font-size: 10px;
-  font-weight: 700;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-heading);
   color: var(--color-teal);
   background: rgba(42, 157, 153, 0.12);
   padding: 1px 7px;
@@ -470,32 +470,32 @@ onMounted(() => {
 }
 
 .hn-cell {
-  font-family: monospace;
-  font-size: 13px;
-  font-weight: 600;
+  font-family: var(--font-family-mono-simple);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text);
   white-space: nowrap;
 }
 
 .name-cell {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text);
 }
 
-/* ── Table Footer ────────────────────────────────────────────────────────────── */
+/* -- Table Footer -- */
 .table-footer {
   padding: 9px 16px;
   font-size: 11.5px;
   color: var(--color-text-muted);
-  border-top: var(--border);
-  background: var(--color-bg-alt);
+  border-top: var(--border-standard);
+  background: var(--color-surface-alt);
 }
 
-/* ── Skeleton Loading ────────────────────────────────────────────────────────── */
+/* -- Skeleton Loading -- */
 .skeleton-thead {
   height: 38px;
-  border-bottom: var(--border);
-  background: var(--color-bg);
+  border-bottom: var(--border-standard);
+  background: var(--color-surface);
 }
 
 .skeleton-row {
@@ -503,7 +503,7 @@ onMounted(() => {
   align-items: center;
   gap: 28px;
   padding: 11px 16px;
-  border-bottom: var(--border);
+  border-bottom: var(--border-standard);
 }
 
 .skeleton-row:last-child {
@@ -513,7 +513,7 @@ onMounted(() => {
 .skeleton-cell {
   height: 13px;
   border-radius: var(--radius-sm);
-  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, var(--skeleton-color-1) 25%, var(--skeleton-color-2) 50%, var(--skeleton-color-1) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
 }
@@ -527,7 +527,7 @@ onMounted(() => {
   }
 }
 
-/* ── Empty State ─────────────────────────────────────────────────────────────── */
+/* -- Empty State -- */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -535,8 +535,8 @@ onMounted(() => {
   justify-content: center;
   gap: 10px;
   padding: 60px 24px;
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   color: var(--color-text-muted);
@@ -545,21 +545,21 @@ onMounted(() => {
 
 .empty-icon {
   opacity: 0.3;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-2);
 }
 
 .empty-title {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--text-ui);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-secondary);
 }
 
 .empty-sub {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-muted);
 }
 
-/* ── Spin Animation ──────────────────────────────────────────────────────────── */
+/* -- Spin Animation -- */
 .spin {
   animation: spin 0.75s linear infinite;
 }

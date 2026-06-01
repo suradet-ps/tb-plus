@@ -15,76 +15,71 @@ const pct = computed(() => {
 const isOverrun = computed(() => (props.currentMonth ?? 0) > (props.totalMonths ?? 999));
 
 const barColor = computed(() => {
-  if (isOverrun.value) return '#dd5b00';
-  if (props.phase === 'intensive') return '#dd5b00';
-  return '#2a9d99';
+  if (isOverrun.value) return 'var(--color-phase-intensive)';
+  if (props.phase === 'intensive') return 'var(--color-phase-intensive)';
+  return 'var(--color-phase-continuation)';
 });
 </script>
 
 <template>
-  <div class="progress-wrapper">
-    <div class="progress-labels">
-      <span class="progress-text">
+  <div class="progress">
+    <div class="progress__labels">
+      <span class="progress__text">
         เดือนที่ {{ currentMonth ?? '?' }} / {{ totalMonths ?? '?' }}
       </span>
-      <span class="progress-pct" :style="{ color: barColor }">{{ pct }}%</span>
+      <span class="progress__pct" :style="{ color: barColor }">{{ pct }}%</span>
     </div>
-    <div class="progress-track">
+    <div class="progress__track">
       <div
-        class="progress-fill"
+        class="progress__fill"
+        :class="{ 'progress__fill--overrun': isOverrun }"
         :style="{ width: pct + '%', background: barColor }"
-        :class="{ 'progress-overrun': isOverrun }"
       />
     </div>
   </div>
 </template>
 
 <style scoped>
-.progress-wrapper {
+.progress {
   width: 100%;
 }
 
-.progress-labels {
+.progress__labels {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-2);
 }
 
-.progress-text {
-  font-size: 11px;
+.progress__text {
+  font-size: var(--text-caption);
   color: var(--color-text-secondary);
 }
 
-.progress-pct {
-  font-size: 11px;
-  font-weight: 600;
+.progress__pct {
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
 }
 
-.progress-track {
-  height: 5px;
-  background: var(--color-bg-alt);
-  border-radius: var(--radius-pill);
+.progress__track {
+  height: var(--progress-height);
+  background: var(--progress-track-bg);
+  border-radius: var(--progress-radius);
   overflow: hidden;
 }
 
-.progress-fill {
+.progress__fill {
   height: 100%;
-  border-radius: var(--radius-pill);
-  transition: width 0.4s ease;
+  border-radius: var(--progress-radius);
+  transition: var(--transition-progress);
 }
 
-.progress-overrun {
-  animation: pulse 1.5s ease-in-out infinite;
+.progress__fill--overrun {
+  animation: pulse var(--duration-loop) ease-in-out infinite;
 }
 
 @keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 </style>

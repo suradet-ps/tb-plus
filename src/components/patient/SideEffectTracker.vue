@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { AlertTriangle, CheckCircle } from 'lucide-vue-next';
+import { AlertTriangle, CheckCircle } from '@lucide/vue';
 import { computed } from 'vue';
 import DrugChip from '@/components/shared/DrugChip.vue';
 import type { Followup, TreatmentPlan } from '@/types/treatment';
 
-// ── Props ─────────────────────────────────────────────────────────────────
+// -- Props --
 
 const props = defineProps<{
   followups: Followup[];
   currentPlan: TreatmentPlan | null;
 }>();
 
-// ── Side effect definitions ───────────────────────────────────────────────
+// -- Side effect definitions --
 
 interface SideEffectDef {
   key: string;
@@ -89,7 +89,7 @@ const DRUG_GROUPS: DrugGroup[] = [
   },
 ];
 
-// ── Aggregate side-effect counts across all followups ─────────────────────
+// -- Aggregate side-effect counts across all followups --
 
 const sideEffectCounts = computed<Record<string, number>>(() => {
   const counts: Record<string, number> = {};
@@ -122,7 +122,7 @@ const distinctReported = computed(
   () => Object.values(sideEffectCounts.value).filter((c) => c > 0).length,
 );
 
-// ── E-related optic neuritis alert logic ──────────────────────────────────
+// -- E-related optic neuritis alert logic --
 
 const hasOpticNeuritis = computed(() => getCount('ตาพร่า/ตาบอดสี') > 0);
 
@@ -139,7 +139,7 @@ const isCurrentlyOnE = computed<boolean>(() => {
 
 const showEPriorityAlert = computed(() => hasOpticNeuritis.value && isCurrentlyOnE.value);
 
-// ── Active drugs in current plan ──────────────────────────────────────────
+// -- Active drugs in current plan --
 
 /** Set of uppercase drug letters in the current plan (for dimming inactive drugs) */
 const activeDrugLetters = computed<Set<string>>(() => {
@@ -159,7 +159,7 @@ function isDrugActive(drug: string): boolean {
   return activeDrugLetters.value.has(drug.toUpperCase());
 }
 
-// ── Drug-specific color helper (for count badge tints) ───────────────────
+// -- Drug-specific color helper (for count badge tints) --
 
 interface DrugColor {
   bg: string;
@@ -188,7 +188,7 @@ function drugColor(drug: string): DrugColor {
 <template>
   <div class="tracker-root">
 
-    <!-- ── E optic neuritis priority alert ────────────────────────── -->
+    <!-- E optic neuritis priority alert -->
     <Transition name="alert-fade">
       <div v-if="showEPriorityAlert" class="priority-alert" role="alert" aria-live="assertive">
         <div class="priority-alert-icon-wrap">
@@ -208,14 +208,14 @@ function drugColor(drug: string): DrugColor {
       </div>
     </Transition>
 
-    <!-- ── No followups empty state ───────────────────────────────── -->
+    <!-- No followups empty state -->
     <div v-if="followups.length === 0" class="empty-state">
       <CheckCircle :size="36" class="empty-icon" aria-hidden="true" />
       <span class="empty-title">ยังไม่มีบันทึกการติดตามผล</span>
       <span class="empty-sub">ผลข้างเคียงจะปรากฏที่นี่เมื่อมีการบันทึกการติดตามผล</span>
     </div>
 
-    <!-- ── Main content ────────────────────────────────────────────── -->
+    <!-- Main content -->
     <template v-else>
 
       <!-- Summary bar -->
@@ -358,22 +358,21 @@ function drugColor(drug: string): DrugColor {
 </template>
 
 <style scoped>
-/* ── Root ──────────────────────────────────────────────────────────── */
+/* -- Root -- */
 .tracker-root {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-8);
 }
 
-/* ── Priority alert (E + optic neuritis) ───────────────────────────── */
 .priority-alert {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  background: rgba(221, 91, 0, 0.07);
+  gap: var(--space-6);
+  background: var(--tint-orange);
   border: 1px solid rgba(221, 91, 0, 0.28);
   border-radius: var(--radius-md);
-  padding: 14px 16px;
+  padding: var(--space-7) var(--space-8);
 }
 
 .priority-alert-icon-wrap {
@@ -381,7 +380,7 @@ function drugColor(drug: string): DrugColor {
   height: 36px;
   border-radius: var(--radius-sm);
   background: rgba(221, 91, 0, 0.14);
-  color: var(--color-orange);
+  color: var(--color-warning);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -395,85 +394,83 @@ function drugColor(drug: string): DrugColor {
 }
 
 .priority-alert-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--color-orange);
-  line-height: 1.3;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-heading);
+  color: var(--color-warning);
+  line-height: var(--leading-snug);
 }
 
 .priority-alert-desc {
-  font-size: 12px;
-  color: #b84a00;
+  font-size: var(--text-sm);
+  color: var(--palette-orange-dark);
   line-height: 1.55;
   margin: 0;
 }
 
 .priority-alert-desc strong {
-  font-weight: 700;
+  font-weight: var(--weight-heading);
 }
 
-/* ── Empty state ────────────────────────────────────────────────────── */
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 40px 24px;
+  gap: var(--space-4);
+  padding: var(--empty-padding-sm);
   text-align: center;
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   border-radius: var(--radius-md);
 }
 
 .empty-icon {
-  color: var(--color-teal);
+  color: var(--color-info);
   opacity: 0.25;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-2);
 }
 
 .empty-title {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-secondary);
 }
 
 .empty-sub {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-muted);
   max-width: 320px;
-  line-height: 1.5;
+  line-height: var(--leading-body);
 }
 
-/* ── Summary bar ────────────────────────────────────────────────────── */
 .summary-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-5);
   flex-wrap: wrap;
-  padding: 10px 14px;
-  background: var(--color-bg-alt);
+  padding: var(--space-5) var(--space-7);
+  background: var(--color-surface-alt);
   border-radius: var(--radius-sm);
 }
 
 .summary-item {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .summary-value {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--text-ui);
+  font-weight: var(--weight-heading);
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
 
 .summary-label {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
 
 .summary-sep {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-muted);
   line-height: 1;
 }
@@ -483,83 +480,76 @@ function drugColor(drug: string): DrugColor {
   align-items: center;
   gap: 5px;
   margin-left: auto;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-green);
-  background: rgba(26, 174, 57, 0.09);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
+  color: var(--color-success);
+  background: var(--status-active-bg);
   border-radius: var(--radius-pill);
   padding: 3px 9px;
 }
 
-/* ── Drug groups container ──────────────────────────────────────────── */
 .drug-groups {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-6);
 }
 
-/* ── Drug section card ──────────────────────────────────────────────── */
 .drug-section {
-  border: var(--border);
+  border: var(--border-standard);
   border-radius: var(--radius-md);
   overflow: hidden;
-  transition: border-color 0.2s;
+  transition: border-color var(--duration-slow) var(--ease-standard);
 }
 
-/* Highlight card border when this drug has any reported effects */
 .drug-section-has-reports {
   border-color: var(--drug-accent-border);
 }
 
-/* Dim sections for drugs not in current plan */
 .drug-section-inactive {
   opacity: 0.5;
 }
 
-/* ── Section header ─────────────────────────────────────────────────── */
 .section-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: var(--color-bg-alt);
-  border-bottom: var(--border);
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-7);
+  background: var(--color-surface-alt);
+  border-bottom: var(--border-standard);
 }
 
 .inactive-badge {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-ui);
   color: var(--color-text-muted);
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--btn-secondary-bg);
   border-radius: var(--radius-pill);
-  padding: 2px 7px;
+  padding: var(--space-1) 7px;
 }
 
 .has-reports-badge {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-orange);
-  background: rgba(221, 91, 0, 0.1);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
+  color: var(--color-warning);
+  background: var(--status-defaulted-bg);
   border-radius: var(--radius-pill);
-  padding: 2px 7px;
+  padding: var(--space-1) 7px;
 }
 
-/* ── Effect list ────────────────────────────────────────────────────── */
 .effect-list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-/* ── Effect row ─────────────────────────────────────────────────────── */
 .effect-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 10px 14px;
-  border-bottom: var(--border);
-  transition: background 0.12s;
+  gap: var(--space-6);
+  padding: var(--space-5) var(--space-7);
+  border-bottom: var(--border-standard);
+  transition: background var(--duration-fast) var(--ease-standard);
 }
 
 .effect-row:last-child {
@@ -570,33 +560,30 @@ function drugColor(drug: string): DrugColor {
   background: rgba(0, 0, 0, 0.015);
 }
 
-/* Reported rows get a subtle tinted background using the drug color */
 .effect-row-reported {
   background: color-mix(in srgb, var(--drug-accent-bg) 50%, transparent);
 }
 
-/* Priority effect (optic neuritis) when reported */
 .effect-row-priority {
-  background: rgba(221, 91, 0, 0.05);
+  background: var(--tint-orange);
   outline: 1px solid rgba(221, 91, 0, 0.15);
   outline-offset: -1px;
 }
 
-/* ── Effect info (left side) ────────────────────────────────────────── */
 .effect-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
   flex: 1;
   min-width: 0;
   flex-wrap: wrap;
 }
 
 .priority-icon {
-  font-size: 14px;
+  font-size: var(--text-body);
   opacity: 0.3;
   flex-shrink: 0;
-  transition: opacity 0.15s;
+  transition: opacity var(--duration-base) var(--ease-standard);
 }
 
 .priority-icon-active {
@@ -606,40 +593,39 @@ function drugColor(drug: string): DrugColor {
 .effect-labels {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
   min-width: 0;
 }
 
 .effect-label-th {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-ui);
   color: var(--color-text);
-  line-height: 1.3;
+  line-height: var(--leading-snug);
 }
 
 .effect-label-en {
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--color-text-muted);
-  line-height: 1.3;
+  line-height: var(--leading-snug);
 }
 
 .priority-tag {
   flex-shrink: 0;
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 7px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-emphasis);
+  padding: var(--space-1) 7px;
   border-radius: var(--radius-pill);
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--btn-secondary-bg);
   color: var(--color-text-muted);
-  transition: background 0.15s, color 0.15s;
+  transition: var(--transition-icon-btn);
 }
 
 .priority-tag-active {
   background: rgba(221, 91, 0, 0.12);
-  color: #dd5b00;
+  color: var(--color-warning);
 }
 
-/* ── Effect count (right side) ──────────────────────────────────────── */
 .effect-count-wrap {
   flex-shrink: 0;
   display: flex;
@@ -650,13 +636,13 @@ function drugColor(drug: string): DrugColor {
   display: inline-flex;
   align-items: baseline;
   gap: 3px;
-  padding: 3px 10px;
+  padding: var(--badge-padding);
   border-radius: var(--radius-pill);
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-heading);
   outline: 1px solid transparent;
   font-variant-numeric: tabular-nums;
-  transition: transform 0.15s;
+  transition: transform var(--duration-base) var(--ease-standard);
 }
 
 .count-badge:hover {
@@ -668,25 +654,24 @@ function drugColor(drug: string): DrugColor {
 }
 
 .count-unit {
-  font-size: 10px;
-  font-weight: 500;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-ui);
   opacity: 0.75;
 }
 
 .count-none {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-muted);
   padding: 3px 8px;
   opacity: 0.5;
 }
 
-/* ── Alert fade transition ──────────────────────────────────────────── */
 .alert-fade-enter-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: opacity 0.25s var(--ease-standard), transform 0.25s var(--ease-standard);
 }
 
 .alert-fade-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity var(--duration-slow) var(--ease-standard), transform var(--duration-slow) var(--ease-standard);
 }
 
 .alert-fade-enter-from,

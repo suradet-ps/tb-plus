@@ -14,24 +14,24 @@ defineProps<{
 
 <style scoped>
 .app-header {
-  padding: 24px 32px 0 32px;
+  padding: var(--space-12) var(--space-16) 0 var(--space-16);
 }
 
 .app-header__title {
-  font-family: var(--font);
-  font-size: 22px;
-  font-weight: 700;
+  font-family: var(--font-family);
+  font-size: var(--text-display-sm);
+  font-weight: var(--weight-heading);
   color: var(--color-text);
-  letter-spacing: -0.25px;
+  letter-spacing: var(--tracking-heading);
   line-height: 1.27;
 }
 
 .app-header__subtitle {
-  font-family: var(--font);
-  font-size: 14px;
-  font-weight: 400;
+  font-family: var(--font-family);
+  font-size: var(--text-body);
+  font-weight: var(--weight-body);
   color: var(--color-text-secondary);
-  margin-top: 4px;
+  margin-top: var(--space-2);
   line-height: 1.43;
 }
 </style>

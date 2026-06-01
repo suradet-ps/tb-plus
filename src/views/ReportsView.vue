@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { invoke } from '@tauri-apps/api/core';
 import {
   AlertTriangle,
   Calendar,
@@ -10,7 +9,8 @@ import {
   RefreshCw,
   TrendingUp,
   Users,
-} from 'lucide-vue-next';
+} from '@lucide/vue';
+import { invoke } from '@tauri-apps/api/core';
 import { computed, onMounted, ref } from 'vue';
 import { useAlertStore } from '@/stores/alerts';
 import { usePatientStore } from '@/stores/patient';
@@ -43,7 +43,7 @@ function getEffectivePhase(
   return plan.phase as 'intensive' | 'continuation';
 }
 
-// ── Derived stats ────────────────────────────────────────────────────
+// -- Derived stats --
 const totalActive = computed(() => patientStore.activePatients.length);
 
 const intensiveCount = computed(
@@ -66,7 +66,7 @@ const lostCount = computed(
   () => patientStore.activePatients.filter((p) => (p.days_since_last_dispensing ?? 0) > 60).length,
 );
 
-// ── Success rate ─────────────────────────────────────────────────────
+// -- Success rate --
 const dischargeStatuses = computed(() => {
   const m = { success: 0, failure: 0, other: 0 };
   for (const p of patientStore.dischargedPatients) {
@@ -85,14 +85,14 @@ const successRate = computed(() => {
   return Math.round((dischargeStatuses.value.success / total) * 100);
 });
 
-// ── E overrun patients ───────────────────────────────────────────────
+// -- E overrun patients --
 const eOverrunPatients = computed(() =>
   patientStore.activePatients.filter((p) =>
     p.alerts.some((a) => a.alert_type === 'ethambutol_overrun'),
   ),
 );
 
-// ── Overdue / lost patients ──────────────────────────────────────────
+// -- Overdue / lost patients --
 const overduePatients = computed(() =>
   patientStore.activePatients.filter((p) => {
     const d = p.days_since_last_dispensing ?? 0;
@@ -104,7 +104,7 @@ const lostPatientsList = computed(() =>
   patientStore.activePatients.filter((p) => (p.days_since_last_dispensing ?? 0) > 60),
 );
 
-// ── Cohort data ──────────────────────────────────────────────────────
+// -- Cohort data --
 const allEnrolled = computed(() => [
   ...patientStore.activePatients.map((p) => ({
     hn: p.tb_patient.hn,
@@ -161,7 +161,7 @@ const cohortDetailPatients = computed(() => {
     .sort((a, b) => a.name.localeCompare(b.name));
 });
 
-// ── Drug consumption ─────────────────────────────────────────────────
+// -- Drug consumption --
 async function fetchDrugConsumption() {
   if (drugConsumption.value.length > 0) return;
   isLoadingDrugConsumption.value = true;
@@ -189,7 +189,7 @@ const drugConsumptionByMonth = computed(() => {
   return Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]));
 });
 
-// ── Toggle report ────────────────────────────────────────────────────
+// -- Toggle report --
 function toggleReport(id: string) {
   if (activeReport.value === id) {
     activeReport.value = null;
@@ -200,7 +200,7 @@ function toggleReport(id: string) {
   if (id === 'monthly-cohort') cohortViewMonth.value = null;
 }
 
-// ── Report cards ─────────────────────────────────────────────────────
+// -- Report cards --
 interface ReportCard {
   id: string;
   titleTh: string;
@@ -218,9 +218,9 @@ const reportCards = computed<ReportCard[]>(() => [
     id: 'census',
     titleTh: 'สถิติผู้ป่วย',
     icon: 'Users',
-    iconColor: '#0075de',
+    iconColor: 'var(--color-accent)',
     iconBg: 'rgba(0,117,222,0.1)',
-    valueColor: '#0075de',
+    valueColor: 'var(--color-accent)',
     value: totalActive.value,
     label: 'ผู้ป่วยทั้งหมด (active)',
     description: 'จำนวนผู้ป่วยแบ่งตามสถานะและระยะการรักษา',
@@ -229,9 +229,9 @@ const reportCards = computed<ReportCard[]>(() => [
     id: 'success-rate',
     titleTh: 'อัตราความสำเร็จ',
     icon: 'TrendingUp',
-    iconColor: '#2a9d99',
+    iconColor: 'var(--color-info)',
     iconBg: 'rgba(42,157,153,0.1)',
-    valueColor: '#2a9d99',
+    valueColor: 'var(--color-info)',
     value: successRate.value !== null ? `${successRate.value}%` : '-',
     label: `หาย + รักษาครบ / ทั้งหมด (${totalDischarged.value} ราย)`,
     description: 'อัตราสำเร็จในการรักษา (%)',
@@ -240,9 +240,9 @@ const reportCards = computed<ReportCard[]>(() => [
     id: 'drug-consumption',
     titleTh: 'การใช้ยา',
     icon: 'Pill',
-    iconColor: '#dd5b00',
+    iconColor: 'var(--color-warning)',
     iconBg: 'rgba(221,91,0,0.1)',
-    valueColor: '#dd5b00',
+    valueColor: 'var(--color-warning)',
     value: drugConsumption.value.length > 0 ? drugConsumptionByMonth.value.length : '-',
     label:
       drugConsumption.value.length > 0
@@ -254,9 +254,9 @@ const reportCards = computed<ReportCard[]>(() => [
     id: 'ethambutol-overrun',
     titleTh: 'E เกินกำหนด',
     icon: 'AlertTriangle',
-    iconColor: '#dd5b00',
+    iconColor: 'var(--color-warning)',
     iconBg: 'rgba(221,91,0,0.1)',
-    valueColor: '#dd5b00',
+    valueColor: 'var(--color-warning)',
     value: eOverrunPatients.value.length,
     label: `ผู้ป่วยที่ได้รับ E เกินระยะ (${eOverrunPatients.value.length} ราย)`,
     description: 'รายชื่อผู้ป่วยที่ได้รับ Ethambutol เกินกำหนด',
@@ -265,9 +265,9 @@ const reportCards = computed<ReportCard[]>(() => [
     id: 'lost-followup',
     titleTh: 'ขาดการติดตาม',
     icon: 'Clock',
-    iconColor: '#dd5b00',
+    iconColor: 'var(--color-warning)',
     iconBg: 'rgba(221,91,0,0.1)',
-    valueColor: '#dd5b00',
+    valueColor: 'var(--color-warning)',
     value: overdueCount.value + lostCount.value,
     label: `เกินกำหนด ${overdueCount.value} · ขาดติดตาม ${lostCount.value}`,
     description: 'ผู้ป่วยที่ไม่ได้รับยานาน > 35 วัน (แจ้งเตือน) หรือ > 60 วัน (ขาดการติดตาม)',
@@ -276,16 +276,16 @@ const reportCards = computed<ReportCard[]>(() => [
     id: 'monthly-cohort',
     titleTh: 'Cohort รายเดือน',
     icon: 'Calendar',
-    iconColor: '#0075de',
+    iconColor: 'var(--color-accent)',
     iconBg: 'rgba(0,117,222,0.1)',
-    valueColor: '#0075de',
+    valueColor: 'var(--color-accent)',
     value: cohortGroups.value.length,
     label: `${cohortGroups.value.length} กลุ่มตามเดือนลงทะเบียน`,
     description: 'การวิเคราะห์ cohort แบ่งตามเดือนลงทะเบียน',
   },
 ]);
 
-// ── CSV export ────────────────────────────────────────────────────────
+// -- CSV export --
 function exportCSV() {
   const headers = ['HN', 'ชื่อ-สกุล', 'สูตรยา', 'Phase', 'เดือนที่', 'รับยาล่าสุด', 'สถานะการแจ้งเตือน'];
 
@@ -324,7 +324,7 @@ function exportCSV() {
 <template>
   <div class="view-root">
 
-    <!-- ── Page header ── -->
+    <!-- Page header -->
     <div class="view-header">
       <div class="header-left">
         <h1>รายงาน</h1>
@@ -352,7 +352,7 @@ function exportCSV() {
       </div>
     </div>
 
-    <!-- ── Quick stats strip ── -->
+    <!-- Quick stats strip -->
     <div class="quick-stats">
       <div class="qs-item">
         <span class="qs-value">{{ totalActive }}</span>
@@ -375,7 +375,7 @@ function exportCSV() {
       </div>
     </div>
 
-    <!-- ── Report cards grid ── -->
+    <!-- Report cards grid -->
     <div class="report-grid">
       <div
         v-for="card in reportCards"
@@ -411,7 +411,7 @@ function exportCSV() {
       </div>
     </div>
 
-    <!-- ── Expandable report detail sections ── -->
+    <!-- Expandable report detail sections -->
 
     <!-- Census detail -->
     <div v-if="activeReport === 'census'" class="report-detail">
@@ -813,13 +813,13 @@ function exportCSV() {
       </div>
     </div>
 
-    <!-- ── Loading state ── -->
+    <!-- Loading state -->
     <div v-if="patientStore.isLoading && patientStore.activePatients.length === 0" class="state-container">
       <Loader2 :size="28" class="spin loading-icon" />
       <span class="state-title">กำลังโหลดข้อมูล...</span>
     </div>
 
-    <!-- ── Error state ── -->
+    <!-- Error state -->
     <div
       v-else-if="patientStore.error && patientStore.activePatients.length === 0"
       class="state-container"
@@ -830,7 +830,7 @@ function exportCSV() {
       <button class="retry-btn" @click="patientStore.fetchActivePatients()">ลองใหม่</button>
     </div>
 
-    <!-- ── Active patients table ── -->
+    <!-- Active patients table -->
     <div
       v-else-if="patientStore.activePatients.length > 0"
       class="report-table-card"
@@ -922,7 +922,7 @@ function exportCSV() {
       </div>
     </div>
 
-    <!-- ── Empty state ── -->
+    <!-- Empty state -->
     <div
       v-else-if="!patientStore.isLoading"
       class="state-container"
@@ -935,37 +935,37 @@ function exportCSV() {
 </template>
 
 <style scoped>
-/* ── Page root ──────────────────────────────────────────────────────── */
+/* -- Page root -- */
 .view-root {
-  padding: 32px 32px 48px;
+  padding: var(--page-root-padding);
 }
 
-/* ── Header ─────────────────────────────────────────────────────────── */
+/* -- Header -- */
 .view-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 24px;
-  gap: 16px;
+  margin-bottom: var(--space-12);
+  gap: var(--space-8);
 }
 
 .header-left h1 {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--text-display-sm);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.25px;
   color: var(--color-text);
   margin: 0 0 4px;
 }
 
 .header-left p {
-  font-size: 14px;
+  font-size: var(--text-body);
   color: var(--color-text-secondary);
   margin: 0;
 }
 
 .header-right {
   display: flex;
-  gap: 8px;
+  gap: var(--space-4);
   align-items: center;
   flex-shrink: 0;
 }
@@ -974,12 +974,12 @@ function exportCSV() {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   padding: 7px 13px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
   cursor: pointer;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
@@ -987,7 +987,7 @@ function exportCSV() {
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
 }
 
 .btn-ghost:disabled {
@@ -999,12 +999,12 @@ function exportCSV() {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--color-bg);
-  border: var(--border);
-  padding: 7px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--font);
+  background: var(--color-surface);
+  border: var(--border-standard);
+  padding: var(--btn-padding);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
   cursor: pointer;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
@@ -1012,17 +1012,17 @@ function exportCSV() {
 }
 
 .btn-export:hover {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
 }
 
-/* ── Quick stats strip ──────────────────────────────────────────────── */
+/* -- Quick stats strip -- */
 .quick-stats {
   display: flex;
   align-items: center;
   gap: 0;
-  margin-bottom: 24px;
-  background: var(--color-bg);
-  border: var(--border);
+  margin-bottom: var(--space-12);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   overflow: hidden;
@@ -1039,13 +1039,13 @@ function exportCSV() {
 .qs-divider {
   width: 1px;
   height: 40px;
-  background: rgba(0, 0, 0, 0.08);
+  background: var(--tint-active);
   flex-shrink: 0;
 }
 
 .qs-value {
-  font-size: 30px;
-  font-weight: 700;
+  font-size: var(--text-display-lg);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.75px;
   line-height: 1;
   color: var(--color-text);
@@ -1056,12 +1056,12 @@ function exportCSV() {
 .qs-red    { color: var(--color-orange); }
 
 .qs-label {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
   margin-top: 2px;
 }
 
-/* ── Report cards grid ──────────────────────────────────────────────── */
+/* -- Report cards grid -- */
 .report-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1071,8 +1071,8 @@ function exportCSV() {
 
 .report-card {
   position: relative;
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   padding: 18px;
@@ -1085,7 +1085,7 @@ function exportCSV() {
 
 .report-card:hover {
   box-shadow:
-    rgba(0, 0, 0, 0.08) 0px 6px 24px,
+    var(--tint-active) 0px 6px 24px,
     rgba(0, 0, 0, 0.04) 0px 2px 6px;
 }
 
@@ -1110,41 +1110,41 @@ function exportCSV() {
 }
 
 .report-title {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-heading);
   color: var(--color-text);
   margin-bottom: 6px;
   letter-spacing: -0.1px;
 }
 
 .report-value {
-  font-size: 30px;
-  font-weight: 700;
+  font-size: var(--text-display-lg);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.75px;
   line-height: 1;
   margin-bottom: 5px;
 }
 
 .report-label {
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--color-text-secondary);
   margin-bottom: 3px;
-  line-height: 1.4;
+  line-height: var(--leading-normal);
 }
 
 .report-desc {
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--color-text-muted);
-  line-height: 1.4;
+  line-height: var(--leading-normal);
 }
 
-/* ── Expandable report details ──────────────────────────────────────── */
+/* -- Expandable report details -- */
 .report-detail {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  padding: 20px 24px;
+  padding: var(--filter-card-padding);
   margin-bottom: 28px;
 }
 
@@ -1153,8 +1153,8 @@ function exportCSV() {
 }
 
 .detail-header h3 {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--text-ui);
+  font-weight: var(--weight-heading);
   color: var(--color-text);
   margin: 0;
   letter-spacing: -0.15px;
@@ -1163,14 +1163,14 @@ function exportCSV() {
 .detail-grid-4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: var(--space-6);
   margin-bottom: 20px;
 }
 
 .detail-grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: var(--space-6);
   margin-bottom: 20px;
 }
 
@@ -1184,21 +1184,21 @@ function exportCSV() {
 }
 
 .stat-val {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: var(--text-display);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.5px;
   line-height: 1;
   color: var(--color-text);
 }
 
 .stat-lbl {
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--color-text-muted);
 }
 
 .stat-orange { color: var(--color-orange); }
 .stat-teal   { color: var(--color-teal); }
-.stat-green  { color: #1aae39; }
+.stat-green  { color: var(--color-success); }
 .stat-red    { color: var(--color-orange); }
 
 .detail-subsection {
@@ -1206,8 +1206,8 @@ function exportCSV() {
 }
 
 .detail-subsection h4 {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-heading);
   color: var(--color-text);
   margin: 0 0 10px;
   letter-spacing: -0.1px;
@@ -1216,8 +1216,8 @@ function exportCSV() {
 .mini-loader {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: var(--space-4);
+  font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   padding: 24px 0;
 }
@@ -1225,24 +1225,24 @@ function exportCSV() {
 .mini-empty {
   text-align: center;
   padding: 32px 0;
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-muted);
 }
 
 /* Mini table variant — higher specificity to override .data-table defaults */
 .data-table.mini-table {
-  font-size: 12px;
+  font-size: var(--text-sm);
 }
 
 .data-table.mini-table th {
   padding: 7px 12px;
-  font-size: 12px;
+  font-size: var(--text-sm);
   vertical-align: middle;
 }
 
 .data-table.mini-table td {
   padding: 7px 12px;
-  font-size: 12px;
+  font-size: var(--text-sm);
 }
 
 /* Month group in drug consumption */
@@ -1251,8 +1251,8 @@ function exportCSV() {
 }
 
 .month-label {
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-heading);
   color: var(--color-text-secondary);
   margin: 0 0 6px;
   letter-spacing: 0.2px;
@@ -1264,29 +1264,29 @@ function exportCSV() {
   align-items: center;
   padding: 1px 8px;
   border-radius: var(--radius-pill);
-  font-size: 10px;
-  font-weight: 700;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-heading);
   letter-spacing: 0.3px;
 }
 
-.drug-h { background: rgba(0, 117, 222, 0.1); color: #0075de; }
-.drug-r { background: rgba(221, 91, 0, 0.1); color: #dd5b00; }
-.drug-e { background: rgba(42, 157, 153, 0.1); color: #2a9d99; }
-.drug-z { background: rgba(173, 126, 38, 0.1); color: #ad7e26; }
+.drug-h { background: var(--tint-blue); color: var(--color-accent); }
+.drug-r { background: var(--status-defaulted-bg); color: var(--color-warning); }
+.drug-e { background: var(--status-completed-bg); color: var(--color-info); }
+.drug-z { background: var(--drug-Z-bg); color: var(--drug-Z); }
 
 /* Outcome pill */
 .outcome-pill {
   display: inline-flex;
   padding: 2px 9px;
   border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
 }
 
-.outcome-success { background: rgba(26, 174, 57, 0.1); color: #1aae39; }
-.outcome-fail    { background: rgba(221, 91, 0, 0.1); color: #dd5b00; }
-.outcome-warn    { background: rgba(245, 166, 35, 0.1); color: #c78b00; }
-.outcome-info    { background: rgba(0, 117, 222, 0.1); color: #0075de; }
+.outcome-success { background: var(--status-active-bg); color: var(--color-success); }
+.outcome-fail    { background: var(--status-defaulted-bg); color: var(--color-warning); }
+.outcome-warn    { background: rgba(245, 166, 35, 0.1); color: var(--color-alert-yellow); }
+.outcome-info    { background: var(--tint-blue); color: var(--color-accent); }
 
 /* Cohort table */
 .cohort-table tbody tr {
@@ -1294,7 +1294,7 @@ function exportCSV() {
 }
 
 .cohort-table tbody tr:hover {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
 }
 
 .row-selected {
@@ -1305,33 +1305,33 @@ function exportCSV() {
   display: inline-flex;
   padding: 1px 8px;
   border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-heading);
 }
 
-.rate-good { background: rgba(26, 174, 57, 0.1); color: #1aae39; }
-.rate-ok   { background: rgba(245, 166, 35, 0.1); color: #c78b00; }
-.rate-bad  { background: rgba(221, 91, 0, 0.1); color: #dd5b00; }
+.rate-good { background: var(--status-active-bg); color: var(--color-success); }
+.rate-ok   { background: rgba(245, 166, 35, 0.1); color: var(--color-alert-yellow); }
+.rate-bad  { background: var(--status-defaulted-bg); color: var(--color-warning); }
 
 /* Status pill */
 .status-pill {
   display: inline-flex;
   padding: 2px 9px;
   border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
 }
 
-.status-active      { background: rgba(0, 117, 222, 0.1); color: #0075de; }
-.status-completed   { background: rgba(26, 174, 57, 0.1); color: #1aae39; }
-.status-died        { background: rgba(221, 91, 0, 0.1); color: #dd5b00; }
-.status-defaulted   { background: rgba(221, 91, 0, 0.1); color: #dd5b00; }
-.status-transferred { background: rgba(0, 117, 222, 0.1); color: #0075de; }
+.status-active      { background: var(--tint-blue); color: var(--color-accent); }
+.status-completed   { background: var(--status-active-bg); color: var(--color-success); }
+.status-died        { background: var(--status-defaulted-bg); color: var(--color-warning); }
+.status-defaulted   { background: var(--status-defaulted-bg); color: var(--color-warning); }
+.status-transferred { background: var(--tint-blue); color: var(--color-accent); }
 
-/* ── Report table card ───────────────────────────────────────────────── */
+/* -- Report table card -- */
 .report-table-card {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   overflow: hidden;
@@ -1342,7 +1342,7 @@ function exportCSV() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: var(--border);
+  border-bottom: var(--border-standard);
 }
 
 .table-header-left {
@@ -1352,8 +1352,8 @@ function exportCSV() {
 }
 
 .table-header h3 {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--text-body);
+  font-weight: var(--weight-heading);
   color: var(--color-text);
   margin: 0;
   letter-spacing: -0.1px;
@@ -1364,36 +1364,36 @@ function exportCSV() {
   color: var(--color-badge-text);
   padding: 2px 9px;
   border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
 }
 
 .table-scroll {
   overflow-x: auto;
 }
 
-/* ── Data table ─────────────────────────────────────────────────────── */
+/* -- Data table -- */
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--text-body-sm);
 }
 
 .data-table th {
   padding: 10px 14px;
   text-align: left;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-secondary);
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   white-space: nowrap;
-  border-bottom: var(--border);
+  border-bottom: var(--border-standard);
   vertical-align: middle;
 }
 
 .data-table td {
   padding: 10px 14px;
-  border-bottom: var(--border);
+  border-bottom: var(--border-standard);
   vertical-align: middle;
   color: var(--color-text);
 }
@@ -1403,7 +1403,7 @@ function exportCSV() {
 }
 
 .data-table tbody tr:hover {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
 }
 
 /* Row highlight for overdue patients */
@@ -1424,25 +1424,25 @@ function exportCSV() {
   text-align: center;
 }
 
-/* ── Table cell styles ──────────────────────────────────────────────── */
+/* -- Table cell styles -- */
 .mono {
-  font-family: monospace;
-  font-weight: 600;
-  font-size: 12px;
+  font-family: var(--font-family-mono-simple);
+  font-weight: var(--weight-emphasis);
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
 }
 
 .patient-name {
-  font-weight: 500;
+  font-weight: var(--weight-ui);
 }
 
 .regimen-tag {
-  background: var(--color-bg-alt);
-  border: var(--border);
+  background: var(--color-surface-alt);
+  border: var(--border-standard);
   border-radius: var(--radius-sm);
   padding: 2px 7px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   white-space: nowrap;
 }
 
@@ -1451,61 +1451,61 @@ function exportCSV() {
   align-items: center;
   padding: 2px 9px;
   border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   white-space: nowrap;
 }
 
 .phase-intensive {
-  background: rgba(221, 91, 0, 0.1);
-  color: #dd5b00;
+  background: var(--status-defaulted-bg);
+  color: var(--color-warning);
 }
 
 .phase-continuation {
-  background: rgba(42, 157, 153, 0.1);
-  color: #2a9d99;
+  background: var(--status-completed-bg);
+  color: var(--color-info);
 }
 
 .month-progress {
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
+  font-weight: var(--weight-emphasis);
 }
 
 .month-sep {
   color: var(--color-text-muted);
-  font-weight: 400;
+  font-weight: var(--weight-body);
   margin: 0 1px;
 }
 
 .overdue-cell {
   color: var(--color-orange);
-  font-weight: 600;
+  font-weight: var(--weight-emphasis);
 }
 
 .overdue-cell.overrun {
-  color: #c0392b;
+  color: var(--palette-red-mid);
 }
 
 .muted-dash {
   color: var(--color-text-muted);
 }
 
-/* ── Alert pills ────────────────────────────────────────────────────── */
+/* -- Alert pills -- */
 .alert-pill {
   display: inline-flex;
   align-items: center;
   padding: 2px 9px;
   border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   white-space: nowrap;
 }
 
-.alert-red    { background: rgba(221, 91, 0, 0.1);    color: #dd5b00; }
-.alert-yellow { background: rgba(245, 166, 35, 0.1);  color: #c78b00; }
-.alert-ok     { background: rgba(26, 174, 57, 0.1);   color: #1aae39; }
+.alert-red    { background: var(--status-defaulted-bg);    color: var(--color-warning); }
+.alert-yellow { background: rgba(245, 166, 35, 0.1);  color: var(--color-alert-yellow); }
+.alert-ok     { background: var(--status-active-bg);   color: var(--color-success); }
 
-/* ── State containers ───────────────────────────────────────────────── */
+/* -- State containers -- */
 .state-container {
   display: flex;
   flex-direction: column;
@@ -1513,8 +1513,8 @@ function exportCSV() {
   justify-content: center;
   gap: 10px;
   min-height: 200px;
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   padding: 48px 32px;
 }
@@ -1530,13 +1530,13 @@ function exportCSV() {
 }
 
 .state-title {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-secondary);
 }
 
 .state-sub {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-muted);
   max-width: 360px;
   text-align: center;
@@ -1548,12 +1548,12 @@ function exportCSV() {
   align-items: center;
   padding: 7px 16px;
   background: var(--color-blue);
-  color: #fff;
+  color: var(--color-text-inverse);
   border: none;
   border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
   cursor: pointer;
   transition: background 0.13s;
 }
@@ -1562,7 +1562,7 @@ function exportCSV() {
   background: var(--color-blue-active);
 }
 
-/* ── Spin animation ─────────────────────────────────────────────────── */
+/* -- Spin animation -- */
 .spin {
   animation: spin 0.85s linear infinite;
   flex-shrink: 0;

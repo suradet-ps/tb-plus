@@ -8,7 +8,7 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
-// ── Disable macOS autocapitalize / autocorrect on all inputs ────────────────
+// -- Disable macOS autocapitalize / autocorrect on all inputs --
 // WebKit on macOS auto-capitalises the first character of any <input> /
 // <textarea> unless the element explicitly opts out. We patch every element
 // as soon as it enters the DOM so Vue-rendered inputs are covered too.
@@ -38,7 +38,7 @@ const inputPatcher = new MutationObserver((mutations) => {
 // Start observing before Vue mounts so no element is missed
 inputPatcher.observe(document.documentElement, { childList: true, subtree: true });
 
-// ── App bootstrap ────────────────────────────────────────────────────────────
+// -- App bootstrap --
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);

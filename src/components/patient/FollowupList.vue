@@ -8,7 +8,7 @@ import {
   Scan,
   StickyNote,
   User,
-} from 'lucide-vue-next';
+} from '@lucide/vue';
 import { computed, ref } from 'vue';
 import type { Followup } from '@/types/treatment';
 
@@ -16,7 +16,7 @@ const props = defineProps<{
   followups: Followup[];
 }>();
 
-// ── Sort order toggle ─────────────────────────────────────────────────────
+// -- Sort order toggle --
 
 const newestFirst = ref(true);
 
@@ -25,7 +25,7 @@ const sortedFollowups = computed<Followup[]>(() => {
   return newestFirst.value ? list.reverse() : list;
 });
 
-// ── Expandable items ──────────────────────────────────────────────────────
+// -- Expandable items --
 
 const expandedIds = ref<Set<number>>(new Set());
 
@@ -41,7 +41,7 @@ function isExpanded(id: number): boolean {
   return expandedIds.value.has(id);
 }
 
-// ── Date helpers ──────────────────────────────────────────────────────────
+// -- Date helpers --
 
 function toThaiDate(iso: string): string {
   try {
@@ -76,7 +76,7 @@ function toThaiDateLong(iso: string): string {
   }
 }
 
-// ── Sputum helpers ────────────────────────────────────────────────────────
+// -- Sputum helpers --
 
 type SputumResult = 'negative' | 'positive' | 'not_done' | null;
 
@@ -99,7 +99,7 @@ function sputumConfig(v: SputumResult): BadgeConfig {
   }
 }
 
-// ── X-ray helpers ─────────────────────────────────────────────────────────
+// -- X-ray helpers --
 
 type XrayResult = 'improved' | 'stable' | 'worse' | 'not_done' | null;
 
@@ -118,7 +118,7 @@ function xrayConfig(v: XrayResult): BadgeConfig {
   }
 }
 
-// ── Adherence helpers ─────────────────────────────────────────────────────
+// -- Adherence helpers --
 
 type Adherence = 'good' | 'fair' | 'poor' | null;
 
@@ -135,7 +135,7 @@ function adherenceConfig(v: Adherence): BadgeConfig {
   }
 }
 
-// ── Side effects ──────────────────────────────────────────────────────────
+// -- Side effects --
 
 function parseSideEffects(json: string | null): string[] {
   if (!json) return [];
@@ -151,7 +151,7 @@ function isOpticNeuritis(se: string): boolean {
   return se.toLowerCase().includes('ตาพร่า') || se.toLowerCase().includes('ตาบอด');
 }
 
-// ── Dispensed drugs ───────────────────────────────────────────────────────
+// -- Dispensed drugs --
 
 function parseDispensedDrugs(json: string | null): string[] {
   if (!json) return [];
@@ -163,7 +163,7 @@ function parseDispensedDrugs(json: string | null): string[] {
   }
 }
 
-// ── Summary line ──────────────────────────────────────────────────────────
+// -- Summary line --
 
 function hasMeaningfulData(f: Followup): boolean {
   return !!(
@@ -179,7 +179,7 @@ function hasMeaningfulData(f: Followup): boolean {
 <template>
   <div class="followup-list">
 
-    <!-- ── Header bar ────────────────────────────────────────────── -->
+    <!-- Header bar -->
     <div class="list-header">
       <span class="list-count">
         {{ followups.length }} บันทึก
@@ -196,7 +196,7 @@ function hasMeaningfulData(f: Followup): boolean {
       </button>
     </div>
 
-    <!-- ── Empty state ────────────────────────────────────────────── -->
+    <!-- Empty state -->
     <div v-if="followups.length === 0" class="empty-state" role="status">
       <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" width="40" height="40"
         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"
@@ -213,7 +213,7 @@ function hasMeaningfulData(f: Followup): boolean {
       <span class="empty-sub">กดปุ่ม "เพิ่มบันทึก" เพื่อบันทึกการติดตามผลครั้งแรก</span>
     </div>
 
-    <!-- ── Follow-up item cards ───────────────────────────────────── -->
+    <!-- Follow-up item cards -->
     <TransitionGroup name="fup-list" tag="div" class="list-items">
       <div
         v-for="f in sortedFollowups"
@@ -223,7 +223,7 @@ function hasMeaningfulData(f: Followup): boolean {
           'fup-card-alert': parseSideEffects(f.side_effects).some(isOpticNeuritis),
         }"
       >
-        <!-- ── Card header ────────────────────────────────── -->
+        <!-- Card header -->
         <div
           class="fup-header"
           @click="hasMeaningfulData(f) ? toggleExpanded(f.id) : undefined"
@@ -291,7 +291,7 @@ function hasMeaningfulData(f: Followup): boolean {
           </div>
         </div>
 
-        <!-- ── Expanded detail ────────────────────────────── -->
+        <!-- Expanded detail -->
         <Transition name="expand">
           <div v-if="isExpanded(f.id)" class="fup-body">
 
@@ -408,142 +408,134 @@ function hasMeaningfulData(f: Followup): boolean {
 </template>
 
 <style scoped>
-/* ── Root ─────────────────────────────────────────────────────────── */
+/* -- Root -- */
 .followup-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
-/* ── List header ──────────────────────────────────────────────────── */
 .list-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-2);
 }
 
 .list-count {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
-  font-weight: 500;
+  font-weight: var(--weight-ui);
 }
 
 .sort-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
   background: none;
-  border: var(--border);
+  border: var(--border-standard);
   border-radius: var(--radius-pill);
-  padding: 4px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  font-family: var(--font);
+  padding: var(--space-2) var(--space-5);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition: var(--transition-icon-btn);
 }
 
 .sort-toggle:hover {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   color: var(--color-text);
 }
 
-/* ── Empty state ──────────────────────────────────────────────────── */
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 40px 24px;
+  gap: var(--space-4);
+  padding: var(--empty-padding-sm);
   text-align: center;
 }
 
 .empty-icon {
   color: var(--color-text-muted);
   opacity: 0.2;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-2);
 }
 
 .empty-title {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-secondary);
 }
 
 .empty-sub {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-muted);
   max-width: 300px;
-  line-height: 1.5;
+  line-height: var(--leading-body);
 }
 
-/* ── List items container ─────────────────────────────────────────── */
 .list-items {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
-/* ── Follow-up card ───────────────────────────────────────────────── */
 .fup-card {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-md);
   overflow: hidden;
-  transition: box-shadow 0.15s;
+  transition: box-shadow var(--duration-base) var(--ease-standard);
 }
 
 .fup-card:hover {
-  box-shadow:
-    rgba(0, 0, 0, 0.06) 0px 4px 14px,
-    rgba(0, 0, 0, 0.03) 0px 1px 4px;
+  box-shadow: var(--shadow-card-hover-sm);
 }
 
-/* Alert state: E-related optic neuritis */
 .fup-card-alert {
-  border-left: 3px solid var(--color-orange);
+  border-left: 3px solid var(--color-warning);
 }
 
-/* ── Card header ──────────────────────────────────────────────────── */
 .fup-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-8);
   user-select: none;
 }
 
 .fup-header-left {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
   min-width: 0;
 }
 
 .fup-date-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
   flex-wrap: wrap;
 }
 
 .fup-date {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text);
   letter-spacing: -0.1px;
 }
 
 .month-badge {
-  padding: 2px 8px;
+  padding: var(--badge-padding-sm);
   background: var(--color-badge-bg);
   color: var(--color-badge-text);
   border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -551,12 +543,12 @@ function hasMeaningfulData(f: Followup): boolean {
 .fup-meta-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-5);
   flex-wrap: wrap;
 }
 
 .weight-tag {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
 }
 
@@ -564,7 +556,7 @@ function hasMeaningfulData(f: Followup): boolean {
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--color-text-muted);
 }
 
@@ -573,11 +565,10 @@ function hasMeaningfulData(f: Followup): boolean {
   opacity: 0.7;
 }
 
-/* ── Header right: chips ──────────────────────────────────────────── */
 .fup-header-right {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   flex-shrink: 0;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -586,43 +577,41 @@ function hasMeaningfulData(f: Followup): boolean {
 .status-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
   padding: 3px 8px;
   border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   white-space: nowrap;
 }
 
 .chip-se {
-  background: rgba(221, 91, 0, 0.1);
-  color: var(--color-orange);
+  background: var(--status-defaulted-bg);
+  color: var(--status-defaulted-text);
 }
 
 .expand-icon {
   color: var(--color-text-muted);
   flex-shrink: 0;
-  transition: transform 0.2s ease;
+  transition: transform var(--duration-slow) var(--ease-standard);
 }
 
 .expand-icon-open {
   transform: rotate(180deg);
 }
 
-/* ── Card body (expanded) ─────────────────────────────────────────── */
 .fup-body {
-  padding: 0 16px 14px;
-  border-top: var(--border);
+  padding: 0 var(--space-8) var(--space-7);
+  border-top: var(--border-standard);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-top: 12px;
+  gap: var(--space-6);
+  padding-top: var(--space-6);
 }
 
-/* ── Results row ──────────────────────────────────────────────────── */
 .results-row {
   display: flex;
-  gap: 24px;
+  gap: var(--space-12);
   flex-wrap: wrap;
 }
 
@@ -636,9 +625,9 @@ function hasMeaningfulData(f: Followup): boolean {
 .result-label {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 600;
+  gap: var(--space-2);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.4px;
@@ -651,24 +640,23 @@ function hasMeaningfulData(f: Followup): boolean {
 .result-badge {
   display: inline-flex;
   align-items: center;
-  padding: 3px 10px;
+  padding: var(--badge-padding);
   border-radius: var(--radius-pill);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   white-space: nowrap;
 }
 
-/* ── Side effects ─────────────────────────────────────────────────── */
 .side-effects-row {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--space-4);
   flex-wrap: wrap;
 }
 
 .se-heading {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-muted);
   white-space: nowrap;
   margin-top: 3px;
@@ -684,39 +672,38 @@ function hasMeaningfulData(f: Followup): boolean {
 .se-tag {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
   padding: 3px 9px;
-  background: rgba(221, 91, 0, 0.08);
-  color: #b84a00;
+  background: var(--tint-orange);
+  color: var(--palette-orange-dark);
   border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
 }
 
 .se-tag-priority {
   background: rgba(221, 91, 0, 0.15);
-  color: #dd5b00;
+  color: var(--color-warning);
   outline: 1px solid rgba(221, 91, 0, 0.3);
 }
 
 .se-priority-marker {
-  font-size: 10px;
+  font-size: var(--text-xs);
 }
 
-/* ── Dispensed drugs ──────────────────────────────────────────────── */
 .dispensed-row {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--space-4);
   flex-wrap: wrap;
 }
 
 .dispensed-heading {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 600;
+  gap: var(--space-2);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-muted);
   white-space: nowrap;
   margin-top: 3px;
@@ -730,71 +717,69 @@ function hasMeaningfulData(f: Followup): boolean {
 }
 
 .dispensed-tag {
-  padding: 2px 8px;
-  background: var(--color-bg-alt);
+  padding: var(--badge-padding-sm);
+  background: var(--color-surface-alt);
   color: var(--color-text-secondary);
-  border: var(--border);
+  border: var(--border-standard);
   border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-ui);
 }
 
-/* ── Notes ────────────────────────────────────────────────────────── */
 .notes-row {
   display: flex;
   align-items: flex-start;
   gap: 7px;
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   border-radius: var(--radius-sm);
-  padding: 8px 10px;
+  padding: var(--space-4) var(--space-5);
 }
 
 .notes-icon {
   flex-shrink: 0;
   color: var(--color-text-muted);
-  margin-top: 2px;
+  margin-top: var(--space-1);
 }
 
 .notes-text {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   line-height: 1.55;
   margin: 0;
   font-style: italic;
 }
 
-/* ── Footer ───────────────────────────────────────────────────────── */
 .fup-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
-  padding-top: 6px;
-  border-top: var(--border);
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: var(--border-standard);
 }
 
 .footer-by {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
+  gap: var(--space-2);
+  font-size: var(--text-caption);
   color: var(--color-text-muted);
 }
 
 .footer-date {
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
 }
 
-/* ── List transition ──────────────────────────────────────────────── */
 .fup-list-enter-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: var(--transition-fade-slide);
 }
 
 .fup-list-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition: opacity var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-standard);
 }
 
 .fup-list-enter-from {
@@ -808,16 +793,17 @@ function hasMeaningfulData(f: Followup): boolean {
 }
 
 .fup-list-move {
-  transition: transform 0.25s ease;
+  transition: transform 0.25s var(--ease-standard);
 }
 
-/* ── Expand transition ────────────────────────────────────────────── */
 .expand-enter-active {
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition: opacity var(--duration-normal) var(--ease-standard),
+    transform var(--duration-normal) var(--ease-standard);
 }
 
 .expand-leave-active {
-  transition: opacity 0.14s ease, transform 0.14s ease;
+  transition: opacity var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-standard);
 }
 
 .expand-enter-from {

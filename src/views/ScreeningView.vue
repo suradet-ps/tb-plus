@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Loader2, RotateCcw, Search, UserPlus } from 'lucide-vue-next';
+import { Loader2, RotateCcw, Search, UserPlus } from '@lucide/vue';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import EnrollModal from '@/components/screening/EnrollModal.vue';
 import PatientTable from '@/components/screening/PatientTable.vue';
@@ -64,13 +64,13 @@ function toggleDrugFilter(drug: string) {
 
 <template>
   <div class="view-root">
-    <!-- ── Page header ──────────────────────────────────────────────────────── -->
+    <!-- Page header -->
     <div class="view-header">
       <h1>คัดกรองผู้ป่วย</h1>
       <p>ค้นหาผู้ป่วยที่ได้รับยาวัณโรคจากระบบ HOSxP</p>
     </div>
 
-    <!-- ── Filter card ──────────────────────────────────────────────────────── -->
+    <!-- Filter card -->
     <div class="filter-card">
       <!-- Search row (HN + Name) -->
       <div class="filter-search-row">
@@ -171,7 +171,7 @@ function toggleDrugFilter(drug: string) {
       </div>
     </div>
 
-    <!-- ── Selection action bar ─────────────────────────────────────────────── -->
+    <!-- Selection action bar -->
     <Transition name="action-bar-fade">
       <div v-if="screeningStore.selectedHns.size > 0" class="action-bar">
         <span class="selected-count">
@@ -197,12 +197,12 @@ function toggleDrugFilter(drug: string) {
       </div>
     </Transition>
 
-    <!-- ── Error banner ─────────────────────────────────────────────────────── -->
+    <!-- Error banner -->
     <div v-if="screeningStore.error" class="error-banner" role="alert">
       ⚠️ {{ screeningStore.error }}
     </div>
 
-    <!-- ── Results meta row ─────────────────────────────────────────────────── -->
+    <!-- Results meta row -->
     <div
       v-if="!screeningStore.isLoading && screeningStore.results.length > 0"
       class="results-meta"
@@ -212,12 +212,12 @@ function toggleDrugFilter(drug: string) {
       ราย
     </div>
 
-    <!-- ── Table card ───────────────────────────────────────────────────────── -->
+    <!-- Table card -->
     <div class="table-card">
       <PatientTable />
     </div>
 
-    <!-- ── Enroll modal ─────────────────────────────────────────────────────── -->
+    <!-- Enroll modal -->
     <EnrollModal
       v-model="showEnrollModal"
       :patients="screeningStore.selectedRecords"
@@ -227,44 +227,44 @@ function toggleDrugFilter(drug: string) {
 </template>
 
 <style scoped>
-/* ── Root layout ─────────────────────────────────────────────────────────────── */
+/* -- Root layout -- */
 .view-root {
-  padding: 32px 32px 48px;
+  padding: var(--page-root-padding);
   max-width: 1200px;
 }
 
-/* ── Page header ─────────────────────────────────────────────────────────────── */
+/* -- Page header -- */
 .view-header {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-12);
 }
 
 .view-header h1 {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--text-display-sm);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.25px;
   color: var(--color-text);
   margin: 0 0 4px;
 }
 
 .view-header p {
-  font-size: 14px;
+  font-size: var(--text-body);
   color: var(--color-text-secondary);
   margin: 0;
 }
 
-/* ── Filter card ─────────────────────────────────────────────────────────────── */
+/* -- Filter card -- */
 .filter-card {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  padding: 20px 24px;
-  margin-bottom: 16px;
+  padding: var(--filter-card-padding);
+  margin-bottom: var(--space-8);
 }
 
 .filter-row {
   display: flex;
-  gap: 16px;
+  gap: var(--space-8);
   flex-wrap: wrap;
   align-items: flex-end;
 }
@@ -276,37 +276,37 @@ function toggleDrugFilter(drug: string) {
 }
 
 .filter-group label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
 .filter-group input[type='date'],
 .filter-group select {
-  padding: 6px 10px;
+  padding: var(--input-padding);
   border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-family: var(--font-family);
   color: var(--color-text);
-  background: var(--color-bg);
+  background: var(--color-surface);
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: var(--transition-input);
 }
 
 .filter-group input[type='date']:focus,
 .filter-group select:focus {
   border-color: var(--color-blue);
-  box-shadow: 0 0 0 3px rgba(0, 117, 222, 0.1);
+  box-shadow: 0 0 0 3px var(--tint-blue);
 }
 
-/* ── Search row (HN + Name) ──────────────────────────────────────────────────── */
+/* -- Search row (HN + Name) -- */
 .filter-search-row {
   display: flex;
-  gap: 16px;
+  gap: var(--space-8);
   flex-wrap: wrap;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-6);
   padding-bottom: 12px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
@@ -317,24 +317,24 @@ function toggleDrugFilter(drug: string) {
 }
 
 .filter-group input[type='text'] {
-  padding: 6px 10px;
+  padding: var(--input-padding);
   border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-family: var(--font-family);
   color: var(--color-text);
-  background: var(--color-bg);
+  background: var(--color-surface);
   outline: none;
   width: 100%;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: var(--transition-input);
 }
 
 .filter-group input[type='text']:focus {
   border-color: var(--color-blue);
-  box-shadow: 0 0 0 3px rgba(0, 117, 222, 0.1);
+  box-shadow: 0 0 0 3px var(--tint-blue);
 }
 
-/* ── Drug class filter ───────────────────────────────────────────────────────── */
+/* -- Drug class filter -- */
 .drug-filter {
   flex: 1;
   min-width: 200px;
@@ -342,7 +342,7 @@ function toggleDrugFilter(drug: string) {
 
 .drug-checkboxes {
   display: flex;
-  gap: 8px;
+  gap: var(--space-4);
   align-items: center;
   flex-wrap: wrap;
 }
@@ -362,10 +362,10 @@ function toggleDrugFilter(drug: string) {
 .drug-chip {
   padding: 3px 12px;
   border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-heading);
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: opacity var(--duration-base) var(--ease-standard);
   user-select: none;
 }
 
@@ -376,59 +376,59 @@ function toggleDrugFilter(drug: string) {
 
 /* Drug class colour tokens */
 .drug-H {
-  background: #e8f8f7;
-  color: #2a9d99;
+  background: var(--drug-H-bg);
+  color: var(--color-info);
 }
 .drug-R {
-  background: #fdf0e8;
-  color: #dd5b00;
+  background: var(--drug-R-bg);
+  color: var(--color-warning);
 }
 .drug-Z {
-  background: #f0ebe6;
-  color: #523410;
+  background: var(--drug-Z-bg);
+  color: var(--drug-Z);
 }
 .drug-E {
-  background: #e8f2fd;
-  color: #0075de;
+  background: var(--drug-E-bg);
+  color: var(--color-accent);
 }
 
-/* ── Filter actions ──────────────────────────────────────────────────────────── */
+/* -- Filter actions -- */
 .filter-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-4);
   margin-top: 16px;
   justify-content: flex-end;
   align-items: center;
 }
 
-/* ── Action bar (appears when rows are selected) ─────────────────────────────── */
+/* -- Action bar (appears when rows are selected) -- */
 .action-bar {
-  background: #f0f7ff;
+  background: var(--tint-selected);
   border: 1px solid rgba(0, 117, 222, 0.2);
   border-radius: var(--radius-md);
   padding: 12px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-8);
 }
 
 .selected-count {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: var(--weight-emphasis);
   color: var(--color-blue);
 }
 
 .action-bar-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
-/* ── Action bar transition ───────────────────────────────────────────────────── */
+/* -- Action bar transition -- */
 .action-bar-fade-enter-active,
 .action-bar-fade-leave-active {
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition: var(--transition-fade-slide);
 }
 
 .action-bar-fade-enter-from,
@@ -437,58 +437,58 @@ function toggleDrugFilter(drug: string) {
   transform: translateY(-4px);
 }
 
-/* ── Error banner ────────────────────────────────────────────────────────────── */
+/* -- Error banner -- */
 .error-banner {
-  background: rgba(221, 91, 0, 0.08);
+  background: var(--alert-error-bg);
   border: 1px solid rgba(221, 91, 0, 0.25);
   border-radius: var(--radius-md);
-  padding: 12px 16px;
-  font-size: 13px;
+  padding: var(--alert-padding);
+  font-size: var(--text-body-sm);
   color: var(--color-orange);
-  margin-bottom: 16px;
+  margin-bottom: var(--space-8);
 }
 
-/* ── Results meta ────────────────────────────────────────────────────────────── */
+/* -- Results meta -- */
 .results-meta {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
-  margin-bottom: 8px;
+  margin-bottom: var(--space-4);
   padding-left: 2px;
 }
 
 .results-meta strong {
   color: var(--color-text-secondary);
-  font-weight: 600;
+  font-weight: var(--weight-emphasis);
 }
 
-/* ── Table card ──────────────────────────────────────────────────────────────── */
+/* -- Table card -- */
 .table-card {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 
-/* ── Shared buttons ──────────────────────────────────────────────────────────── */
+/* -- Shared buttons -- */
 .btn-ghost {
   background: transparent;
   border: 1px solid rgba(0, 0, 0, 0.15);
-  padding: 7px 14px;
-  font-size: 13px;
-  font-weight: 600;
+  padding: var(--btn-padding);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
   cursor: pointer;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
   display: flex;
   align-items: center;
   gap: 6px;
-  font-family: var(--font);
-  transition: background 0.12s, color 0.12s;
+  font-family: var(--font-family);
+  transition: var(--transition-icon-btn);
 }
 
 .btn-ghost:hover {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   color: var(--color-text);
 }
 
@@ -496,33 +496,33 @@ function toggleDrugFilter(drug: string) {
   background: transparent;
   border: none;
   padding: 5px 10px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   cursor: pointer;
   border-radius: var(--radius-sm);
   color: var(--color-blue);
-  font-family: var(--font);
-  transition: background 0.12s;
+  font-family: var(--font-family);
+  transition: var(--transition-btn);
 }
 
 .btn-ghost-small:hover {
-  background: rgba(0, 117, 222, 0.08);
+  background: var(--tint-blue-hover);
 }
 
 .btn-primary {
   background: var(--color-blue);
-  color: #fff;
+  color: var(--color-text-inverse);
   border: none;
-  padding: 7px 14px;
-  font-size: 13px;
-  font-weight: 600;
+  padding: var(--btn-padding);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
   cursor: pointer;
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   gap: 6px;
-  font-family: var(--font);
-  transition: background 0.12s;
+  font-family: var(--font-family);
+  transition: var(--transition-btn);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -534,7 +534,7 @@ function toggleDrugFilter(drug: string) {
   cursor: not-allowed;
 }
 
-/* ── Spinner ─────────────────────────────────────────────────────────────────── */
+/* -- Spinner -- */
 .spin {
   animation: spin 1s linear infinite;
 }

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { invoke } from '@tauri-apps/api/core';
-import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog';
 import {
   AlertTriangle,
   Calculator,
@@ -19,7 +17,9 @@ import {
   Wifi,
   WifiOff,
   XCircle,
-} from 'lucide-vue-next';
+} from '@lucide/vue';
+import { invoke } from '@tauri-apps/api/core';
+import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog';
 import { reactive, ref, watch } from 'vue';
 import DrugChip from '@/components/shared/DrugChip.vue';
 import {
@@ -33,7 +33,7 @@ import {
 
 const settingsStore = useSettingsStore();
 
-// ── Section navigation ───────────────────────────────────────────────
+// -- Section navigation --
 type Section = 'mysql' | 'hosxp' | 'drugcodes' | 'dosage' | 'alerts' | 'staff' | 'backup';
 const activeSection = ref<Section>('mysql');
 
@@ -47,7 +47,7 @@ const navItems: { id: Section; label: string; icon: string }[] = [
   { id: 'backup', label: 'สำรองข้อมูล', icon: 'HardDrive' },
 ];
 
-// ── MySQL connection form ────────────────────────────────────────────
+// -- MySQL connection form --
 const mysqlForm = reactive<DbConfig>({ ...settingsStore.dbConfig });
 const testResult = ref<'idle' | 'testing' | 'success' | 'fail'>('idle');
 const testError = ref('');
@@ -123,7 +123,7 @@ function showSettingsSaveError(error: unknown) {
   settingsSaveError.value = String(error);
 }
 
-// ── HOSxP clinic search ────────────────────────────────────────────
+// -- HOSxP clinic search --
 const clinicSearchQuery = ref('');
 const clinicSearchResults = ref<{ clinic: string; name: string | null }[]>([]);
 const isClinicSearching = ref(false);
@@ -150,7 +150,7 @@ function selectClinic(code: string) {
   settingsStore.hosxpSettings.clinic_code = code;
 }
 
-// ── HOSxP / Alert save ──────────────────────────────────────────────
+// -- HOSxP / Alert save --
 const hosxpSaved = ref(false);
 async function saveHosxp() {
   await settingsStore.saveHosxpSettings();
@@ -169,7 +169,7 @@ async function saveAlerts() {
   }, 2500);
 }
 
-// ── Drug class management — search-first flow ────────────────────────
+// -- Drug class management — search-first flow --
 const drugSearchQuery = ref('');
 const drugSearchResults = ref<DrugItem[]>([]);
 const isSearching = ref(false);
@@ -234,7 +234,7 @@ async function saveDrugClasses() {
   }
 }
 
-// ── Regimen management (structured) ─────────────────────────────────
+// -- Regimen management (structured) --
 const newRegimenName = ref('');
 const editingRegimen = ref<{ name: string; phases: RegimenPhase[] } | null>(null);
 const editingRegimenIdx = ref(-1);
@@ -372,7 +372,7 @@ async function saveDosageRules() {
   }
 }
 
-// ── Staff names ──────────────────────────────────────────────────────
+// -- Staff names --
 const newStaff = ref('');
 
 async function addStaff() {
@@ -398,7 +398,7 @@ async function removeStaff(_name: string) {
   }
 }
 
-// ── Backup ───────────────────────────────────────────────────────────
+// -- Backup --
 const isBackingUp = ref(false);
 const backupError = ref<string | null>(null);
 const backupSuccess = ref(false);
@@ -432,7 +432,7 @@ async function downloadBackup() {
   }
 }
 
-// ── Restore ──────────────────────────────────────────────────────────
+// -- Restore --
 const isRestoring = ref(false);
 const restoreError = ref<string | null>(null);
 const restoreSuccess = ref(false);
@@ -485,7 +485,7 @@ function cancelRestore() {
 <template>
   <div class="view-root">
 
-    <!-- ── Page header ── -->
+    <!-- Page header -->
     <div class="view-header">
       <h1>ตั้งค่า</h1>
       <p>การตั้งค่าระบบ การเชื่อมต่อฐานข้อมูล และการจัดการผู้ใช้งาน</p>
@@ -493,7 +493,7 @@ function cancelRestore() {
 
     <div class="settings-layout">
 
-      <!-- ── Left sidebar nav ── -->
+      <!-- Left sidebar nav -->
       <nav class="settings-nav" aria-label="เมนูตั้งค่า">
         <button
           v-for="item in navItems"
@@ -514,7 +514,7 @@ function cancelRestore() {
         </button>
       </nav>
 
-      <!-- ── Right content area ── -->
+      <!-- Right content area -->
       <div class="settings-content">
 
         <!-- ══════════════════════════════════════════════════
@@ -1178,39 +1178,39 @@ function cancelRestore() {
 </template>
 
 <style scoped>
-/* ── Page root ──────────────────────────────────────────────────────── */
+/* -- Page root -- */
 .view-root {
-  padding: 32px 32px 48px;
+  padding: var(--page-root-padding);
   max-width: 900px;
 }
 
-/* ── Page header ────────────────────────────────────────────────────── */
+/* -- Page header -- */
 .view-header {
   margin-bottom: 28px;
 }
 
 .view-header h1 {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--text-display-sm);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.25px;
   color: var(--color-text);
   margin: 0 0 4px;
 }
 
 .view-header p {
-  font-size: 14px;
+  font-size: var(--text-body);
   color: var(--color-text-secondary);
   margin: 0;
 }
 
-/* ── Two-column layout ──────────────────────────────────────────────── */
+/* -- Two-column layout -- */
 .settings-layout {
   display: flex;
   gap: 24px;
   align-items: flex-start;
 }
 
-/* ── Left sidebar nav ───────────────────────────────────────────────── */
+/* -- Left sidebar nav -- */
 .settings-nav {
   width: 180px;
   flex-shrink: 0;
@@ -1227,9 +1227,9 @@ function cancelRestore() {
   gap: 10px;
   padding: 9px 12px;
   border-radius: var(--radius-md);
-  font-size: 13px;
-  font-weight: 500;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-ui);
+  font-family: var(--font-family);
   cursor: pointer;
   color: var(--color-text-secondary);
   background: none;
@@ -1240,26 +1240,26 @@ function cancelRestore() {
 }
 
 .nav-item:hover {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   color: var(--color-text);
 }
 
 .nav-item.active {
   background: var(--color-badge-bg);
   color: var(--color-blue);
-  font-weight: 600;
+  font-weight: var(--weight-emphasis);
 }
 
-/* ── Right content area ─────────────────────────────────────────────── */
+/* -- Right content area -- */
 .settings-content {
   flex: 1;
   min-width: 0;
 }
 
-/* ── Settings card ──────────────────────────────────────────────────── */
+/* -- Settings card -- */
 .settings-card {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   padding: 24px;
@@ -1270,13 +1270,13 @@ function cancelRestore() {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
+  gap: var(--space-8);
   margin-bottom: 20px;
 }
 
 .card-title {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--text-ui);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.15px;
   color: var(--color-text);
   margin: 0 0 5px;
@@ -1288,27 +1288,27 @@ function cancelRestore() {
 }
 
 .card-subtitle {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   margin: 0 0 20px;
-  line-height: 1.5;
+  line-height: var(--leading-body);
 }
 
-/* ── Connection status pill ─────────────────────────────────────────── */
+/* -- Connection status pill -- */
 .connection-status {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   padding: 4px 10px;
   border-radius: var(--radius-pill);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .status-connected {
-  background: rgba(26, 174, 57, 0.1);
+  background: var(--status-active-bg);
   color: var(--color-green);
 }
 
@@ -1317,7 +1317,7 @@ function cancelRestore() {
   color: var(--color-text-muted);
 }
 
-/* ── Form grid ──────────────────────────────────────────────────────── */
+/* -- Form grid -- */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1335,19 +1335,19 @@ function cancelRestore() {
 }
 
 .form-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-secondary);
 }
 
 .form-input {
   padding: 7px 10px;
-  border: 1px solid #dddddd;
+  border: 1px solid var(--border-color-input);
   border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-family: var(--font-family);
   color: var(--color-text);
-  background: var(--color-bg);
+  background: var(--color-surface);
   outline: none;
   width: 100%;
   transition: border-color 0.13s, box-shadow 0.13s;
@@ -1355,34 +1355,34 @@ function cancelRestore() {
 
 .form-input:focus {
   border-color: var(--color-blue);
-  box-shadow: 0 0 0 3px rgba(0, 117, 222, 0.1);
+  box-shadow: 0 0 0 3px var(--tint-blue);
 }
 
 .form-input::placeholder {
   color: var(--color-text-muted);
 }
 
-/* ── Form actions row ───────────────────────────────────────────────── */
+/* -- Form actions row -- */
 .form-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-4);
   margin-top: 18px;
   align-items: center;
   flex-wrap: wrap;
 }
 
-/* ── Buttons ────────────────────────────────────────────────────────── */
+/* -- Buttons -- */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   background: var(--color-blue);
-  color: #fff;
+  color: var(--color-text-inverse);
   border: none;
   padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
   cursor: pointer;
   border-radius: var(--radius-sm);
   transition: background 0.13s;
@@ -1401,12 +1401,12 @@ function cancelRestore() {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
   cursor: pointer;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
@@ -1414,7 +1414,7 @@ function cancelRestore() {
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
 }
 
 .btn-secondary:disabled {
@@ -1426,12 +1426,12 @@ function cancelRestore() {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   padding: 9px 18px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
   cursor: pointer;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
@@ -1439,7 +1439,7 @@ function cancelRestore() {
 }
 
 .btn-ghost-download:hover:not(:disabled) {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   border-color: rgba(0, 0, 0, 0.18);
 }
 
@@ -1452,12 +1452,12 @@ function cancelRestore() {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   padding: 9px 18px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
   cursor: pointer;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
@@ -1465,7 +1465,7 @@ function cancelRestore() {
 }
 
 .btn-ghost-restore:hover:not(:disabled) {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   border-color: rgba(0, 0, 0, 0.18);
 }
 
@@ -1480,8 +1480,8 @@ function cancelRestore() {
   flex-wrap: wrap;
 }
 
-/* ── Test-result inline feedback ────────────────────────────────────── */
-/* ── Ghost danger button (delete config) ───────────────────────────── */
+/* -- Test-result inline feedback -- */
+/* -- Ghost danger button (delete config) -- */
 .btn-ghost-danger {
   display: inline-flex;
   align-items: center;
@@ -1490,10 +1490,10 @@ function cancelRestore() {
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
   background: transparent;
-  color: #b91c1c;
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 500;
+  color: var(--color-alert-red);
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-ui);
   cursor: pointer;
   transition: background 0.12s, color 0.12s;
   white-space: nowrap;
@@ -1501,7 +1501,7 @@ function cancelRestore() {
 
 .btn-ghost-danger:hover:not(:disabled) {
   background: rgba(185, 28, 28, 0.07);
-  color: #991b1b;
+  color: var(--palette-red-dark);
 }
 
 .btn-ghost-danger:disabled {
@@ -1513,30 +1513,30 @@ function cancelRestore() {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
 }
 
 .test-success { color: var(--color-green); }
 .test-fail    { color: var(--color-orange); }
 
-/* ── Error note ─────────────────────────────────────────────────────── */
+/* -- Error note -- */
 .error-note {
   margin-top: 10px;
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-orange);
-  line-height: 1.5;
+  line-height: var(--leading-body);
 }
 
-/* ── Info note ──────────────────────────────────────────────────────── */
+/* -- Info note -- */
 .info-note {
-  background: var(--color-bg-alt);
-  border: var(--border);
+  background: var(--color-surface-alt);
+  border: var(--border-standard);
   border-radius: var(--radius-md);
   padding: 11px 14px;
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
-  line-height: 1.6;
+  line-height: var(--leading-relaxed);
   margin-top: 16px;
 }
 
@@ -1544,12 +1544,12 @@ function cancelRestore() {
   color: var(--color-text);
 }
 
-/* ── Staff list ─────────────────────────────────────────────────────── */
-/* ── Sub-section layout ──────────────────────────────────────────────── */
+/* -- Staff list -- */
+/* -- Sub-section layout -- */
 .sub-section {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-12);
   padding-bottom: 24px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+  border-bottom: 1px solid var(--divider-color);
 }
 
 .sub-section:last-child {
@@ -1559,14 +1559,14 @@ function cancelRestore() {
 }
 
 .sub-title {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text);
   margin: 0 0 4px;
 }
 
 .sub-desc {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
   margin: 0 0 12px;
 }
@@ -1584,10 +1584,10 @@ function cancelRestore() {
 
 .dosage-grid--head {
   padding: 0 0 8px;
-  margin-bottom: 8px;
-  border-bottom: var(--border);
-  font-size: 11px;
-  font-weight: 700;
+  margin-bottom: var(--space-4);
+  border-bottom: var(--border-standard);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-heading);
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -1609,15 +1609,15 @@ function cancelRestore() {
 }
 
 .dosage-drug-name {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text);
   overflow-wrap: anywhere;
 }
 
 .dosage-drug-meta,
 .dosage-strength {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
   overflow-wrap: anywhere;
 }
@@ -1629,7 +1629,7 @@ function cancelRestore() {
   align-items: flex-start;
 }
 
-/* ── Regimen management ──────────────────────────────────────────────────────── */
+/* -- Regimen management -- */
 .regimen-list {
   display: flex;
   flex-direction: column;
@@ -1641,15 +1641,15 @@ function cancelRestore() {
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   border-radius: var(--radius-sm);
-  border: var(--border);
-  gap: 8px;
+  border: var(--border-standard);
+  gap: var(--space-4);
 }
 
 .regimen-name {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text);
   font-family: 'SF Mono', 'Roboto Mono', monospace;
 }
@@ -1666,14 +1666,14 @@ function cancelRestore() {
   align-items: center;
   justify-content: space-between;
   padding: 9px 12px;
-  background: var(--color-bg-alt);
-  border: var(--border);
+  background: var(--color-surface-alt);
+  border: var(--border-standard);
   border-radius: var(--radius-md);
   transition: background 0.1s;
 }
 
 .staff-item:hover {
-  background: #efede9;
+  background: var(--color-surface-alt);
 }
 
 .staff-item-left {
@@ -1688,8 +1688,8 @@ function cancelRestore() {
   border-radius: 50%;
   background: var(--color-badge-bg);
   color: var(--color-blue);
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-heading);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1698,8 +1698,8 @@ function cancelRestore() {
 }
 
 .staff-name {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-ui);
   color: var(--color-text);
 }
 
@@ -1718,11 +1718,11 @@ function cancelRestore() {
 
 .staff-delete:hover {
   color: var(--color-orange);
-  background: rgba(221, 91, 0, 0.08);
+  background: var(--alert-error-bg);
 }
 
 .staff-empty {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-muted);
   padding: 16px 0 10px;
   text-align: center;
@@ -1733,7 +1733,7 @@ function cancelRestore() {
 
 .staff-add-row {
   display: flex;
-  gap: 8px;
+  gap: var(--space-4);
   align-items: center;
 }
 
@@ -1741,20 +1741,20 @@ function cancelRestore() {
   flex: 1;
 }
 
-/* ── Backup section ─────────────────────────────────────────────────── */
+/* -- Backup section -- */
 .backup-body {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 4px;
+  gap: var(--space-8);
+  margin-bottom: var(--space-2);
 }
 
 .backup-info-box {
   display: flex;
   gap: 14px;
   align-items: flex-start;
-  background: var(--color-bg-alt);
-  border: var(--border);
+  background: var(--color-surface-alt);
+  border: var(--border-standard);
   border-radius: var(--radius-md);
   padding: 16px;
 }
@@ -1763,7 +1763,7 @@ function cancelRestore() {
   width: 44px;
   height: 44px;
   border-radius: var(--radius-md);
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--btn-secondary-bg);
   color: var(--color-text-secondary);
   display: flex;
   align-items: center;
@@ -1779,20 +1779,20 @@ function cancelRestore() {
 }
 
 .backup-info-title {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text);
   margin: 0;
 }
 
 .backup-info-desc {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
-  line-height: 1.6;
+  line-height: var(--leading-relaxed);
   margin: 0;
 }
 
-/* ── Spin animation ─────────────────────────────────────────────────── */
+/* -- Spin animation -- */
 .spin {
   animation: spin 0.85s linear infinite;
   flex-shrink: 0;
@@ -1802,29 +1802,29 @@ function cancelRestore() {
   to { transform: rotate(360deg); }
 }
 
-/* ── Drug search — search-first flow ── */
+/* -- Drug search — search-first flow -- */
 .drug-search-row {
   display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
 }
 .drug-search-row .form-input { flex: 1; }
 
 .search-results-box {
-  border: var(--border);
+  border: var(--border-standard);
   border-radius: var(--radius-md);
   overflow: hidden;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-6);
 }
 
 .sr-header {
   display: flex;
   gap: 10px;
   padding: 7px 12px;
-  background: var(--color-bg-alt);
-  border-bottom: var(--border);
-  font-size: 11px;
-  font-weight: 600;
+  background: var(--color-surface-alt);
+  border-bottom: var(--border-standard);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -1839,14 +1839,14 @@ function cancelRestore() {
   align-items: center;
   padding: 6px 12px;
   border-bottom: 1px solid rgba(0,0,0,0.05);
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   transition: background 0.1s;
 }
 .sr-row:last-child { border-bottom: none; }
 .sr-row:hover { background: rgba(0,0,0,0.02); }
 .sr-row--assigned { background: rgba(26,174,57,0.04); }
 
-.sr-icode { font-family: monospace; font-weight: 600; width: 90px; color: var(--color-text); }
+.sr-icode { font-family: var(--font-family-mono-simple); font-weight: var(--weight-emphasis); width: 90px; color: var(--color-text); }
 .sr-name { flex: 1; }
 .sr-assign { display: flex; gap: 4px; align-items: center; width: 180px; }
 
@@ -1855,13 +1855,13 @@ function cancelRestore() {
   padding: 3px 6px;
   border: 1px solid rgba(0,0,0,0.15);
   border-radius: var(--radius-sm);
-  font-size: 12px;
-  font-family: monospace;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-family: var(--font-family-mono-simple);
+  font-weight: var(--weight-emphasis);
   text-transform: uppercase;
   text-align: center;
   outline: none;
-  background: var(--color-bg);
+  background: var(--color-surface);
 }
 .sr-input:focus { border-color: var(--color-blue); box-shadow: 0 0 0 2px rgba(0,117,222,0.1); }
 
@@ -1870,24 +1870,24 @@ function cancelRestore() {
   border-radius: var(--radius-sm);
   border: none;
   background: var(--color-blue);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
+  color: var(--color-text-inverse);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   cursor: pointer;
-  font-family: var(--font);
+  font-family: var(--font-family);
 }
 .sr-btn:disabled { opacity: 0.4; cursor: default; }
 
-.sr-done { color: var(--color-green); font-weight: 700; font-size: 14px; }
+.sr-done { color: var(--color-green); font-weight: var(--weight-heading); font-size: var(--text-body); }
 
-/* ── Configured classes summary ── */
+/* -- Configured classes summary -- */
 .classes-summary {
   margin-top: 4px;
 }
 
 .class-summary-card {
-  background: var(--color-bg-alt);
-  border: var(--border);
+  background: var(--color-surface-alt);
+  border: var(--border-standard);
   border-radius: var(--radius-md);
   padding: 10px 12px;
   margin-bottom: 6px;
@@ -1896,11 +1896,11 @@ function cancelRestore() {
 .cs-top {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
   margin-bottom: 6px;
 }
 
-.cs-name { font-size: 13px; font-weight: 600; flex: 1; }
+.cs-name { font-size: var(--text-body-sm); font-weight: var(--weight-emphasis); flex: 1; }
 
 .cs-icodes {
   display: flex;
@@ -1909,13 +1909,13 @@ function cancelRestore() {
 }
 
 .cs-icode {
-  font-family: monospace;
-  font-size: 12px;
+  font-family: var(--font-family-mono-simple);
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
-  background: var(--color-bg);
+  background: var(--color-surface);
   padding: 2px 7px;
-  border-radius: 3px;
-  border: var(--border);
+  border-radius: var(--radius-sm);
+  border: var(--border-standard);
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -1925,7 +1925,7 @@ function cancelRestore() {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-muted);
   line-height: 1;
   padding: 0;
@@ -1933,21 +1933,21 @@ function cancelRestore() {
 .cs-remove:hover { color: var(--color-orange); }
 .cs-remove:disabled { opacity: 0.3; cursor: default; }
 
-/* ── Input hint ── */
+/* -- Input hint -- */
 .input-hint {
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--color-text-muted);
   margin-top: 2px;
 }
 
 .empty-hint {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-muted);
   padding: 16px;
   text-align: center;
   border: 1px dashed rgba(0,0,0,0.12);
   border-radius: var(--radius-md);
-  margin-bottom: 12px;
+  margin-bottom: var(--space-6);
 }
 .empty-hint a { color: var(--color-blue); }
 
@@ -1965,38 +1965,38 @@ function cancelRestore() {
 }
 
 .phase-tag {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   padding: 2px 7px;
   border-radius: var(--radius-pill);
   background: var(--color-badge-bg);
   color: var(--color-blue);
 }
 
-/* ── Add class/regimen row ── */
+/* -- Add class/regimen row -- */
 .add-class-row {
   display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
 }
 
-/* ── Button variants ── */
+/* -- Button variants -- */
 .btn-secondary-sm {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   padding: 5px 10px;
   border-radius: var(--radius-sm);
-  font-family: var(--font);
-  font-size: 12px;
-  font-weight: 600;
+  font-family: var(--font-family);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   cursor: pointer;
   color: var(--color-text-secondary);
   transition: background 0.13s;
 }
-.btn-secondary-sm:hover { background: var(--color-bg-alt); }
+.btn-secondary-sm:hover { background: var(--color-surface-alt); }
 
 .btn-ghost-danger-sm {
   display: inline-flex;
@@ -2011,7 +2011,7 @@ function cancelRestore() {
 }
 .btn-ghost-danger-sm:hover { color: var(--color-orange); background: rgba(221,91,0,0.08); }
 
-/* ── Phase editor modal ── */
+/* -- Phase editor modal -- */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -2019,11 +2019,11 @@ function cancelRestore() {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: var(--z-overlay-settings);
 }
 
 .modal-card {
-  background: var(--color-bg);
+  background: var(--color-surface);
   border-radius: var(--radius-card);
   padding: 24px;
   min-width: 520px;
@@ -2034,15 +2034,15 @@ function cancelRestore() {
 .phase-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
   margin-bottom: 10px;
   padding: 10px;
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   border-radius: var(--radius-md);
 }
 
 .phase-label {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
   white-space: nowrap;
 }
@@ -2053,36 +2053,36 @@ function cancelRestore() {
 }
 
 .toggle-btn {
-  padding: 3px 10px;
+  padding: var(--badge-padding);
   border-radius: var(--radius-pill);
-  border: var(--border);
-  background: var(--color-bg);
-  font-size: 12px;
-  font-weight: 600;
-  font-family: monospace;
+  border: var(--border-standard);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family-mono-simple);
   cursor: pointer;
   color: var(--color-text-muted);
   transition: all 0.1s;
 }
 .toggle-btn.active {
   background: var(--color-blue);
-  color: #fff;
+  color: var(--color-text-inverse);
   border-color: var(--color-blue);
 }
 
 .phase-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-4);
   margin-top: 12px;
 }
 
-/* ── Clinic search ── */
+/* -- Clinic search -- */
 .current-clinic {
   margin-top: 12px;
 }
 .current-clinic h4 {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
   margin-bottom: 6px;
 }
 .clinic-badge {
@@ -2093,15 +2093,15 @@ function cancelRestore() {
   background: var(--color-badge-bg);
   color: var(--color-blue);
   border-radius: var(--radius-pill);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: var(--weight-emphasis);
 }
 .clinic-badge strong {
-  font-family: monospace;
-  font-size: 16px;
+  font-family: var(--font-family-mono-simple);
+  font-size: var(--text-heading-sm);
 }
 
-/* ── Restore confirmation modal ─────────────────────────────────── */
+/* -- Restore confirmation modal -- */
 .restore-confirm-modal {
   text-align: center;
   max-width: 440px;
@@ -2112,7 +2112,7 @@ function cancelRestore() {
   width: 52px;
   height: 52px;
   border-radius: var(--radius-md);
-  background: rgba(221, 91, 0, 0.1);
+  background: var(--status-defaulted-bg);
   color: var(--color-orange);
   display: flex;
   align-items: center;
@@ -2121,21 +2121,21 @@ function cancelRestore() {
 }
 
 .restore-confirm-title {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--text-heading-sm);
+  font-weight: var(--weight-heading);
   color: var(--color-text);
   margin: 0 0 8px;
 }
 
 .restore-confirm-desc {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
-  line-height: 1.6;
+  line-height: var(--leading-relaxed);
   margin: 0 0 12px;
 }
 
 .restore-confirm-file {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
   margin: 0 0 20px;
   word-break: break-all;
@@ -2167,6 +2167,6 @@ function cancelRestore() {
 }
 
 .btn-restore-confirm:hover:not(:disabled) {
-  background: #c44e00;
+  background: var(--palette-orange-darker);
 }
 </style>

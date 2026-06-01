@@ -9,11 +9,11 @@ const isRed = props.alert.severity === 'red';
 <template>
   <span
     class="alert-badge"
-    :class="isRed ? 'alert-red' : 'alert-yellow'"
+    :class="isRed ? 'alert-badge--red' : 'alert-badge--yellow'"
     :title="alert.details ?? alert.message"
   >
-    <span class="alert-dot" />
-    <span class="alert-text">{{ alert.message }}</span>
+    <span class="alert-badge__dot" />
+    <span class="alert-badge__text">{{ alert.message }}</span>
   </span>
 </template>
 
@@ -24,39 +24,39 @@ const isRed = props.alert.severity === 'red';
   gap: 5px;
   padding: 3px 8px;
   border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   max-width: 200px;
 }
 
-.alert-dot {
+.alert-badge__dot {
   width: 6px;
   height: 6px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   flex-shrink: 0;
 }
 
-.alert-text {
+.alert-badge__text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.alert-red {
+.alert-badge--red {
   background: rgba(221, 91, 0, 0.12);
-  color: #dd5b00;
+  color: var(--color-alert-orange);
 }
 
-.alert-red .alert-dot {
-  background: #dd5b00;
+.alert-badge--red .alert-badge__dot {
+  background: var(--color-alert-orange);
 }
 
-.alert-yellow {
+.alert-badge--yellow {
   background: rgba(245, 166, 35, 0.12);
-  color: #c78b00;
+  color: var(--color-alert-yellow);
 }
 
-.alert-yellow .alert-dot {
-  background: #f5a623;
+.alert-badge--yellow .alert-badge__dot {
+  background: var(--palette-amber);
 }
 </style>

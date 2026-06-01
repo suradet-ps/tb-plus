@@ -71,13 +71,13 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* ─── App Shell Layout ──────────────────────────────────────────────── */
+/* -- App Shell Layout -- */
 .app-shell {
   display: flex;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background-color: var(--color-bg-alt);
+  background-color: var(--color-surface-alt);
 }
 
 .app-main {
@@ -85,6 +85,6 @@ onUnmounted(() => {
   min-width: 0;
   height: 100vh;
   overflow-y: auto;
-  background-color: var(--color-bg);
+  background-color: var(--color-surface);
 }
 </style>

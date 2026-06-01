@@ -14,18 +14,30 @@ interface StatusConfig {
 }
 
 const statusMap: Record<Status, StatusConfig> = {
-  active: { label: 'กำลังรักษา', bg: 'rgba(26, 174, 57, 0.1)', color: '#1aae39' },
-  completed: { label: 'รักษาหาย/ครบ', bg: 'rgba(42, 157, 153, 0.1)', color: '#2a9d99' },
-  transferred: { label: 'ส่งต่อ', bg: '#f2f9ff', color: '#097fe8' },
-  died: { label: 'เสียชีวิต', bg: 'rgba(49, 48, 46, 0.1)', color: '#615d59' },
-  defaulted: { label: 'ขาดการรักษา', bg: 'rgba(221, 91, 0, 0.1)', color: '#dd5b00' },
+  active: { label: 'กำลังรักษา', bg: 'var(--status-active-bg)', color: 'var(--status-active-text)' },
+  completed: {
+    label: 'รักษาหาย/ครบ',
+    bg: 'var(--status-completed-bg)',
+    color: 'var(--status-completed-text)',
+  },
+  transferred: {
+    label: 'ส่งต่อ',
+    bg: 'var(--status-transferred-bg)',
+    color: 'var(--status-transferred-text)',
+  },
+  died: { label: 'เสียชีวิต', bg: 'var(--status-died-bg)', color: 'var(--status-died-text)' },
+  defaulted: {
+    label: 'ขาดการรักษา',
+    bg: 'var(--status-defaulted-bg)',
+    color: 'var(--status-defaulted-text)',
+  },
 };
 
 const config = computed<StatusConfig>(() => {
   return (
     statusMap[props.status as Status] ?? {
       label: props.status,
-      bg: 'rgba(0, 0, 0, 0.06)',
+      bg: 'var(--tint-active)',
       color: 'var(--color-text-secondary)',
     }
   );
@@ -34,7 +46,7 @@ const config = computed<StatusConfig>(() => {
 
 <template>
   <span
-    class="status-badge"
+    class="badge"
     :style="{
       backgroundColor: config.bg,
       color: config.color,
@@ -45,19 +57,9 @@ const config = computed<StatusConfig>(() => {
 </template>
 
 <style scoped>
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-pill);
-  padding: 3px 10px;
-  font-family: var(--font);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.125px;
-  line-height: 1.33;
-  white-space: nowrap;
-  user-select: none;
-  /* no border per spec */
-}
+/*
+ * Uses global .badge class from base.css.
+ * Scoped block only for any component-specific overrides.
+ * All token values are CSS variables — no hardcoded values.
+ */
 </style>

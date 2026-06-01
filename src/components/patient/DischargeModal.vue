@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { AlertTriangle, Loader2, LogOut } from '@lucide/vue';
 import { invoke } from '@tauri-apps/api/core';
-import { AlertTriangle, Loader2, LogOut } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import type { OutcomeInput } from '@/types/treatment';
 
-// ── Props & Emits ─────────────────────────────────────────────────────────
+// -- Props & Emits --
 
 const props = defineProps<{
   modelValue: boolean;
@@ -17,7 +17,7 @@ const emit = defineEmits<{
   (e: 'discharged'): void;
 }>();
 
-// ── Outcome options ───────────────────────────────────────────────────────
+// -- Outcome options --
 
 interface OutcomeOption {
   value: string;
@@ -71,7 +71,7 @@ const OUTCOME_OPTIONS: OutcomeOption[] = [
   },
 ];
 
-// ── Form state ────────────────────────────────────────────────────────────
+// -- Form state --
 
 function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
@@ -109,7 +109,7 @@ watch(
   },
 );
 
-// ── Reset on open ─────────────────────────────────────────────────────────
+// -- Reset on open --
 
 watch(
   () => props.modelValue,
@@ -122,7 +122,7 @@ watch(
   },
 );
 
-// ── Submit ────────────────────────────────────────────────────────────────
+// -- Submit --
 
 async function handleSubmit() {
   submitError.value = null;
@@ -156,7 +156,7 @@ async function handleSubmit() {
   }
 }
 
-// ── Close helpers ─────────────────────────────────────────────────────────
+// -- Close helpers --
 
 function close() {
   if (isSubmitting.value) return;
@@ -191,7 +191,7 @@ function onKeydown(e: KeyboardEvent) {
           tabindex="-1"
           @pointerdown.stop
         >
-          <!-- ── Warning header ──────────────────────────────────── -->
+          <!-- Warning header -->
           <div class="modal-header">
             <div class="header-icon-wrap" aria-hidden="true">
               <LogOut :size="20" />
@@ -206,7 +206,7 @@ function onKeydown(e: KeyboardEvent) {
             </div>
           </div>
 
-          <!-- ── Warning notice ──────────────────────────────────── -->
+          <!-- Warning notice -->
           <div class="warning-notice" role="note">
             <AlertTriangle :size="13" class="warning-icon" aria-hidden="true" />
             <span>
@@ -215,7 +215,7 @@ function onKeydown(e: KeyboardEvent) {
             </span>
           </div>
 
-          <!-- ── Form ────────────────────────────────────────────── -->
+          <!-- Form -->
           <form
             id="discharge-form"
             class="discharge-form"
@@ -331,7 +331,7 @@ function onKeydown(e: KeyboardEvent) {
             </Transition>
           </form>
 
-          <!-- ── Actions ──────────────────────────────────────────── -->
+          <!-- Actions -->
           <div class="modal-actions">
             <button
               type="button"
@@ -359,25 +359,23 @@ function onKeydown(e: KeyboardEvent) {
 </template>
 
 <style scoped>
-/* ── Backdrop ──────────────────────────────────────────────────────── */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: var(--z-modal);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
-  background: rgba(0, 0, 0, 0.35);
+  padding: var(--space-8);
+  background: var(--modal-overlay);
 }
 
-/* ── Dialog panel ──────────────────────────────────────────────────── */
 .modal-panel {
-  background: var(--color-bg);
-  border: var(--border);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-deep);
-  max-width: 500px;
+  background: var(--modal-bg);
+  border: var(--border-standard);
+  border-radius: var(--modal-radius);
+  box-shadow: var(--modal-shadow);
+  max-width: var(--modal-max-sm);
   width: 100%;
   outline: none;
   overflow: hidden;
@@ -385,12 +383,11 @@ function onKeydown(e: KeyboardEvent) {
   flex-direction: column;
 }
 
-/* ── Warning header ────────────────────────────────────────────────── */
 .modal-header {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 20px 24px 18px;
+  gap: var(--space-7);
+  padding: var(--space-10) var(--space-12) var(--space-9);
   background: linear-gradient(
     135deg,
     rgba(221, 91, 0, 0.07) 0%,
@@ -403,7 +400,7 @@ function onKeydown(e: KeyboardEvent) {
   width: 42px;
   height: 42px;
   background: rgba(221, 91, 0, 0.14);
-  color: var(--color-orange);
+  color: var(--color-warning);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -414,31 +411,31 @@ function onKeydown(e: KeyboardEvent) {
 .header-text {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
   min-width: 0;
 }
 
 .header-title {
-  font-size: 17px;
-  font-weight: 700;
+  font-size: var(--text-heading);
+  font-weight: var(--weight-heading);
   color: var(--color-text);
   letter-spacing: -0.2px;
   margin: 0;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
 }
 
 .header-subtitle {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
+  gap: var(--space-3);
+  font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   margin: 0;
   flex-wrap: wrap;
 }
 
 .patient-name-highlight {
-  font-weight: 600;
+  font-weight: var(--weight-emphasis);
   color: var(--color-text);
 }
 
@@ -448,45 +445,43 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .header-hn {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
-  font-weight: 500;
+  font-weight: var(--weight-ui);
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Warning notice ────────────────────────────────────────────────── */
 .warning-notice {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  margin: 16px 24px 0;
-  background: rgba(221, 91, 0, 0.06);
+  gap: var(--space-4);
+  margin: var(--space-8) var(--space-12) 0;
+  background: var(--tint-orange);
   border-left: 3px solid rgba(221, 91, 0, 0.5);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   padding: 9px 12px;
-  font-size: 12px;
-  color: #b84a00;
+  font-size: var(--text-sm);
+  color: var(--palette-orange-dark);
   line-height: 1.55;
 }
 
 .warning-icon {
   flex-shrink: 0;
   margin-top: 1px;
-  color: var(--color-orange);
+  color: var(--color-warning);
   opacity: 0.9;
 }
 
-/* ── Form ──────────────────────────────────────────────────────────── */
 .discharge-form {
-  padding: 16px 24px;
+  padding: var(--space-8) var(--space-12);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--space-7);
 }
 
 .form-row-2 {
   display: flex;
-  gap: 12px;
+  gap: var(--space-6);
 }
 
 .form-row-2 > .form-group {
@@ -501,43 +496,42 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .form-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-secondary);
   user-select: none;
 }
 
 .required {
-  color: var(--color-orange);
+  color: var(--color-warning);
   margin-left: 1px;
 }
 
-/* ── Inputs ────────────────────────────────────────────────────────── */
 .form-input,
 .form-textarea {
-  font-family: var(--font);
-  font-size: 13px;
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm);
   color: var(--color-text);
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-sm);
-  padding: 8px 10px;
+  padding: var(--input-padding-lg);
   width: 100%;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: var(--transition-input);
 }
 
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: var(--color-orange);
-  box-shadow: 0 0 0 3px rgba(221, 91, 0, 0.1);
+  border-color: var(--color-warning);
+  box-shadow: var(--shadow-focus-ring-error);
 }
 
 .form-input:disabled,
 .form-textarea:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
 }
 
 .form-textarea {
@@ -546,7 +540,6 @@ function onKeydown(e: KeyboardEvent) {
   line-height: 1.55;
 }
 
-/* ── Select wrapper ────────────────────────────────────────────────── */
 .select-wrap {
   position: relative;
 }
@@ -566,32 +559,31 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .form-select {
-  font-family: var(--font);
-  font-size: 13px;
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm);
   color: var(--color-text);
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-sm);
-  padding: 8px 30px 8px 10px;
+  padding: var(--input-padding-lg) 30px var(--input-padding-lg) var(--space-5);
   width: 100%;
   appearance: none;
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: var(--transition-input);
 }
 
 .form-select:focus {
   outline: none;
-  border-color: var(--color-orange);
-  box-shadow: 0 0 0 3px rgba(221, 91, 0, 0.1);
+  border-color: var(--color-warning);
+  box-shadow: var(--shadow-focus-ring-error);
 }
 
 .form-select:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
 }
 
-/* ── Outcome preview badge ─────────────────────────────────────────── */
 .outcome-preview {
   display: inline-flex;
   align-items: center;
@@ -599,59 +591,57 @@ function onKeydown(e: KeyboardEvent) {
   padding: 5px 12px;
   border-radius: var(--radius-pill);
   border: 1px solid transparent;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   align-self: flex-start;
 }
 
 .outcome-preview-dot {
   width: 7px;
   height: 7px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   flex-shrink: 0;
 }
 
-/* ── Form error ────────────────────────────────────────────────────── */
 .form-error {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  background: rgba(221, 91, 0, 0.08);
-  border: 1px solid rgba(221, 91, 0, 0.22);
+  gap: var(--space-4);
+  background: var(--alert-error-bg);
+  border: 1px solid var(--border-color-error);
   border-radius: var(--radius-sm);
   padding: 9px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-orange);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-ui);
+  color: var(--color-warning);
   line-height: 1.45;
 }
 
-/* ── Actions ───────────────────────────────────────────────────────── */
 .modal-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
-  padding: 14px 24px;
-  border-top: var(--border);
-  background: var(--color-bg-alt);
+  gap: var(--space-4);
+  padding: var(--space-7) var(--space-12);
+  border-top: var(--border-standard);
+  background: var(--color-surface-alt);
 }
 
 .btn-cancel {
-  padding: 8px 18px;
-  background: rgba(0, 0, 0, 0.05);
+  padding: var(--space-4) var(--space-9);
+  background: var(--btn-secondary-bg);
   border: none;
   border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
   cursor: pointer;
   color: var(--color-text-secondary);
-  transition: background 0.15s;
+  transition: var(--transition-btn);
 }
 
 .btn-cancel:hover:not(:disabled) {
-  background: rgba(0, 0, 0, 0.09);
+  background: var(--btn-secondary-hover);
 }
 
 .btn-discharge {
@@ -659,20 +649,20 @@ function onKeydown(e: KeyboardEvent) {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 8px 20px;
-  background: var(--color-orange);
+  padding: var(--space-4) var(--space-10);
+  background: var(--btn-danger-bg);
   border: none;
   border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-weight: 700;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-heading);
+  font-family: var(--font-family);
   cursor: pointer;
-  color: #fff;
-  transition: background 0.15s, transform 0.1s;
+  color: var(--btn-danger-text);
+  transition: var(--transition-btn-hover);
 }
 
 .btn-discharge:hover:not(:disabled) {
-  background: #b84a00;
+  background: var(--btn-danger-hover);
 }
 
 .btn-discharge:active:not(:disabled) {
@@ -685,13 +675,12 @@ function onKeydown(e: KeyboardEvent) {
   cursor: not-allowed;
 }
 
-/* ── Modal enter/leave transitions ─────────────────────────────────── */
 .modal-enter-active {
-  transition: opacity 0.2s ease;
+  transition: var(--transition-modal);
 }
 
 .modal-leave-active {
-  transition: opacity 0.16s ease;
+  transition: opacity var(--duration-base) var(--ease-standard);
 }
 
 .modal-enter-from,
@@ -700,11 +689,13 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .modal-enter-active .modal-panel {
-  transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: opacity var(--duration-slow) var(--ease-standard),
+    transform var(--duration-slow) cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .modal-leave-active .modal-panel {
-  transition: opacity 0.16s ease, transform 0.16s ease;
+  transition: opacity var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-standard);
 }
 
 .modal-enter-from .modal-panel,
@@ -713,13 +704,13 @@ function onKeydown(e: KeyboardEvent) {
   transform: scale(0.95) translateY(8px);
 }
 
-/* ── Badge / error fade ─────────────────────────────────────────────── */
 .badge-fade-enter-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: var(--transition-fade-slide);
 }
 
 .badge-fade-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition: opacity var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-standard);
 }
 
 .badge-fade-enter-from,
@@ -728,9 +719,8 @@ function onKeydown(e: KeyboardEvent) {
   transform: translateY(-4px);
 }
 
-/* ── Spin animation ─────────────────────────────────────────────────── */
 .spin {
-  animation: spin 0.9s linear infinite;
+  animation: spin var(--duration-animate) linear infinite;
   flex-shrink: 0;
 }
 

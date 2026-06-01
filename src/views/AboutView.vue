@@ -8,7 +8,7 @@ import {
   Network,
   ShieldCheck,
   Stethoscope,
-} from 'lucide-vue-next';
+} from '@lucide/vue';
 
 // Section 1: Feature list
 const features = [
@@ -213,7 +213,7 @@ const infoItems: InfoItem[] = [
 <style scoped>
 /* Page root */
 .view-root {
-  padding: 32px 32px 48px;
+  padding: var(--page-root-padding);
   max-width: 780px;
 }
 
@@ -223,17 +223,17 @@ const infoItems: InfoItem[] = [
 }
 
 .view-header h1 {
-  font-family: var(--font);
-  font-size: 22px;
-  font-weight: 700;
+  font-family: var(--font-family);
+  font-size: var(--text-display-sm);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.3px;
   color: var(--color-text);
   margin: 0 0 4px;
 }
 
 .view-header p {
-  font-family: var(--font);
-  font-size: 14px;
+  font-family: var(--font-family);
+  font-size: var(--text-body);
   color: var(--color-text-secondary);
   margin: 0;
 }
@@ -247,8 +247,8 @@ const infoItems: InfoItem[] = [
 
 /* Individual card */
 .about-card {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   padding: 24px;
@@ -289,7 +289,7 @@ const infoItems: InfoItem[] = [
 }
 
 .card-icon-wrap--muted {
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--btn-secondary-bg);
   color: var(--color-text-muted);
 }
 
@@ -302,9 +302,9 @@ const infoItems: InfoItem[] = [
 }
 
 .card-title {
-  font-family: var(--font);
-  font-size: 15px;
-  font-weight: 700;
+  font-family: var(--font-family);
+  font-size: var(--text-ui);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.15px;
   color: var(--color-text);
   margin: 0;
@@ -312,8 +312,8 @@ const infoItems: InfoItem[] = [
 
 /* Body paragraph */
 .card-body-text {
-  font-family: var(--font);
-  font-size: 14px;
+  font-family: var(--font-family);
+  font-size: var(--text-body);
   line-height: 1.65;
   color: var(--color-text-secondary);
   margin: 0 0 18px;
@@ -333,11 +333,11 @@ const infoItems: InfoItem[] = [
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  font-family: var(--font);
+  font-family: var(--font-family);
   font-size: 13.5px;
-  font-weight: 500;
+  font-weight: var(--weight-ui);
   color: var(--color-text);
-  line-height: 1.5;
+  line-height: var(--leading-body);
 }
 
 .feature-check {
@@ -351,10 +351,10 @@ const infoItems: InfoItem[] = [
   display: flex;
   align-items: center;
   gap: 10px;
-  background: var(--color-bg-alt);
-  border: var(--border);
+  background: var(--color-surface-alt);
+  border: var(--border-standard);
   border-radius: var(--radius-md);
-  padding: 12px 16px;
+  padding: var(--alert-padding);
   margin-bottom: 20px;
 }
 
@@ -365,22 +365,22 @@ const infoItems: InfoItem[] = [
 
 .banner-text {
   flex: 1;
-  font-family: var(--font);
+  font-family: var(--font-family);
   font-size: 13.5px;
-  font-weight: 600;
+  font-weight: var(--weight-emphasis);
   letter-spacing: -0.1px;
   color: var(--color-text);
 }
 
 .banner-badge {
   flex-shrink: 0;
-  padding: 3px 10px;
+  padding: var(--badge-padding);
   border-radius: var(--radius-pill);
   background: rgba(26, 174, 57, 0.12);
   color: var(--color-green);
-  font-family: var(--font);
+  font-family: var(--font-family);
   font-size: 11.5px;
-  font-weight: 700;
+  font-weight: var(--weight-heading);
   letter-spacing: 0.1px;
 }
 
@@ -395,7 +395,7 @@ const infoItems: InfoItem[] = [
   align-items: flex-start;
   gap: 14px;
   padding: 14px 0;
-  border-bottom: var(--border);
+  border-bottom: var(--border-standard);
 }
 
 .security-point:first-child {
@@ -412,7 +412,7 @@ const infoItems: InfoItem[] = [
   height: 34px;
   flex-shrink: 0;
   border-radius: var(--radius-sm);
-  background: rgba(26, 174, 57, 0.08);
+  background: var(--alert-success-bg);
   color: var(--color-green);
   display: flex;
   align-items: center;
@@ -426,20 +426,20 @@ const infoItems: InfoItem[] = [
 }
 
 .security-point-title {
-  font-family: var(--font);
+  font-family: var(--font-family);
   font-size: 13.5px;
-  font-weight: 600;
+  font-weight: var(--weight-emphasis);
   color: var(--color-text);
   margin: 0 0 4px;
-  line-height: 1.4;
+  line-height: var(--leading-normal);
 }
 
 .security-point-desc {
-  font-family: var(--font);
-  font-size: 13px;
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   margin: 0;
-  line-height: 1.6;
+  line-height: var(--leading-relaxed);
 }
 
 /* Data table (Section 3) */
@@ -450,15 +450,15 @@ const infoItems: InfoItem[] = [
 }
 
 .data-th {
-  font-family: var(--font);
+  font-family: var(--font-family);
   font-size: 11.5px;
-  font-weight: 600;
+  font-weight: var(--weight-emphasis);
   letter-spacing: 0.1px;
   color: var(--color-text-muted);
   text-transform: uppercase;
   text-align: left;
   padding: 0 12px 9px;
-  border-bottom: var(--border);
+  border-bottom: var(--border-standard);
 }
 
 .data-th:first-child {
@@ -470,7 +470,7 @@ const infoItems: InfoItem[] = [
 }
 
 .data-row td {
-  border-bottom: var(--border);
+  border-bottom: var(--border-standard);
 }
 
 .data-row--last td {
@@ -478,12 +478,12 @@ const infoItems: InfoItem[] = [
 }
 
 .data-td {
-  font-family: var(--font);
+  font-family: var(--font-family);
   font-size: 13.5px;
   color: var(--color-text);
   padding: 11px 12px;
   vertical-align: middle;
-  line-height: 1.4;
+  line-height: var(--leading-normal);
 }
 
 .data-td:first-child {
@@ -491,7 +491,7 @@ const infoItems: InfoItem[] = [
 }
 
 .data-td--source {
-  font-weight: 600;
+  font-weight: var(--weight-emphasis);
   white-space: nowrap;
 }
 
@@ -506,9 +506,9 @@ const infoItems: InfoItem[] = [
   align-items: center;
   padding: 3px 9px;
   border-radius: var(--radius-pill);
-  font-family: var(--font);
+  font-family: var(--font-family);
   font-size: 11.5px;
-  font-weight: 700;
+  font-weight: var(--weight-heading);
   letter-spacing: 0.05px;
   white-space: nowrap;
 }
@@ -528,11 +528,11 @@ const infoItems: InfoItem[] = [
   display: flex;
   align-items: flex-start;
   gap: 7px;
-  font-family: var(--font);
+  font-family: var(--font-family);
   font-size: 12.5px;
   color: var(--color-text-muted);
   margin: 0;
-  line-height: 1.5;
+  line-height: var(--leading-body);
 }
 
 .backup-note-icon {
@@ -552,7 +552,7 @@ const infoItems: InfoItem[] = [
   flex-direction: column;
   gap: 4px;
   padding: 12px 0;
-  border-bottom: var(--border);
+  border-bottom: var(--border-standard);
 }
 
 /* Remove bottom border on the last two items (bottom row of 2-col grid) */
@@ -563,23 +563,23 @@ const infoItems: InfoItem[] = [
 /* Right-column items: separate with a left border + left padding */
 .info-row:nth-child(even) {
   padding-left: 20px;
-  border-left: var(--border);
+  border-left: var(--border-standard);
 }
 
 .info-label {
-  font-family: var(--font);
-  font-size: 11px;
-  font-weight: 600;
+  font-family: var(--font-family);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   letter-spacing: 0.15px;
   color: var(--color-text-muted);
   text-transform: uppercase;
 }
 
 .info-value {
-  font-family: var(--font);
+  font-family: var(--font-family);
   font-size: 13.5px;
-  font-weight: 500;
+  font-weight: var(--weight-ui);
   color: var(--color-text);
-  line-height: 1.4;
+  line-height: var(--leading-normal);
 }
 </style>

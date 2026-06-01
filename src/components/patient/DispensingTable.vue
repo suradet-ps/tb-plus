@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-vue-next';
+import { ArrowDown, ArrowUp, ArrowUpDown } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import DrugChip from '@/components/shared/DrugChip.vue';
 import type { DispensingRecord } from '@/types/dispensing';
@@ -8,7 +8,7 @@ const props = defineProps<{
   records: DispensingRecord[];
 }>();
 
-// ── Sorting ───────────────────────────────────────────────────────────────
+// -- Sorting --
 
 type SortKey = 'date' | 'drug' | 'class' | 'qty';
 type SortDir = 'asc' | 'desc';
@@ -49,14 +49,14 @@ const sortedRecords = computed<DispensingRecord[]>(() => {
   });
 });
 
-// ── Stats ─────────────────────────────────────────────────────────────────
+// -- Stats --
 
 const uniqueDates = computed(() => new Set(props.records.map((r) => r.vstdate)).size);
 const uniqueClasses = computed(
   () => new Set(props.records.map((r) => r.drug_class).filter(Boolean)).size,
 );
 
-// ── Helpers ───────────────────────────────────────────────────────────────
+// -- Helpers --
 
 function toThaiDate(iso: string): string {
   try {
@@ -91,7 +91,7 @@ function sortIcon(key: SortKey): 'none' | 'asc' | 'desc' {
 <template>
   <div class="disp-table-wrapper">
 
-    <!-- ── Summary bar ─────────────────────────────────────────────── -->
+    <!-- Summary bar -->
     <div v-if="records.length > 0" class="summary-bar">
       <span class="summary-item">
         <span class="summary-value">{{ records.length }}</span>
@@ -114,7 +114,7 @@ function sortIcon(key: SortKey): 'none' | 'asc' | 'desc' {
       </div>
     </div>
 
-    <!-- ── Empty state ─────────────────────────────────────────────── -->
+    <!-- Empty state -->
     <div v-if="records.length === 0" class="empty-state" role="status">
       <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" width="36" height="36"
         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
@@ -126,7 +126,7 @@ function sortIcon(key: SortKey): 'none' | 'asc' | 'desc' {
       <span class="empty-sub">ยังไม่มีรายการยาวัณโรคในระบบ HOSxP สำหรับผู้ป่วยรายนี้</span>
     </div>
 
-    <!-- ── Table ───────────────────────────────────────────────────── -->
+    <!-- Table -->
     <div v-else class="table-scroll">
       <table class="disp-table" aria-label="ประวัติการจ่ายยา TB">
         <thead>
@@ -211,134 +211,127 @@ function sortIcon(key: SortKey): 'none' | 'asc' | 'desc' {
 </template>
 
 <style scoped>
-/* ── Wrapper ──────────────────────────────────────────────────────── */
 .disp-table-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-6);
 }
 
-/* ── Summary bar ──────────────────────────────────────────────────── */
 .summary-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-5);
   flex-wrap: wrap;
-  padding: 8px 12px;
-  background: var(--color-bg-alt);
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-surface-alt);
   border-radius: var(--radius-sm);
 }
 
 .summary-item {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .summary-value {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--text-body);
+  font-weight: var(--weight-heading);
   color: var(--color-text);
 }
 
 .summary-label {
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--color-text-muted);
 }
 
 .summary-sep {
   color: var(--color-text-muted);
-  font-size: 12px;
+  font-size: var(--text-sm);
   line-height: 1;
 }
 
 .legend-chips {
   display: flex;
-  gap: 4px;
+  gap: var(--space-2);
   margin-left: auto;
   flex-wrap: wrap;
 }
 
-/* ── Empty state ──────────────────────────────────────────────────── */
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 40px 24px;
+  gap: var(--space-4);
+  padding: var(--empty-padding-sm);
   text-align: center;
   color: var(--color-text-muted);
 }
 
 .empty-icon {
   opacity: 0.2;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-2);
 }
 
 .empty-title {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-secondary);
 }
 
 .empty-sub {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-muted);
   max-width: 320px;
-  line-height: 1.5;
+  line-height: var(--leading-body);
 }
 
-/* ── Table scroll container ───────────────────────────────────────── */
 .table-scroll {
   overflow-x: auto;
   border-radius: var(--radius-sm);
-  border: var(--border);
+  border: var(--border-standard);
 }
 
-/* ── Table ────────────────────────────────────────────────────────── */
 .disp-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   min-width: 520px;
 }
 
-/* ── Head ─────────────────────────────────────────────────────────── */
 thead tr {
-  background: var(--color-bg-alt);
-  border-bottom: var(--border);
+  background: var(--color-surface-alt);
+  border-bottom: var(--border-standard);
 }
 
 thead th {
   padding: 0;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--table-header-font-size);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-secondary);
   text-align: left;
   white-space: nowrap;
 }
 
-/* Sort button fills the entire <th> */
 .sort-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
   width: 100%;
   padding: 9px 12px;
   background: none;
   border: none;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font);
+  font-size: var(--table-header-font-size);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
   color: var(--color-text-secondary);
   cursor: pointer;
   text-align: left;
   white-space: nowrap;
-  transition: background 0.12s, color 0.12s;
+  transition: var(--transition-icon-btn);
 }
 
 .sort-btn:hover {
-  background: rgba(0, 0, 0, 0.03);
+  background: var(--tint-hover);
   color: var(--color-text);
 }
 
@@ -353,19 +346,17 @@ thead th {
 
 .sort-icon-active {
   opacity: 1;
-  color: var(--color-blue);
+  color: var(--color-accent);
 }
 
-/* Column widths */
 .th-date  { width: 110px; }
 .th-class { width: 90px; }
 .th-qty   { width: 110px; }
 
-/* ── Body rows ────────────────────────────────────────────────────── */
 .data-row {
-  border-bottom: var(--border);
+  border-bottom: var(--border-standard);
   border-left: 3px solid transparent;
-  transition: background 0.1s;
+  transition: background var(--duration-instant) var(--ease-standard);
 }
 
 .data-row:last-child {
@@ -373,75 +364,69 @@ thead th {
 }
 
 .data-row:hover {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
 }
 
-/* Drug-class color coding via left border */
 .row-H { border-left-color: var(--drug-H); }
 .row-R { border-left-color: var(--drug-R); }
 .row-Z { border-left-color: var(--drug-Z); }
 .row-E { border-left-color: var(--drug-E); }
 .row-unknown { border-left-color: transparent; }
 
-/* ── Cells ────────────────────────────────────────────────────────── */
 td {
   padding: 9px 12px;
   vertical-align: middle;
 }
 
-/* Date cell */
 .td-date {
   white-space: nowrap;
 }
 
 .date-text {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-ui);
   color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
-/* Drug name cell — no additional styles needed; wrapping is default block behaviour */
 .drug-name {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text);
-  font-weight: 400;
-  line-height: 1.4;
+  font-weight: var(--weight-body);
+  line-height: var(--leading-normal);
 }
 
 .drug-icode {
   display: block;
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--color-text-muted);
   margin-top: 1px;
   font-variant-numeric: tabular-nums;
 }
 
-/* Class chip cell */
 .td-class {
   white-space: nowrap;
 }
 
 .no-class {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
 
-/* Qty cell */
 .td-qty {
   white-space: nowrap;
   text-align: right;
 }
 
 .qty-value {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
 
 .qty-unit {
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--color-text-muted);
   margin-left: 3px;
 }

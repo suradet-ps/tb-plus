@@ -7,7 +7,7 @@ import {
   RefreshCw,
   ScanSearch,
   TriangleAlert,
-} from 'lucide-vue-next';
+} from '@lucide/vue';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import MapCanvas from '@/components/mapping/MapCanvas.vue';
 import MapFilters from '@/components/mapping/MapFilters.vue';
@@ -343,7 +343,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 
 <style scoped>
 .view-root {
-  padding: 32px 32px 48px;
+  padding: var(--page-root-padding);
   max-width: 1440px;
 }
 
@@ -351,23 +351,23 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: var(--space-8);
+  margin-bottom: var(--space-12);
 }
 
 .page-title {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--text-display-sm);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.3px;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-2);
   color: var(--color-text);
 }
 
 .page-subtitle {
-  font-size: 14px;
+  font-size: var(--text-body);
   color: var(--color-text-secondary);
   max-width: 820px;
-  line-height: 1.5;
+  line-height: var(--leading-body);
 }
 
 .header-actions {
@@ -384,28 +384,28 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   min-height: 36px;
   padding: 0 14px;
   border-radius: var(--radius-sm);
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 600;
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
   cursor: pointer;
   transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
 .btn-ghost {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   color: var(--color-text-secondary);
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   color: var(--color-text);
 }
 
 .btn-primary {
   background: var(--color-blue);
   border: 1px solid transparent;
-  color: #ffffff;
+  color: var(--color-surface);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -425,18 +425,18 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 .stats-bar {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
 }
 
 .stat-card {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   padding: 14px 16px;
   display: flex;
-  gap: 12px;
+  gap: var(--space-6);
   align-items: center;
 }
 
@@ -451,27 +451,27 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 
 .stat-icon--blue {
   color: var(--color-blue);
-  background: rgba(0, 117, 222, 0.1);
+  background: var(--tint-blue);
 }
 
 .stat-icon--teal {
   color: var(--color-teal);
-  background: rgba(42, 157, 153, 0.1);
+  background: var(--status-completed-bg);
 }
 
 .stat-icon--orange {
   color: var(--color-orange);
-  background: rgba(221, 91, 0, 0.1);
+  background: var(--status-defaulted-bg);
 }
 
 .stat-icon--green {
   color: var(--color-green);
-  background: rgba(26, 174, 57, 0.1);
+  background: var(--status-active-bg);
 }
 
 .stat-value {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: var(--text-display);
+  font-weight: var(--weight-heading);
   line-height: 1;
   color: var(--color-text);
 }
@@ -490,23 +490,23 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 
 .stat-label {
   margin-top: 4px;
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
 
 .notice-banner {
-  margin-bottom: 12px;
+  margin-bottom: var(--space-6);
   border-radius: var(--radius-md);
-  border: var(--border);
+  border: var(--border-standard);
   background: rgba(0, 117, 222, 0.07);
   color: var(--color-blue);
   padding: 10px 12px;
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
 }
 
 .notice-banner--warning {
-  background: rgba(221, 91, 0, 0.08);
+  background: var(--alert-error-bg);
   color: var(--color-orange);
 }
 
@@ -523,13 +523,13 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 .content-grid {
   display: grid;
   grid-template-columns: 360px minmax(0, 1fr);
-  gap: 16px;
+  gap: var(--space-8);
   margin-top: 16px;
 }
 
 .side-card {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   padding: 16px;
@@ -542,19 +542,19 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 .side-card__header {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-6);
 }
 
 .section-title {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--text-title-sm);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.2px;
   color: var(--color-text);
 }
 
 .section-subtitle {
   margin-top: 4px;
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   line-height: 1.45;
 }
@@ -565,36 +565,36 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   border-radius: var(--radius-pill);
   background: var(--color-badge-bg);
   color: var(--color-badge-text);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
 }
 
 .detail-card {
   padding: 14px;
   border-radius: var(--radius-card);
-  background: var(--color-bg-alt);
-  border: var(--border);
+  background: var(--color-surface-alt);
+  border: var(--border-standard);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-6);
 }
 
 .detail-card__top {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-6);
   align-items: flex-start;
 }
 
 .detail-name {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--text-heading-sm);
+  font-weight: var(--weight-heading);
   color: var(--color-text);
 }
 
 .detail-hn {
   margin-top: 3px;
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
 
@@ -612,31 +612,31 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 }
 
 .meta-label {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   letter-spacing: 0.125px;
   color: var(--color-text-muted);
   text-transform: uppercase;
 }
 
 .meta-value {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   line-height: 1.45;
 }
 
 .detail-error {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-orange);
-  background: rgba(221, 91, 0, 0.08);
+  background: var(--alert-error-bg);
   border-radius: var(--radius-md);
-  padding: 8px 10px;
+  padding: var(--input-padding-lg);
 }
 
 .patient-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-4);
   overflow: auto;
   padding-right: 2px;
 }
@@ -644,8 +644,8 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 .patient-row {
   width: 100%;
   text-align: left;
-  background: #ffffff;
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-md);
   padding: 11px 12px;
   display: flex;
@@ -656,7 +656,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 }
 
 .patient-row:hover {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
 }
 
 .patient-row--active {
@@ -669,14 +669,14 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 }
 
 .patient-row__name {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-heading);
   color: var(--color-text);
 }
 
 .patient-row__sub {
   margin-top: 4px;
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
   line-height: 1.45;
 }
@@ -685,14 +685,14 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   align-self: center;
   padding: 4px 8px;
   border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   letter-spacing: 0.125px;
   white-space: nowrap;
 }
 
 .geo-pill--success {
-  background: rgba(42, 157, 153, 0.1);
+  background: var(--status-completed-bg);
   color: var(--color-teal);
 }
 
@@ -702,21 +702,21 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 }
 
 .geo-pill--failed {
-  background: rgba(221, 91, 0, 0.1);
+  background: var(--status-defaulted-bg);
   color: var(--color-orange);
 }
 
 .geo-pill--muted {
-  background: rgba(0, 0, 0, 0.07);
+  background: var(--divider-color);
   color: var(--color-text-secondary);
 }
 
 .empty-inline {
   border-radius: var(--radius-md);
-  border: var(--border);
+  border: var(--border-standard);
   padding: 14px;
   text-align: center;
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
 }
 

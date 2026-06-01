@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Eye, LogOut, PlusCircle } from 'lucide-vue-next';
+import { Eye, LogOut, PlusCircle } from '@lucide/vue';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import DrugChip from '@/components/shared/DrugChip.vue';
@@ -7,11 +7,10 @@ import type { ActivePatientRow } from '@/types/patient';
 import AlertBadge from './AlertBadge.vue';
 import ProgressBar from './ProgressBar.vue';
 
-/** Parse regimen string "2HRZE/4HR" → continuation drug letters ["H","R"] */
 function getContinuationDrugsFromRegimen(regimen: string): string[] {
   const parts = regimen.split('/');
   if (parts.length < 2) return ['H', 'R'];
-  const contPart = parts[1].replace(/^\d+/, ''); // strip leading digit e.g. "4HR" → "HR"
+  const contPart = parts[1].replace(/^\d+/, '');
   return (['H', 'R', 'Z', 'E'] as const).filter((d) => contPart.toUpperCase().includes(d));
 }
 
@@ -27,9 +26,6 @@ const router = useRouter();
 const name = computed(() => props.patient.demographics?.full_name ?? props.patient.tb_patient.hn);
 const age = computed(() => props.patient.demographics?.age);
 
-// Derives the "real" current phase from the date, not just the SQLite record.
-// If the intensive phase end date has passed but the plan was never updated,
-// we still show "Continuation" so staff see the correct clinical picture.
 const effectivePhase = computed<'intensive' | 'continuation' | null>(() => {
   const plan = props.patient.current_plan;
   if (!plan) return null;
@@ -39,8 +35,6 @@ const effectivePhase = computed<'intensive' | 'continuation' | null>(() => {
   return plan.phase as 'intensive' | 'continuation';
 });
 
-// True when the SQLite plan record hasn't been updated yet but the phase has
-// effectively changed based on the expected end date.
 const phaseIsStale = computed(
   () => !!props.patient.current_plan && effectivePhase.value !== props.patient.current_plan.phase,
 );
@@ -52,9 +46,9 @@ const phaseLabel = computed(() => {
 });
 
 const phaseColor = computed(() => {
-  if (effectivePhase.value === 'intensive') return '#dd5b00';
-  if (effectivePhase.value === 'continuation') return '#2a9d99';
-  return '#a39e98';
+  if (effectivePhase.value === 'intensive') return 'var(--color-phase-intensive)';
+  if (effectivePhase.value === 'continuation') return 'var(--color-phase-continuation)';
+  return 'var(--color-text-muted)';
 });
 
 const tbTypeLabel = computed(() => {
@@ -75,9 +69,6 @@ const sexSymbol = computed(() => {
 
 const isOverdue = computed(() => (props.patient.days_since_last_dispensing ?? 0) > 35);
 
-// Returns drug letters to display.
-// When the plan is stale (still says "intensive" but end date passed), derive
-// the expected continuation drugs from the regimen string.
 function getDisplayDrugs(): string[] {
   const plan = props.patient.current_plan;
   if (!plan) return [];
@@ -110,38 +101,36 @@ function handleDischarge() {
   <div
     class="patient-card"
     :class="{
-      'card-alert-red': hasRedAlert,
-      'card-alert-yellow': hasYellowAlert && !hasRedAlert,
+      'patient-card--red': hasRedAlert,
+      'patient-card--yellow': hasYellowAlert && !hasRedAlert,
     }"
   >
-    <!-- Header: HN + name + badges -->
-    <div class="card-header">
-      <div class="card-name-block">
-        <div class="card-hn">{{ patient.tb_patient.hn }}</div>
-        <div class="card-name">{{ name }}</div>
-        <div class="card-meta">
+    <div class="patient-card__header">
+      <div class="patient-card__name-block">
+        <div class="patient-card__hn">{{ patient.tb_patient.hn }}</div>
+        <div class="patient-card__name">{{ name }}</div>
+        <div class="patient-card__meta">
           <span v-if="age !== null && age !== undefined">{{ age }} ปี</span>
-          <span v-if="sexSymbol" class="sex-dot">{{ sexSymbol }}</span>
+          <span v-if="sexSymbol" class="patient-card__sex">{{ sexSymbol }}</span>
         </div>
       </div>
-      <div class="card-badges">
-        <span class="tb-type-badge">{{ tbTypeLabel }}</span>
+      <div class="patient-card__badges">
+        <span class="patient-card__type-badge">{{ tbTypeLabel }}</span>
         <span
-          class="phase-badge"
+          class="patient-card__phase-badge"
           :style="{ background: phaseColor + '20', color: phaseColor }"
           :title="phaseIsStale ? 'ระยะนี้อ้างอิงจากวันที่ — แผนการรักษาในระบบยังไม่ได้อัปเดต' : undefined"
         >
           {{ phaseLabel }}
-          <span v-if="phaseIsStale" class="phase-stale-dot" title="แผนยังไม่ได้อัปเดต">*</span>
+          <span v-if="phaseIsStale" class="patient-card__phase-stale" title="แผนยังไม่ได้อัปเดต">*</span>
         </span>
       </div>
     </div>
 
-    <!-- Regimen + drug chips -->
-    <div class="card-regimen">
-      <span class="regimen-label">สูตรยา</span>
-      <span class="regimen-value">{{ patient.current_plan?.regimen ?? '-' }}</span>
-      <div class="drug-chips" v-if="getDisplayDrugs().length > 0">
+    <div class="patient-card__regimen">
+      <span class="patient-card__regimen-label">สูตรยา</span>
+      <span class="patient-card__regimen-value">{{ patient.current_plan?.regimen ?? '-' }}</span>
+      <div class="patient-card__chips" v-if="getDisplayDrugs().length > 0">
         <DrugChip
           v-for="d in getDisplayDrugs()"
           :key="d"
@@ -151,8 +140,7 @@ function handleDischarge() {
       </div>
     </div>
 
-    <!-- Treatment progress bar -->
-    <div class="card-progress">
+    <div class="patient-card__progress">
       <ProgressBar
         :current-month="patient.current_month"
         :total-months="patient.total_months"
@@ -160,22 +148,20 @@ function handleDischarge() {
       />
     </div>
 
-    <!-- Days since last dispensing -->
     <div
-      class="card-dispensing"
+      class="patient-card__dispensing"
       v-if="patient.days_since_last_dispensing !== null && patient.days_since_last_dispensing !== undefined"
     >
-      <span class="dispensing-label">รับยาล่าสุด</span>
+      <span class="patient-card__dispensing-label">รับยาล่าสุด</span>
       <span
-        class="dispensing-days"
-        :class="{ 'days-overdue': isOverdue }"
+        class="patient-card__dispensing-days"
+        :class="{ 'patient-card__dispensing-days--overdue': isOverdue }"
       >
         {{ patient.days_since_last_dispensing }} วันที่แล้ว
       </span>
     </div>
 
-    <!-- Alert badges (up to 2) -->
-    <div class="card-alerts" v-if="patient.alerts.length > 0">
+    <div class="patient-card__alerts" v-if="patient.alerts.length > 0">
       <AlertBadge
         v-for="alert in patient.alerts.slice(0, 2)"
         :key="alert.alert_type"
@@ -183,10 +169,9 @@ function handleDischarge() {
       />
     </div>
 
-    <!-- Action buttons -->
-    <div class="card-actions">
+    <div class="patient-card__actions">
       <button
-        class="action-btn action-view"
+        class="patient-card__action patient-card__action--view"
         @click="handleViewDetail"
         :title="`ดูรายละเอียด ${patient.tb_patient.hn}`"
       >
@@ -194,7 +179,7 @@ function handleDischarge() {
         ดูรายละเอียด
       </button>
       <button
-        class="action-btn action-followup"
+        class="patient-card__action patient-card__action--followup"
         @click="handleAddFollowup"
         :title="`บันทึกการติดตามผล ${patient.tb_patient.hn}`"
       >
@@ -202,7 +187,7 @@ function handleDischarge() {
         ติดตามผล
       </button>
       <button
-        class="action-btn action-discharge"
+        class="patient-card__action patient-card__action--discharge"
         @click="handleDischarge"
         title="จำหน่ายผู้ป่วย"
       >
@@ -214,227 +199,218 @@ function handleDischarge() {
 
 <style scoped>
 .patient-card {
-  background: var(--color-bg);
-  border: var(--border);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
-  padding: 16px;
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: var(--card-padding);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  transition: box-shadow 0.2s;
+  gap: var(--space-6);
+  transition: var(--transition-card-hover);
 }
 
 .patient-card:hover {
-  box-shadow:
-    rgba(0, 0, 0, 0.08) 0px 6px 24px,
-    rgba(0, 0, 0, 0.04) 0px 2px 8px;
+  box-shadow: var(--shadow-card-hover);
 }
 
-.card-alert-red {
-  border-left: 3px solid #dd5b00;
+.patient-card--red {
+  border-left: 3px solid var(--color-phase-intensive);
 }
 
-.card-alert-yellow {
-  border-left: 3px solid #f5a623;
+.patient-card--yellow {
+  border-left: 3px solid var(--palette-amber);
 }
 
-/* ── Header ── */
-.card-header {
+.patient-card__header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
-.card-name-block {
+.patient-card__name-block {
   flex: 1;
   min-width: 0;
 }
 
-.card-hn {
-  font-size: 12px;
-  font-weight: 600;
+.patient-card__hn {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-muted);
-  letter-spacing: 0.5px;
-  font-family: 'SF Mono', 'Roboto Mono', 'Fira Code', monospace;
+  letter-spacing: var(--tracking-hn);
+  font-family: var(--font-family-mono);
 }
 
-.card-name {
-  font-size: 15px;
-  font-weight: 600;
+.patient-card__name {
+  font-size: var(--text-ui);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text);
-  line-height: 1.3;
-  margin-top: 2px;
+  line-height: var(--leading-snug);
+  margin-top: var(--space-1);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.card-meta {
-  font-size: 12px;
+.patient-card__meta {
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
   display: flex;
-  gap: 4px;
+  gap: var(--space-2);
   align-items: center;
   margin-top: 3px;
 }
 
-.sex-dot {
+.patient-card__sex {
   opacity: 0.65;
 }
 
-.card-badges {
+.patient-card__badges {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
   align-items: flex-end;
   flex-shrink: 0;
 }
 
-.tb-type-badge {
-  background: var(--color-bg-alt);
+.patient-card__type-badge {
+  background: var(--color-surface-alt);
   color: var(--color-text-secondary);
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 600;
+  padding: var(--badge-padding-sm);
+  border-radius: var(--badge-radius);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   white-space: nowrap;
 }
 
-.phase-badge {
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 600;
+.patient-card__phase-badge {
+  padding: var(--badge-padding-sm);
+  border-radius: var(--badge-radius);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   white-space: nowrap;
 }
 
-.phase-stale-dot {
-  font-size: 10px;
-  font-weight: 800;
+.patient-card__phase-stale {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-heavy);
   opacity: 0.7;
   margin-left: 1px;
 }
 
-/* ── Regimen ── */
-.card-regimen {
+.patient-card__regimen {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
   flex-wrap: wrap;
 }
 
-.regimen-label {
-  font-size: 11px;
+.patient-card__regimen-label {
+  font-size: var(--text-caption);
   color: var(--color-text-muted);
   flex-shrink: 0;
 }
 
-.regimen-value {
-  font-size: 13px;
-  font-weight: 600;
+.patient-card__regimen-value {
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text);
 }
 
-.drug-chips {
+.patient-card__chips {
   display: flex;
   gap: 3px;
   flex-wrap: wrap;
 }
 
-/* ── Last dispensing ── */
-.card-dispensing {
+.patient-card__dispensing {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
-.dispensing-label {
-  font-size: 11px;
+.patient-card__dispensing-label {
+  font-size: var(--text-caption);
   color: var(--color-text-muted);
 }
 
-.dispensing-days {
-  font-size: 13px;
-  font-weight: 500;
+.patient-card__dispensing-days {
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-ui);
   color: var(--color-text-secondary);
 }
 
-.days-overdue {
-  color: var(--color-orange);
-  font-weight: 600;
+.patient-card__dispensing-days--overdue {
+  color: var(--color-warning);
+  font-weight: var(--weight-emphasis);
 }
 
-/* ── Alerts ── */
-.card-alerts {
+.patient-card__alerts {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
-/* ── Actions ── */
-.card-actions {
+.patient-card__actions {
   display: flex;
-  gap: 6px;
+  gap: var(--space-3);
   align-items: center;
-  padding-top: 4px;
-  border-top: var(--border);
+  padding-top: var(--space-2);
+  border-top: var(--border-standard);
 }
 
-.action-btn {
+.patient-card__action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 5px 10px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font);
+  gap: var(--space-2);
+  padding: var(--btn-padding-sm);
+  font-size: var(--btn-font-size-sm);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
   cursor: pointer;
-  border-radius: var(--radius-sm);
-  border: var(--border);
-  background: var(--color-bg);
-  transition:
-    background 0.15s,
-    border-color 0.15s;
+  border-radius: var(--btn-radius);
+  border: var(--border-standard);
+  background: var(--color-surface);
+  transition: var(--transition-icon-btn), border-color var(--duration-base) var(--ease-standard);
   white-space: nowrap;
 }
 
-.action-btn:focus-visible {
-  outline: 2px solid var(--color-blue);
+.patient-card__action:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 
-.action-view {
+.patient-card__action--view {
   flex: 1;
-  color: var(--color-blue);
-  border-color: rgba(0, 117, 222, 0.25);
+  color: var(--color-accent);
+  border-color: var(--border-color-focus);
 }
 
-.action-view:hover {
+.patient-card__action--view:hover {
   background: var(--color-badge-bg);
 }
 
-.action-followup {
+.patient-card__action--followup {
   flex: 1;
-  color: var(--color-teal);
-  border-color: rgba(42, 157, 153, 0.25);
+  color: var(--color-info);
+  border-color: var(--border-color-teal);
 }
 
-.action-followup:hover {
-  background: rgba(42, 157, 153, 0.06);
+.patient-card__action--followup:hover {
+  background: var(--tint-teal);
 }
 
-.action-discharge {
+.patient-card__action--discharge {
   color: var(--color-text-muted);
   padding: 5px 9px;
   flex-shrink: 0;
 }
 
-.action-discharge:hover {
-  background: var(--color-bg-alt);
-  color: var(--color-orange);
+.patient-card__action--discharge:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-warning);
   border-color: rgba(221, 91, 0, 0.2);
 }
 </style>

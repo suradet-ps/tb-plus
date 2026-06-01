@@ -120,20 +120,20 @@ const emit = defineEmits<{
 
 <style scoped>
 .filter-card {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-6);
 }
 
 .filter-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: var(--space-6);
 }
 
 .filter-row--search {
@@ -151,8 +151,8 @@ const emit = defineEmits<{
 }
 
 .filter-group label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   letter-spacing: 0.125px;
   color: var(--color-text-secondary);
 }
@@ -160,19 +160,19 @@ const emit = defineEmits<{
 .filter-input {
   width: 100%;
   min-height: 36px;
-  padding: 8px 10px;
+  padding: var(--input-padding-lg);
   border-radius: var(--radius-sm);
   border: 1px solid #dddddd;
-  background: #ffffff;
+  background: var(--color-surface);
   color: var(--color-text);
-  font-family: var(--font);
-  font-size: 13px;
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm);
 }
 
 .filter-input:focus {
   outline: none;
   border-color: var(--color-blue-focus);
-  box-shadow: 0 0 0 3px rgba(9, 127, 232, 0.14);
+  box-shadow: var(--shadow-focus-input);
 }
 
 .filter-actions {
@@ -184,18 +184,18 @@ const emit = defineEmits<{
   min-height: 36px;
   padding: 0 14px;
   border-radius: var(--radius-sm);
-  border: var(--border);
-  background: var(--color-bg);
+  border: var(--border-standard);
+  background: var(--color-surface);
   color: var(--color-text-secondary);
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 600;
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
   cursor: pointer;
   transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
 .btn-reset:hover {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   color: var(--color-text);
 }
 

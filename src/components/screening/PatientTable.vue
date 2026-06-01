@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronDown, FileX } from 'lucide-vue-next';
+import { ChevronDown, FileX } from '@lucide/vue';
 import { computed, ref, watchEffect } from 'vue';
 import DrugChip from '@/components/shared/DrugChip.vue';
 import { useScreeningStore } from '@/stores/screening';
@@ -7,10 +7,10 @@ import type { PatientDrugRecord } from '@/types/patient';
 
 const store = useScreeningStore();
 
-// ── Header checkbox ref (needed to set indeterminate via JS property) ──────────
+// -- Header checkbox ref (needed to set indeterminate via JS property) --
 const headerCheckbox = ref<HTMLInputElement | null>(null);
 
-// ── Sort state ───────────────────────────────────────────────────────────────
+// -- Sort state --
 type SortKey = 'hn' | 'full_name' | 'age' | 'first_dispensed' | 'last_dispensed' | 'visit_count';
 type SortDir = 'asc' | 'desc';
 
@@ -26,7 +26,7 @@ function sortBy(key: SortKey) {
   }
 }
 
-// ── Sorted results ────────────────────────────────────────────────────────────
+// -- Sorted results --
 const sortedResults = computed<PatientDrugRecord[]>(() => {
   const arr = [...store.results];
   const key = sortKey.value;
@@ -51,7 +51,7 @@ const sortedResults = computed<PatientDrugRecord[]>(() => {
   return arr;
 });
 
-// ── Selection helpers ─────────────────────────────────────────────────────────
+// -- Selection helpers --
 // Selectable = not enrolled, OR enrolled but already discharged (non-active status)
 const selectableRows = computed(() =>
   store.results.filter(
@@ -94,7 +94,7 @@ function toggleRow(row: PatientDrugRecord) {
   store.toggleSelect(row.hn);
 }
 
-// ── Formatters ────────────────────────────────────────────────────────────────
+// -- Formatters --
 function toThaiDate(isoDate: string | null | undefined): string {
   if (!isoDate) return '-';
   try {
@@ -115,7 +115,7 @@ function sexLabel(sex: string | null | undefined): string {
 <template>
   <div class="table-wrapper">
     <table class="patient-table">
-      <!-- ── Header ─────────────────────────────────────────────────────────── -->
+      <!-- Header -->
       <thead>
         <tr>
           <th class="th-check">
@@ -203,7 +203,7 @@ function sexLabel(sex: string | null | undefined): string {
         </tr>
       </thead>
 
-      <!-- ── Loading: 5 skeleton rows ──────────────────────────────────────── -->
+      <!-- Loading: 5 skeleton rows -->
       <tbody v-if="store.isLoading">
         <tr v-for="i in 5" :key="i" class="skeleton-row">
           <td>
@@ -233,7 +233,7 @@ function sexLabel(sex: string | null | undefined): string {
         </tr>
       </tbody>
 
-      <!-- ── Empty state ────────────────────────────────────────────────────── -->
+      <!-- Empty state -->
       <tbody v-else-if="store.results.length === 0">
         <tr>
           <td colspan="9" class="empty-td">
@@ -245,7 +245,7 @@ function sexLabel(sex: string | null | undefined): string {
         </tr>
       </tbody>
 
-      <!-- ── Data rows ──────────────────────────────────────────────────────── -->
+      <!-- Data rows -->
       <tbody v-else>
         <tr
           v-for="row in sortedResults"
@@ -302,33 +302,30 @@ function sexLabel(sex: string | null | undefined): string {
 </template>
 
 <style scoped>
-/* ── Wrapper ─────────────────────────────────────────────────────────────────── */
 .table-wrapper {
   overflow-x: auto;
 }
 
-/* ── Table base ──────────────────────────────────────────────────────────────── */
 .patient-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--text-body-sm);
 }
 
-/* ── Sticky header ───────────────────────────────────────────────────────────── */
 thead {
   position: sticky;
   top: 0;
-  background: var(--color-bg);
-  z-index: 1;
+  background: var(--color-surface);
+  z-index: var(--z-sticky);
 }
 
 thead th {
-  padding: 10px 12px;
+  padding: var(--table-cell-padding);
   text-align: left;
-  font-weight: 600;
-  font-size: 12px;
+  font-weight: var(--weight-emphasis);
+  font-size: var(--table-header-font-size);
   color: var(--color-text-secondary);
-  border-bottom: var(--border);
+  border-bottom: var(--border-standard);
   white-space: nowrap;
 }
 
@@ -340,7 +337,6 @@ thead th {
   text-align: center;
 }
 
-/* ── Sortable column headers ─────────────────────────────────────────────────── */
 .sortable {
   cursor: pointer;
   user-select: none;
@@ -355,9 +351,8 @@ thead th {
   vertical-align: middle;
   margin-left: 3px;
   opacity: 0;
-  transition:
-    opacity 0.15s,
-    transform 0.2s;
+  transition: opacity var(--duration-base) var(--ease-standard),
+    transform var(--duration-slow) var(--ease-standard);
   transform: rotate(0deg);
 }
 
@@ -367,26 +362,25 @@ thead th {
 
 .sort-icon.sort-active {
   opacity: 1;
-  color: var(--color-blue);
+  color: var(--color-accent);
 }
 
 .sort-icon.sort-asc {
   transform: rotate(180deg);
 }
 
-/* ── Body rows ───────────────────────────────────────────────────────────────── */
 tbody tr {
-  border-bottom: var(--border);
+  border-bottom: var(--border-standard);
   cursor: pointer;
-  transition: background 0.1s;
+  transition: background var(--duration-instant) var(--ease-standard);
 }
 
 tbody tr:hover:not(.row-enrolled):not(.row-discharged-selectable) {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
 }
 
 tbody tr.row-selected {
-  background: #f0f7ff;
+  background: var(--tint-selected);
 }
 
 tbody tr.row-enrolled {
@@ -394,22 +388,20 @@ tbody tr.row-enrolled {
   cursor: default;
 }
 
-/* Discharged patients are selectable for re-enrollment */
 tbody tr.row-discharged-selectable {
   cursor: pointer;
 }
 
 tbody tr.row-discharged-selectable:hover:not(.row-selected) {
-  background: rgba(221, 91, 0, 0.05);
+  background: var(--tint-orange);
 }
 
 tbody tr.row-discharged-selectable.row-selected {
   background: rgba(221, 91, 0, 0.09);
 }
 
-/* ── Cells ───────────────────────────────────────────────────────────────────── */
 td {
-  padding: 10px 12px;
+  padding: var(--table-cell-padding);
   vertical-align: middle;
 }
 
@@ -418,97 +410,91 @@ td {
 }
 
 .hn-cell {
-  font-weight: 600;
-  font-family: monospace;
-  font-size: 13px;
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family-mono-simple);
+  font-size: var(--text-body-sm);
   color: var(--color-text);
   white-space: nowrap;
 }
 
 .name-cell {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   white-space: nowrap;
 }
 
 .age-sex-cell {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   white-space: nowrap;
   color: var(--color-text-secondary);
 }
 
 .sex-glyph {
-  margin-left: 4px;
-  font-size: 13px;
+  margin-left: var(--space-2);
+  font-size: var(--text-body-sm);
 }
 
 .date-cell {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
 .count-cell {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
   text-align: center;
 }
 
 .drug-chips {
   display: flex;
-  gap: 4px;
+  gap: var(--space-2);
   flex-wrap: wrap;
   min-width: 60px;
 }
 
 .enrolled-badge {
-  background: rgba(26, 174, 57, 0.1);
-  color: #1aae39;
-  padding: 2px 8px;
-  border-radius: 9999px;
-  font-size: 11px;
-  font-weight: 600;
+  background: var(--status-active-bg);
+  color: var(--status-active-text);
+  padding: var(--badge-padding-sm);
+  border-radius: var(--badge-radius);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   white-space: nowrap;
 }
 
 .discharged-badge {
   background: rgba(163, 158, 152, 0.15);
   color: var(--color-text-muted);
-  padding: 2px 8px;
-  border-radius: 9999px;
-  font-size: 11px;
-  font-weight: 600;
+  padding: var(--badge-padding-sm);
+  border-radius: var(--badge-radius);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   white-space: nowrap;
 }
 
-/* ── Skeleton rows ───────────────────────────────────────────────────────────── */
 .skeleton-row td {
-  padding: 10px 12px;
+  padding: var(--table-cell-padding);
 }
 
 .skeleton-line {
   height: 14px;
-  border-radius: 4px;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--skeleton-color-1) 25%, var(--skeleton-color-2) 50%, var(--skeleton-color-1) 75%);
   background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
+  animation: skeleton-shimmer 1.4s infinite;
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-/* ── Empty state ─────────────────────────────────────────────────────────────── */
 .empty-td {
   text-align: center;
 }
 
 .empty-state {
-  padding: 48px 24px;
+  padding: var(--empty-padding);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -517,13 +503,13 @@ td {
 
 .empty-state p {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--text-body);
 }
 
 .empty-icon {
-  width: 32px;
-  height: 32px;
-  margin-bottom: 12px;
+  width: var(--space-16);
+  height: var(--space-16);
+  margin-bottom: var(--space-6);
   opacity: 0.4;
 }
 </style>

@@ -7,7 +7,7 @@ const props = defineProps<{
   followups: Followup[];
 }>();
 
-// ── Helpers ──────────────────────────────────────────────────────────────
+// -- Helpers --
 
 function addMonths(date: Date, months: number): Date {
   const d = new Date(date);
@@ -37,7 +37,7 @@ function toThaiDate(iso: string): string {
   }
 }
 
-// ── Plan resolution ───────────────────────────────────────────────────────
+// -- Plan resolution --
 
 const intensivePlan = computed(() => props.plans.find((p) => p.phase === 'intensive') ?? null);
 const continuationPlan = computed(
@@ -103,7 +103,7 @@ const continuationInfo = computed<PhaseInfo | null>(() => {
   return null;
 });
 
-// ── Timeline bounds ───────────────────────────────────────────────────────
+// -- Timeline bounds --
 
 const overallStart = computed(
   () => intensiveInfo.value?.start ?? continuationInfo.value?.start ?? null,
@@ -116,7 +116,7 @@ const totalDays = computed(() => {
   return Math.max(1, d);
 });
 
-// ── Percentage helpers ────────────────────────────────────────────────────
+// -- Percentage helpers --
 
 function pctFromDate(date: Date): number {
   if (!overallStart.value) return 0;
@@ -147,13 +147,13 @@ function followupPct(date: string): number {
   return pctFromDate(new Date(date));
 }
 
-// ── Month ticks ───────────────────────────────────────────────────────────
+// -- Month ticks --
 
 const totalMonths = computed(
   () => (intensiveInfo.value?.durationMonths ?? 0) + (continuationInfo.value?.durationMonths ?? 0),
 );
 
-// ── Date labels ───────────────────────────────────────────────────────────
+// -- Date labels --
 
 const startLabel = computed(() =>
   overallStart.value ? toThaiDate(overallStart.value.toISOString().slice(0, 10)) : '',
@@ -183,7 +183,7 @@ const boundaryLabel = computed(() =>
   boundaryDate.value ? toThaiDate(boundaryDate.value.toISOString().slice(0, 10)) : '',
 );
 
-// ── Tooltip for each followup dot ─────────────────────────────────────────
+// -- Tooltip for each followup dot --
 
 function dotTooltip(f: Followup): string {
   const dateStr = toThaiDate(f.followup_date);
@@ -205,7 +205,7 @@ function dotTooltip(f: Followup): string {
         <span>{{ endLabel }}</span>
       </div>
 
-      <!-- ── Track area ─────────────────────────────────────────── -->
+      <!-- Track area -->
       <div class="timeline-track-outer">
         <!-- Phase bars (flexbox, fills 100% width) -->
         <div class="timeline-track" role="img" aria-label="ไทม์ไลน์การรักษา">
@@ -239,7 +239,7 @@ function dotTooltip(f: Followup): string {
           </div>
         </div>
 
-        <!-- ── Overlay layer: dots + today marker ──────────────── -->
+        <!-- Overlay layer: dots + today marker -->
         <div class="overlay-layer" aria-hidden="true">
           <!-- Phase boundary label -->
           <div
@@ -272,7 +272,7 @@ function dotTooltip(f: Followup): string {
           </div>
         </div>
       </div>
-      <!-- ── End track area ──────────────────────────────────── -->
+      <!-- End track area -->
 
       <!-- Month ticks -->
       <div v-if="totalMonths > 0" class="month-ticks" aria-hidden="true">
@@ -303,51 +303,44 @@ function dotTooltip(f: Followup): string {
 </template>
 
 <style scoped>
-/* ── Wrapper ──────────────────────────────────────────────────────── */
 .timeline-wrapper {
-  padding: 4px 0;
+  padding: var(--space-2) 0;
 }
 
-/* ── Empty state ──────────────────────────────────────────────────── */
 .timeline-empty {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   border-radius: var(--radius-md);
-  padding: 24px;
+  padding: var(--space-12);
   text-align: center;
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-muted);
 }
 
-/* ── Container ────────────────────────────────────────────────────── */
 .timeline-container {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
-/* ── Date labels ──────────────────────────────────────────────────── */
 .date-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-ui);
   color: var(--color-text-muted);
-  padding: 0 2px;
+  padding: 0 var(--space-1);
 }
 
-/* ── Track outer (position: relative hosts absolute children) ─────── */
 .timeline-track-outer {
   position: relative;
 }
 
-/* ── Phase bars row ───────────────────────────────────────────────── */
 .timeline-track {
   display: flex;
   height: 42px;
   border-radius: var(--radius-sm);
   overflow: hidden;
-  background: var(--color-bg-alt);
-  /* children fill available space proportionally */
+  background: var(--color-surface-alt);
 }
 
 .phase-bar {
@@ -356,77 +349,73 @@ function dotTooltip(f: Followup): string {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  transition: width 0.4s ease;
+  transition: width var(--duration-pulse) var(--ease-standard);
   min-width: 4px;
   flex-shrink: 0;
 }
 
 .intensive-bar {
-  background: rgba(221, 91, 0, 0.13);
-  border-right: 2px solid rgba(221, 91, 0, 0.3);
+  background: var(--timeline-intensive-bg);
+  border-right: 2px solid var(--timeline-intensive-border);
 }
 
 .continuation-bar {
-  background: rgba(42, 157, 153, 0.13);
+  background: var(--timeline-continuation-bg);
 }
 
 .unknown-bar {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
 }
 
-/* ── Phase labels (inside bars) ───────────────────────────────────── */
 .phase-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: 0 12px;
+  padding: 0 var(--space-6);
   user-select: none;
   pointer-events: none;
 }
 
 .intensive-label {
-  color: #dd5b00;
+  color: var(--color-phase-intensive);
 }
 
 .continuation-label {
-  color: #2a9d99;
+  color: var(--color-phase-continuation);
 }
 
 .unknown-label {
   color: var(--color-text-muted);
 }
 
-/* ── Overlay layer (dots + today marker) ──────────────────────────── */
 .overlay-layer {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-/* ── Follow-up dots ───────────────────────────────────────────────── */
 .followup-dot {
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
   width: 12px;
   height: 12px;
-  background: var(--color-blue);
-  border: 2.5px solid #fff;
-  border-radius: 50%;
-  box-shadow: 0 1px 4px rgba(0, 117, 222, 0.4);
+  background: var(--timeline-today-color);
+  border: 2.5px solid var(--color-surface);
+  border-radius: var(--radius-circle);
+  box-shadow: var(--shadow-timeline-dot);
   pointer-events: all;
   cursor: pointer;
-  z-index: 2;
-  transition: transform 0.15s ease;
+  z-index: var(--z-timeline);
+  transition: transform var(--duration-base) var(--ease-standard);
 }
 
 .followup-dot:hover {
   transform: translate(-50%, -50%) scale(1.35);
 }
 
-/* ── Today marker ─────────────────────────────────────────────────── */
 .today-marker {
   position: absolute;
   top: -6px;
@@ -435,7 +424,7 @@ function dotTooltip(f: Followup): string {
   display: flex;
   flex-direction: column;
   align-items: center;
-  z-index: 3;
+  z-index: var(--z-timeline);
   pointer-events: none;
 }
 
@@ -447,41 +436,39 @@ function dotTooltip(f: Followup): string {
 }
 
 .today-label {
-  font-size: 10px;
-  font-weight: 700;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-heading);
   color: rgba(0, 0, 0, 0.65);
   white-space: nowrap;
   margin-top: 3px;
   letter-spacing: 0.3px;
 }
 
-/* Boundary label (phase transition date positioned above the boundary) */
 .boundary-label {
   position: absolute;
   top: -18px;
   transform: translateX(-50%);
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-heading);
   color: var(--color-text-secondary);
   white-space: nowrap;
-  z-index: 3;
+  z-index: var(--z-timeline);
   pointer-events: none;
 }
 
-/* ── Month ticks ──────────────────────────────────────────────────── */
 .month-ticks {
   display: flex;
-  margin-top: 16px; /* extra space so today-label doesn't overlap */
+  margin-top: var(--space-8);
 }
 
 .month-tick {
   flex: 1;
   text-align: center;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-ui);
   color: var(--color-text-muted);
-  border-left: 1px dashed rgba(0, 0, 0, 0.1);
-  padding-top: 2px;
+  border-left: 1px dashed var(--border-color);
+  padding-top: var(--space-1);
   user-select: none;
 }
 
@@ -489,21 +476,20 @@ function dotTooltip(f: Followup): string {
   border-left: none;
 }
 
-/* ── Legend ───────────────────────────────────────────────────────── */
 .phase-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: var(--border);
+  gap: var(--space-7);
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: var(--border-standard);
 }
 
 .legend-item {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--color-text-muted);
   user-select: none;
 }
@@ -524,8 +510,8 @@ function dotTooltip(f: Followup): string {
 }
 
 .legend-followup {
-  background: var(--color-blue);
-  border-radius: 50%;
+  background: var(--timeline-today-color);
+  border-radius: var(--radius-circle);
 }
 
 .legend-today {

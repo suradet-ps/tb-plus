@@ -141,8 +141,8 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .map-card {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   overflow: hidden;
@@ -155,32 +155,32 @@ onBeforeUnmount(() => {
 }
 
 :deep(.leaflet-control-attribution) {
-  font-family: var(--font);
+  font-family: var(--font-family);
   font-size: 10.5px;
 }
 
 :deep(.leaflet-popup-content-wrapper) {
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  border: var(--border);
+  border: var(--border-standard);
 }
 
 :deep(.leaflet-popup-content) {
   margin: 10px 12px;
-  font-family: var(--font);
+  font-family: var(--font-family);
 }
 
 :deep(.tb-map-popup__title) {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-heading);
   color: var(--color-text);
   margin-bottom: 3px;
 }
 
 :deep(.tb-map-popup__meta) {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
-  line-height: 1.4;
+  line-height: var(--leading-normal);
 }
 
 :deep(.tb-map-marker-shell) {
@@ -193,12 +193,12 @@ onBeforeUnmount(() => {
   width: 18px;
   height: 18px;
   border-radius: 9999px;
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 6px 16px rgba(0, 0, 0, 0.16);
+  border: 2px solid var(--color-surface);
+  box-shadow: var(--shadow-map-marker);
 }
 
 :deep(.tb-map-marker--selected) {
-  box-shadow: 0 0 0 3px rgba(9, 127, 232, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 0 0 3px rgba(9, 127, 232, 0.2), 0 0 0 1px var(--border-color);
 }
 
 @media (max-width: 1100px) {

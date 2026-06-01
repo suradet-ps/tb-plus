@@ -1,64 +1,500 @@
-/* ─── Design System CSS Variables ─────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════
+   Design Token System — TB Plus
+   Architecture: Primitive → Semantic → Component (3-tier hierarchy)
+   Inspired by DESIGN.md (Notion visual language)
+
+   Naming convention: `--{category}-{property}-{variant}`
+   Categories: color | space | text | leading | tracking | weight
+               radius | shadow | z | ease | bp | layout
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* -- 1. PRIMITIVE COLOUR PALETTE -- */
 :root {
-  /* Colors — text */
-  --color-text: rgba(0, 0, 0, 0.95);
-  --color-text-secondary: #615d59;
-  --color-text-muted: #a39e98;
+  /* Warm neutrals (yellow-brown undertones, per DESIGN.md) */
+  --palette-warm-white: #f6f5f4;
+  --palette-warm-dark: #31302e;
+  --palette-warm-gray-500: #615d59;
+  --palette-warm-gray-300: #a39e98;
 
-  /* Colors — surface */
-  --color-bg: #ffffff;
-  --color-bg-alt: #f6f5f4;
-  --color-bg-dark: #31302e;
+  /* Brand blues */
+  --palette-blue: #0075de;
+  --palette-blue-active: #005bab;
+  --palette-blue-focus: #097fe8;
 
-  /* Colors — brand / interactive */
-  --color-blue: #0075de;
-  --color-blue-active: #005bab;
-  --color-blue-focus: #097fe8;
+  /* Semantic accent colours */
+  --palette-teal: #2a9d99;
+  --palette-green: #1aae39;
+  --palette-orange: #dd5b00;
+  --palette-pink: #ff64c8;
+  --palette-purple: #391c57;
+  --palette-brown: #523410;
 
-  /* Colors — badge */
+  /* Alert / extended */
+  --palette-red: #b91c1c;
+  --palette-red-dark: #991b1b;
+  --palette-amber: #f5a623;
+  --palette-amber-dark: #c78b00;
+  --palette-orange-dark: #b84a00;
+  --palette-orange-darker: #c44e00;
+  --palette-teal-dark: #238582;
+  --palette-red-mid: #c0392b;
+  --palette-gold-brown: #ad7e26;
+
+  /* Pure white / near-black */
+  --palette-white: #ffffff;
+  --palette-black-alpha-95: rgba(0, 0, 0, 0.95);
+}
+
+/* -- 2. SEMANTIC COLOUR TOKENS -- */
+:root {
+  /* Text hierarchy */
+  --color-text: var(--palette-black-alpha-95);
+  --color-text-secondary: var(--palette-warm-gray-500);
+  --color-text-muted: var(--palette-warm-gray-300);
+  --color-text-inverse: var(--palette-white);
+
+  /* Surface */
+  --color-surface: var(--palette-white);
+  --color-surface-alt: var(--palette-warm-white);
+  --color-surface-dark: var(--palette-warm-dark);
+
+  /* Brand / interactive */
+  --color-accent: var(--palette-blue);
+  --color-accent-active: var(--palette-blue-active);
+  --color-accent-focus: var(--palette-blue-focus);
+
+  /* Semantic — status */
+  --color-success: var(--palette-green);
+  --color-success-text: var(--palette-green);
+  --color-info: var(--palette-teal);
+  --color-warning: var(--palette-orange);
+  --color-danger: var(--palette-orange);
+  --color-error: var(--palette-red);
+
+  /* Semantic — alert severity */
+  --color-alert-red: var(--palette-red);
+  --color-alert-red-bg: #fff5f5;
+  --color-alert-orange: var(--palette-orange);
+  --color-alert-orange-bg: #fff8f1;
+  --color-alert-yellow: var(--palette-amber-dark);
+  --color-alert-yellow-bg: #fffaf2;
+
+  /* Semantic — phase colours */
+  --color-phase-intensive: var(--palette-orange);
+  --color-phase-continuation: var(--palette-teal);
+
+  /* Semantic — badge */
   --color-badge-bg: #f2f9ff;
-  --color-badge-text: #097fe8;
+  --color-badge-text: var(--palette-blue-focus);
 
-  /* Colors — semantic */
-  --color-teal: #2a9d99;
-  --color-green: #1aae39;
-  --color-orange: #dd5b00;
-  --color-pink: #ff64c8;
-  --color-purple: #391c57;
-  --color-brown: #523410;
+  /* Semantic — overlay */
+  --color-overlay: rgba(0, 0, 0, 0.35);
+  --color-overlay-light: rgba(0, 0, 0, 0.3);
 
-  /* Drug class accent colors */
-  --drug-H: #2a9d99;
-  --drug-R: #dd5b00;
-  --drug-Z: #523410;
-  --drug-E: #0075de;
+  /* Semantic — focus ring */
+  --color-focus-ring: var(--palette-blue);
+}
 
-  /* Borders */
-  --border: 1px solid rgba(0, 0, 0, 0.1);
+/* -- 3. DRUG CLASS ACCENT COLOURS -- */
+:root {
+  --drug-H: var(--palette-teal);
+  --drug-H-bg: #e8f8f7;
+  --drug-H-border: rgba(42, 157, 153, 0.25);
+
+  --drug-R: var(--palette-orange);
+  --drug-R-bg: #fdf0e8;
+  --drug-R-border: rgba(221, 91, 0, 0.25);
+
+  --drug-Z: var(--palette-brown);
+  --drug-Z-bg: #f0ebe6;
+  --drug-Z-border: rgba(82, 52, 16, 0.25);
+
+  --drug-E: var(--palette-blue);
+  --drug-E-bg: #e8f2fd;
+  --drug-E-border: rgba(0, 117, 222, 0.25);
+}
+
+/* -- 4. SPACING SCALE (8px base) -- */
+:root {
+  --space-0: 0;
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 10px;
+  --space-6: 12px;
+  --space-7: 14px;
+  --space-8: 16px;
+  --space-9: 18px;
+  --space-10: 20px;
+  --space-11: 22px;
+  --space-12: 24px;
+  --space-14: 28px;
+  --space-16: 32px;
+  --space-20: 40px;
+  --space-24: 48px;
+  --space-28: 56px;
+  --space-30: 60px;
+
+  /* Page-level spacing */
+  --space-page-padding: 32px;
+  --space-page-bottom: 48px;
+}
+
+/* -- 5. TYPOGRAPHY -- */
+:root {
+  /* Font family */
+  --font-family: "Inter", -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-family-mono: "SF Mono", "Roboto Mono", "Fira Code", monospace;
+  --font-family-mono-simple: monospace;
+
+  /* Font size scale (px, per DESIGN.md hierarchy) */
+  --text-xs: 10px;
+  --text-2xs: 10px;
+  --text-caption: 11px;
+  --text-sm: 12px;
+  --text-body-sm: 13px;
+  --text-body: 14px;
+  --text-ui: 15px;
+  --text-heading-sm: 16px;
+  --text-heading: 17px;
+  --text-title-sm: 18px;
+  --text-title: 20px;
+  --text-display-sm: 22px;
+  --text-display: 24px;
+  --text-display-lg: 30px;
+
+  /* Font weights (4-weight system per DESIGN.md) */
+  --weight-body: 400; /* reading */
+  --weight-ui: 500; /* interactive */
+  --weight-emphasis: 600; /* emphasis / navigation */
+  --weight-heading: 700; /* headings / display */
+  --weight-heavy: 800; /* extreme emphasis */
+
+  /* Line heights */
+  --leading-tight: 1.2;
+  --leading-snug: 1.3;
+  --leading-compact: 1.33;
+  --leading-normal: 1.4;
+  --leading-body: 1.5;
+  --leading-relaxed: 1.6;
+
+  /* Letter spacing */
+  --tracking-tighter: -0.03em;
+  --tracking-tight: -0.02em;
+  --tracking-snug: -0.01em;
+  --tracking-normal: normal;
+  --tracking-badge: 0.125px;
+  --tracking-hn: 0.5px;
+  --tracking-label: 0.5px;
+  --tracking-heading: -0.25px;
+}
+
+/* -- 6. BORDER RADIUS -- */
+:root {
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-card: 12px;
+  --radius-pill: 9999px;
+  --radius-circle: 50%;
+}
+
+/* -- 7. BORDER COLOURS -- */
+:root {
+  --border-standard: 1px solid rgba(0, 0, 0, 0.1);
   --border-color: rgba(0, 0, 0, 0.1);
+  --border-color-light: rgba(0, 0, 0, 0.06);
+  --border-color-medium: rgba(0, 0, 0, 0.07);
+  --border-color-input: rgba(0, 0, 0, 0.15);
+  --border-color-focus: rgba(0, 117, 222, 0.25);
+  --border-color-teal: rgba(42, 157, 153, 0.25);
+  --border-color-orange: rgba(221, 91, 0, 0.25);
+  --border-color-green: rgba(26, 174, 57, 0.22);
+  --border-color-error: rgba(221, 91, 0, 0.22);
+}
 
-  /* Shadows */
+/* -- 8. SHADOW PRESETS -- */
+:root {
   --shadow-card:
     rgba(0, 0, 0, 0.04) 0px 4px 18px,
     rgba(0, 0, 0, 0.027) 0px 2.025px 7.84688px,
     rgba(0, 0, 0, 0.02) 0px 0.8px 2.925px,
     rgba(0, 0, 0, 0.01) 0px 0.175px 1.04062px;
+  --shadow-card-hover: rgba(0, 0, 0, 0.08) 0px 6px 24px, rgba(0, 0, 0, 0.04) 0px 2px 8px;
+  --shadow-card-hover-sm: rgba(0, 0, 0, 0.06) 0px 4px 14px, rgba(0, 0, 0, 0.03) 0px 1px 4px;
   --shadow-deep:
     rgba(0, 0, 0, 0.01) 0px 1px 3px,
     rgba(0, 0, 0, 0.02) 0px 3px 7px,
     rgba(0, 0, 0, 0.02) 0px 7px 15px,
     rgba(0, 0, 0, 0.04) 0px 14px 28px,
     rgba(0, 0, 0, 0.05) 0px 23px 52px;
+  --shadow-focus-ring: 0 0 0 3px rgba(0, 117, 222, 0.1);
+  --shadow-focus-ring-sm: 0 0 0 2px rgba(0, 117, 222, 0.1);
+  --shadow-focus-ring-error: 0 0 0 3px rgba(221, 91, 0, 0.1);
+  --shadow-timeline-dot: 0 1px 4px rgba(0, 117, 222, 0.4);
+  --shadow-map-marker: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 6px 16px rgba(0, 0, 0, 0.16);
+  --shadow-focus-search: 0 0 0 3px rgba(9, 127, 232, 0.15);
+  --shadow-focus-input: 0 0 0 3px rgba(9, 127, 232, 0.14);
+}
 
-  /* Border radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-card: 12px;
-  --radius-pill: 9999px;
+/* -- 9. Z-INDEX LAYERS -- */
+:root {
+  --z-sticky: 1;
+  --z-timeline: 3;
+  --z-overlay-settings: 100;
+  --z-panel: 900;
+  --z-modal: 1000;
+  --z-splash: 9999;
+}
 
-  /* Typography */
-  --font: "Inter", -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+/* -- 10. TRANSITIONS -- */
+:root {
+  --ease-standard: ease;
+  --ease-in-out: ease-in-out;
+  --duration-instant: 80ms;
+  --duration-fast: 120ms;
+  --duration-base: 150ms;
+  --duration-normal: 180ms;
+  --duration-slow: 200ms;
+  --duration-pulse: 400ms;
+  --duration-animate: 900ms;
+  --duration-loop: 1500ms;
 
-  /* Layout */
+  --transition-bg: background var(--duration-base) var(--ease-standard);
+  --transition-color: color var(--duration-base) var(--ease-standard);
+  --transition-border: border-color var(--duration-base) var(--ease-standard);
+  --transition-input:
+    border-color var(--duration-base) var(--ease-standard),
+    box-shadow var(--duration-base) var(--ease-standard);
+  --transition-btn: background var(--duration-fast) var(--ease-standard);
+  --transition-btn-hover:
+    background var(--duration-fast) var(--ease-standard),
+    transform var(--duration-instant) var(--ease-standard);
+  --transition-modal: opacity var(--duration-slow) var(--ease-standard);
+  --transition-modal-panel:
+    opacity var(--duration-slow) var(--ease-standard),
+    transform var(--duration-slow) var(--ease-standard);
+  --transition-progress: width var(--duration-pulse) var(--ease-standard);
+  --transition-fade-slide:
+    opacity var(--duration-normal) var(--ease-standard),
+    transform var(--duration-normal) var(--ease-standard);
+  --transition-card-hover: box-shadow var(--duration-slow) var(--ease-standard);
+  --transition-icon-btn:
+    background var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+/* -- 11. BREAKPOINTS -- */
+:root {
+  --bp-mobile-sm: 400px;
+  --bp-mobile: 600px;
+  --bp-tablet-sm: 768px;
+  --bp-tablet: 1080px;
+  --bp-desktop-sm: 1200px;
+  --bp-desktop: 1440px;
+}
+
+/* -- 12. LAYOUT -- */
+:root {
   --sidebar-width: 240px;
+  --page-max-sm: 780px;
+  --page-max: 900px;
+  --page-max-md: 1100px;
+  --page-max-lg: 1200px;
+  --page-max-xl: 1440px;
+  --dialog-max: 400px;
+  --modal-max-sm: 500px;
+  --modal-max: 540px;
+}
+
+/* -- 13. COMPONENT TOKENS -- */
+:root {
+  /* -- Button -- */
+  --btn-primary-bg: var(--palette-blue);
+  --btn-primary-text: var(--palette-white);
+  --btn-primary-hover: var(--palette-blue-active);
+  --btn-ghost-text: var(--color-text-secondary);
+  --btn-ghost-hover-bg: var(--color-surface-alt);
+  --btn-ghost-hover-text: var(--color-text);
+  --btn-danger-bg: var(--palette-orange);
+  --btn-danger-hover: var(--palette-orange-dark);
+  --btn-danger-text: var(--palette-white);
+  --btn-secondary-bg: rgba(0, 0, 0, 0.05);
+  --btn-secondary-hover: rgba(0, 0, 0, 0.09);
+  --btn-secondary-active: rgba(0, 0, 0, 0.13);
+  --btn-padding: 7px 14px;
+  --btn-padding-sm: 5px 10px;
+  --btn-padding-lg: 7px 16px;
+  --btn-font-size: var(--text-body-sm);
+  --btn-font-size-sm: var(--text-sm);
+  --btn-font-size-lg: var(--text-body);
+  --btn-radius: var(--radius-sm);
+
+  /* -- Input / Form -- */
+  --input-bg: var(--color-surface);
+  --input-text: rgba(0, 0, 0, 0.9);
+  --input-placeholder: var(--palette-warm-gray-300);
+  --input-border: var(--border-color-input);
+  --input-border-focus: var(--palette-blue);
+  --input-border-error: var(--palette-orange);
+  --input-padding: 6px 10px;
+  --input-padding-sm: 6px 10px;
+  --input-padding-md: 7px 10px;
+  --input-padding-lg: 8px 10px;
+  --input-font-size: var(--text-body-sm);
+  --input-font-size-sm: var(--text-body-sm);
+  --input-font-size-md: var(--text-body);
+  --input-font-size-lg: var(--text-body);
+  --input-radius: var(--radius-sm);
+
+  /* -- Card -- */
+  --card-bg: var(--color-surface);
+  --card-border: var(--border-standard);
+  --card-radius: var(--radius-card);
+  --card-shadow: var(--shadow-card);
+  --card-padding: var(--space-8);
+
+  /* -- Badge / Pill -- */
+  --badge-radius: var(--radius-pill);
+  --badge-font-size: var(--text-sm);
+  --badge-font-weight: var(--weight-emphasis);
+  --badge-letter-spacing: var(--tracking-badge);
+  --badge-line-height: var(--leading-compact);
+  --badge-padding: 3px 10px;
+  --badge-padding-sm: 2px 8px;
+
+  /* -- Drug Chip -- */
+  --chip-radius: var(--radius-pill);
+  --chip-font-weight: var(--weight-emphasis);
+  --chip-letter-spacing: var(--tracking-badge);
+  --chip-line-height: 1;
+  --chip-padding-sm: 2px 8px;
+  --chip-padding-md: 3px 10px;
+  --chip-font-sm: var(--text-caption);
+  --chip-font-md: var(--text-body-sm);
+
+  /* -- Modal / Dialog -- */
+  --modal-overlay: var(--color-overlay);
+  --modal-overlay-light: var(--color-overlay-light);
+  --modal-bg: var(--color-surface);
+  --modal-shadow: var(--shadow-deep);
+  --modal-radius: var(--radius-card);
+  --modal-header-padding: 20px 24px 16px;
+  --modal-body-padding: 20px 24px;
+  --modal-footer-padding: 16px 24px;
+  --modal-padding: var(--space-12);
+  --dialog-padding: var(--space-12);
+
+  /* -- Table -- */
+  --table-bg: var(--color-surface);
+  --table-border: var(--border-standard);
+  --table-radius: var(--radius-card);
+  --table-shadow: var(--shadow-card);
+  --table-cell-padding: 10px 12px;
+  --table-header-font-size: var(--text-caption);
+
+  /* -- Stat Card -- */
+  --stat-padding: 14px 18px;
+  --stat-num-size: var(--text-display);
+  --stat-label-size: var(--text-caption);
+
+  /* -- Empty State -- */
+  --empty-padding-sm: 40px 24px;
+  --empty-padding: 48px 24px;
+  --empty-padding-lg: 60px 24px;
+  --empty-padding-xl: 56px 24px;
+  --empty-icon-color: var(--palette-warm-gray-300);
+
+  /* -- Page layout -- */
+  --page-root-padding: var(--space-page-padding) var(--space-page-padding) var(--space-page-bottom);
+  --page-header-margin: var(--space-12);
+  --filter-card-padding: 20px 24px;
+  --filter-card-margin: var(--space-8);
+
+  /* -- Scrollbar -- */
+  --scrollbar-width: 6px;
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+
+  /* -- Skeleton -- */
+  --skeleton-color-1: #f0f0f0;
+  --skeleton-color-2: #e8e8e8;
+
+  /* -- Alert / Notification -- */
+  --alert-padding: 12px 16px;
+  --alert-border-radius: var(--radius-md);
+  --alert-error-bg: rgba(221, 91, 0, 0.08);
+  --alert-error-border: rgba(221, 91, 0, 0.25);
+  --alert-success-bg: rgba(26, 174, 57, 0.08);
+  --alert-success-border: rgba(26, 174, 57, 0.22);
+  --alert-warning-border: rgba(221, 91, 0, 0.2);
+
+  /* -- Status Badge (inline) -- */
+  --status-active-bg: rgba(26, 174, 57, 0.1);
+  --status-active-text: var(--palette-green);
+  --status-completed-bg: rgba(42, 157, 153, 0.1);
+  --status-completed-text: var(--palette-teal);
+  --status-transferred-bg: #f2f9ff;
+  --status-transferred-text: var(--palette-blue-focus);
+  --status-died-bg: rgba(49, 48, 46, 0.1);
+  --status-died-text: var(--palette-warm-gray-500);
+  --status-defaulted-bg: rgba(221, 91, 0, 0.1);
+  --status-defaulted-text: var(--palette-orange);
+
+  /* -- Progress Bar -- */
+  --progress-height: 5px;
+  --progress-track-bg: var(--color-surface-alt);
+  --progress-radius: var(--radius-pill);
+
+  /* -- Action Bar -- */
+  --action-bar-bg: #f0f7ff;
+  --action-bar-border: 1px solid rgba(0, 117, 222, 0.2);
+  --action-bar-padding: 12px 20px;
+
+  /* -- Search Bar -- */
+  --search-wrap-border: 1px solid rgba(0, 0, 0, 0.1);
+  --search-wrap-radius: var(--radius-sm);
+
+  /* -- Tab -- */
+  --tab-padding: 10px 18px;
+  --tab-active-border: 2px solid var(--palette-blue);
+
+  /* -- Divider -- */
+  --divider-color: rgba(0, 0, 0, 0.07);
+
+  /* -- Timeline -- */
+  --timeline-bar-height: 28px;
+  --timeline-intensive-bg: rgba(221, 91, 0, 0.1);
+  --timeline-continuation-bg: rgba(42, 157, 153, 0.1);
+  --timeline-intensive-border: rgba(221, 91, 0, 0.3);
+  --timeline-continuation-border: rgba(42, 157, 153, 0.3);
+  --timeline-today-color: var(--palette-blue);
+
+  /* -- Tinted backgrounds (reusable overlay tints) -- */
+  --tint-hover: rgba(0, 0, 0, 0.04);
+  --tint-active: rgba(0, 0, 0, 0.08);
+  --tint-blue: rgba(0, 117, 222, 0.06);
+  --tint-blue-hover: rgba(0, 117, 222, 0.08);
+  --tint-teal: rgba(42, 157, 153, 0.06);
+  --tint-orange: rgba(221, 91, 0, 0.06);
+  --tint-red: rgba(185, 28, 28, 0.06);
+  --tint-selected: #f0f7ff;
+}
+
+/* -- Aliases for backward compatibility -- */
+:root {
+  --color-bg: var(--color-surface);
+  --color-bg-alt: var(--color-surface-alt);
+  --color-bg-dark: var(--color-surface-dark);
+  --color-blue: var(--color-accent);
+  --color-blue-active: var(--color-accent-active);
+  --color-blue-focus: var(--color-accent-focus);
+  --color-teal: var(--color-info);
+  --color-green: var(--color-success);
+  --color-orange: var(--color-warning);
+  --color-pink: var(--palette-pink);
+  --color-purple: var(--palette-purple);
+  --color-brown: var(--palette-brown);
+  --font: var(--font-family);
+  --border: var(--border-standard);
 }

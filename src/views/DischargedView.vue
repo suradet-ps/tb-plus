@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertTriangle, CheckCircle, Loader2, RefreshCw, UserMinus, Users } from 'lucide-vue-next';
+import { AlertTriangle, CheckCircle, Loader2, RefreshCw, UserMinus, Users } from '@lucide/vue';
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 import { usePatientStore } from '@/stores/patient';
@@ -45,26 +45,26 @@ function getOutcomeColor(p: import('@/types/patient').ActivePatientRow): string 
   const outcome = p.outcome_value ?? p.tb_patient.status;
   switch (outcome) {
     case 'cured':
-      return '#1aae39';
+      return 'var(--color-success)';
     case 'treatment_completed':
       return '#2a9d99';
     case 'treatment_failed':
-      return '#dd5b00';
+      return 'var(--color-warning)';
     case 'died':
-      return '#615d59';
+      return 'var(--color-text-secondary)';
     case 'lost_to_followup':
-      return '#dd5b00';
+      return 'var(--color-warning)';
     case 'transferred_out':
-      return '#0075de';
+      return 'var(--color-accent)';
     case 'not_evaluated':
       return '#a39e98';
     // Fallback for legacy tb_patients.status values
     case 'completed':
       return '#2a9d99';
     case 'transferred':
-      return '#0075de';
+      return 'var(--color-accent)';
     case 'defaulted':
-      return '#dd5b00';
+      return 'var(--color-warning)';
     default:
       return '#a39e98';
   }
@@ -248,39 +248,39 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 
 <style scoped>
 .view-root {
-  padding: 32px 32px 48px;
+  padding: var(--page-root-padding);
   max-width: 1200px;
 }
 
-/* ── Header ── */
+/* -- Header -- */
 .view-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 24px;
-  gap: 16px;
+  margin-bottom: var(--space-12);
+  gap: var(--space-8);
 }
 
 .header-title {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--text-display-sm);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.3px;
   color: var(--color-text);
   margin: 0 0 4px;
 }
 
 .header-sub {
-  font-size: 14px;
+  font-size: var(--text-body);
   color: var(--color-text-secondary);
   margin: 0;
 }
 
 .header-sub strong {
-  font-weight: 700;
+  font-weight: var(--weight-heading);
   color: var(--color-text);
 }
 
-/* ── Refresh button ── */
+/* -- Refresh button -- */
 .btn-ghost {
   display: inline-flex;
   align-items: center;
@@ -288,9 +288,9 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
   background: transparent;
   border: 1px solid rgba(0, 0, 0, 0.15);
   padding: 7px 13px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
   cursor: pointer;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
@@ -298,7 +298,7 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
 }
 
 .btn-ghost:disabled {
@@ -306,22 +306,22 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
   cursor: not-allowed;
 }
 
-/* ── Stats bar ── */
+/* -- Stats bar -- */
 .stats-bar {
   display: flex;
-  gap: 12px;
+  gap: var(--space-6);
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
 
 .stat-card {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
-  padding: 14px 18px;
+  padding: var(--stat-padding);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-6);
   box-shadow: var(--shadow-card);
   min-width: 140px;
 }
@@ -336,10 +336,10 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
   flex-shrink: 0;
 }
 
-.stat-icon-blue   { background: rgba(0, 117, 222, 0.1);  color: var(--color-blue); }
-.stat-icon-teal   { background: rgba(42, 157, 153, 0.1); color: var(--color-teal); }
-.stat-icon-orange { background: rgba(221, 91, 0, 0.1);   color: var(--color-orange); }
-.stat-icon-gray   { background: rgba(0, 0, 0, 0.05);     color: var(--color-text-muted); }
+.stat-icon-blue   { background: var(--tint-blue);  color: var(--color-blue); }
+.stat-icon-teal   { background: var(--status-completed-bg); color: var(--color-teal); }
+.stat-icon-orange { background: var(--status-defaulted-bg);   color: var(--color-orange); }
+.stat-icon-gray   { background: var(--btn-secondary-bg);     color: var(--color-text-muted); }
 
 .stat-body {
   display: flex;
@@ -348,8 +348,8 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 }
 
 .stat-num {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: var(--text-display);
+  font-weight: var(--weight-heading);
   line-height: 1;
   letter-spacing: -0.5px;
   color: var(--color-text);
@@ -360,12 +360,12 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 .stat-num-gray   { color: var(--color-text-muted); }
 
 .stat-label {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
   margin-top: 1px;
 }
 
-/* ── Loading / empty states ── */
+/* -- Loading / empty states -- */
 .state-container {
   display: flex;
   align-items: center;
@@ -386,31 +386,31 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 .loading-icon {
   color: var(--color-blue);
   opacity: 0.7;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-2);
 }
 
 .empty-icon {
   opacity: 0.2;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-2);
   color: var(--color-text-muted);
 }
 
 .state-title {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--text-ui);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-secondary);
 }
 
 .state-sub {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-muted);
   max-width: 320px;
 }
 
-/* ── Table card ── */
+/* -- Table card -- */
 .table-card {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   overflow: hidden;
@@ -419,11 +419,11 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 .discharged-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--text-body-sm);
 }
 
 .discharged-table thead {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
   position: sticky;
   top: 0;
 }
@@ -431,15 +431,15 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 .discharged-table thead th {
   padding: 10px 14px;
   text-align: left;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-secondary);
-  border-bottom: var(--border);
+  border-bottom: var(--border-standard);
   white-space: nowrap;
 }
 
 .data-row {
-  border-bottom: var(--border);
+  border-bottom: var(--border-standard);
   transition: background 0.1s;
 }
 
@@ -448,7 +448,7 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 }
 
 .data-row:hover {
-  background: var(--color-bg-alt);
+  background: var(--color-surface-alt);
 }
 
 .discharged-table td {
@@ -457,34 +457,34 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 }
 
 .td-hn {
-  font-weight: 600;
+  font-weight: var(--weight-emphasis);
   font-family: 'SF Mono', 'Roboto Mono', monospace;
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
 
 .td-name {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-ui);
   color: var(--color-text);
 }
 
 .td-type {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
 }
 
 .td-date {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
 .outcome-badge {
-  padding: 3px 10px;
+  padding: var(--badge-padding);
   border-radius: 9999px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
   white-space: nowrap;
 }
 
@@ -492,21 +492,21 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
   display: inline-flex;
   align-items: center;
   padding: 4px 10px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-blue);
   background: var(--color-badge-bg);
   border: 1px solid rgba(0, 117, 222, 0.2);
   border-radius: var(--radius-sm);
   text-decoration: none;
-  transition: background 0.12s;
+  transition: var(--transition-btn);
 }
 
 .btn-view:hover {
   background: rgba(0, 117, 222, 0.12);
 }
 
-/* ── Spinner ── */
+/* -- Spinner -- */
 .spin {
   animation: spin 1s linear infinite;
 }

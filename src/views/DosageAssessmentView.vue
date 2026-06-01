@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { invoke } from '@tauri-apps/api/core';
 import {
   AlertCircle,
   Calculator,
@@ -8,7 +7,8 @@ import {
   Scale,
   Search,
   UserRound,
-} from 'lucide-vue-next';
+} from '@lucide/vue';
+import { invoke } from '@tauri-apps/api/core';
 import { computed, ref, watch } from 'vue';
 import DrugChip from '@/components/shared/DrugChip.vue';
 import { useSettingsStore } from '@/stores/settings';
@@ -274,7 +274,7 @@ function sexLabel(sex: string | null | undefined): string | null {
 
 <style scoped>
 .view-root {
-  padding: 32px 32px 48px;
+  padding: var(--page-root-padding);
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -284,12 +284,12 @@ function sexLabel(sex: string | null | undefined): string | null {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-8);
 }
 
 .view-header h1 {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--text-display-sm);
+  font-weight: var(--weight-heading);
   letter-spacing: -0.25px;
   color: var(--color-text);
   margin: 0 0 4px;
@@ -304,10 +304,10 @@ function sexLabel(sex: string | null | undefined): string | null {
 .phase-header p,
 .dose-rule,
 .empty-sub {
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   margin: 0;
-  line-height: 1.5;
+  line-height: var(--leading-body);
 }
 
 .header-chip,
@@ -319,8 +319,8 @@ function sexLabel(sex: string | null | undefined): string | null {
   gap: 6px;
   border-radius: var(--radius-pill);
   padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
 }
 
 .header-chip,
@@ -335,8 +335,8 @@ function sexLabel(sex: string | null | undefined): string | null {
 .phase-card,
 .state-box,
 .empty-card {
-  background: var(--color-bg);
-  border: var(--border);
+  background: var(--color-surface);
+  border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
 }
@@ -362,33 +362,33 @@ function sexLabel(sex: string | null | undefined): string | null {
 }
 
 .form-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-secondary);
 }
 
 .form-input {
   width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #dddddd;
+  padding: var(--input-padding-lg);
+  border: 1px solid var(--border-color-input);
   border-radius: var(--radius-sm);
-  font-family: var(--font);
-  font-size: 13px;
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm);
   color: var(--color-text);
-  background: var(--color-bg);
+  background: var(--color-surface);
   outline: none;
   transition: border-color 0.13s, box-shadow 0.13s;
 }
 
 .form-input:focus {
   border-color: var(--color-blue);
-  box-shadow: 0 0 0 3px rgba(0, 117, 222, 0.1);
+  box-shadow: 0 0 0 3px var(--tint-blue);
 }
 
 .search-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-6);
   margin-top: 16px;
   flex-wrap: wrap;
 }
@@ -398,12 +398,12 @@ function sexLabel(sex: string | null | undefined): string | null {
   align-items: center;
   gap: 6px;
   background: var(--color-blue);
-  color: #fff;
+  color: var(--color-text-inverse);
   border: none;
   padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
   cursor: pointer;
   border-radius: var(--radius-sm);
   transition: background 0.13s;
@@ -421,15 +421,15 @@ function sexLabel(sex: string | null | undefined): string | null {
 .state-box {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: var(--space-6);
 }
 
 .state-box--warn {
-  background: #fff8f1;
+  background: var(--color-alert-orange-bg);
 }
 
 .state-box--error {
-  background: #fff5f5;
+  background: var(--color-alert-red-bg);
 }
 
 .state-icon,
@@ -444,19 +444,19 @@ function sexLabel(sex: string | null | undefined): string | null {
 .empty-title {
   color: var(--color-text);
   margin: 0 0 4px;
-  font-weight: 700;
+  font-weight: var(--weight-heading);
 }
 
 .summary-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-8);
 }
 
 .summary-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text-muted);
   margin: 0 0 6px;
   text-transform: uppercase;
@@ -478,15 +478,15 @@ function sexLabel(sex: string | null | undefined): string | null {
 .warnings-card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  background: #fffaf2;
+  gap: var(--space-4);
+  background: var(--color-alert-yellow-bg);
 }
 
 .warning-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: var(--space-4);
+  font-size: var(--text-body-sm);
   color: var(--color-orange);
 }
 
@@ -494,7 +494,7 @@ function sexLabel(sex: string | null | undefined): string | null {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-8);
   margin-bottom: 14px;
 }
 
@@ -516,8 +516,8 @@ function sexLabel(sex: string | null | undefined): string | null {
 }
 
 .assessment-table th {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-heading);
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -533,24 +533,24 @@ function sexLabel(sex: string | null | undefined): string | null {
 .suggestion-main,
 .target-range,
 .strength-text {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-emphasis);
   color: var(--color-text);
 }
 
 .drug-code {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
   margin-top: 2px;
 }
 
 .status-pill--ok {
-  background: rgba(26, 174, 57, 0.1);
+  background: var(--status-active-bg);
   color: var(--color-green);
 }
 
 .status-pill--warn {
-  background: rgba(221, 91, 0, 0.1);
+  background: var(--status-defaulted-bg);
   color: var(--color-orange);
 }
 

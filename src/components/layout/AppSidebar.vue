@@ -11,7 +11,7 @@ import {
   UserMinus,
   Users,
   WifiOff,
-} from 'lucide-vue-next';
+} from '@lucide/vue';
 import { computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import TbClinicLogo from '@/components/shared/TbClinicLogo.vue';
@@ -124,8 +124,8 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
   width: var(--sidebar-width);
   min-width: var(--sidebar-width);
   height: 100vh;
-  background: var(--color-bg-alt);
-  border-right: var(--border);
+  background: var(--color-surface-alt);
+  border-right: var(--border-standard);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -133,12 +133,11 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
   flex-shrink: 0;
 }
 
-/* ── Header / branding ── */
 .sidebar-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 18px 16px 14px;
+  gap: var(--space-5);
+  padding: var(--space-9) var(--space-8) var(--space-7);
 }
 
 .sidebar-logo {
@@ -158,9 +157,9 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
 }
 
 .brand-title {
-  font-family: var(--font);
-  font-size: 15px;
-  font-weight: 600;
+  font-family: var(--font-family);
+  font-size: var(--text-ui);
+  font-weight: var(--weight-emphasis);
   letter-spacing: -0.3px;
   color: var(--color-text);
   white-space: nowrap;
@@ -169,42 +168,40 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
 }
 
 .brand-sub {
-  font-family: var(--font);
-  font-size: 11px;
-  font-weight: 400;
+  font-family: var(--font-family);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-body);
   color: var(--color-text-muted);
   white-space: nowrap;
 }
 
-/* ── Divider ── */
 .sidebar-divider {
   height: 1px;
-  background: rgba(0, 0, 0, 0.07);
-  margin: 0 12px 8px;
+  background: var(--divider-color);
+  margin: 0 var(--space-6) var(--space-4);
 }
 
-/* ── Navigation ── */
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 0 8px;
+  gap: var(--space-1);
+  padding: 0 var(--space-4);
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 8px 10px;
+  padding: var(--space-4) var(--space-5);
   border-radius: var(--radius-sm);
   text-decoration: none;
   cursor: pointer;
-  transition: background 120ms ease, color 120ms ease;
+  transition: var(--transition-icon-btn);
   position: relative;
   color: var(--color-text-secondary);
-  font-family: var(--font);
+  font-family: var(--font-family);
   font-size: 13.5px;
-  font-weight: 500;
+  font-weight: var(--weight-ui);
   letter-spacing: -0.1px;
   user-select: none;
 }
@@ -216,22 +213,22 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
 
 .nav-item--active {
   background: rgba(0, 117, 222, 0.1);
-  color: var(--color-blue);
+  color: var(--color-accent);
 }
 
 .nav-item--active:hover {
   background: rgba(0, 117, 222, 0.13);
-  color: var(--color-blue-active);
+  color: var(--color-accent-active);
 }
 
 .nav-item--active .nav-icon {
-  color: var(--color-blue);
+  color: var(--color-accent);
 }
 
 .nav-icon {
   flex-shrink: 0;
   color: var(--color-text-muted);
-  transition: color 120ms ease;
+  transition: color var(--duration-fast) var(--ease-standard);
 }
 
 .nav-item--active .nav-icon,
@@ -246,57 +243,54 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
   text-overflow: ellipsis;
 }
 
-/* Alert count badge on nav item */
 .nav-badge {
   flex-shrink: 0;
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
   border-radius: var(--radius-pill);
-  background: var(--color-orange);
-  color: #ffffff;
-  font-family: var(--font);
-  font-size: 10.5px;
-  font-weight: 700;
+  background: var(--color-warning);
+  color: var(--color-text-inverse);
+  font-family: var(--font-family);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-heading);
   display: flex;
   align-items: center;
   justify-content: center;
-  letter-spacing: 0;
+  letter-spacing: var(--tracking-normal);
   line-height: 1;
 }
 
 .nav-badge--teal {
-  background: var(--color-teal);
+  background: var(--color-info);
 }
 
-/* ── Spacer ── */
 .sidebar-spacer {
   flex: 1;
 }
 
-/* ── Footer / connection ── */
 .sidebar-footer {
-  padding: 10px 12px 14px;
-  border-top: var(--border);
+  padding: var(--space-5) var(--space-6) var(--space-7);
+  border-top: var(--border-standard);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .conn-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-sm);
 }
 
 .conn-row--ok {
-  background: rgba(42, 157, 153, 0.08);
+  background: var(--tint-teal);
 }
 
 .conn-row--err {
-  background: rgba(221, 91, 0, 0.08);
+  background: var(--tint-orange);
 }
 
 .conn-icon {
@@ -304,29 +298,29 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
 }
 
 .conn-row--ok .conn-icon {
-  color: var(--color-teal);
+  color: var(--color-info);
 }
 
 .conn-row--err .conn-icon {
-  color: var(--color-orange);
+  color: var(--color-warning);
 }
 
 .conn-label {
   flex: 1;
-  font-family: var(--font);
-  font-size: 11.5px;
-  font-weight: 500;
+  font-family: var(--font-family);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-ui);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .conn-row--ok .conn-label {
-  color: var(--color-teal);
+  color: var(--color-info);
 }
 
 .conn-row--err .conn-label {
-  color: var(--color-orange);
+  color: var(--color-warning);
 }
 
 .conn-dot {
@@ -338,11 +332,11 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
 }
 
 .conn-row--ok .conn-dot {
-  background: var(--color-teal);
+  background: var(--color-info);
 }
 
 .conn-row--err .conn-dot {
-  background: var(--color-orange);
+  background: var(--color-warning);
   animation: none;
 }
 
@@ -352,8 +346,8 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
 }
 
 .sidebar-app-ver {
-  font-family: var(--font);
-  font-size: 10.5px;
+  font-family: var(--font-family);
+  font-size: var(--text-2xs);
   color: var(--color-text-muted);
   text-align: center;
   letter-spacing: 0.1px;

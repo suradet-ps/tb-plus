@@ -38,7 +38,6 @@ function onCancel() {
 }
 
 function onOverlayPointerDown(event: MouseEvent) {
-  // Only close when clicking directly on the backdrop, not on the dialog panel
   if (event.target === event.currentTarget) {
     onCancel();
   }
@@ -61,7 +60,6 @@ function onKeydown(event: KeyboardEvent) {
         @pointerdown="onOverlayPointerDown"
         @keydown="onKeydown"
       >
-        <!-- Dialog panel — stop propagation so clicks inside don't hit the overlay -->
         <div
           class="dialog-panel"
           role="dialog"
@@ -71,25 +69,22 @@ function onKeydown(event: KeyboardEvent) {
           tabindex="-1"
           @pointerdown.stop
         >
-          <!-- Title -->
           <h3 id="confirm-dialog-title" class="dialog-title">
             {{ title }}
           </h3>
 
-          <!-- Message -->
           <p id="confirm-dialog-message" class="dialog-message">
             {{ message }}
           </p>
 
-          <!-- Actions -->
           <div class="dialog-actions">
-            <button type="button" class="btn btn-cancel" @click="onCancel">
+            <button type="button" class="btn btn-secondary" @click="onCancel">
               {{ cancelText }}
             </button>
             <button
               type="button"
-              class="btn btn-confirm"
-              :class="{ 'btn-confirm--danger': variant === 'danger' }"
+              class="btn"
+              :class="variant === 'danger' ? 'btn-danger' : 'btn-primary'"
               @click="onConfirm"
             >
               {{ confirmText }}
@@ -102,136 +97,63 @@ function onKeydown(event: KeyboardEvent) {
 </template>
 
 <style scoped>
-/* ── Backdrop overlay ───────────────────────────────────────────────── */
 .dialog-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: var(--z-modal);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
-  background: rgba(0, 0, 0, 0.3);
+  padding: var(--space-8);
+  background: var(--color-overlay-light);
 }
 
-/* ── Dialog panel ───────────────────────────────────────────────────── */
 .dialog-panel {
-  background: var(--color-bg);
-  border: var(--border);
-  border-radius: var(--radius-card); /* 12px */
+  background: var(--color-surface);
+  border: var(--border-standard);
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow-deep);
-  max-width: 400px;
+  max-width: var(--dialog-max);
   width: 100%;
-  padding: 24px;
-  outline: none; /* focus managed via focustrap / tabindex */
+  padding: var(--dialog-padding);
+  outline: none;
 }
 
-/* ── Title ──────────────────────────────────────────────────────────── */
 .dialog-title {
-  font-family: var(--font);
-  font-size: 16px;
-  font-weight: 700;
+  font-family: var(--font-family);
+  font-size: var(--text-heading-sm);
+  font-weight: var(--weight-heading);
   color: var(--color-text);
   letter-spacing: -0.125px;
-  line-height: 1.3;
+  line-height: var(--leading-snug);
   margin: 0;
 }
 
-/* ── Message ────────────────────────────────────────────────────────── */
 .dialog-message {
-  font-family: var(--font);
-  font-size: 14px;
-  font-weight: 400;
+  font-family: var(--font-family);
+  font-size: var(--text-body);
+  font-weight: var(--weight-body);
   color: var(--color-text-secondary);
-  line-height: 1.5;
-  margin-top: 8px;
+  line-height: var(--leading-body);
+  margin-top: var(--space-4);
 }
 
-/* ── Actions row ────────────────────────────────────────────────────── */
 .dialog-actions {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 24px;
+  gap: var(--space-4);
+  margin-top: var(--space-12);
 }
 
-/* ── Shared button base ─────────────────────────────────────────────── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  border-radius: var(--radius-sm); /* 4px */
-  padding: 6px 14px;
-  font-family: var(--font);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: 0;
-  cursor: pointer;
-  white-space: nowrap;
-  user-select: none;
-  transition:
-    background 120ms ease,
-    transform 80ms ease,
-    box-shadow 120ms ease;
-}
-
-.btn:focus-visible {
-  outline: 2px solid var(--color-blue);
-  outline-offset: 2px;
-}
-
-.btn:active {
-  transform: scale(0.97);
-}
-
-/* ── Cancel (secondary) ─────────────────────────────────────────────── */
-.btn-cancel {
-  background: rgba(0, 0, 0, 0.05);
-  color: var(--color-text);
-}
-
-.btn-cancel:hover {
-  background: rgba(0, 0, 0, 0.09);
-}
-
-.btn-cancel:active {
-  background: rgba(0, 0, 0, 0.13);
-}
-
-/* ── Confirm (primary blue, default) ────────────────────────────────── */
-.btn-confirm {
-  background: var(--color-blue);
-  color: #ffffff;
-}
-
-.btn-confirm:hover {
-  background: var(--color-blue-active);
-}
-
-/* ── Confirm (danger — orange) ──────────────────────────────────────── */
-.btn-confirm--danger {
-  background: var(--color-orange);
-  color: #ffffff;
-}
-
-.btn-confirm--danger:hover {
-  /* darken orange ~15% */
-  background: #b84a00;
-}
-
-/* ── Enter/leave transitions ────────────────────────────────────────── */
-
-/* 1. Overlay backdrop: fade opacity */
+/* -- Transition classes -- */
 .dialog-enter-active {
-  transition: opacity 200ms ease;
+  transition: var(--transition-modal);
 }
 
 .dialog-leave-active {
-  transition: opacity 160ms ease;
+  transition: opacity var(--duration-base) var(--ease-standard);
 }
 
 .dialog-enter-from,
@@ -239,21 +161,14 @@ function onKeydown(event: KeyboardEvent) {
   opacity: 0;
 }
 
-/*
- * 2. Dialog panel: scale + translate upward while overlay fades.
- *    Using descendant selector — both overlay and panel share the
- *    same component scope attribute, so scoped CSS resolves correctly.
- */
 .dialog-enter-active .dialog-panel {
-  transition:
-    opacity 200ms ease,
-    transform 200ms ease;
+  transition: opacity var(--duration-slow) var(--ease-standard),
+    transform var(--duration-slow) var(--ease-standard);
 }
 
 .dialog-leave-active .dialog-panel {
-  transition:
-    opacity 160ms ease,
-    transform 160ms ease;
+  transition: opacity var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-standard);
 }
 
 .dialog-enter-from .dialog-panel,
