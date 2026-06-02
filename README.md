@@ -23,7 +23,7 @@ A modern desktop application built with Tauri (Rust) and Vue (TypeScript) for ma
 
 ## Architecture
 
-- **Frontend**: Vue 3.5 (Composition API, `<script setup>`), TypeScript 6, Pinia, Vue Router 5, and `lucide/vue` for iconography.
+- **Frontend**: Vue 3.5 (Composition API, `<script setup>`), TypeScript 6, Pinia, Vue Router 5, and `@lucide/vue` for iconography.
 - **Backend / Desktop**: Tauri 2, Rust (stable), and `sqlx` driving database interactions.
 - **Databases**:
   - **MySQL (HOSxP)**: Read-only access to query patient demographics and their drug dispensing records.
