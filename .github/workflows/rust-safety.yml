@@ -6,7 +6,7 @@ jobs:
   clippy-pedantic:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
 
       - name: Install system dependencies (Tauri on Linux)
         run: |
@@ -36,7 +36,7 @@ jobs:
           - tb-models
           - tb-logic
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
 
       - name: Install Rust nightly
         uses: dtolnay/rust-toolchain@nightly
