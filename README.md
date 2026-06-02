@@ -1,6 +1,6 @@
 # TB Plus
 
-[![Tauri](https://img.shields.io/badge/Tauri-%5E2-4c8db?logo=tauri&logoColor=fff)](https://tauri.app/)
+[![Tauri](https://img.shields.io/badge/Tauri-%5E2-24c8db?logo=tauri&logoColor=fff)](https://tauri.app/)
 [![Vue.js](https://img.shields.io/badge/Vue.js-%5E3.5-4FC08D?logo=vuedotjs&logoColor=fff)](https://vuejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-%5E6-3178C6?logo=typescript&logoColor=ffffff)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-%5E8-646CFF?logo=vite&logoColor=ffffff)](https://vitejs.dev/)
