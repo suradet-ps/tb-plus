@@ -33,7 +33,7 @@ jobs:
 
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6.0.8
