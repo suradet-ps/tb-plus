@@ -30,16 +30,16 @@ export default defineConfig(async () => ({
     rollupOptions: {
       output: {
         manualChunks(id: string) {
-          if (id.includes('/node_modules/.pnpm/leaflet')) {
+          if (id.includes('/node_modules/leaflet')) {
             return 'leaflet';
           }
           if (id.includes('lucide-vue-next')) {
             return 'lucide';
           }
           if (
-            id.includes('/node_modules/.pnpm/vue') ||
-            id.includes('/node_modules/.pnpm/vue-router') ||
-            id.includes('/node_modules/.pnpm/pinia')
+            id.includes('/node_modules/vue') ||
+            id.includes('/node_modules/vue-router') ||
+            id.includes('/node_modules/pinia')
           ) {
             return 'vue';
           }

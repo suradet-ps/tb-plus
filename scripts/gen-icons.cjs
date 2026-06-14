@@ -63,14 +63,14 @@ const ICON_SVG = `<svg width="200" height="200" viewBox="5 9 14 11" xmlns="http:
     log(`Saved ${path.basename(SOURCE_PNG)} (${Math.round(pngBuffer.length / 1024)} KB)`);
 
     log("Running tauri icon generator…");
-    execSync(`pnpm tauri icon "${SOURCE_PNG}"`, {
+    execSync(`bun tauri icon "${SOURCE_PNG}"`, {
       cwd: ROOT,
       stdio: IS_SILENT ? "pipe" : "inherit",
       timeout: 120_000,
     });
 
     log("All icons generated successfully in src-tauri/icons/");
-    log("Rebuild the app to apply: pnpm tauri build");
+    log("Rebuild the app to apply: bun tauri build");
   } catch (err) {
     error("Process failed:");
     error(err.message || err);
