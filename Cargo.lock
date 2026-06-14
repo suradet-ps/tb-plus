@@ -4641,7 +4641,7 @@ dependencies = [
 
 [[package]]
 name = "tb-database"
-version = "1.2.0"
+version = "1.3.0"
 dependencies = [
  "aes-gcm",
  "anyhow",
@@ -4661,7 +4661,7 @@ dependencies = [
 
 [[package]]
 name = "tb-logic"
-version = "1.2.0"
+version = "1.3.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -4676,7 +4676,7 @@ dependencies = [
 
 [[package]]
 name = "tb-models"
-version = "1.2.0"
+version = "1.3.0"
 dependencies = [
  "chrono",
  "serde",
@@ -4685,7 +4685,7 @@ dependencies = [
 
 [[package]]
 name = "tb-plus"
-version = "1.2.0"
+version = "1.3.0"
 dependencies = [
  "anyhow",
  "chrono",
