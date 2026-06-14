@@ -1,13 +1,19 @@
-# TB Plus
+<p align="center">
+  <img src="src-tauri/icons/icon.png" width="128" alt="TB Plus icon">
+</p>
 
-[![Tauri](https://img.shields.io/badge/Tauri-%5E2-24c8db?logo=tauri&logoColor=fff)](https://tauri.app/)
-[![Vue.js](https://img.shields.io/badge/Vue.js-%5E3.5-4FC08D?logo=vuedotjs&logoColor=fff)](https://vuejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-%5E6-3178C6?logo=typescript&logoColor=ffffff)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-%5E8-646CFF?logo=vite&logoColor=ffffff)](https://vitejs.dev/)
-[![Pinia](https://img.shields.io/badge/Pinia-%5E3-FFE16B?logo=vue.js&logoColor=black)](https://pinia.vuejs.org/)
-[![Vue_Router](https://img.shields.io/badge/Vue_Router-%5E5-4FC08D?logo=vuedotjs&logoColor=ffffff)](https://router.vuejs.org/)
-[![Lucide](https://img.shields.io/badge/Lucide-%5E1-F92672?logo=lucide&logoColor=ffffff)](https://lucide.dev/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<h1 align="center">TB Plus</h1>
+
+<p align="center">
+  <a href="https://tauri.app/"><img src="https://img.shields.io/badge/Tauri-%5E2-24c8db?logo=tauri&logoColor=fff" alt="Tauri"></a>
+  <a href="https://vuejs.org/"><img src="https://img.shields.io/badge/Vue.js-%5E3.5-4FC08D?logo=vuedotjs&logoColor=fff" alt="Vue.js"></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-%5E6-3178C6?logo=typescript&logoColor=ffffff" alt="TypeScript"></a>
+  <a href="https://vitejs.dev/"><img src="https://img.shields.io/badge/Vite-%5E8-646CFF?logo=vite&logoColor=ffffff" alt="Vite"></a>
+  <a href="https://pinia.vuejs.org/"><img src="https://img.shields.io/badge/Pinia-%5E3-FFE16B?logo=vue.js&logoColor=black" alt="Pinia"></a>
+  <a href="https://router.vuejs.org/"><img src="https://img.shields.io/badge/Vue_Router-%5E5-4FC08D?logo=vuedotjs&logoColor=ffffff" alt="Vue Router"></a>
+  <a href="https://lucide.dev/"><img src="https://img.shields.io/badge/Lucide-%5E1-F92672?logo=lucide&logoColor=ffffff" alt="Lucide"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+</p>
 
 A modern desktop application built with Tauri (Rust) and Vue (TypeScript) for managing tuberculosis (TB) clinic operations. This system bridges HOSxP's MySQL database (read-only) with a local SQLite database for clinic-specific tracking data.
 
