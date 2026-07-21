@@ -97,7 +97,6 @@ jobs:
 
       - name: Run cargo audit
         run: cargo audit
-        working-directory: src-tauri
 
   cargo-deny:
     name: Cargo Deny
