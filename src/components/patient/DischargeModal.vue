@@ -23,7 +23,9 @@ interface OutcomeOption {
   value: string;
   labelTh: string;
   labelEn: string;
-  color: string;
+  bg: string;
+  text: string;
+  border: string;
 }
 
 const OUTCOME_OPTIONS: OutcomeOption[] = [
@@ -31,43 +33,57 @@ const OUTCOME_OPTIONS: OutcomeOption[] = [
     value: 'cured',
     labelTh: 'หาย',
     labelEn: 'Cured',
-    color: '#1aae39',
+    bg: 'rgba(26, 174, 57, 0.1)',
+    text: 'var(--outcome-cured-text)',
+    border: 'rgba(26, 174, 57, 0.25)',
   },
   {
     value: 'treatment_completed',
     labelTh: 'รักษาครบ',
     labelEn: 'Treatment completed',
-    color: '#2a9d99',
+    bg: 'rgba(42, 157, 153, 0.1)',
+    text: 'var(--outcome-completed-text)',
+    border: 'rgba(42, 157, 153, 0.25)',
   },
   {
     value: 'treatment_failed',
     labelTh: 'รักษาล้มเหลว',
     labelEn: 'Treatment failed',
-    color: '#dd5b00',
+    bg: 'rgba(221, 91, 0, 0.1)',
+    text: 'var(--outcome-failed-text)',
+    border: 'rgba(221, 91, 0, 0.25)',
   },
   {
     value: 'died',
     labelTh: 'เสียชีวิต',
     labelEn: 'Died',
-    color: '#615d59',
+    bg: 'rgba(49, 48, 46, 0.1)',
+    text: 'var(--outcome-died-text)',
+    border: 'rgba(49, 48, 46, 0.2)',
   },
   {
     value: 'lost_to_followup',
     labelTh: 'ขาดการรักษา',
     labelEn: 'Lost to follow-up',
-    color: '#dd5b00',
+    bg: 'rgba(221, 91, 0, 0.1)',
+    text: 'var(--outcome-lost-text)',
+    border: 'rgba(221, 91, 0, 0.25)',
   },
   {
     value: 'transferred_out',
     labelTh: 'ส่งต่อ',
     labelEn: 'Transferred out',
-    color: '#097fe8',
+    bg: 'rgba(9, 127, 232, 0.1)',
+    text: 'var(--outcome-transferred-text)',
+    border: 'rgba(9, 127, 232, 0.25)',
   },
   {
     value: 'not_evaluated',
     labelTh: 'ไม่ได้ประเมิน',
     labelEn: 'Not evaluated',
-    color: '#a39e98',
+    bg: 'rgba(0, 0, 0, 0.04)',
+    text: 'var(--outcome-not-evaluated-text)',
+    border: 'rgba(0, 0, 0, 0.1)',
   },
 ];
 
@@ -253,14 +269,14 @@ function onKeydown(e: KeyboardEvent) {
                   v-if="selectedOutcomeConfig"
                   class="outcome-preview"
                   :style="{
-                    background: selectedOutcomeConfig.color + '18',
-                    color: selectedOutcomeConfig.color,
-                    borderColor: selectedOutcomeConfig.color + '40',
+                    background: selectedOutcomeConfig.bg,
+                    color: selectedOutcomeConfig.text,
+                    borderColor: selectedOutcomeConfig.border,
                   }"
                   aria-live="polite"
                 >
                   <span class="outcome-preview-dot"
-                    :style="{ background: selectedOutcomeConfig.color }"
+                    :style="{ background: selectedOutcomeConfig.text }"
                   />
                   {{ selectedOutcomeConfig.labelTh }} — {{ selectedOutcomeConfig.labelEn }}
                 </div>
@@ -390,16 +406,16 @@ function onKeydown(e: KeyboardEvent) {
   padding: var(--space-10) var(--space-12) var(--space-9);
   background: linear-gradient(
     135deg,
-    rgba(221, 91, 0, 0.07) 0%,
-    rgba(221, 91, 0, 0.03) 100%
+    var(--warning-tint-7) 0%,
+    var(--warning-tint-3) 100%
   );
-  border-bottom: 1px solid rgba(221, 91, 0, 0.15);
+  border-bottom: 1px solid var(--warning-border-15);
 }
 
 .header-icon-wrap {
   width: 42px;
   height: 42px;
-  background: rgba(221, 91, 0, 0.14);
+  background: var(--warning-bg-14);
   color: var(--color-warning);
   border-radius: var(--radius-md);
   display: flex;
@@ -457,7 +473,7 @@ function onKeydown(e: KeyboardEvent) {
   gap: var(--space-4);
   margin: var(--space-8) var(--space-12) 0;
   background: var(--tint-orange);
-  border-left: 3px solid rgba(221, 91, 0, 0.5);
+  border-left: 3px solid var(--warning-border-50);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   padding: 9px 12px;
   font-size: var(--text-sm);

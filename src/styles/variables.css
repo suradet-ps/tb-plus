@@ -93,6 +93,69 @@
 
   /* Semantic — focus ring */
   --color-focus-ring: var(--palette-blue);
+
+  /* Semantic — result badges (sputum, xray, adherence) */
+  --result-negative-bg: rgba(26, 174, 57, 0.1);
+  --result-negative-text: var(--palette-green);
+  --result-positive-bg: rgba(221, 91, 0, 0.1);
+  --result-positive-text: var(--palette-orange);
+  --result-improved-bg: rgba(42, 157, 153, 0.1);
+  --result-improved-text: var(--palette-teal);
+  --result-stable-bg: rgba(0, 0, 0, 0.06);
+  --result-stable-text: var(--palette-warm-gray-500);
+  --result-worse-bg: rgba(221, 91, 0, 0.1);
+  --result-worse-text: var(--palette-orange);
+  --result-not-done-bg: rgba(0, 0, 0, 0.06);
+  --result-not-done-text: var(--palette-warm-gray-300);
+  --result-na-bg: rgba(0, 0, 0, 0.04);
+  --result-na-text: var(--palette-warm-gray-300);
+  --result-fair-bg: rgba(245, 166, 35, 0.12);
+  --result-fair-text: var(--palette-amber-dark);
+
+  /* Semantic — outcome colors */
+  --outcome-cured-text: var(--palette-green);
+  --outcome-completed-text: var(--palette-teal);
+  --outcome-failed-text: var(--palette-orange);
+  --outcome-died-text: var(--palette-warm-gray-500);
+  --outcome-lost-text: var(--palette-orange);
+  --outcome-transferred-text: var(--palette-blue-focus);
+  --outcome-not-evaluated-text: var(--palette-warm-gray-300);
+
+  /* Semantic — mapping status */
+  --map-active: var(--palette-orange);
+  --map-completed: var(--palette-teal);
+  --map-defaulted: var(--palette-warm-gray-500);
+  --map-died: var(--palette-warm-dark);
+  --map-transferred: var(--palette-blue);
+  --map-fallback: var(--palette-blue-focus);
+
+  /* Semantic — drug class accent (for inline JS use) */
+  --drug-H-text: var(--palette-teal);
+  --drug-H-bg-tint: rgba(42, 157, 153, 0.12);
+  --drug-H-border-tint: rgba(42, 157, 153, 0.3);
+  --drug-R-text: var(--palette-orange);
+  --drug-R-bg-tint: rgba(221, 91, 0, 0.12);
+  --drug-R-border-tint: rgba(221, 91, 0, 0.3);
+  --drug-E-text: var(--palette-blue);
+  --drug-E-bg-tint: rgba(0, 117, 222, 0.12);
+  --drug-E-border-tint: rgba(0, 117, 222, 0.3);
+  --drug-Z-text: var(--palette-brown);
+  --drug-Z-bg-tint: rgba(82, 52, 16, 0.10);
+  --drug-Z-border-tint: rgba(82, 52, 16, 0.25);
+
+  /* Semantic — priority alert */
+  --priority-bg: rgba(221, 91, 0, 0.15);
+  --priority-text: var(--palette-orange);
+  --priority-border: rgba(221, 91, 0, 0.35);
+  --priority-outline: rgba(221, 91, 0, 0.15);
+
+  /* Semantic — warning tints (derived from --palette-orange) */
+  --warning-tint-7: rgba(221, 91, 0, 0.07);
+  --warning-tint-3: rgba(221, 91, 0, 0.03);
+  --warning-border-15: rgba(221, 91, 0, 0.15);
+  --warning-border-28: rgba(221, 91, 0, 0.28);
+  --warning-bg-14: rgba(221, 91, 0, 0.14);
+  --warning-border-50: rgba(221, 91, 0, 0.5);
 }
 
 /* -- 3. DRUG CLASS ACCENT COLOURS -- */

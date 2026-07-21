@@ -168,10 +168,10 @@ interface DrugColor {
 }
 
 const DRUG_COLORS: Record<string, DrugColor> = {
-  H: { bg: 'rgba(42,157,153,0.12)', text: '#2a9d99', border: 'rgba(42,157,153,0.3)' },
-  R: { bg: 'rgba(221,91,0,0.12)', text: '#dd5b00', border: 'rgba(221,91,0,0.3)' },
-  E: { bg: 'rgba(0,117,222,0.12)', text: '#0075de', border: 'rgba(0,117,222,0.3)' },
-  Z: { bg: 'rgba(82,52,16,0.10)', text: '#523410', border: 'rgba(82,52,16,0.25)' },
+  H: { bg: 'var(--drug-H-bg-tint)', text: 'var(--drug-H-text)', border: 'var(--drug-H-border-tint)' },
+  R: { bg: 'var(--drug-R-bg-tint)', text: 'var(--drug-R-text)', border: 'var(--drug-R-border-tint)' },
+  E: { bg: 'var(--drug-E-bg-tint)', text: 'var(--drug-E-text)', border: 'var(--drug-E-border-tint)' },
+  Z: { bg: 'var(--drug-Z-bg-tint)', text: 'var(--drug-Z-text)', border: 'var(--drug-Z-border-tint)' },
 };
 
 function drugColor(drug: string): DrugColor {
@@ -330,13 +330,13 @@ function drugColor(drug: string): DrugColor {
                   :class="{ 'count-badge-priority': effect.isPriority }"
                   :style="{
                     background: effect.isPriority
-                      ? 'rgba(221,91,0,0.15)'
+                      ? 'var(--priority-bg)'
                       : drugColor(group.drug).bg,
                     color: effect.isPriority
-                      ? '#dd5b00'
+                      ? 'var(--priority-text)'
                       : drugColor(group.drug).text,
                     outlineColor: effect.isPriority
-                      ? 'rgba(221,91,0,0.35)'
+                      ? 'var(--priority-border)'
                       : drugColor(group.drug).border,
                   }"
                   :aria-label="`รายงาน ${getCount(effect.key)} ครั้ง`"
@@ -370,7 +370,7 @@ function drugColor(drug: string): DrugColor {
   align-items: flex-start;
   gap: var(--space-6);
   background: var(--tint-orange);
-  border: 1px solid rgba(221, 91, 0, 0.28);
+  border: 1px solid var(--warning-border-28);
   border-radius: var(--radius-md);
   padding: var(--space-7) var(--space-8);
 }
@@ -379,7 +379,7 @@ function drugColor(drug: string): DrugColor {
   width: 36px;
   height: 36px;
   border-radius: var(--radius-sm);
-  background: rgba(221, 91, 0, 0.14);
+  background: var(--warning-bg-14);
   color: var(--color-warning);
   display: flex;
   align-items: center;
@@ -566,7 +566,7 @@ function drugColor(drug: string): DrugColor {
 
 .effect-row-priority {
   background: var(--tint-orange);
-  outline: 1px solid rgba(221, 91, 0, 0.15);
+  outline: 1px solid var(--priority-outline);
   outline-offset: -1px;
 }
 
@@ -622,8 +622,8 @@ function drugColor(drug: string): DrugColor {
 }
 
 .priority-tag-active {
-  background: rgba(221, 91, 0, 0.12);
-  color: var(--color-warning);
+  background: var(--priority-bg);
+  color: var(--priority-text);
 }
 
 .effect-count-wrap {

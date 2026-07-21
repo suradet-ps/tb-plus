@@ -162,7 +162,7 @@ const emit = defineEmits<{
   min-height: 36px;
   padding: var(--input-padding-lg);
   border-radius: var(--radius-sm);
-  border: 1px solid #dddddd;
+  border: 1px solid var(--border-color-input);
   background: var(--color-surface);
   color: var(--color-text);
   font-family: var(--font-family);

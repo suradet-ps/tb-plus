@@ -32,17 +32,17 @@ function createIcon(color: string, isSelected: boolean): L.DivIcon {
 function statusColor(patient: MappingPatientRow): string {
   switch (patient.tb_status) {
     case 'active':
-      return '#dd5b00';
+      return 'var(--map-active)';
     case 'completed':
-      return '#2a9d99';
+      return 'var(--map-completed)';
     case 'defaulted':
-      return '#615d59';
+      return 'var(--map-defaulted)';
     case 'died':
-      return '#31302e';
+      return 'var(--map-died)';
     case 'transferred':
-      return '#0075de';
+      return 'var(--map-transferred)';
     default:
-      return '#097fe8';
+      return 'var(--map-fallback)';
   }
 }
 
