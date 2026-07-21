@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Frontend ──────────────────────────────────────────────────────
+  frontend-lint:
+    name: Frontend Lint & Format
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Biome check
+        run: bun run ci
+
+      - name: TypeScript type check
+        run: bun run type-check
+
+  frontend-test:
+    name: Frontend Tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Vitest
+        run: bun run test
+
+  # ── Design system enforcement ─────────────────────────────────────
+  design-enforcement:
+    name: No Inline Hex Colors
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Check for raw #rrggbb in Vue components
+        run: |
+          # Exclude variables.css (palette primitives belong there)
+          violations=$(grep -rn '#[0-9a-fA-F]\{6\}' src/ \
+            --include='*.vue' \
+            --include='*.css' \
+            --exclude='variables.css' \
+            || true)
+          if [ -n "$violations" ]; then
+            echo "::error::Inline hex colors found outside variables.css. Route all colors through CSS tokens."
+            echo "$violations"
+            exit 1
+          fi
+          echo "No inline hex colors found. Design system enforced."
+
+  # ── Supply-chain security ─────────────────────────────────────────
+  cargo-audit:
+    name: Cargo Audit
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Run cargo audit
+        run: cargo audit
+        working-directory: src-tauri
+
+  cargo-deny:
+    name: Cargo Deny
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check all
+          manifest-path: src-tauri/Cargo.toml
