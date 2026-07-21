@@ -344,7 +344,7 @@ function sortIcon(key: SortKey): string {
 .toolbar { display: flex; align-items: center; gap: var(--space-6); margin-bottom: var(--space-6); }
 .search-wrap {
   display: flex; align-items: center; gap: 7px;
-  background: var(--color-text-inverse); border: 1px solid #ddd; border-radius: 4px;
+  background: var(--color-text-inverse); border: 1px solid var(--border-color); border-radius: 4px;
   padding: var(--input-padding); transition: var(--transition-input);
 }
 .search-wrap:focus-within { border-color: var(--color-accent-focus); box-shadow: 0 0 0 3px rgba(9,127,232,0.15); }

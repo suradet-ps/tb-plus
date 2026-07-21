@@ -62,10 +62,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Check for raw #rrggbb in Vue components
+      - name: Check for raw hex colors in Vue components
         run: |
           # Exclude variables.css (palette primitives belong there)
-          violations=$(grep -rn '#[0-9a-fA-F]\{6\}' src/ \
+          # Match both 6-digit (#rrggbb) and 3-digit (#rgb) hex colors
+          violations=$(grep -rnE '#[0-9a-fA-F]{6}[^0-9a-fA-F]|#[0-9a-fA-F]{3}[^0-9a-fA-F]' src/ \
             --include='*.vue' \
             --include='*.css' \
             --exclude='variables.css' \
