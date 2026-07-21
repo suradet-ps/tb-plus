@@ -42,12 +42,13 @@ checked against it.
 - **Design system** (`DESIGN.md`): Notion-inspired warm neutrals, Notion Blue
   (`#0075de`) as the sole saturated accent, whisper borders, 8px spacing base.
   CSS tokens in `variables.css` form a 3-tier hierarchy: primitive → semantic →
-  component. **However**, ~46 inline hex colors leak past the token system in
-  Vue components — the design system is documented but not fully enforced.
-- **CI** (3 workflows): `rust-safety` (clippy `-D warnings` + miri on
-  `tb-models` and `tb-logic`), `test-build` (full `bun tauri build` on Ubuntu),
-  `release` (cross-platform publish on tag). **No frontend test step in CI** —
-  vitest exists locally but is not a merge gate.
+  component. All ~46 inline hex colors have been eliminated — every color value
+  routes through CSS custom properties. CI enforces no raw `#rrggbb` in `.vue`
+  `<style>` blocks or `.css` files (excluding `variables.css`).
+- **CI** (5 merge-gate jobs): `No Inline Hex Colors` (grep gate),
+  `Cargo Audit`, `Frontend Lint & Format` (biome), `Frontend Tests` (vitest),
+  `Cargo Deny` (advisories + licenses + bans). Plus `rust-safety` (clippy +
+  miri) and `test-build` (full Tauri build).
 - **Rust tests**: 46 unit tests across crates — alert logic (11), date
   arithmetic (7), duration parsing (6), icode mapping (7+6), crypto (5),
   dosage (3), settings (3). All passing.
@@ -70,16 +71,16 @@ checked against it.
 
 ### Gaps found while reading the repo (these shape the phases below)
 
-1. **~46 inline hex colors** bypass the token system in Vue components
+1. ~~**~46 inline hex colors** bypass the token system in Vue components
    (`SideEffectTracker`, `FollowupList`, `DischargeModal`, `MapCanvas`,
    `TbClinicLogo`, `MapFilters`, `DischargedView`). A design system that isn't
    enforced isn't a system. The `DESIGN.md` tokens exist — the components just
-   don't use them consistently. (Phase 1.)
+   don't use them consistently.~~ ✅ **Done in Phase 1.**
 2. **No CI gate for frontend tests.** Vitest runs locally but is never a merge
    blocker. Component tests don't exist at all. The Rust side is well-tested;
    the Vue side has a gap. (Phase 2.)
-3. **No `cargo audit` or `cargo deny` in CI.** Supply-chain drift can creep in
-   silently. (Phase 1.)
+3. ~~**No `cargo audit` or `cargo deny` in CI.** Supply-chain drift can creep in
+   silently.~~ ✅ **Done in Phase 1.**
 4. **No component tests.** Views and components are the UI boundary — they
    receive data from stores and render it. A regression in rendering logic (alert
    badge visibility, progress bar calculation, timeline phase coloring) would not
@@ -97,29 +98,31 @@ checked against it.
 
 ## Phase 1: A Design System That Is Enforced, Not Aspirational
 
+> **Status: ✅ Complete** — PR [#68](https://github.com/suradet-ps/tb-plus/pull/68)
+
 TB Plus already has a documented design language (Notion-inspired warm neutrals,
 blue accent, whisper borders). The gap is enforcement — 46 inline hex values
 bypass the token system, and supply-chain safety has no CI gate.
 
-- [ ] **Eliminate all ~46 inline hex colors** in Vue components. Every color
+- [x] **Eliminate all ~46 inline hex colors** in Vue components. Every color
   value must route through a CSS custom property from `variables.css`. Components
   that need semantic variants (e.g., `drug-H-text`, `result-negative-bg`) should
   add tokens to the semantic layer, not hardcode hex. This is a systematic find-
   and-replace pass, not a redesign.
-- [ ] **Add a CI lint step** that fails the build on raw `#rrggbb` in `.vue`
+- [x] **Add a CI lint step** that fails the build on raw `#rrggbb` in `.vue`
   `<style>` blocks and `.css` files (excluding `variables.css` where palette
   primitives live). The design system, enforced — not aspirational.
-- [ ] **Add `cargo audit` and `cargo deny` jobs** to CI. Advisories, licenses,
+- [x] **Add `cargo audit` and `cargo deny` jobs** to CI. Advisories, licenses,
   yanked/duplicate crates must all be green for merge. This is supply-chain
   safety, not a feature, but it belongs in the foundation phase because it gates
   everything that follows.
-- [ ] **Add `vitest run` as a CI gate** in the `test-build.yml` workflow (or a
+- [x] **Add `vitest run` as a CI gate** in the `test-build.yml` workflow (or a
   new `test.yml`). Frontend tests must block merge just like Rust tests do.
-- [ ] **Add `biome ci .` as a CI gate** alongside the existing Rust lint. The
+- [x] **Add `biome ci .` as a CI gate** alongside the existing Rust lint. The
   frontend formatter/linter should also block merge, not just run locally.
 
-**Acceptance:** zero inline hex outside `variables.css` (CI enforced); `cargo
-audit` + `cargo deny` green; `vitest run` and `biome ci` are merge gates.
+**Acceptance:** ~~zero inline hex outside `variables.css` (CI enforced); `cargo
+audit` + `cargo deny` green; `vitest run` and `biome ci` are merge gates.~~ ✅ All met.
 
 ---
 
@@ -429,4 +432,4 @@ For reference, the current module architecture that this roadmap builds on:
 ---
 
 *Last updated: 2026-07-21*
-*Next review: after Phase 1 acceptance is met*
+*Next review: after Phase 2 acceptance is met*
