@@ -140,7 +140,7 @@
   --drug-E-bg-tint: rgba(0, 117, 222, 0.12);
   --drug-E-border-tint: rgba(0, 117, 222, 0.3);
   --drug-Z-text: var(--palette-brown);
-  --drug-Z-bg-tint: rgba(82, 52, 16, 0.10);
+  --drug-Z-bg-tint: rgba(82, 52, 16, 0.1);
   --drug-Z-border-tint: rgba(82, 52, 16, 0.25);
 
   /* Semantic — priority alert */

@@ -168,10 +168,26 @@ interface DrugColor {
 }
 
 const DRUG_COLORS: Record<string, DrugColor> = {
-  H: { bg: 'var(--drug-H-bg-tint)', text: 'var(--drug-H-text)', border: 'var(--drug-H-border-tint)' },
-  R: { bg: 'var(--drug-R-bg-tint)', text: 'var(--drug-R-text)', border: 'var(--drug-R-border-tint)' },
-  E: { bg: 'var(--drug-E-bg-tint)', text: 'var(--drug-E-text)', border: 'var(--drug-E-border-tint)' },
-  Z: { bg: 'var(--drug-Z-bg-tint)', text: 'var(--drug-Z-text)', border: 'var(--drug-Z-border-tint)' },
+  H: {
+    bg: 'var(--drug-H-bg-tint)',
+    text: 'var(--drug-H-text)',
+    border: 'var(--drug-H-border-tint)',
+  },
+  R: {
+    bg: 'var(--drug-R-bg-tint)',
+    text: 'var(--drug-R-text)',
+    border: 'var(--drug-R-border-tint)',
+  },
+  E: {
+    bg: 'var(--drug-E-bg-tint)',
+    text: 'var(--drug-E-text)',
+    border: 'var(--drug-E-border-tint)',
+  },
+  Z: {
+    bg: 'var(--drug-Z-bg-tint)',
+    text: 'var(--drug-Z-text)',
+    border: 'var(--drug-Z-border-tint)',
+  },
 };
 
 function drugColor(drug: string): DrugColor {
