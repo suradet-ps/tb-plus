@@ -47,7 +47,7 @@ function getOutcomeColor(p: import('@/types/patient').ActivePatientRow): string 
     case 'cured':
       return 'var(--color-success)';
     case 'treatment_completed':
-      return '#2a9d99';
+      return 'var(--outcome-completed-text)';
     case 'treatment_failed':
       return 'var(--color-warning)';
     case 'died':
@@ -57,16 +57,16 @@ function getOutcomeColor(p: import('@/types/patient').ActivePatientRow): string 
     case 'transferred_out':
       return 'var(--color-accent)';
     case 'not_evaluated':
-      return '#a39e98';
+      return 'var(--outcome-not-evaluated-text)';
     // Fallback for legacy tb_patients.status values
     case 'completed':
-      return '#2a9d99';
+      return 'var(--outcome-completed-text)';
     case 'transferred':
       return 'var(--color-accent)';
     case 'defaulted':
       return 'var(--color-warning)';
     default:
-      return '#a39e98';
+      return 'var(--outcome-not-evaluated-text)';
   }
 }
 

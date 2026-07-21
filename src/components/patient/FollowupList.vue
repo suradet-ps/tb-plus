@@ -89,13 +89,25 @@ interface BadgeConfig {
 function sputumConfig(v: SputumResult): BadgeConfig {
   switch (v) {
     case 'negative':
-      return { label: 'ผลลบ', bg: 'rgba(26,174,57,0.1)', color: '#1aae39' };
+      return {
+        label: 'ผลลบ',
+        bg: 'var(--result-negative-bg)',
+        color: 'var(--result-negative-text)',
+      };
     case 'positive':
-      return { label: 'ผลบวก', bg: 'rgba(221,91,0,0.1)', color: '#dd5b00' };
+      return {
+        label: 'ผลบวก',
+        bg: 'var(--result-positive-bg)',
+        color: 'var(--result-positive-text)',
+      };
     case 'not_done':
-      return { label: 'ไม่ได้ตรวจ', bg: 'rgba(0,0,0,0.06)', color: '#a39e98' };
+      return {
+        label: 'ไม่ได้ตรวจ',
+        bg: 'var(--result-not-done-bg)',
+        color: 'var(--result-not-done-text)',
+      };
     default:
-      return { label: '-', bg: 'rgba(0,0,0,0.04)', color: '#a39e98' };
+      return { label: '-', bg: 'var(--result-na-bg)', color: 'var(--result-na-text)' };
   }
 }
 
@@ -106,15 +118,23 @@ type XrayResult = 'improved' | 'stable' | 'worse' | 'not_done' | null;
 function xrayConfig(v: XrayResult): BadgeConfig {
   switch (v) {
     case 'improved':
-      return { label: 'ดีขึ้น', bg: 'rgba(42,157,153,0.1)', color: '#2a9d99' };
+      return {
+        label: 'ดีขึ้น',
+        bg: 'var(--result-improved-bg)',
+        color: 'var(--result-improved-text)',
+      };
     case 'stable':
-      return { label: 'คงที่', bg: 'rgba(0,0,0,0.06)', color: '#615d59' };
+      return { label: 'คงที่', bg: 'var(--result-stable-bg)', color: 'var(--result-stable-text)' };
     case 'worse':
-      return { label: 'แย่ลง', bg: 'rgba(221,91,0,0.1)', color: '#dd5b00' };
+      return { label: 'แย่ลง', bg: 'var(--result-worse-bg)', color: 'var(--result-worse-text)' };
     case 'not_done':
-      return { label: 'ไม่ได้ตรวจ', bg: 'rgba(0,0,0,0.06)', color: '#a39e98' };
+      return {
+        label: 'ไม่ได้ตรวจ',
+        bg: 'var(--result-not-done-bg)',
+        color: 'var(--result-not-done-text)',
+      };
     default:
-      return { label: '-', bg: 'rgba(0,0,0,0.04)', color: '#a39e98' };
+      return { label: '-', bg: 'var(--result-na-bg)', color: 'var(--result-na-text)' };
   }
 }
 
@@ -125,13 +145,25 @@ type Adherence = 'good' | 'fair' | 'poor' | null;
 function adherenceConfig(v: Adherence): BadgeConfig {
   switch (v) {
     case 'good':
-      return { label: 'การรับยา: ดี', bg: 'rgba(26,174,57,0.1)', color: '#1aae39' };
+      return {
+        label: 'การรับยา: ดี',
+        bg: 'var(--result-negative-bg)',
+        color: 'var(--result-negative-text)',
+      };
     case 'fair':
-      return { label: 'การรับยา: พอใช้', bg: 'rgba(245,166,35,0.12)', color: '#c78b00' };
+      return {
+        label: 'การรับยา: พอใช้',
+        bg: 'var(--result-fair-bg)',
+        color: 'var(--result-fair-text)',
+      };
     case 'poor':
-      return { label: 'การรับยา: ไม่ดี', bg: 'rgba(221,91,0,0.1)', color: '#dd5b00' };
+      return {
+        label: 'การรับยา: ไม่ดี',
+        bg: 'var(--result-worse-bg)',
+        color: 'var(--result-worse-text)',
+      };
     default:
-      return { label: 'การรับยา: -', bg: 'rgba(0,0,0,0.04)', color: '#a39e98' };
+      return { label: 'การรับยา: -', bg: 'var(--result-na-bg)', color: 'var(--result-na-text)' };
   }
 }
 
@@ -682,9 +714,9 @@ function hasMeaningfulData(f: Followup): boolean {
 }
 
 .se-tag-priority {
-  background: rgba(221, 91, 0, 0.15);
-  color: var(--color-warning);
-  outline: 1px solid rgba(221, 91, 0, 0.3);
+  background: var(--priority-bg);
+  color: var(--priority-text);
+  outline: 1px solid var(--priority-border);
 }
 
 .se-priority-marker {
