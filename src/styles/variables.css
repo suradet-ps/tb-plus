@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════
    Design Token System — TB Plus
    Architecture: Primitive → Semantic → Component (3-tier hierarchy)
-   Inspired by DESIGN.md (Notion visual language)
+   Inspired by docs/DESIGN.md (Notion visual language)
 
    Naming convention: `--{category}-{property}-{variant}`
    Categories: color | space | text | leading | tracking | weight
@@ -10,7 +10,7 @@
 
 /* -- 1. PRIMITIVE COLOUR PALETTE -- */
 :root {
-  /* Warm neutrals (yellow-brown undertones, per DESIGN.md) */
+   /* Warm neutrals (yellow-brown undertones, per docs/DESIGN.md) */
   --palette-warm-white: #f6f5f4;
   --palette-warm-dark: #31302e;
   --palette-warm-gray-500: #615d59;
@@ -211,7 +211,7 @@
   --font-family-mono: "SF Mono", "Roboto Mono", "Fira Code", monospace;
   --font-family-mono-simple: monospace;
 
-  /* Font size scale (px, per DESIGN.md hierarchy) */
+   /* Font size scale (px, per docs/DESIGN.md hierarchy) */
   --text-xs: 10px;
   --text-2xs: 10px;
   --text-caption: 11px;
@@ -227,7 +227,7 @@
   --text-display: 24px;
   --text-display-lg: 30px;
 
-  /* Font weights (4-weight system per DESIGN.md) */
+   /* Font weights (4-weight system per docs/DESIGN.md) */
   --weight-body: 400; /* reading */
   --weight-ui: 500; /* interactive */
   --weight-emphasis: 600; /* emphasis / navigation */

@@ -430,10 +430,10 @@ Alerts are stored in memory (Pinia `useAlertStore`) and shown as:
 
 ## Design System
 
-> **`DESIGN.md` is the single source of truth for all visual design decisions.**
-> Read `DESIGN.md` in full before writing any UI code. Every color value, typography size, spacing unit, border style, shadow stack, border radius, and component state described below refers to definitions in that file — do not hardcode arbitrary values.
+> **`docs/DESIGN.md` is the single source of truth for all visual design decisions.**
+> Read `docs/DESIGN.md` in full before writing any UI code. Every color value, typography size, spacing unit, border style, shadow stack, border radius, and component state described below refers to definitions in that file — do not hardcode arbitrary values.
 
-Key pointers into `DESIGN.md`:
+Key pointers into `docs/DESIGN.md`:
 
 - **Colors** — use the warm neutral palette and semantic accent colors defined in the Color Palette section. Notion Blue (`#0075de`) is the only saturated accent; use it for primary CTAs and interactive states only.
 - **Typography** — follow the full type hierarchy table (Display → Body → Badge). Apply negative letter-spacing at larger sizes exactly as specified.
@@ -442,8 +442,8 @@ Key pointers into `DESIGN.md`:
 - **Border Radius** — 4px for buttons/inputs, 12px for cards, 9999px for pill badges, per the radius scale.
 - **Components** — buttons (primary blue, secondary, ghost), cards, inputs, pill badges, and navigation all have exact specs in the Component Stylings section.
 - **Alert semantics** — map overrun/overdue alerts to Orange (`#dd5b00`), phase-transition warnings to the same, success/completion to Teal (`#2a9d99`) or Green (`#1aae39`), as defined under Semantic Accent Colors.
-- **Drug class chips** — assign one semantic accent color per drug class (H, R, Z, E) consistently across chips, timeline bars, and table row highlights; pick from the accent palette in DESIGN.md.
-- **Icons** — `lucide-vue-next` exclusively; size and stroke follow DESIGN.md guidance.
+- **Drug class chips** — assign one semantic accent color per drug class (H, R, Z, E) consistently across chips, timeline bars, and table row highlights; pick from the accent palette in docs/DESIGN.md.
+- **Icons** — `lucide-vue-next` exclusively; size and stroke follow docs/DESIGN.md guidance.
 - **Accessibility** — focus rings, contrast ratios, and interactive states are specified in the Accessibility & States section.
 
 ---
@@ -463,7 +463,7 @@ Key pointers into `DESIGN.md`:
 | Icons | lucide-vue-next |
 | Build tool | Vite |
 | Package manager | bun |
-| Styling | **See `DESIGN.md`** — all colors, typography, spacing, and component styles are defined there |
+| Styling | **See `docs/DESIGN.md`** — all colors, typography, spacing, and component styles are defined there |
 
 > **Package manager**: Always use `bun` (not npm, not pnpm). Run `bun install` for dependencies, `bun dev` for dev server, `bun build` for production build, `bun tauri dev` / `bun tauri build` for Tauri commands. Lock file is `bun.lockb`.
 
@@ -552,7 +552,10 @@ tb-plus/
 │       ├── dispensing.ts
 │       ├── treatment.ts
 │       └── alert.ts
-├── DESIGN.md
+├── docs/
+│   ├── DESIGN.md
+│   ├── ROADMAP.md
+│   └── AGENTS-RUST.md
 └── agents.md
 ```
 

@@ -1,9 +1,9 @@
 # TB Plus Roadmap
 
 This roadmap describes what TB Plus is, honestly, from reading its own code — and
-where it should end up. It follows the architecture in [AGENTS.md](AGENTS.md),
+where it should end up. It follows the architecture in [AGENTS.md](../AGENTS.md),
 the conventions in [CONTRIBUTING.md](CONTRIBUTING.md), the security posture in
-[SECURITY.md](SECURITY.md), and the design system in [DESIGN.md](DESIGN.md).
+[security.md](security.md), and the design system in [DESIGN.md](DESIGN.md).
 
 > **What TB Plus is.** A *quiet, single-clinic* companion for managing
 > tuberculosis treatment at Sabot Hospital (โรงพยาบาลสระโบสถ์). One nurse, one
@@ -274,7 +274,7 @@ and what's cached.
 - [ ] **Measure a baseline first.** WASM bundle size (gzip + brotli), cold
   start time, screening search latency (first row visible), patient detail load
   time, and MySQL reconnection time — measured on a mid-range device over a
-  throttled network. Record in `docs/perf-baseline.md`.
+  throttled network. Record in `perf-baseline.md`.
 - [ ] **Set CI-enforced budgets** against that baseline. Bundle size ceiling
   that fails the build; first-paint and load targets calibrated to real numbers.
 - [ ] **Over-render audit.** Confirm the Vue reactive graph doesn't re-render
@@ -296,7 +296,7 @@ without a noted exception.
 - [ ] **AES-256-GCM credential encryption audit.** Verify key derivation
   (HKDF), nonce randomness, ciphertext integrity, and that decrypted credentials
   are zeroized from memory after use. Document the encryption posture in
-  `SECURITY.md`.
+  `security.md`.
 - [ ] **Tauri allowlist lockdown.** Audit `tauri.conf.json` — every capability
   must be justified. Remove any unused plugin permissions. The principle of
   least privilege applies to the desktop shell too.
@@ -322,7 +322,7 @@ without a noted exception.
 
 - [ ] **Reproducible build documented.** Exact toolchain versions, bun version,
   Tauri CLI version, system dependencies → the same `dist/` from a given
-  commit. Written in `docs/build-reproducibility.md`.
+  commit. Written in `build-reproducibility.md`.
 - [ ] **Windows installer signing.** For clinical deployment, the `.msi` or
   `.exe` must be signed so Windows doesn't flag it as untrusted.
 - [ ] **Branch protection on `main`.** Strict required status checks (clippy,
