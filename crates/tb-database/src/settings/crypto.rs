@@ -1,57 +1,16 @@
-use aes_gcm::aead::rand_core::RngCore;
-use aes_gcm::aead::{Aead, KeyInit, OsRng};
-use aes_gcm::{Aes256Gcm, Key, Nonce};
-use anyhow::{Context, Result};
-use base64::Engine;
-use hkdf::Hkdf;
-use sha2::Sha256;
+use anyhow::Result;
+use encryptman::MasterKey;
 
-const KEY_SIZE: usize = 32;
-const NONCE_SIZE: usize = 12;
-const CONTEXT: &str = "tb-plus-settings-v1";
+pub use encryptman::generate_master_key;
 
-pub fn generate_master_key() -> [u8; KEY_SIZE] {
-  let mut key = [0u8; KEY_SIZE];
-  OsRng.fill_bytes(&mut key);
-  key
+pub fn encrypt(master_key: &MasterKey, plaintext: &str) -> Result<String> {
+  encryptman::encrypt(master_key, plaintext)
+    .map_err(|e| anyhow::anyhow!("{e}"))
 }
 
-fn derive_key(master_key: &[u8; KEY_SIZE]) -> Key<Aes256Gcm> {
-  let hk = Hkdf::<Sha256>::new(None, master_key);
-  let mut okm = [0u8; KEY_SIZE];
-  hk.expand(CONTEXT.as_bytes(), &mut okm)
-    .expect("HKDF expand should succeed");
-  *Key::<Aes256Gcm>::from_slice(&okm)
-}
-
-pub fn encrypt(master_key: &[u8; KEY_SIZE], plaintext: &str) -> Result<String> {
-  let key = derive_key(master_key);
-  let cipher = Aes256Gcm::new(&key);
-  let mut nonce_bytes = [0u8; NONCE_SIZE];
-  OsRng.fill_bytes(&mut nonce_bytes);
-  let nonce = Nonce::from_slice(&nonce_bytes);
-  let ciphertext = cipher
-    .encrypt(nonce, plaintext.as_bytes())
-    .map_err(|e| anyhow::anyhow!("encryption failed: {e}"))?;
-  let mut packed = Vec::with_capacity(NONCE_SIZE + ciphertext.len());
-  packed.extend_from_slice(&nonce_bytes);
-  packed.extend_from_slice(&ciphertext);
-  Ok(base64::engine::general_purpose::STANDARD.encode(&packed))
-}
-
-pub fn decrypt(master_key: &[u8; KEY_SIZE], encoded: &str) -> Result<String> {
-  let key = derive_key(master_key);
-  let cipher = Aes256Gcm::new(&key);
-  let packed = base64::engine::general_purpose::STANDARD
-    .decode(encoded)
-    .context("invalid base64")?;
-  anyhow::ensure!(packed.len() > NONCE_SIZE, "ciphertext too short");
-  let (nonce_bytes, ciphertext) = packed.split_at(NONCE_SIZE);
-  let nonce = Nonce::from_slice(nonce_bytes);
-  let plaintext = cipher
-    .decrypt(nonce, ciphertext)
-    .map_err(|_| anyhow::anyhow!("decryption failed"))?;
-  String::from_utf8(plaintext).context("decrypted data is not valid UTF-8")
+pub fn decrypt(master_key: &MasterKey, encoded: &str) -> Result<String> {
+  encryptman::decrypt(master_key, encoded)
+    .map_err(|e| anyhow::anyhow!("{e}"))
 }
 
 #[cfg(test)]
