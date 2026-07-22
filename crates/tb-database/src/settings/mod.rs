@@ -2,7 +2,7 @@ pub mod crypto;
 
 use anyhow::Result;
 use chrono::Local;
-use encryptman::MasterKey;
+use encryptman_keyring::Vault;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use sqlx::SqlitePool;
@@ -12,46 +12,38 @@ use tb_models::settings::{
   RegimenEntry, SplashMessages,
 };
 
-const KEY_FILENAME: &str = ".tb_key";
+const KEYRING_SERVICE: &str = "tb-plus";
+const LEGACY_KEY_FILENAME: &str = ".tb_key";
 
 pub struct SettingsManager {
   pool: SqlitePool,
-  master_key: MasterKey,
+  vault: Vault,
 }
 
 #[allow(dead_code)]
 impl SettingsManager {
   /// Create a new SettingsManager, loading or generating the master encryption key.
   pub async fn new(pool: SqlitePool, app_data_dir: &std::path::Path) -> Result<Self> {
-    let master_key = Self::load_or_create_key(app_data_dir);
-    let mgr = Self { pool, master_key };
+    let vault = Self::init_vault(app_data_dir)?;
+    let mgr = Self { pool, vault };
     mgr.seed_defaults().await?;
     Ok(mgr)
   }
 
-  pub fn master_key(&self) -> &MasterKey {
-    &self.master_key
+  pub fn vault(&self) -> &Vault {
+    &self.vault
   }
 
   // ── Key management ────────────────────────────────────────────────────────
 
-  fn load_or_create_key(app_data_dir: &std::path::Path) -> MasterKey {
-    Self::load_or_create_static_key(app_data_dir)
-  }
-
-  pub fn load_or_create_static_key(app_data_dir: &std::path::Path) -> MasterKey {
-    let key_path = app_data_dir.join(KEY_FILENAME);
+  fn init_vault(app_data_dir: &std::path::Path) -> Result<Vault> {
+    let key_path = app_data_dir.join(LEGACY_KEY_FILENAME);
     if key_path.exists() {
-      let raw = std::fs::read(&key_path).unwrap_or_default();
-      if raw.len() == 32 {
-        let mut bytes = [0u8; 32];
-        bytes.copy_from_slice(&raw);
-        return MasterKey::from_bytes(bytes);
-      }
+      let vault = Vault::migrate_from_file(KEYRING_SERVICE, &key_path)?;
+      println!("[tb-plus] Migrated .tb_key to OS keychain");
+      return Ok(vault);
     }
-    let key = crypto::generate_master_key();
-    let _ = std::fs::write(&key_path, key.as_bytes());
-    key
+    Ok(Vault::new(KEYRING_SERVICE)?)
   }
 
   // ── Default seeding ───────────────────────────────────────────────────────
@@ -223,7 +215,7 @@ impl SettingsManager {
     let raw = self.get(key).await?;
     match raw {
       Some(encoded) if !encoded.is_empty() => {
-        let decrypted = crypto::decrypt(&self.master_key, &encoded)?;
+        let decrypted = self.vault.decrypt(&encoded)?;
         Ok(Some(decrypted))
       }
       _ => Ok(None),
@@ -232,7 +224,7 @@ impl SettingsManager {
 
   pub async fn set_encrypted(&self, key: &str, plaintext: &str) -> Result<()> {
     let now = Local::now().format("%Y-%m-%dT%H:%M:%S").to_string();
-    let encoded = crypto::encrypt(&self.master_key, plaintext)?;
+    let encoded = self.vault.encrypt(plaintext)?;
     sqlx::query("INSERT OR REPLACE INTO app_settings (key, value, updated_at) VALUES (?, ?, ?)")
       .bind(key)
       .bind(&encoded)
