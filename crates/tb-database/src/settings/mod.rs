@@ -2,6 +2,7 @@ pub mod crypto;
 
 use anyhow::Result;
 use chrono::Local;
+use encryptman::MasterKey;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use sqlx::SqlitePool;
@@ -15,7 +16,7 @@ const KEY_FILENAME: &str = ".tb_key";
 
 pub struct SettingsManager {
   pool: SqlitePool,
-  master_key: [u8; 32],
+  master_key: MasterKey,
 }
 
 #[allow(dead_code)]
@@ -28,28 +29,28 @@ impl SettingsManager {
     Ok(mgr)
   }
 
-  pub fn master_key(&self) -> &[u8; 32] {
+  pub fn master_key(&self) -> &MasterKey {
     &self.master_key
   }
 
   // ── Key management ────────────────────────────────────────────────────────
 
-  fn load_or_create_key(app_data_dir: &std::path::Path) -> [u8; 32] {
+  fn load_or_create_key(app_data_dir: &std::path::Path) -> MasterKey {
     Self::load_or_create_static_key(app_data_dir)
   }
 
-  pub fn load_or_create_static_key(app_data_dir: &std::path::Path) -> [u8; 32] {
+  pub fn load_or_create_static_key(app_data_dir: &std::path::Path) -> MasterKey {
     let key_path = app_data_dir.join(KEY_FILENAME);
     if key_path.exists() {
       let raw = std::fs::read(&key_path).unwrap_or_default();
       if raw.len() == 32 {
-        let mut key = [0u8; 32];
-        key.copy_from_slice(&raw);
-        return key;
+        let mut bytes = [0u8; 32];
+        bytes.copy_from_slice(&raw);
+        return MasterKey::from_bytes(bytes);
       }
     }
     let key = crypto::generate_master_key();
-    let _ = std::fs::write(&key_path, key);
+    let _ = std::fs::write(&key_path, key.as_bytes());
     key
   }
 
