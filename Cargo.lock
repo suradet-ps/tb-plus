@@ -1127,9 +1127,9 @@ dependencies = [
 
 [[package]]
 name = "encryptman"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4550441d80c8d91226403ab385279a264338d71ff155006576707e595d0d85d0"
+checksum = "aaaa06da4136007667b8e29bbeb597ebf67ebde4e897e9166c903dfbbaac704f"
 dependencies = [
  "aes-gcm",
  "base64 0.22.1",
