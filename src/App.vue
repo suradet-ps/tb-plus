@@ -6,11 +6,15 @@ import { onMounted, onUnmounted, ref, watch } from 'vue';
 import AppSidebar from '@/components/layout/AppSidebar.vue';
 import { useAlertStore } from '@/stores/alerts';
 import { useAppointmentsStore } from '@/stores/appointments';
+import { usePatientStore } from '@/stores/patient';
+import { useScreeningStore } from '@/stores/screening';
 import { useSettingsStore } from '@/stores/settings';
 
 const alertStore = useAlertStore();
 const settingsStore = useSettingsStore();
 const appointmentsStore = useAppointmentsStore();
+const patientStore = usePatientStore();
+const screeningStore = useScreeningStore();
 
 const connectionAnnounce = ref('');
 let prevConnected: boolean | null = null;
@@ -27,13 +31,21 @@ watch(
   },
 );
 
+function handleReconnect() {
+  alertStore.refresh();
+  appointmentsStore.fetchAppointments();
+  patientStore.fetchActivePatients();
+  if (screeningStore.results.length > 0) {
+    screeningStore.search();
+  }
+}
+
 let startupRetryTimer: ReturnType<typeof setInterval> | null = null;
 
 onMounted(async () => {
   await getCurrentWindow().show();
   const splashStart = Date.now();
 
-  // Load everything (MySQL config + drug classes + regimens + HOSxP + alerts)
   await settingsStore.loadAllSettings();
   await settingsStore.checkConnection();
   alertStore.startAutoRefresh();
@@ -56,6 +68,8 @@ onMounted(async () => {
     }, 2000);
   }
 
+  settingsStore.startConnectionMonitor(handleReconnect);
+
   const elapsed = Date.now() - splashStart;
   setTimeout(
     () => {
@@ -70,6 +84,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  settingsStore.stopConnectionMonitor();
   if (startupRetryTimer) {
     clearInterval(startupRetryTimer);
     startupRetryTimer = null;
@@ -84,9 +99,13 @@ onUnmounted(() => {
 
     <AppSidebar />
     <main id="main-content" class="app-main" tabindex="-1">
-      <div v-if="!settingsStore.isConnected" class="mysql-banner" role="alert">
+      <div v-if="settingsStore.connectionStatus === 'checking'" class="mysql-banner mysql-banner--checking" role="status">
+        <span class="mysql-banner-icon" aria-hidden="true">...</span>
+        <span>กำลังตรวจสอบการเชื่อมต่อ HOSxP...</span>
+      </div>
+      <div v-else-if="!settingsStore.isConnected" class="mysql-banner" role="alert">
         <WifiOff :size="14" class="mysql-banner-icon" aria-hidden="true" />
-        <span>ยังไม่ได้เชื่อมต่อ HOSxP — ข้อมูลการจ่ายยาและข้อมูลผู้ป่วยอาจไม่เป็นปัจจุบัน</span>
+        <span>ไม่สามารถเชื่อมต่อ HOSxP ได้ — ข้อมูลการจ่ายยาและข้อมูลผู้ป่วยอาจไม่เป็นปัจจุบัน</span>
       </div>
       <RouterView />
     </main>
@@ -148,6 +167,12 @@ onUnmounted(() => {
   font-size: var(--text-body-sm);
   color: var(--palette-orange-dark);
   line-height: var(--leading-body);
+}
+
+.mysql-banner--checking {
+  background: var(--tint-blue);
+  border-bottom-color: rgba(0, 117, 222, 0.15);
+  color: var(--palette-blue);
 }
 
 .mysql-banner-icon {

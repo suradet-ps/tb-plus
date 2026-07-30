@@ -77,11 +77,19 @@ const DEFAULT_HOST = {
   password: '',
 };
 
+export type ConnectionStatus = 'connected' | 'disconnected' | 'checking';
+
 export const useSettingsStore = defineStore('settings', () => {
   const dbConfig = ref<DbConfig>({ ...DEFAULT_HOST });
   const isConnected = ref(false);
   const isConnecting = ref(false);
   const connectionError = ref<string | null>(null);
+  const connectionStatus = ref<ConnectionStatus>('disconnected');
+  const lastConnectedAt = ref<string | null>(null);
+
+  // Connection monitor state
+  let connectionMonitorTimer: ReturnType<typeof setInterval> | null = null;
+  let onReconnectCallback: (() => void) | null = null;
 
   // Hospital-specific — start empty, filled by setup wizard or loadAllSettings()
   const staffNames = ref<string[]>([]);
@@ -137,10 +145,13 @@ export const useSettingsStore = defineStore('settings', () => {
   async function connect(config: DbConfig): Promise<void> {
     try {
       isConnecting.value = true;
+      connectionStatus.value = 'checking';
       connectionError.value = null;
       await invoke('connect_mysql', { config });
       dbConfig.value = { ...config };
       isConnected.value = true;
+      connectionStatus.value = 'connected';
+      lastConnectedAt.value = new Date().toISOString();
       try {
         await saveAllSettings();
       } catch (saveErr) {
@@ -149,6 +160,7 @@ export const useSettingsStore = defineStore('settings', () => {
     } catch (e) {
       connectionError.value = String(e);
       isConnected.value = false;
+      connectionStatus.value = 'disconnected';
     } finally {
       isConnecting.value = false;
     }
@@ -156,10 +168,41 @@ export const useSettingsStore = defineStore('settings', () => {
 
   async function checkConnection(): Promise<void> {
     try {
-      isConnected.value = await invoke<boolean>('get_mysql_status');
+      const connected = await invoke<boolean>('get_mysql_status');
+      const wasDisconnected = !isConnected.value;
+      isConnected.value = connected;
+      connectionStatus.value = connected ? 'connected' : 'disconnected';
+      if (connected) {
+        lastConnectedAt.value = new Date().toISOString();
+        // If we just reconnected, notify the app so it can refresh data
+        if (wasDisconnected && onReconnectCallback) {
+          onReconnectCallback();
+        }
+      }
     } catch {
       isConnected.value = false;
+      connectionStatus.value = 'disconnected';
     }
+  }
+
+  /**
+   * Start periodic connection monitoring. Checks every 30 seconds.
+   * When connection transitions from disconnected → connected, fires onReconnect callback.
+   */
+  function startConnectionMonitor(onReconnect: () => void): void {
+    stopConnectionMonitor();
+    onReconnectCallback = onReconnect;
+    connectionMonitorTimer = setInterval(() => {
+      void checkConnection();
+    }, 30_000);
+  }
+
+  function stopConnectionMonitor(): void {
+    if (connectionMonitorTimer) {
+      clearInterval(connectionMonitorTimer);
+      connectionMonitorTimer = null;
+    }
+    onReconnectCallback = null;
   }
 
   async function loadSavedConfig(): Promise<void> {
@@ -334,6 +377,8 @@ export const useSettingsStore = defineStore('settings', () => {
     isConnected,
     isConnecting,
     connectionError,
+    connectionStatus,
+    lastConnectedAt,
     staffNames,
     drugCodes,
     drugClasses,
@@ -345,6 +390,8 @@ export const useSettingsStore = defineStore('settings', () => {
     testConnection,
     connect,
     checkConnection,
+    startConnectionMonitor,
+    stopConnectionMonitor,
     saveAllSettings,
     loadSavedConfig,
     deleteSavedConfig,
