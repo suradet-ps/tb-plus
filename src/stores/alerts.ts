@@ -6,6 +6,7 @@ import type { PatientAlert } from '@/types/alert';
 export const useAlertStore = defineStore('alerts', () => {
   const alerts = ref<PatientAlert[]>([]);
   const isLoading = ref(false);
+  const error = ref<string | null>(null);
   let refreshInterval: ReturnType<typeof setInterval> | null = null;
 
   const redAlerts = computed(() => alerts.value.filter((a) => a.severity === 'red'));
@@ -20,9 +21,11 @@ export const useAlertStore = defineStore('alerts', () => {
   async function refresh(): Promise<void> {
     try {
       isLoading.value = true;
+      error.value = null;
       const data = await invoke<PatientAlert[]>('get_patient_alerts');
       alerts.value = data;
     } catch (e) {
+      error.value = String(e);
       console.error('Alert refresh failed:', e);
     } finally {
       isLoading.value = false;
@@ -44,6 +47,7 @@ export const useAlertStore = defineStore('alerts', () => {
   return {
     alerts,
     isLoading,
+    error,
     redAlerts,
     yellowAlerts,
     totalCount,

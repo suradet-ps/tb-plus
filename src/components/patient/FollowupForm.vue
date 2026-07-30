@@ -151,6 +151,20 @@ async function handleSubmit() {
     return;
   }
 
+  if (form.value.month_number !== null) {
+    if (form.value.month_number < 1 || form.value.month_number > 24) {
+      submitError.value = 'หมายเลขเดือนต้องอยู่ระหว่าง 1 ถึง 24';
+      return;
+    }
+  }
+
+  if (form.value.weight_kg !== null) {
+    if (form.value.weight_kg < 20 || form.value.weight_kg > 200) {
+      submitError.value = 'น้ำหนักต้องอยู่ระหว่าง 20 ถึง 200 กก.';
+      return;
+    }
+  }
+
   isSubmitting.value = true;
   try {
     const input: FollowupInput = {

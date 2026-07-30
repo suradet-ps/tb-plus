@@ -313,7 +313,12 @@ export const useSettingsStore = defineStore('settings', () => {
   // -- Setup status --
 
   async function markSetupComplete(): Promise<void> {
-    await invoke('mark_setup_complete');
+    try {
+      await invoke('mark_setup_complete');
+    } catch (e) {
+      console.error('Failed to mark setup complete:', e);
+      throw e;
+    }
   }
 
   async function isSetupComplete(): Promise<boolean> {

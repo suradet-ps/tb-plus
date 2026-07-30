@@ -85,6 +85,49 @@ describe('DischargeModal', () => {
     expect(invoke).not.toHaveBeenCalled();
   });
 
+  it('should show error when outcome_date is in the future', async () => {
+    const wrapper = mountModal();
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 5);
+    const futureStr = futureDate.toISOString().slice(0, 10);
+
+    await wrapper.find('#dc-outcome').setValue('cured');
+    await wrapper.find('#dc-date').setValue(futureStr);
+    await wrapper.find('#discharge-form').trigger('submit');
+
+    expect(wrapper.find('.form-error').text()).toContain('วันที่จำหน่ายต้องไม่เป็นวันในอนาคต');
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it('should show error when treatment_end is in the future', async () => {
+    const wrapper = mountModal();
+    const today = new Date().toISOString().slice(0, 10);
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 10);
+    const futureStr = futureDate.toISOString().slice(0, 10);
+
+    await wrapper.find('#dc-outcome').setValue('cured');
+    await wrapper.find('#dc-date').setValue(today);
+    await wrapper.find('#dc-end').setValue(futureStr);
+    await wrapper.find('#discharge-form').trigger('submit');
+
+    expect(wrapper.find('.form-error').text()).toContain('วันที่สิ้นสุดการรักษาต้องไม่เป็นวันในอนาคต');
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it('should accept today as a valid outcome_date', async () => {
+    vi.mocked(invoke).mockResolvedValue(undefined);
+    const wrapper = mountModal();
+    const today = new Date().toISOString().slice(0, 10);
+
+    await wrapper.find('#dc-outcome').setValue('cured');
+    await wrapper.find('#dc-date').setValue(today);
+    await wrapper.find('#discharge-form').trigger('submit');
+    await flushPromises();
+
+    expect(invoke).toHaveBeenCalled();
+  });
+
   it('should call invoke with correct payload on valid submit', async () => {
     vi.mocked(invoke).mockResolvedValue(undefined);
     const wrapper = mountModal({ hn: 'HN00005' });
