@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { AlertTriangle, Loader2, X } from '@lucide/vue';
 import { invoke } from '@tauri-apps/api/core';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, toRef, watch } from 'vue';
+import { useFocusTrap } from '@/composables/useFocusTrap';
 import type { FollowupInput } from '@/types/treatment';
 
 // -- Props & Emits --
@@ -113,6 +114,11 @@ const form = ref<FormState>(createEmptyForm());
 const selectedSideEffects = ref<string[]>([]);
 const isSubmitting = ref(false);
 const submitError = ref<string | null>(null);
+
+// -- Focus trap --
+const panelRef = ref<HTMLElement | null>(null);
+const isOpen = toRef(props, 'modelValue');
+useFocusTrap(isOpen, panelRef);
 
 // Warn when optic neuritis (E side effect) is checked
 const hasOpticNeuritisChecked = ref(false);
@@ -232,6 +238,7 @@ function onKeydown(e: KeyboardEvent) {
       >
         <!-- Panel -->
         <aside
+          ref="panelRef"
           class="panel"
           role="dialog"
           aria-modal="true"

@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { ref, toRef } from 'vue';
+import { useFocusTrap } from '@/composables/useFocusTrap';
+
 type DialogVariant = 'default' | 'danger';
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     modelValue: boolean;
     title: string;
@@ -22,6 +25,10 @@ const emit = defineEmits<{
   (e: 'confirm'): void;
   (e: 'cancel'): void;
 }>();
+
+const panelRef = ref<HTMLElement | null>(null);
+const isOpen = toRef(props, 'modelValue');
+useFocusTrap(isOpen, panelRef);
 
 function close() {
   emit('update:modelValue', false);
@@ -61,6 +68,7 @@ function onKeydown(event: KeyboardEvent) {
         @keydown="onKeydown"
       >
         <div
+          ref="panelRef"
           class="dialog-panel"
           role="dialog"
           aria-modal="true"
