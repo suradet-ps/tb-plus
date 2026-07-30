@@ -164,6 +164,7 @@ async function handleSubmit() {
     };
     await invoke('discharge_patient', { outcome: input });
     emit('discharged');
+    isSubmitting.value = false;
     close();
   } catch (e) {
     submitError.value = String(e);
