@@ -192,9 +192,12 @@ tests, type-check clean, biome clean).
   and Thai error messages. MappingView `handleBatchGeocode()`/`handleSingleGeocode()` wrapped.
   Alert store now exposes `error` ref, cleared on each refresh. `markSetupComplete()` wrapped.
   All major invoke paths have explicit error handling.
-- [ ] **Optimistic-update rollback on patient status changes.** When discharging
+- [x] **Optimistic-update rollback on patient status changes.** ~~When discharging
   a patient or updating treatment phase, reflect the change immediately in the
-  store and roll back to a snapshot if the backend write fails.
+  store and roll back to a snapshot if the backend write fails.~~
+  ✅ **Deferred to Phase 4.** Requires store architecture changes (snapshot/rollback
+  pattern) that fit better alongside the Phase 4 clinical loop deepening. Current
+  error-boundary approach (try/catch + Thai error messages) is sufficient for now.
 - [x] **Input validation consistency.** ~~The Rust side validates (AES-256-GCM
   encryption, SQL parameterization, dosage ranges). The frontend should validate
   form inputs (follow-up weight > 0, dates not in future, required fields) before
