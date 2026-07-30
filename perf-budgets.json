@@ -1,0 +1,31 @@
+{
+  "$schema": "Performance budget thresholds for CI enforcement.",
+  "version": "2.0.0",
+  "frontend": {
+    "total_js_gzip_kb": 250,
+    "chunks": {
+      "vue": 50,
+      "leaflet": 75,
+      "index": 30
+    },
+    "total_css_gzip_kb": 60
+  },
+  "baseline": {
+    "measured_at": "2026-07-30",
+    "version": "1.7.0",
+    "actual_js_gzip_kb": 165.6,
+    "actual_css_gzip_kb": 37.5,
+    "actual_chunks": {
+      "vue": 34.2,
+      "leaflet": 50.0,
+      "index": 19.0
+    }
+  },
+  "rust_tests": {
+    "min_total": 48
+  },
+  "frontend_tests": {
+    "min_total": 236,
+    "min_files": 16
+  }
+}

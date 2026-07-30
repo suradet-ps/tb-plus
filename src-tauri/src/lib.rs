@@ -35,6 +35,14 @@ pub fn run() {
           .await
           .expect("Failed to connect to SQLite");
 
+        // Enable WAL mode for concurrent read/write performance.
+        // WAL allows multiple readers with a single writer, preventing
+        // SQLITE_BUSY errors during the alert refresh cycle.
+        sqlx::query("PRAGMA journal_mode=WAL")
+          .execute(&pool)
+          .await
+          .expect("Failed to set SQLite WAL mode");
+
         sqlx::migrate!("./migrations")
           .run(&pool)
           .await

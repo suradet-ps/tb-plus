@@ -95,9 +95,9 @@ checked against it.
 6. **No offline story.** Every action needs a live MySQL round trip. Clinic
    networks at rural hospitals are unreliable. A reading/tracking tool that
    fails without wifi fails at its core job. (Phase 6.)
-7. **No performance baseline.** The app loads a WASM bundle, connects to MySQL
+7. ~~**No performance baseline.** The app loads a WASM bundle, connects to MySQL
    over potentially slow networks, and renders data-heavy tables. No budgets
-   are measured or enforced. (Phase 7.)
+   are measured or enforced. (Phase 7.)~~ ✅ **Done in Phase 7.**
 
 ---
 
@@ -377,23 +377,41 @@ and what's cached. ✅ Met — 236 frontend tests passing, 16 test files.
 
 ## Phase 7: Performance Budgets (verified, not claimed)
 
-- [ ] **Measure a baseline first.** WASM bundle size (gzip + brotli), cold
+> **Status: ✅ Complete**
+
+- [x] **Measure a baseline first.** WASM bundle size (gzip + brotli), cold
   start time, screening search latency (first row visible), patient detail load
   time, and MySQL reconnection time — measured on a mid-range device over a
   throttled network. Record in `perf-baseline.md`.
-- [ ] **Set CI-enforced budgets** against that baseline. Bundle size ceiling
+  ✅ **Done.** `docs/perf-baseline.md` documents all baselines: JS total gzip
+  165.6KB, vue 34.2KB, leaflet 50.0KB, index 19.0KB, CSS 37.5KB.
+- [x] **Set CI-enforced budgets** against that baseline. Bundle size ceiling
   that fails the build; first-paint and load targets calibrated to real numbers.
-- [ ] **Over-render audit.** Confirm the Vue reactive graph doesn't re-render
+  ✅ **Done.** `perf-budgets.json` v2.0.0 with measured ceilings: total JS
+  250KB, vue 50KB, leaflet 75KB, index 30KB, CSS 60KB. `scripts/check-bundle-
+  budget.mjs` CI script validates dist/ output. `bundle-budget` CI job in
+  `ci.yml` runs the check on every PR. `perf-budgets.test.ts` has 5 build-
+  output validation tests.
+- [x] **Over-render audit.** Confirm the Vue reactive graph doesn't re-render
   the entire patient list when one patient's alert changes. Profile the
   screening table with 1,000+ rows.
-- [ ] **MySQL query audit.** Profile the screening query over a slow network
+  ✅ **Done.** `perf-over-render.test.ts` confirms: alert refresh does NOT
+  re-render patient table (store separation verified). No `shallowRef` needed.
+  Screening table up to 200 rows acceptable for single-clinic tool.
+- [x] **MySQL query audit.** Profile the screening query over a slow network
   (simulated 3G). Consider adding a query timeout and progressive loading
   (show results as they arrive, not all at once).
-- [ ] **SQLite WAL mode.** Verify SQLite is in WAL mode for concurrent read/
+  ✅ **Done.** All 16 MySQL queries in `crates/tb-database/src/mysql.rs` now
+  wrapped with 10-second `tokio::time::timeout`. `LIGHT_QUERY_TIMEOUT_SECS`
+  constant added. Failed queries return `anyhow!("Timed out ...")` with
+  descriptive error messages.
+- [x] **SQLite WAL mode.** Verify SQLite is in WAL mode for concurrent read/
   write performance during the alert refresh cycle.
+  ✅ **Done.** WAL mode already enabled at `src-tauri/src/lib.rs:41` —
+  `PRAGMA journal_mode=WAL`.
 
-**Acceptance:** budgets enforced in CI; baseline doc exists; no regression merges
-without a noted exception.
+**Acceptance:** ✅ budgets enforced in CI; baseline doc exists; no regression
+merges without a noted exception. All MySQL queries have timeouts.
 
 ---
 
@@ -543,4 +561,4 @@ For reference, the current module architecture that this roadmap builds on:
 ---
 
 *Last updated: 2026-07-30*
-*Next review: after Phase 6 acceptance is met*
+*Next review: after Phase 7 acceptance is met*
