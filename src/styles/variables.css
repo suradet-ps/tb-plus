@@ -207,7 +207,9 @@
 /* -- 5. TYPOGRAPHY -- */
 :root {
   /* Font family */
-  --font-family: "Inter", "Noto Sans Thai", "Sarabun", -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-family:
+    "Inter", "Noto Sans Thai", "Sarabun", -apple-system, system-ui, "Segoe UI", Helvetica, Arial,
+    sans-serif;
   --font-family-mono: "SF Mono", "Roboto Mono", "Fira Code", monospace;
   --font-family-mono-simple: monospace;
 
