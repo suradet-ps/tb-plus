@@ -1,6 +1,6 @@
 # TB Plus — Performance Baseline
 
-Measured on 2026-07-30 against v1.7.0 build output (`vite build`).
+Measured on 2026-07-30 against v1.8.0 build output (`vite build`).
 Device: mid-range Windows desktop. Network: local (no throttling).
 
 ---

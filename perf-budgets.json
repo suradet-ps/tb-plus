@@ -12,7 +12,7 @@
   },
   "baseline": {
     "measured_at": "2026-07-30",
-    "version": "1.7.0",
+    "version": "1.8.0",
     "actual_js_gzip_kb": 165.6,
     "actual_css_gzip_kb": 37.5,
     "actual_chunks": {
