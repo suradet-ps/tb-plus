@@ -17,6 +17,13 @@ const TABLE_OAPP: &str = "oapp";
 const TABLE_CLINIC: &str = "clinic";
 const TABLE_OPDSCREEN: &str = "opdscreen";
 
+/// Per-query execution timeout in seconds.
+/// Prevents the UI from hanging on slow HOSxP servers.
+const QUERY_TIMEOUT_SECS: u64 = 30;
+
+/// Timeout for lighter queries (single-table lookups, simple JOINs).
+const LIGHT_QUERY_TIMEOUT_SECS: u64 = 10;
+
 // ---------------------------------------------------------------------------
 // Private helpers
 // ---------------------------------------------------------------------------
@@ -191,7 +198,12 @@ pub async fn search_tb_patients(
     q = q.bind(format!("%{}%", name));
   }
 
-  let rows = q.fetch_all(pool).await?;
+  let rows = tokio::time::timeout(
+    std::time::Duration::from_secs(QUERY_TIMEOUT_SECS),
+    q.fetch_all(pool),
+  )
+  .await
+  .map_err(|_| anyhow::anyhow!("MySQL query timed out after {QUERY_TIMEOUT_SECS}s"))??;
 
   let mut out = Vec::with_capacity(rows.len());
   for row in rows {
@@ -242,7 +254,7 @@ pub async fn get_patient_demographics(
   pool: &MySqlPool,
   hn: &str,
 ) -> Result<Option<PatientDemographics>> {
-  let row = sqlx::query_as::<_, DemographicsRow>(
+  let q = sqlx::query_as::<_, DemographicsRow>(
     "SELECT \
             p.hn, \
             CONCAT(COALESCE(p.pname, ''), p.fname, ' ', p.lname) AS full_name, \
@@ -254,9 +266,14 @@ pub async fn get_patient_demographics(
         FROM patient p \
         WHERE p.hn = ?",
   )
-  .bind(hn)
-  .fetch_optional(pool)
-  .await?;
+  .bind(hn);
+
+  let row = tokio::time::timeout(
+    std::time::Duration::from_secs(LIGHT_QUERY_TIMEOUT_SECS),
+    q.fetch_optional(pool),
+  )
+  .await
+  .map_err(|_| anyhow::anyhow!("MySQL query timed out after {LIGHT_QUERY_TIMEOUT_SECS}s"))??;
 
   Ok(row.map(|r| PatientDemographics {
     hn: r.hn,
@@ -296,7 +313,12 @@ pub async fn get_patient_demographics_by_hns(
   }
   separated.push_unseparated(")");
 
-  let rows: Vec<DemographicsRow> = query.build_query_as().fetch_all(pool).await?;
+  let rows: Vec<DemographicsRow> = tokio::time::timeout(
+    std::time::Duration::from_secs(LIGHT_QUERY_TIMEOUT_SECS),
+    query.build_query_as().fetch_all(pool),
+  )
+  .await
+  .map_err(|_| anyhow::anyhow!("MySQL query timed out after {LIGHT_QUERY_TIMEOUT_SECS}s"))??;
 
   Ok(
     rows
@@ -348,10 +370,14 @@ pub async fn get_patient_latest_weight_summary(
         LIMIT 1"
   );
 
-  let row = sqlx::query_as::<_, DosagePatientRow>(sqlx::AssertSqlSafe(sql.as_str()))
-    .bind(hn)
-    .fetch_optional(pool)
-    .await?;
+  let row = tokio::time::timeout(
+    std::time::Duration::from_secs(LIGHT_QUERY_TIMEOUT_SECS),
+    sqlx::query_as::<_, DosagePatientRow>(sqlx::AssertSqlSafe(sql.as_str()))
+      .bind(hn)
+      .fetch_optional(pool),
+  )
+  .await
+  .map_err(|_| anyhow::anyhow!("MySQL query timed out after {LIGHT_QUERY_TIMEOUT_SECS}s"))??;
 
   Ok(row.map(|r| DosagePatientSummary {
     hn: r.hn,
@@ -388,7 +414,12 @@ pub async fn get_drug_items_by_icodes(
     q = q.bind(icode.as_str());
   }
 
-  let rows = q.fetch_all(pool).await?;
+  let rows = tokio::time::timeout(
+    std::time::Duration::from_secs(LIGHT_QUERY_TIMEOUT_SECS),
+    q.fetch_all(pool),
+  )
+  .await
+  .map_err(|_| anyhow::anyhow!("MySQL query timed out after {LIGHT_QUERY_TIMEOUT_SECS}s"))??;
   Ok(
     rows
       .into_iter()
@@ -447,7 +478,13 @@ pub async fn get_dispensing_history(
     q = q.bind(icode.as_str());
   }
 
-  let mut rows: Vec<DispensingRecord> = q.fetch_all(pool).await.map_err(anyhow::Error::from)?;
+  let mut rows: Vec<DispensingRecord> = tokio::time::timeout(
+    std::time::Duration::from_secs(QUERY_TIMEOUT_SECS),
+    q.fetch_all(pool),
+  )
+  .await
+  .map_err(|_| anyhow::anyhow!("MySQL query timed out after {QUERY_TIMEOUT_SECS}s"))?
+  .map_err(anyhow::Error::from)?;
   for row in &mut rows {
     row.drug_class = icode_to_class_map.get(&row.icode).cloned();
   }
@@ -475,7 +512,13 @@ pub async fn get_last_dispensing_date(
     q = q.bind(icode.as_str());
   }
 
-  q.fetch_one(pool).await.map_err(anyhow::Error::from)
+  tokio::time::timeout(
+    std::time::Duration::from_secs(LIGHT_QUERY_TIMEOUT_SECS),
+    q.fetch_one(pool),
+  )
+  .await
+  .map_err(|_| anyhow::anyhow!("MySQL query timed out after {LIGHT_QUERY_TIMEOUT_SECS}s"))?
+  .map_err(anyhow::Error::from)
 }
 
 /// Return `true` if Ethambutol (icode 1600004 **or** 1000129) was dispensed
@@ -505,7 +548,12 @@ pub async fn was_ethambutol_dispensed_recently(
   }
   q = q.bind(days);
 
-  let count = q.fetch_one(pool).await?;
+  let count = tokio::time::timeout(
+    std::time::Duration::from_secs(LIGHT_QUERY_TIMEOUT_SECS),
+    q.fetch_one(pool),
+  )
+  .await
+  .map_err(|_| anyhow::anyhow!("MySQL query timed out after {LIGHT_QUERY_TIMEOUT_SECS}s"))??;
   Ok(count > 0)
 }
 
@@ -533,7 +581,12 @@ pub async fn was_ze_dispensed_recently(
   }
   q = q.bind(days);
 
-  let count = q.fetch_one(pool).await?;
+  let count = tokio::time::timeout(
+    std::time::Duration::from_secs(LIGHT_QUERY_TIMEOUT_SECS),
+    q.fetch_one(pool),
+  )
+  .await
+  .map_err(|_| anyhow::anyhow!("MySQL query timed out after {LIGHT_QUERY_TIMEOUT_SECS}s"))??;
   Ok(count > 0)
 }
 
@@ -560,12 +613,16 @@ pub async fn get_tb_appointments(
         ORDER BY a.nextdate ASC",
   );
 
-  sqlx::query_as::<_, AppointmentRecord>(sqlx::AssertSqlSafe(sql.as_str()))
-    .bind(clinic_code)
-    .bind(days_ahead)
-    .fetch_all(pool)
-    .await
-    .map_err(anyhow::Error::from)
+  tokio::time::timeout(
+    std::time::Duration::from_secs(LIGHT_QUERY_TIMEOUT_SECS),
+    sqlx::query_as::<_, AppointmentRecord>(sqlx::AssertSqlSafe(sql.as_str()))
+      .bind(clinic_code)
+      .bind(days_ahead)
+      .fetch_all(pool),
+  )
+  .await
+  .map_err(|_| anyhow::anyhow!("MySQL query timed out after {LIGHT_QUERY_TIMEOUT_SECS}s"))?
+  .map_err(anyhow::Error::from)
 }
 
 /// Search for TB clinics in HOSxP `clinic` table by name or code.
@@ -585,13 +642,17 @@ pub async fn search_clinics(pool: &MySqlPool, query: &str, limit: u32) -> Result
          LIMIT ?",
   );
   let pattern = format!("%{}%", query);
-  sqlx::query_as::<_, ClinicRow>(sqlx::AssertSqlSafe(sql.as_str()))
-    .bind(&pattern)
-    .bind(&pattern)
-    .bind(limit as i64)
-    .fetch_all(pool)
-    .await
-    .map_err(anyhow::Error::from)
+  tokio::time::timeout(
+    std::time::Duration::from_secs(LIGHT_QUERY_TIMEOUT_SECS),
+    sqlx::query_as::<_, ClinicRow>(sqlx::AssertSqlSafe(sql.as_str()))
+      .bind(&pattern)
+      .bind(&pattern)
+      .bind(limit as i64)
+      .fetch_all(pool),
+  )
+  .await
+  .map_err(|_| anyhow::anyhow!("MySQL query timed out after {LIGHT_QUERY_TIMEOUT_SECS}s"))?
+  .map_err(anyhow::Error::from)
 }
 
 /// Search for drugs in HOSxP `drugitems` by name, icode, or shortname.
@@ -614,12 +675,16 @@ pub async fn search_drugs(pool: &MySqlPool, query: &str, limit: u32) -> Result<V
          LIMIT ?",
   );
   let pattern = format!("%{}%", query);
-  let rows: Vec<DrugItemRow> = sqlx::query_as(sqlx::AssertSqlSafe(sql.as_str()))
-    .bind(&pattern)
-    .bind(&pattern)
-    .bind(limit as i64)
-    .fetch_all(pool)
-    .await?;
+  let rows: Vec<DrugItemRow> = tokio::time::timeout(
+    std::time::Duration::from_secs(LIGHT_QUERY_TIMEOUT_SECS),
+    sqlx::query_as(sqlx::AssertSqlSafe(sql.as_str()))
+      .bind(&pattern)
+      .bind(&pattern)
+      .bind(limit as i64)
+      .fetch_all(pool),
+  )
+  .await
+  .map_err(|_| anyhow::anyhow!("MySQL query timed out after {LIGHT_QUERY_TIMEOUT_SECS}s"))??;
   Ok(
     rows
       .into_iter()
@@ -678,7 +743,12 @@ pub async fn get_drug_consumption_by_month(
   }
   q = q.bind(months_back);
 
-  let rows = q.fetch_all(pool).await?;
+  let rows = tokio::time::timeout(
+    std::time::Duration::from_secs(QUERY_TIMEOUT_SECS),
+    q.fetch_all(pool),
+  )
+  .await
+  .map_err(|_| anyhow::anyhow!("MySQL query timed out after {QUERY_TIMEOUT_SECS}s"))??;
 
   // Aggregate by month + drug class
   let mut combined: Vec<DrugConsumptionRow> = Vec::new();
