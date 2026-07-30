@@ -50,10 +50,10 @@ checked against it.
   `Cargo Audit`, `Frontend Lint & Format` (biome), `Frontend Tests` (vitest),
   `Cargo Deny` (advisories + licenses + bans). Plus `rust-safety` (clippy +
   miri) and `test-build` (full Tauri build).
-- **Rust tests**: 46 unit tests across crates — alert logic (11), date
-  arithmetic (7), duration parsing (6), icode mapping (7+6), crypto (5),
-  dosage (3), settings (3). All passing.
-- **Frontend tests**: 16 test files (220 tests) — 6 store test files covering
+- **Rust tests**: 48 unit tests across crates — date arithmetic (14),
+  duration parsing (7), icode mapping (16), crypto (5), dosage (3),
+  settings (3). All passing.
+- **Frontend tests**: 16 test files (236 tests) — 6 store test files covering
   alerts, patient, screening, settings, mapping, appointments stores; 4
   component tests (AlertBadge, ProgressBar, TreatmentTimeline, DischargeModal);
   4 integration tests (alert full path, dosage round-trip, screening filters,
@@ -61,7 +61,7 @@ checked against it.
   factories and Tauri invoke mocks in `src/__tests__/`.
 - **2 composables**: `useFocusTrap` (reusable focus trap for modals) and
   `useAnnounce` (debounced live-region screen reader announcements).
-- **41 Tauri commands** across 10 command modules: screening (2), patients (5),
+- **41 Tauri commands** across 9 command modules: screening (2), patients (5),
   followups (2), alerts (1), settings (22), dosage (2), mapping (5),
   appointments (1), reports (1).
 - **10 views**: Screening, Active, Discharged, Appointments, Dosage Assessment,
@@ -145,9 +145,9 @@ built on top of them.
   alert or a wrong progress indication. Use `@vue/test-utils` + vitest.
   ✅ **Done.** AlertBadge (7 tests: severity classes, message, dot, tooltip),
   ProgressBar (13 tests: percentage, overrun, nulls, phase colors, width),
-  TreatmentTimeline (11 tests: empty state, phase bars, followup dots, today
-  marker, ARIA), DischargeModal (15 tests: rendering, validation, submit,
-  close/escape, error handling).
+  TreatmentTimeline (17 tests: empty state, phase bars, followup dots, today
+  marker, ARIA, gap zones, current month tick), DischargeModal (18 tests:
+  rendering, validation, submit, close/escape, error handling).
 - [x] **Alert engine integration tests.** The Rust-side `compute_alerts_for_patient`
   is well unit-tested. Add frontend tests that verify the alert store correctly
   classifies, counts, and surfaces alerts per patient — the full path from
@@ -179,7 +179,7 @@ calling `close()`. This would have prevented the modal from closing after a
 successful discharge.
 
 **Acceptance:** ✅ every critical rendering path has a component test; alert and
-dosage logic verified end-to-end; enrollment flow tested; all blocking CI (191
+dosage logic verified end-to-end; enrollment flow tested; all blocking CI (236
 tests, type-check clean, biome clean).
 
 ---
@@ -227,7 +227,7 @@ tests, type-check clean, biome clean).
 **Acceptance:** ✅ no silent error swallowing; failed writes surface Thai error
 messages; disconnected MySQL shows a global banner on every view; input validation
 catches invalid data before backend round-trips; encryption audit verified clean;
-191 tests passing, type-check clean, biome clean.
+236 tests passing, type-check clean, biome clean.
 
 ---
 
@@ -273,7 +273,7 @@ discharge — without adding a second product.
 
 **Acceptance:** each improvement has a component test where logic exists; nothing
 here adds sharing, social, or multi-user features.
-✅ **Done in Phase 4.** 206 frontend tests (15 new in Phase 4: filter
+✅ **Done in Phase 4.** 236 frontend tests (15 new in Phase 4: filter
 persistence, resetFilters, lastSearchAt, savePinNote, gap zones, current month
 tick, mapping factory Phase 4.6 fields).
 
@@ -293,7 +293,7 @@ job for its one audience.
   ✅ **Done.** Focus-trap on ConfirmDialog, DischargeModal, FollowupForm,
   EnrollModal via `useFocusTrap` composable. Arrow-key tab navigation on
   PatientDetailView (`ArrowLeft`/`ArrowRight`/`Home`/`End`). Sortable table
-  headers in PatientTable (5 columns) and ActiveView (3 columns) have
+  headers in PatientTable (6 columns) and ActiveView (3 columns) have
   `tabindex="0"` + Enter/Space keyboard activation. Skip-to-content link
   (`ข้ามไปยังเนื้อหา`). Escape closes all modals.
 - [x] **Screen-reader pass.** ARIA roles on the patient table, sidebar
@@ -303,7 +303,7 @@ job for its one audience.
   ✅ **Done.** `useAnnounce` composable provides debounced live-region
   announcements. AppSidebar has `aria-label="เมนูหลัก"` and `aria-current="page"`.
   PatientTable has `aria-label="ผลการคัดกรองผู้ป่วย"`, header checkbox
-  `aria-label`, `aria-sort` on all 5 sortable columns. ActiveView has
+  `aria-label`, `aria-sort` on all 6 sortable columns. ActiveView has
   `aria-label="รายชื่อผู้ป่วยกำลังรักษา"`, `aria-sort` on 3 sortable columns.
   ProgressBar has `role="progressbar"` with `aria-valuenow`/`aria-valuemin`/
   `aria-valuemax`/`aria-label`. Connection status banner has `role="status"`
@@ -327,7 +327,7 @@ job for its one audience.
 
 **Acceptance:** keyboard-only + reduced-motion pass; ARIA attributes on all
 interactive components; Thai font in design tokens; high-contrast mode;
-14 new composable tests (useFocusTrap: 8, useAnnounce: 6); 220 total frontend
+14 new composable tests (useFocusTrap: 8, useAnnounce: 6); 236 total frontend
 tests, type-check clean, biome clean.
 
 ---
