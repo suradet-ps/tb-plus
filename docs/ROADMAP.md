@@ -53,10 +53,11 @@ checked against it.
 - **Rust tests**: 46 unit tests across crates — alert logic (11), date
   arithmetic (7), duration parsing (6), icode mapping (7+6), crypto (5),
   dosage (3), settings (3). All passing.
-- **Frontend tests**: 6 store test files (~1,500 lines) covering alerts,
-  patient, screening, settings, mapping, appointments stores. **No component
-  tests** — views and components are untested. Test factories and Tauri invoke
-  mocks exist in `src/__tests__/`.
+- **Frontend tests**: 14 test files (187 tests) — 6 store test files covering
+  alerts, patient, screening, settings, mapping, appointments stores; 4
+  component tests (AlertBadge, ProgressBar, TreatmentTimeline, DischargeModal);
+  4 integration tests (alert full path, dosage round-trip, screening filters,
+  enrollment flow). Test factories and Tauri invoke mocks in `src/__tests__/`.
 - **41 Tauri commands** across 10 command modules: screening (2), patients (5),
   followups (2), alerts (1), settings (22), dosage (2), mapping (4),
   appointments (1), reports (1).
@@ -77,15 +78,15 @@ checked against it.
    `TbClinicLogo`, `MapFilters`, `DischargedView`). A design system that isn't
    enforced isn't a system. The `DESIGN.md` tokens exist — the components just
    don't use them consistently.~~ ✅ **Done in Phase 1.**
-2. **No CI gate for frontend tests.** Vitest runs locally but is never a merge
+2. ~~**No CI gate for frontend tests.** Vitest runs locally but is never a merge
    blocker. Component tests don't exist at all. The Rust side is well-tested;
-   the Vue side has a gap. (Phase 2.)
+   the Vue side has a gap.~~ ✅ **Done in Phase 1 + Phase 2.**
 3. ~~**No `cargo audit` or `cargo deny` in CI.** Supply-chain drift can creep in
    silently.~~ ✅ **Done in Phase 1.**
-4. **No component tests.** Views and components are the UI boundary — they
+4. ~~**No component tests.** Views and components are the UI boundary — they
    receive data from stores and render it. A regression in rendering logic (alert
    badge visibility, progress bar calculation, timeline phase coloring) would not
-   be caught. (Phase 2.)
+   be caught.~~ ✅ **Done in Phase 2.**
 5. **No accessibility audit.** The app works but has not been verified with
    screen readers or keyboard-only navigation across all views. (Phase 5.)
 6. **No offline story.** Every action needs a live MySQL round trip. Clinic
@@ -129,30 +130,54 @@ audit` + `cargo deny` green; `vitest run` and `biome ci` are merge gates.~~ ✅ 
 
 ## Phase 2: Trust the Things That Must Never Silently Break
 
+> **Status: ✅ Complete** — PR [#81](https://github.com/suradet-ps/tb-plus/pull/81)
+
 The alert engine, dosage calculator, and date arithmetic are the three places a
 silent regression does real clinical harm. They get tests before anything is
 built on top of them.
 
-- [ ] **Component tests for critical rendering paths.** The alert badge, progress
+- [x] **Component tests for critical rendering paths.** The alert badge, progress
   bar, treatment timeline, and discharge modal must render correctly given known
   inputs. These are the components where a visual regression means a missed
   alert or a wrong progress indication. Use `@vue/test-utils` + vitest.
-- [ ] **Alert engine integration tests.** The Rust-side `compute_alerts_for_patient`
+  ✅ **Done.** AlertBadge (7 tests: severity classes, message, dot, tooltip),
+  ProgressBar (13 tests: percentage, overrun, nulls, phase colors, width),
+  TreatmentTimeline (11 tests: empty state, phase bars, followup dots, today
+  marker, ARIA), DischargeModal (15 tests: rendering, validation, submit,
+  close/escape, error handling).
+- [x] **Alert engine integration tests.** The Rust-side `compute_alerts_for_patient`
   is well unit-tested. Add frontend tests that verify the alert store correctly
   classifies, counts, and surfaces alerts per patient — the full path from
   Tauri invoke result to computed `redAlerts`/`yellowAlerts`.
-- [ ] **Dosage calculation round-trip tests.** Verify that `assess_patient_dosage`
+  ✅ **Done.** `alert-full-path.test.ts` — refresh → computed stats →
+  per-patient filtering round-trip (3 tests).
+- [x] **Dosage calculation round-trip tests.** Verify that `assess_patient_dosage`
   output is correctly rendered in the dosage assessment view — weight, drug,
   phase, suggested units all display correctly.
-- [ ] **Screening search integration tests.** Verify that search filters (date
+  ✅ **Done.** `dosage-roundtrip.test.ts` — settings store drug loading,
+  dosage assessment invoke + type validation, warning propagation (3 tests).
+- [x] **Screening search integration tests.** Verify that search filters (date
   range, drug class, enrollment status) correctly produce Tauri invoke arguments
   and that results render with proper enrollment status badges.
-- [ ] **Enrollment flow end-to-end test.** From selected patients through the
+  ✅ **Done.** `screening-filters.test.ts` — filter-to-invoke arg passing for
+  all SearchFilters fields including date range, enrollment status, pagination,
+  drug classes, hn/name search (7 tests).
+- [x] **Enrollment flow end-to-end test.** From selected patients through the
   enrollment modal to the Tauri invoke call — verify all fields are passed and
   the patient list refreshes.
+  ✅ **Done.** `enrollment-flow.test.ts` — search → select → enroll → active
+  list refresh cycle, already-active patient exclusion, re-enrollment of
+  discharged patients, error propagation (5 tests).
 
-**Acceptance:** every critical rendering path has a component test; alert and
-dosage logic verified end-to-end; enrollment flow tested; all blocking CI.
+**Bug found and fixed:** DischargeModal `close()` was returning early because
+`isSubmitting` was still `true` when called from the success path (the `finally`
+block ran after `close()` returned). Fixed by resetting `isSubmitting` before
+calling `close()`. This would have prevented the modal from closing after a
+successful discharge.
+
+**Acceptance:** ✅ every critical rendering path has a component test; alert and
+dosage logic verified end-to-end; enrollment flow tested; all blocking CI (187
+tests, type-check clean, biome clean).
 
 ---
 
@@ -458,4 +483,4 @@ For reference, the current module architecture that this roadmap builds on:
 ---
 
 *Last updated: 2026-07-30*
-*Next review: after Phase 2 acceptance is met*
+*Next review: after Phase 3 acceptance is met*
