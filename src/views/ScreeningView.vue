@@ -231,6 +231,10 @@ function formatLastSearch(iso: string | null): string {
       พบ
       <strong>{{ screeningStore.results.length }}</strong>
       ราย
+      <span v-if="screeningStore.isStale" class="stale-badge">
+        <Clock :size="11" />
+        ข้อมูลอาจไม่เป็นปัจจุบัน
+      </span>
       <span v-if="screeningStore.lastSearchAt" class="last-search-badge">
         <Clock :size="11" />
         ค้นหาล่าสุด {{ formatLastSearch(screeningStore.lastSearchAt) }}
@@ -580,6 +584,20 @@ function formatLastSearch(iso: string | null): string {
   font-weight: var(--weight-normal);
   color: var(--color-text-muted);
   background: var(--color-surface-alt);
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+/* -- Stale data badge -- */
+.stale-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: var(--space-4);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-emphasis);
+  color: var(--palette-orange-dark);
+  background: var(--tint-orange);
   padding: 2px 8px;
   border-radius: 9999px;
 }

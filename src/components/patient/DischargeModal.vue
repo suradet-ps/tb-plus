@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { AlertTriangle, Loader2, LogOut } from '@lucide/vue';
+import { AlertTriangle, Info, Loader2, LogOut } from '@lucide/vue';
 import { invoke } from '@tauri-apps/api/core';
 import { ref, toRef, watch } from 'vue';
 import { useFocusTrap } from '@/composables/useFocusTrap';
+import { useSettingsStore } from '@/stores/settings';
 import type { OutcomeInput } from '@/types/treatment';
+
+const settingsStore = useSettingsStore();
 
 // -- Props & Emits --
 
@@ -248,6 +251,12 @@ function onKeydown(e: KeyboardEvent) {
               การดำเนินการนี้จะเปลี่ยนสถานะผู้ป่วยออกจากรายการกำลังรักษา
               และบันทึกผลการรักษาขั้นสุดท้าย
             </span>
+          </div>
+
+          <!-- Offline dispensing warning -->
+          <div v-if="!settingsStore.isConnected" class="offline-note">
+            <Info :size="14" class="offline-note-icon" aria-hidden="true" />
+            <span>ข้อมูลการจ่ายยาอาจไม่เป็นปัจจุบัน — HOSxP ไม่ได้เชื่อมต่อ</span>
           </div>
 
           <!-- Form -->
@@ -505,6 +514,24 @@ function onKeydown(e: KeyboardEvent) {
   margin-top: 1px;
   color: var(--color-warning);
   opacity: 0.9;
+}
+
+.offline-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin: 0 var(--space-12);
+  padding: var(--space-4) var(--space-6);
+  background: var(--tint-blue);
+  border: 1px solid rgba(0, 117, 222, 0.15);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-body-sm);
+  color: var(--color-accent);
+}
+
+.offline-note-icon {
+  flex-shrink: 0;
+  opacity: 0.8;
 }
 
 .discharge-form {

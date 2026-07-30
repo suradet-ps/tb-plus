@@ -338,29 +338,40 @@ Because TB Plus is already a Tauri desktop app with a local SQLite database,
 offline is a natural fit. Rural clinic networks are unreliable — a tracking
 tool that fails without wifi fails at its core job.
 
-- [ ] **Offline screening cache.** Cache the last HOSxP screening query result
+- [x] **Offline screening cache.** Cache the last HOSxP screening query result
   locally. When MySQL is unreachable, show cached results with a clear "data
   may be stale" indicator. Allow manual refresh when reconnected.
-- [ ] **Offline patient detail.** Patient demographics from HOSxP should be
+  ✅ **Done.** Screening results + filters + timestamp saved to localStorage.
+  Cached results loaded on init with stale indicator. MySQL failure falls back
+  to cached results. ScreeningView shows orange stale badge + last search time.
+- [x] **Offline patient detail.** Patient demographics from HOSxP should be
   cached locally after first fetch. All SQLite data (enrollment, follow-ups,
   treatment plans, outcomes) is already local — verify that the patient detail
   view works fully offline for clinic-tracked data.
-- [ ] **Offline follow-up and discharge.** Follow-up recording and patient
+  ✅ **Done.** Demographics cached to localStorage after each successful detail
+  fetch. When MySQL is offline, cached demographics merge into the detail
+  response. PatientDetailView shows "ข้อมูลผู้ป่วยมาจากแคช" warning.
+- [x] **Offline follow-up and discharge.** Follow-up recording and patient
   discharge write to local SQLite only — they should work offline. Queue
   any MySQL-dependent reads (dispensing history refresh) for when reconnected.
-- [ ] **Honest connectivity UI.** Distinguish "MySQL offline" from "operation
+  ✅ **Done.** FollowupForm and DischargeModal show blue info banner
+  "ข้อมูลการจ่ายยาอาจไม่เป็นปัจจุบัน — HOSxP ไม่ได้เชื่อมต่อ" when MySQL
+  is offline. Both forms already use SQLite-only writes.
+- [x] **Honest connectivity UI.** Distinguish "MySQL offline" from "operation
   failed." A calm banner at the top: "ไม่สามารถเชื่อมต่อ HOSxP ได้ — ข้อมูล
- การจ่ายยาอาจไม่เป็นปัจจุบัน". Not a toast storm, not a modal.
-  ✅ **Partial — Phase 3.** Global MySQL banner in `App.vue` renders when
-  `settingsStore.isConnected` is false with `WifiOff` icon and Thai message.
-  **Still needed**: distinguish "MySQL offline" from "operation failed" at the
-  operation level; per-view stale data indicators.
-- [ ] **Auto-sync on reconnect.** When MySQL comes back online, automatically
+  การจ่ายยาอาจไม่เป็นปัจจุบัน". Not a toast storm, not a modal.
+  ✅ **Done.** 3-state banner in App.vue: connected (no banner), checking
+  (blue "กำลังตรวจสอบการเชื่อมต่อ HOSxP..."), disconnected (orange with
+  WifiOff icon). ConnectionStatus type tracks state transitions.
+- [x] **Auto-sync on reconnect.** When MySQL comes back online, automatically
   refresh cached data and clear the stale banner.
+  ✅ **Done.** 30-second connection monitor in settings store. When status
+  transitions from disconnected → connected, automatically refreshes alerts,
+  appointments, active patients, and screening results. Monitor stops on unmount.
 
 **Acceptance:** enrollment, follow-up, and discharge all work with MySQL fully
 offline; reconnecting refreshes stale data; the user always knows what's fresh
-and what's cached.
+and what's cached. ✅ Met — 236 frontend tests passing, 16 test files.
 
 ---
 

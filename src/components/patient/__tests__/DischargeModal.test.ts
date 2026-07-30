@@ -1,4 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils';
+import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import DischargeModal from '../DischargeModal.vue';
 
@@ -10,6 +11,7 @@ import { invoke } from '@tauri-apps/api/core';
 
 describe('DischargeModal', () => {
   beforeEach(() => {
+    setActivePinia(createPinia());
     vi.clearAllMocks();
   });
 

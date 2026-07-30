@@ -727,4 +727,96 @@ describe('settings store', () => {
       });
     });
   });
+
+  /* ---------------------------------------------------------- */
+  /*  connection status and monitoring                            */
+  /* ---------------------------------------------------------- */
+
+  describe('connection status', () => {
+    it('should default to disconnected', () => {
+      const store = useSettingsStore();
+      expect(store.connectionStatus).toBe('disconnected');
+      expect(store.lastConnectedAt).toBeNull();
+    });
+
+    it('should set connectionStatus and lastConnectedAt on successful connect', async () => {
+      const store = useSettingsStore();
+      vi.mocked(invoke)
+        .mockResolvedValueOnce(undefined) // connect_mysql
+        .mockResolvedValueOnce(undefined); // save_db_config
+
+      await store.connect(createDbConfig());
+
+      expect(store.connectionStatus).toBe('connected');
+      expect(store.lastConnectedAt).toBeTruthy();
+    });
+
+    it('should set connectionStatus to disconnected on connect failure', async () => {
+      const store = useSettingsStore();
+      vi.mocked(invoke).mockRejectedValue(new Error('Auth failed'));
+
+      await store.connect(createDbConfig());
+
+      expect(store.connectionStatus).toBe('disconnected');
+    });
+
+    it('should update connectionStatus on checkConnection', async () => {
+      const store = useSettingsStore();
+      vi.mocked(invoke).mockResolvedValue(true);
+
+      await store.checkConnection();
+
+      expect(store.connectionStatus).toBe('connected');
+      expect(store.lastConnectedAt).toBeTruthy();
+    });
+
+    it('should fire onReconnect callback on status transition', async () => {
+      const store = useSettingsStore();
+      const onReconnect = vi.fn();
+
+      store.startConnectionMonitor(onReconnect);
+
+      // Initially disconnected
+      store.isConnected = false;
+
+      // Simulate reconnection
+      vi.mocked(invoke).mockResolvedValue(true);
+      await store.checkConnection();
+
+      expect(onReconnect).toHaveBeenCalled();
+      expect(store.connectionStatus).toBe('connected');
+
+      store.stopConnectionMonitor();
+    });
+
+    it('should not fire onReconnect when already connected', async () => {
+      const store = useSettingsStore();
+      const onReconnect = vi.fn();
+
+      store.startConnectionMonitor(onReconnect);
+      store.isConnected = true;
+
+      vi.mocked(invoke).mockResolvedValue(true);
+      await store.checkConnection();
+
+      expect(onReconnect).not.toHaveBeenCalled();
+
+      store.stopConnectionMonitor();
+    });
+
+    it('should stop monitor on stopConnectionMonitor', () => {
+      const store = useSettingsStore();
+      const onReconnect = vi.fn();
+
+      store.startConnectionMonitor(onReconnect);
+      store.stopConnectionMonitor();
+
+      // After stopping, checkConnection should not fire the callback
+      store.isConnected = false;
+      vi.mocked(invoke).mockResolvedValue(true);
+      void store.checkConnection();
+
+      expect(onReconnect).not.toHaveBeenCalled();
+    });
+  });
 });

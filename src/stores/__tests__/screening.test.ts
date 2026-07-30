@@ -22,6 +22,7 @@ function makeRecords(count: number, baseHn = 'HN'): PatientDrugRecord[] {
 
 describe('screening store', () => {
   beforeEach(() => {
+    localStorage.clear();
     setActivePinia(createPinia());
     vi.clearAllMocks();
   });
@@ -310,6 +311,88 @@ describe('screening store', () => {
 
       expect(store.lastSearchAt).toBeTruthy();
       expect(localStorage.getItem('tb_screening_last_search')).toBe(store.lastSearchAt);
+    });
+  });
+
+  describe('screening cache', () => {
+    it('should save results to cache after successful search', async () => {
+      const store = useScreeningStore();
+      const mockResults = makeRecords(2);
+      vi.mocked(invoke).mockResolvedValue(mockResults);
+
+      await store.search();
+
+      const cached = localStorage.getItem('tb_screening_cache');
+      expect(cached).toBeTruthy();
+      const parsed = JSON.parse(cached as string);
+      expect(parsed.results).toEqual(mockResults);
+      expect(parsed.cachedAt).toBeTruthy();
+    });
+
+    it('should load cached results as stale on init', () => {
+      const cachedData = {
+        results: makeRecords(2),
+        filters: {
+          date_from: null,
+          date_to: null,
+          drug_classes: null,
+          enrollment_status: 'all',
+          page: 1,
+          page_size: 50,
+        },
+        cachedAt: new Date(Date.now() - 60_000).toISOString(),
+      };
+      localStorage.setItem('tb_screening_cache', JSON.stringify(cachedData));
+
+      const store = useScreeningStore();
+
+      expect(store.results).toEqual(cachedData.results);
+      expect(store.isStale).toBe(true);
+    });
+
+    it('should set isStale to false after a fresh search', async () => {
+      const cachedData = {
+        results: makeRecords(1),
+        filters: {},
+        cachedAt: new Date(Date.now() - 60_000).toISOString(),
+      };
+      localStorage.setItem('tb_screening_cache', JSON.stringify(cachedData));
+
+      const store = useScreeningStore();
+      expect(store.isStale).toBe(true);
+
+      vi.mocked(invoke).mockResolvedValue(makeRecords(3));
+      await store.search();
+
+      expect(store.isStale).toBe(false);
+    });
+
+    it('should fall back to cached results on MySQL failure', async () => {
+      const cachedResults = makeRecords(2);
+      const cachedData = {
+        results: cachedResults,
+        filters: {},
+        cachedAt: new Date(Date.now() - 60_000).toISOString(),
+      };
+      localStorage.setItem('tb_screening_cache', JSON.stringify(cachedData));
+
+      const store = useScreeningStore();
+      vi.mocked(invoke).mockRejectedValue(new Error('MySQL is down'));
+
+      await store.search();
+
+      expect(store.results).toEqual(cachedResults);
+      expect(store.isStale).toBe(true);
+      expect(store.error).toBeNull();
+    });
+
+    it('should handle corrupted cache gracefully', () => {
+      localStorage.setItem('tb_screening_cache', '{invalid json');
+
+      const store = useScreeningStore();
+
+      expect(store.results).toEqual([]);
+      expect(store.isStale).toBe(false);
     });
   });
 });

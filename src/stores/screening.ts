@@ -5,6 +5,13 @@ import type { PatientDrugRecord, SearchFilters } from '@/types/patient';
 
 const STORAGE_KEY_FILTERS = 'tb_screening_filters';
 const STORAGE_KEY_LAST_SEARCH = 'tb_screening_last_search';
+const STORAGE_KEY_CACHE = 'tb_screening_cache';
+
+interface ScreeningCache {
+  results: PatientDrugRecord[];
+  filters: SearchFilters;
+  cachedAt: string;
+}
 
 function formatDate(d: Date): string {
   const y = d.getFullYear();
@@ -61,15 +68,48 @@ function buildDefaultFilters(): SearchFilters {
   };
 }
 
+function loadCachedScreening(): ScreeningCache | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_CACHE);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as ScreeningCache;
+    if (!Array.isArray(parsed.results) || typeof parsed.cachedAt !== 'string') return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function saveScreeningCache(results: PatientDrugRecord[], filters: SearchFilters): void {
+  try {
+    const cache: ScreeningCache = {
+      results,
+      filters,
+      cachedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(STORAGE_KEY_CACHE, JSON.stringify(cache));
+  } catch {
+    // storage full or unavailable — silent
+  }
+}
+
 export const useScreeningStore = defineStore('screening', () => {
   const results = ref<PatientDrugRecord[]>([]);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
   const selectedHns = ref<Set<string>>(new Set());
   const lastSearchAt = ref<string | null>(localStorage.getItem(STORAGE_KEY_LAST_SEARCH));
+  const isStale = ref(false);
 
   const filters = ref<SearchFilters>(loadSavedFilters() ?? buildDefaultFilters());
   const totalCount = ref(0);
+
+  // Load cached results on init if available
+  const cached = loadCachedScreening();
+  if (cached) {
+    results.value = cached.results;
+    isStale.value = true;
+  }
 
   watch(
     filters,
@@ -87,6 +127,8 @@ export const useScreeningStore = defineStore('screening', () => {
         filters: filters.value,
       });
       results.value = data;
+      isStale.value = false;
+      saveScreeningCache(data, filters.value);
       const now = new Date().toISOString();
       lastSearchAt.value = now;
       try {
@@ -95,7 +137,13 @@ export const useScreeningStore = defineStore('screening', () => {
         // silent
       }
     } catch (e) {
-      error.value = String(e);
+      // If we have cached data and MySQL is unreachable, show cached results as stale
+      if (results.value.length > 0) {
+        isStale.value = true;
+        error.value = null;
+      } else {
+        error.value = String(e);
+      }
     } finally {
       isLoading.value = false;
     }
@@ -138,6 +186,7 @@ export const useScreeningStore = defineStore('screening', () => {
     filters,
     totalCount,
     lastSearchAt,
+    isStale,
     selectedRecords,
     search,
     toggleSelect,
