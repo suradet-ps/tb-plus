@@ -7,7 +7,7 @@ tuberculosis (TB) clinic operations at Sabot Hospital (โรงพยาบา�
 system bridges HOSxP's MySQL database (read-only) with a local SQLite database
 for clinic-specific tracking data not available in HIS.
 
-> **Version**: 1.5.0 — see `Cargo.toml` and `package.json`.
+> **Version**: 1.7.0 — see `Cargo.toml` and `package.json`.
 
 ---
 
