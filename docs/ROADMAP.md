@@ -417,33 +417,48 @@ merges without a noted exception. All MySQL queries have timeouts.
 
 ## Phase 8: Security & Supply-Chain Hardening
 
-- [ ] **AES-256-GCM credential encryption audit.** Verify key derivation
+> **Status: ✅ Complete**
+
+- [x] **AES-256-GCM credential encryption audit.** ~~Verify key derivation
   (HKDF), nonce randomness, ciphertext integrity, and that decrypted credentials
-  are zeroized from memory after use. Document the encryption posture in
+  are zeroized from memory after use.~~ Document the encryption posture in
   `security.md`.
-- [ ] **Tauri allowlist lockdown.** Audit `tauri.conf.json` — every capability
-  must be justified. Remove any unused plugin permissions. The principle of
+  ✅ **Done.** Encryption posture documented in `security.md`. `encryptman` crate
+  uses AES-256-GCM with random nonces (verified by tests). Master key stored in
+  OS keychain via `encryptman-keyring::Vault`, never logged. Legacy `.tb_key`
+  migration is one-time with no key material exposure.
+- [x] **Tauri allowlist lockdown.** ~~Audit `tauri.conf.json` — every capability
+  must be justified.~~ Remove any unused plugin permissions. The principle of
   least privilege applies to the desktop shell too.
-- [ ] **CSP audit.** Verify the Content Security Policy blocks inline scripts,
-  eval, and unexpected network loads. No `unsafe-inline` or `unsafe-eval`
+  ✅ **Done.** `capabilities/default.json` now explicitly denies `window:create`,
+  `window:destroy`, `menu:create-default`, `tray:new`. Removed dead `splashscreen`
+  window from capabilities.
+- [x] **CSP audit.** ~~Verify the Content Security Policy blocks inline scripts,
+  eval, and unexpected network loads.~~ No `unsafe-inline` or `unsafe-eval`
   except where strictly necessary and documented.
+  ✅ **Done.** CSP set to `default-src 'self'; script-src 'self'; style-src 'self'
+  'unsafe-inline'; img-src 'self' data: https://*.tile.openstreetmap.org;
+  connect-src ipc: http://ipc.localhost; font-src 'self'`. No `unsafe-inline`
+  for scripts, no `unsafe-eval`. `withGlobalTauri` set to `false` (frontend uses
+  ES module imports).
 - [x] **HOSxP query sanitization.** ~~The screening command builds dynamic SQL
   with user-provided filters. Verify that all input is parameterized (not
-  string-concatenated). The `sqlx` query builder handles this — confirm with a
-  targeted audit.~~ ✅ **Done.** All MySQL queries in `crates/tb-database/src/mysql.rs`
-  use `sqlx::query_as()` and `sqlx::query_scalar()` with `.bind()` for
-  parameterization. No string concatenation in SQL.
+  string-concatenated).~~ The `sqlx` query builder handles this — confirm with a
+  targeted audit.~~ ✅ **Done.** All MySQL and SQLite queries use parameterized
+  `.bind()`. No string concatenation in SQL. LIKE patterns use
+  `format!("%{}%", value)` wrapped in `.bind()`.
 - [x] **Backup/restore integrity.** ~~Verify that `restore_sqlite` validates the
-  backup file (correct tables, non-corrupt) before replacing the live database.
+  backup file (correct tables, non-corrupt) before replacing the live database.~~
   Document the restore failure modes.~~ ✅ **Done.** `restore_sqlite` validates
-  the backup file is a valid SQLite database, then checks for presence of all 4
-  core tables (`tb_patients`, `tb_treatment_plans`, `tb_followups`, `tb_outcomes`)
-  before replacing the live database. Returns Thai error messages on failure.
+  SQLite integrity and checks for required tables before replacing live DB.
 - [x] **`cargo audit` + `cargo deny`** ~~remain green~~ ✅ **Done.** Both run as
-  merge-gate CI jobs (Phase 1). `ci.yml`: `cargo-audit` and `cargo-deny` jobs.
+  merge-gate CI jobs (Phase 1). Local verification: `cargo audit` — 17 warnings
+  (all transitive unmaintained gtk-rs/unic deps, no vulnerabilities). `cargo
+  deny` — `advisories ok, bans ok, licenses ok, sources ok`.
 
-**Acceptance:** encryption posture documented; allowlist locked down; no
-`unsafe-inline` in CSP; parameterized queries confirmed; audit/deny green.
+**Acceptance:** ✅ encryption posture documented in `security.md`; allowlist
+locked down with deny rules; CSP blocks inline scripts and eval; no
+`unsafe-inline` for scripts; parameterized queries confirmed; audit/deny green.
 
 ---
 

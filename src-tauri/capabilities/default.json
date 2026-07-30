@@ -1,12 +1,16 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/schema/acl/capabilities.schema.json",
   "identifier": "default",
-  "description": "Capability for the main and splashscreen windows",
-  "windows": ["main", "splashscreen"],
+  "description": "Capability for the main window",
+  "windows": ["main"],
   "permissions": [
     "core:default",
+    "core:window:allow-show",
+    "core:window:deny-create",
+    "core:window:deny-destroy",
+    "core:menu:deny-create-default",
+    "core:tray:deny-new",
     "dialog:default",
-    "opener:default",
-    "core:window:allow-show"
+    "opener:default"
   ]
 }
