@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Loader2, RotateCcw, Search, UserPlus } from '@lucide/vue';
+import { Clock, Loader2, RotateCcw, Search, UserPlus } from '@lucide/vue';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import EnrollModal from '@/components/screening/EnrollModal.vue';
 import PatientTable from '@/components/screening/PatientTable.vue';
@@ -11,19 +11,11 @@ const settingsStore = useSettingsStore();
 const showEnrollModal = ref(false);
 
 onMounted(() => {
-  // Only auto-search if MySQL is already connected.
-  // If the background auto-connect in Rust hasn't finished yet (race condition
-  // between webview JS startup and lib.rs async task), the watcher below will
-  // trigger the search as soon as isConnected flips to true.
   if (settingsStore.isConnected) {
     screeningStore.search();
   }
 });
 
-// Watch for MySQL coming online after mount (handles the splash-screen
-// race condition where Vue mounts before lib.rs finishes auto-connecting).
-// Only fires on false → true transitions and only when there are no
-// results yet, so manual searches or reconnects don't double-fire.
 const stopConnectionWatch = watch(
   () => settingsStore.isConnected,
   (connected, wasConnected) => {
@@ -33,17 +25,37 @@ const stopConnectionWatch = watch(
   },
 );
 
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    if (screeningStore.selectedHns.size > 0) {
+      screeningStore.clearSelection();
+      e.preventDefault();
+    }
+  }
+  if (e.key === 'Enter' && screeningStore.selectedHns.size > 0) {
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName !== 'INPUT' &&
+      target.tagName !== 'SELECT' &&
+      target.tagName !== 'TEXTAREA'
+    ) {
+      showEnrollModal.value = true;
+      e.preventDefault();
+    }
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('keydown', onKeydown);
+});
+
 onUnmounted(() => {
   stopConnectionWatch();
+  document.removeEventListener('keydown', onKeydown);
 });
 
 function resetFilters() {
-  screeningStore.filters = {
-    page: 1,
-    page_size: 50,
-    hn_search: undefined,
-    name_search: undefined,
-  };
+  screeningStore.resetFilters();
   screeningStore.search();
 }
 
@@ -59,6 +71,14 @@ function toggleDrugFilter(drug: string) {
   } else {
     screeningStore.filters.drug_classes = [...classes, drug];
   }
+}
+
+function formatLastSearch(iso: string | null): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${hh}:${mm}`;
 }
 </script>
 
@@ -192,6 +212,7 @@ function toggleDrugFilter(drug: string) {
           >
             <UserPlus :size="14" />
             นำเข้าคลินิก
+            <span class="kbd-hint">⏎</span>
           </button>
         </div>
       </div>
@@ -210,6 +231,10 @@ function toggleDrugFilter(drug: string) {
       พบ
       <strong>{{ screeningStore.results.length }}</strong>
       ราย
+      <span v-if="screeningStore.lastSearchAt" class="last-search-badge">
+        <Clock :size="11" />
+        ค้นหาล่าสุด {{ formatLastSearch(screeningStore.lastSearchAt) }}
+      </span>
     </div>
 
     <!-- Table card -->
@@ -543,5 +568,34 @@ function toggleDrugFilter(drug: string) {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* -- Last search badge -- */
+.last-search-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: var(--space-4);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-normal);
+  color: var(--color-text-muted);
+  background: var(--color-surface-alt);
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+/* -- Keyboard shortcut hint -- */
+.kbd-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  font-weight: var(--weight-heading);
+  line-height: 1;
 }
 </style>

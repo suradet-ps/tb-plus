@@ -1,5 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { nextTick } from 'vue';
 import { createPatientDrugRecord } from '@/__tests__/factories/patient';
 import { useScreeningStore } from '@/stores/screening';
 import type { PatientDrugRecord } from '@/types/patient';
@@ -192,6 +193,10 @@ describe('screening store', () => {
   });
 
   describe('default filters', () => {
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
     it('should default to the last year date range', () => {
       const store = useScreeningStore();
       expect(store.filters.date_from).toBeTruthy();
@@ -213,6 +218,98 @@ describe('screening store', () => {
       const store = useScreeningStore();
       expect(store.filters.page).toBe(1);
       expect(store.filters.page_size).toBe(50);
+    });
+  });
+
+  describe('filter persistence', () => {
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it('should save filters to localStorage on change', async () => {
+      const store = useScreeningStore();
+      store.filters.enrollment_status = 'enrolled';
+      store.filters.drug_classes = ['H', 'R'];
+      await nextTick();
+
+      const saved = JSON.parse(localStorage.getItem('tb_screening_filters') ?? '{}');
+      expect(saved.enrollment_status).toBe('enrolled');
+      expect(saved.drug_classes).toEqual(['H', 'R']);
+    });
+
+    it('should load saved filters from localStorage on init', () => {
+      localStorage.setItem(
+        'tb_screening_filters',
+        JSON.stringify({
+          enrollment_status: 'not_enrolled',
+          drug_classes: ['E'],
+          page: 3,
+          page_size: 25,
+        }),
+      );
+
+      const store = useScreeningStore();
+      expect(store.filters.enrollment_status).toBe('not_enrolled');
+      expect(store.filters.drug_classes).toEqual(['E']);
+      expect(store.filters.page).toBe(3);
+      expect(store.filters.page_size).toBe(25);
+    });
+
+    it('should fall back to defaults when localStorage has invalid data', () => {
+      localStorage.setItem('tb_screening_filters', 'not json');
+      const store = useScreeningStore();
+      expect(store.filters.enrollment_status).toBe('all');
+      expect(store.filters.page).toBe(1);
+    });
+  });
+
+  describe('resetFilters', () => {
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it('should reset filters to defaults', () => {
+      const store = useScreeningStore();
+      store.filters.enrollment_status = 'enrolled';
+      store.filters.drug_classes = ['H'];
+      store.filters.page = 5;
+
+      store.resetFilters();
+
+      expect(store.filters.enrollment_status).toBe('all');
+      expect(store.filters.drug_classes).toBeUndefined();
+      expect(store.filters.page).toBe(1);
+    });
+
+    it('should remove saved filters from localStorage', () => {
+      localStorage.setItem(
+        'tb_screening_filters',
+        JSON.stringify({ enrollment_status: 'enrolled' }),
+      );
+      const store = useScreeningStore();
+      store.resetFilters();
+      expect(localStorage.getItem('tb_screening_filters')).toBeNull();
+    });
+  });
+
+  describe('lastSearchAt', () => {
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it('should be null when no search has been performed', () => {
+      const store = useScreeningStore();
+      expect(store.lastSearchAt).toBeNull();
+    });
+
+    it('should update after a successful search', async () => {
+      const store = useScreeningStore();
+      vi.mocked(invoke).mockResolvedValue([]);
+
+      await store.search();
+
+      expect(store.lastSearchAt).toBeTruthy();
+      expect(localStorage.getItem('tb_screening_last_search')).toBe(store.lastSearchAt);
     });
   });
 });
