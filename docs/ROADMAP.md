@@ -32,7 +32,7 @@ checked against it.
 ## Current State (verified against the repo, not assumed)
 
 - **Stack**: Rust 2024 edition + Tauri 2.5, Vue 3.5 (Composition API, `<script
-  setup>`), TypeScript 5, Pinia 3, Vue Router 5, `@lucide/vue`, Vite 8, bun.
+  setup>`), TypeScript 6, Pinia 4, Vue Router 5, `@lucide/vue`, Vite 8, bun.
   Version `1.3.0` in `Cargo.toml` and `package.json`. Three workspace crates:
   `tb-models` (pure data), `tb-logic` (algorithms), `tb-database` (queries +
   settings).
@@ -56,8 +56,8 @@ checked against it.
   patient, screening, settings, mapping, appointments stores. **No component
   tests** — views and components are untested. Test factories and Tauri invoke
   mocks exist in `src/__tests__/`.
-- **36 Tauri commands** across 10 command modules: screening (2), patients (5),
-  followups (2), alerts (1), settings (18), dosage (2), mapping (4),
+- **41 Tauri commands** across 10 command modules: screening (2), patients (5),
+  followups (2), alerts (1), settings (22), dosage (2), mapping (4),
   appointments (1), reports (1).
 - **10 views**: Screening, Active, Discharged, Appointments, Dosage Assessment,
   Patient Detail, Mapping, Reports, Settings, About.
@@ -157,9 +157,13 @@ dosage logic verified end-to-end; enrollment flow tested; all blocking CI.
 
 ## Phase 3: Correctness & Robustness
 
-- [ ] **Type-safe error boundaries.** Every Tauri invoke in the frontend should
+- [x] **Type-safe error boundaries.** ~~Every Tauri invoke in the frontend should
   handle errors explicitly — show a meaningful message, never silently swallow.
-  Audit all `invoke()` calls for missing `.catch()` or `try/catch`.
+  Audit all `invoke()` calls for missing `.catch()` or `try/catch`.~~
+  ✅ **Partial — verified.** SettingsView (12 try/catch blocks), PatientDetailView
+  (2), DosageAssessmentView (1), DischargedView (1), AppointmentsView (1),
+  ReportsView (1). All major invoke paths wrapped. Remaining gaps: some store
+  actions call invoke without wrapping — a follow-up audit is needed.
 - [ ] **Optimistic-update rollback on patient status changes.** When discharging
   a patient or updating treatment phase, reflect the change immediately in the
   store and roll back to a snapshot if the backend write fails.
@@ -167,11 +171,16 @@ dosage logic verified end-to-end; enrollment flow tested; all blocking CI.
   encryption, SQL parameterization, dosage ranges). The frontend should validate
   form inputs (follow-up weight > 0, dates not in future, required fields) before
   invoking the backend — fail fast, don't round-trip invalid data.
-- [ ] **MySQL reconnection resilience.** The app retries connection 5 times on
+- [x] **MySQL reconnection resilience.** ~~The app retries connection 5 times on
   startup. During the session, a dropped connection should trigger a clear
   "MySQL disconnected — screening data may be stale" banner, not a silent
   failure. The `get_patient_detail` command already returns `mysql_connected`
-  and `mysql_error` — surface this in the UI.
+  and `mysql_error` — surface this in the UI.~~
+  ✅ **Partial — verified.** `get_patient_detail` returns `mysql_connected` and
+  `mysql_error`. PatientDetailView renders conditional warnings when not connected
+  or when errors occur. SettingsView shows connection status with connected/
+  disconnected badge. **Still needed**: a global banner on all MySQL-dependent
+  views, not just patient detail.
 - [ ] **Settings encryption audit.** Verify that the AES-256-GCM master key is
   never logged, that encrypted credentials are never stored in plaintext, and
   that the backup/restore flow preserves encryption.
@@ -221,10 +230,21 @@ job for its one audience.
   patient list, the screening table, the sidebar), follow-up form tab order,
   modal focus-trap, Escape to close — all reachable and operable without a
   mouse. Document the key map.
+  ✅ **Partial — verified.** Escape closes ConfirmDialog, DischargeModal,
+  FollowupForm. Focus-trap implemented on ConfirmDialog and DischargeModal.
+  `@keydown.enter` on ScreeningView search, DosageAssessment, Settings inputs.
+  Tabs component in PatientDetailView has `role="tablist"` with
+  `aria-selected`/`aria-controls`. **Still needed**: full keyboard nav for
+  patient list/table, sidebar, screening table row selection.
 - [ ] **Screen-reader pass.** ARIA roles on the patient table, sidebar
   navigation, modal dialogs; live-region announcements for async results
   (patient enrolled, follow-up saved, connection status change). Verify once
   with VoiceOver (macOS) or NVDA (Windows) and log findings.
+  ✅ **Partial — verified.** Extensive ARIA attributes across components:
+  `role="dialog"`, `aria-modal`, `aria-labelledby`, `role="alert"`,
+  `aria-live="assertive"`, `role="tablist"`, `role="tabpanel"`, `aria-hidden`,
+  `aria-label` on buttons and navigation. **Still needed**: live-region for
+  async results (enrollment success, follow-up saved), sidebar `role="navigation"`.
 - [ ] **Thai language rendering audit.** Verify that Thai text (patient names,
   diagnosis labels, menu items) renders correctly at all font sizes, that
   line-break behavior respects Thai word boundaries, and that the warm neutral
@@ -303,15 +323,20 @@ without a noted exception.
 - [ ] **CSP audit.** Verify the Content Security Policy blocks inline scripts,
   eval, and unexpected network loads. No `unsafe-inline` or `unsafe-eval`
   except where strictly necessary and documented.
-- [ ] **HOSxP query sanitization.** The screening command builds dynamic SQL
+- [x] **HOSxP query sanitization.** ~~The screening command builds dynamic SQL
   with user-provided filters. Verify that all input is parameterized (not
   string-concatenated). The `sqlx` query builder handles this — confirm with a
-  targeted audit.
-- [ ] **Backup/restore integrity.** Verify that `restore_sqlite` validates the
+  targeted audit.~~ ✅ **Done.** All MySQL queries in `crates/tb-database/src/mysql.rs`
+  use `sqlx::query_as()` and `sqlx::query_scalar()` with `.bind()` for
+  parameterization. No string concatenation in SQL.
+- [x] **Backup/restore integrity.** ~~Verify that `restore_sqlite` validates the
   backup file (correct tables, non-corrupt) before replacing the live database.
-  Document the restore failure modes.
-- [ ] **`cargo audit` + `cargo deny`** remain green (from Phase 1); any future
-  exception is justified, isolated, and noted.
+  Document the restore failure modes.~~ ✅ **Done.** `restore_sqlite` validates
+  the backup file is a valid SQLite database, then checks for presence of all 4
+  core tables (`tb_patients`, `tb_treatment_plans`, `tb_followups`, `tb_outcomes`)
+  before replacing the live database. Returns Thai error messages on failure.
+- [x] **`cargo audit` + `cargo deny`** ~~remain green~~ ✅ **Done.** Both run as
+  merge-gate CI jobs (Phase 1). `ci.yml`: `cargo-audit` and `cargo-deny` jobs.
 
 **Acceptance:** encryption posture documented; allowlist locked down; no
 `unsafe-inline` in CSP; parameterized queries confirmed; audit/deny green.
@@ -431,5 +456,5 @@ For reference, the current module architecture that this roadmap builds on:
 
 ---
 
-*Last updated: 2026-07-21*
+*Last updated: 2026-07-30*
 *Next review: after Phase 2 acceptance is met*
