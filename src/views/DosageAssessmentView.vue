@@ -247,6 +247,16 @@ function sexLabel(sex: string | null | undefined): string | null {
                   <div class="dose-rule">
                     {{ item.suggested_daily_dose_mg != null ? `${formatNumber(item.suggested_daily_dose_mg)} mg/day` : item.note ?? '-' }}
                   </div>
+                  <!-- Calculation chain -->
+                  <div v-if="result?.patient_summary.latest_weight_kg && item.suggested_units_per_day != null && item.strength" class="calc-chain">
+                    <span class="calc-step">{{ result.patient_summary.latest_weight_kg }} กก.</span>
+                    <span class="calc-arrow">×</span>
+                    <span class="calc-step">{{ formatNumber(item.min_mg_per_kg_day) }}-{{ formatNumber(item.max_mg_per_kg_day) }} mg/kg</span>
+                    <span class="calc-arrow">→</span>
+                    <span class="calc-step">{{ formatNumber(item.suggested_daily_dose_mg, 1) }} mg</span>
+                    <span class="calc-arrow">→</span>
+                    <span class="calc-step calc-step-final">{{ item.suggested_units_per_day }} {{ item.units ?? 'หน่วย' }}/วัน</span>
+                  </div>
                 </td>
                 <td>
                   <div class="status-pill" :class="item.within_target_range ? 'status-pill--ok' : 'status-pill--warn'">
@@ -552,6 +562,34 @@ function sexLabel(sex: string | null | undefined): string | null {
 .status-pill--warn {
   background: var(--status-defaulted-bg);
   color: var(--color-orange);
+}
+
+.calc-chain {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  background: var(--color-bg-subtle);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  flex-wrap: wrap;
+}
+
+.calc-step {
+  font-weight: var(--weight-emphasis);
+  color: var(--color-text);
+}
+
+.calc-step-final {
+  color: var(--color-blue);
+  font-weight: var(--weight-heading);
+}
+
+.calc-arrow {
+  color: var(--color-text-muted);
+  font-size: 10px;
 }
 
 .empty-card {
