@@ -13,6 +13,9 @@ export interface MappingPatientRow {
   lat: number | null;
   lng: number | null;
   geocoded_at: string | null;
+  current_phase: 'intensive' | 'continuation' | null;
+  regimen: string | null;
+  pin_note: string | null;
 }
 
 export interface MappingSummary {

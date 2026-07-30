@@ -104,5 +104,19 @@ export const useMappingStore = defineStore('mapping', () => {
     selectPatient,
     geocodePatient,
     batchGeocode,
+    savePinNote,
   };
+
+  async function savePinNote(hn: string, pinNote: string | null): Promise<MappingPatientRow> {
+    try {
+      error.value = null;
+      const updated = await invoke<MappingPatientRow>('save_pin_note', { hn, pinNote });
+      patients.value = patients.value.map((patient) => (patient.hn === hn ? updated : patient));
+      summary.value = summarize(patients.value);
+      return updated;
+    } catch (e) {
+      error.value = String(e);
+      throw e;
+    }
+  }
 });

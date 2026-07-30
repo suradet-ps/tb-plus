@@ -47,11 +47,26 @@ function statusColor(patient: MappingPatientRow): string {
 }
 
 function popupContent(patient: MappingPatientRow): string {
+  const phaseLabel =
+    patient.current_phase === 'intensive'
+      ? '<span class="tb-map-popup__phase tb-map-popup__phase--intensive">เข้มข้น</span>'
+      : patient.current_phase === 'continuation'
+        ? '<span class="tb-map-popup__phase tb-map-popup__phase--continuation">ต่อเนื่อง</span>'
+        : '';
+  const regimenLine = patient.regimen
+    ? `<div class="tb-map-popup__meta">${patient.regimen} ${phaseLabel}</div>`
+    : '';
+  const noteLine = patient.pin_note
+    ? `<div class="tb-map-popup__note">${patient.pin_note}</div>`
+    : '';
+
   return `
     <div class="tb-map-popup">
       <div class="tb-map-popup__title">${patient.masked_name}</div>
       <div class="tb-map-popup__meta">${patient.masked_hn}</div>
       <div class="tb-map-popup__meta">${patient.address_preview ?? 'ไม่ระบุที่อยู่'}</div>
+      ${regimenLine}
+      ${noteLine}
     </div>
   `;
 }
@@ -181,6 +196,34 @@ onBeforeUnmount(() => {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   line-height: var(--leading-normal);
+}
+
+:deep(.tb-map-popup__phase) {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+:deep(.tb-map-popup__phase--intensive) {
+  background: var(--status-active-bg);
+  color: var(--color-teal);
+}
+
+:deep(.tb-map-popup__phase--continuation) {
+  background: rgba(0, 117, 222, 0.09);
+  color: var(--color-blue);
+}
+
+:deep(.tb-map-popup__note) {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: var(--text-sm);
+  color: var(--color-orange);
+  font-style: italic;
 }
 
 :deep(.tb-map-marker-shell) {

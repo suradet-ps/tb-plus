@@ -18,6 +18,9 @@ export function createMappingPatientRow(
     lat: 15.2345,
     lng: 100.3456,
     geocoded_at: '2025-01-15T10:00:00',
+    current_phase: null,
+    regimen: null,
+    pin_note: null,
     ...overrides,
   };
 }

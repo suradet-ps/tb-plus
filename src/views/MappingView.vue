@@ -8,7 +8,7 @@ import {
   ScanSearch,
   TriangleAlert,
 } from '@lucide/vue';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import MapCanvas from '@/components/mapping/MapCanvas.vue';
 import MapFilters from '@/components/mapping/MapFilters.vue';
 import StatusBadge from '@/components/shared/StatusBadge.vue';
@@ -23,11 +23,14 @@ const search = ref('');
 const status = ref<'all' | 'active' | 'completed' | 'transferred' | 'died' | 'defaulted'>('all');
 const tbType = ref<'all' | 'pulmonary' | 'extra_pulmonary'>('all');
 const geocodeStatus = ref<'all' | 'success' | 'pending' | 'failed' | 'missing_address'>('all');
+const phase = ref<'all' | 'intensive' | 'continuation'>('all');
 const enrolledFrom = ref('');
 const enrolledTo = ref('');
 const mapError = ref<string | null>(null);
 const isOnline = ref(window.navigator.onLine);
 const batchMessage = ref<string | null>(null);
+const pinNoteDraft = ref('');
+const isSavingPinNote = ref(false);
 
 function handleOnline(): void {
   isOnline.value = true;
@@ -64,6 +67,7 @@ const filteredPatients = computed<MappingPatientRow[]>(() => {
     if (tbType.value !== 'all' && patient.tb_type !== tbType.value) return false;
     if (geocodeStatus.value !== 'all' && patient.geocode_status !== geocodeStatus.value)
       return false;
+    if (phase.value !== 'all' && patient.current_phase !== phase.value) return false;
     if (enrolledFrom.value && patient.enrolled_at < enrolledFrom.value) return false;
     if (enrolledTo.value && patient.enrolled_at > enrolledTo.value) return false;
     if (!query) return true;
@@ -90,6 +94,14 @@ const selectedPatient = computed(() => {
   return filteredPatients.value[0] ?? null;
 });
 
+watch(
+  () => selectedPatient.value?.hn,
+  () => {
+    pinNoteDraft.value = selectedPatient.value?.pin_note ?? '';
+  },
+  { immediate: true },
+);
+
 const mappedPatients = computed(() =>
   filteredPatients.value.filter((patient) => patient.lat !== null && patient.lng !== null),
 );
@@ -99,8 +111,23 @@ function resetFilters(): void {
   status.value = 'all';
   tbType.value = 'all';
   geocodeStatus.value = 'all';
+  phase.value = 'all';
   enrolledFrom.value = '';
   enrolledTo.value = '';
+}
+
+async function handleSavePinNote(): Promise<void> {
+  if (!selectedPatient.value) return;
+  isSavingPinNote.value = true;
+  try {
+    const note = pinNoteDraft.value.trim() || null;
+    await mappingStore.savePinNote(selectedPatient.value.hn, note);
+    batchMessage.value = 'บันทึกหมายเหตุบนแผนที่เรียบร้อย';
+  } catch {
+    batchMessage.value = 'ไม่สามารถบันทึกหมายเหตุได้';
+  } finally {
+    isSavingPinNote.value = false;
+  }
 }
 
 function geocodeStatusLabel(value: MappingPatientRow['geocode_status']): string {
@@ -232,12 +259,14 @@ async function handleSingleGeocode(hn: string): Promise<void> {
       :status="status"
       :tb-type="tbType"
       :geocode-status="geocodeStatus"
+      :phase="phase"
       :enrolled-from="enrolledFrom"
       :enrolled-to="enrolledTo"
       @update:search="search = $event"
       @update:status="status = $event"
       @update:tb-type="tbType = $event"
       @update:geocode-status="geocodeStatus = $event"
+      @update:phase="phase = $event"
       @update:enrolled-from="enrolledFrom = $event"
       @update:enrolled-to="enrolledTo = $event"
       @reset="resetFilters"
@@ -297,6 +326,38 @@ async function handleSingleGeocode(hn: string): Promise<void> {
             {{ selectedPatient.geocode_error }}
           </div>
 
+          <div v-if="selectedPatient.regimen" class="detail-meta-grid">
+            <div>
+              <span class="meta-label">สูตรยา</span>
+              <span class="meta-value">{{ selectedPatient.regimen }}</span>
+            </div>
+            <div>
+              <span class="meta-label">ระยะการรักษา</span>
+              <span class="meta-value">
+                {{ selectedPatient.current_phase === 'intensive' ? 'เข้มข้น' : selectedPatient.current_phase === 'continuation' ? 'ต่อเนื่อง' : '-' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="detail-block">
+            <label class="meta-label" for="pin-note-input">หมายเหตุบนแผนที่</label>
+            <textarea
+              id="pin-note-input"
+              v-model="pinNoteDraft"
+              class="pin-note-input"
+              rows="2"
+              placeholder="เช่น ผู้สัมผัสในครัวเรือน, กลุ่มก้อนที่ทำงาน..."
+            />
+            <button
+              class="btn-ghost btn-ghost--sm"
+              :disabled="isSavingPinNote"
+              @click="handleSavePinNote"
+            >
+              <Loader2 v-if="isSavingPinNote" :size="12" class="spin" />
+              บันทึกหมายเหตุ
+            </button>
+          </div>
+
           <button
             class="btn-primary btn-primary--full"
             :disabled="
@@ -326,6 +387,9 @@ async function handleSingleGeocode(hn: string): Promise<void> {
                 {{ patient.masked_hn }} • {{ patient.address_preview ?? 'ไม่มีที่อยู่' }}
               </div>
             </div>
+            <span v-if="patient.current_phase" class="patient-row__phase" :class="`patient-row__phase--${patient.current_phase}`">
+              {{ patient.current_phase === 'intensive' ? 'เข้มข้น' : 'ต่อเนื่อง' }}
+            </span>
             <span :class="geocodeStatusClass(patient.geocode_status)">
               {{ geocodeStatusLabel(patient.geocode_status) }}
             </span>
@@ -687,6 +751,52 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   line-height: 1.45;
+}
+
+.patient-row__phase {
+  align-self: center;
+  padding: 3px 7px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-emphasis);
+  white-space: nowrap;
+}
+
+.patient-row__phase--intensive {
+  background: var(--status-active-bg);
+  color: var(--color-teal);
+}
+
+.patient-row__phase--continuation {
+  background: rgba(0, 117, 222, 0.09);
+  color: var(--color-blue);
+}
+
+.pin-note-input {
+  width: 100%;
+  min-height: 48px;
+  padding: var(--input-padding-lg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color-input);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm);
+  resize: vertical;
+  line-height: var(--leading-body);
+}
+
+.pin-note-input:focus {
+  outline: none;
+  border-color: var(--color-blue-focus);
+  box-shadow: var(--shadow-focus-input);
+}
+
+.btn-ghost--sm {
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: var(--text-caption);
+  margin-top: 4px;
 }
 
 .geo-pill {

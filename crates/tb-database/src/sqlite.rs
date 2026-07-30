@@ -136,7 +136,7 @@ pub async fn get_all_patient_locations(
 ) -> Result<HashMap<String, TbPatientLocation>> {
   let rows = sqlx::query_as::<_, TbPatientLocation>(
     "SELECT hn, raw_address, normalized_address, lat, lng, jittered_lat, jittered_lng,
-            geocode_status, geocode_error, geocode_attempts, geocoded_at, updated_at
+            geocode_status, geocode_error, geocode_attempts, geocoded_at, updated_at, pin_note
        FROM tb_patient_locations",
   )
   .fetch_all(pool)
@@ -156,7 +156,7 @@ pub async fn get_patient_location(
 ) -> Result<Option<TbPatientLocation>> {
   sqlx::query_as::<_, TbPatientLocation>(
     "SELECT hn, raw_address, normalized_address, lat, lng, jittered_lat, jittered_lng,
-            geocode_status, geocode_error, geocode_attempts, geocoded_at, updated_at
+            geocode_status, geocode_error, geocode_attempts, geocoded_at, updated_at, pin_note
        FROM tb_patient_locations
       WHERE hn = ?",
   )
@@ -217,6 +217,30 @@ pub async fn upsert_patient_location(
   .bind(input.geocode_attempts)
   .bind(&input.geocoded_at)
   .bind(&now)
+  .execute(pool)
+  .await?;
+
+  Ok(())
+}
+
+/// Update only the `pin_note` column for a patient location.
+/// If no location row exists yet, a minimal placeholder row is created so the
+/// note is persisted immediately (the user may annotate before geocoding).
+pub async fn update_patient_pin_note(
+  pool: &SqlitePool,
+  hn: &str,
+  pin_note: Option<&str>,
+) -> Result<()> {
+  let now = Local::now().format("%Y-%m-%dT%H:%M:%S").to_string();
+
+  sqlx::query(
+    "INSERT INTO tb_patient_locations (hn, raw_address, geocode_status, geocode_attempts, updated_at, pin_note)
+     VALUES (?1, '', 'pending', 0, ?2, ?3)
+     ON CONFLICT(hn) DO UPDATE SET pin_note = excluded.pin_note, updated_at = excluded.updated_at",
+  )
+  .bind(hn)
+  .bind(&now)
+  .bind(pin_note)
   .execute(pool)
   .await?;
 
@@ -425,6 +449,26 @@ pub async fn get_all_treatment_plans(pool: &SqlitePool, hn: &str) -> Result<Vec<
   .fetch_all(pool)
   .await
   .map_err(anyhow::Error::from)
+}
+
+/// Return the current treatment plan (`is_current = 1`) for every patient in
+/// a single query, keyed by HN.  Used by the mapping module to avoid N+1.
+pub async fn get_current_treatment_plans_for_all(
+  pool: &SqlitePool,
+) -> Result<HashMap<String, TreatmentPlan>> {
+  let rows = sqlx::query_as::<_, TreatmentPlan>(
+    "SELECT id, hn, regimen, phase, phase_start, phase_end_expected,
+                drugs, duration_months, is_current, notes, created_at
+         FROM   tb_treatment_plans
+         WHERE  is_current = 1",
+  )
+  .fetch_all(pool)
+  .await?;
+
+  Ok(rows
+    .into_iter()
+    .map(|row| (row.hn.clone(), row))
+    .collect())
 }
 
 /// Return the earliest `phase_start` across all plans for `hn`, or `None`
