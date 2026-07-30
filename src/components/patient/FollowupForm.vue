@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { AlertTriangle, Loader2, X } from '@lucide/vue';
 import { invoke } from '@tauri-apps/api/core';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { FollowupInput } from '@/types/treatment';
 
 // -- Props & Emits --
@@ -119,6 +119,21 @@ const hasOpticNeuritisChecked = ref(false);
 
 watch(selectedSideEffects, (list) => {
   hasOpticNeuritisChecked.value = list.includes('ตาพร่า/ตาบอดสี');
+});
+
+interface SeGroup {
+  label: string;
+  items: SideEffectOption[];
+}
+
+const seGroups = computed<SeGroup[]>(() => {
+  const groups: Record<string, SideEffectOption[]> = {};
+  for (const se of SIDE_EFFECT_OPTIONS) {
+    const key = se.drug === '-' ? 'อื่นๆ' : `กลุ่มยา ${se.drug}`;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(se);
+  }
+  return Object.entries(groups).map(([label, items]) => ({ label, items }));
 });
 
 // -- Reset on open --
@@ -314,6 +329,17 @@ function onKeydown(e: KeyboardEvent) {
                       <option value="not_done">ไม่ได้ตรวจ</option>
                     </select>
                   </div>
+                  <div class="quick-taps">
+                    <button
+                      type="button"
+                      class="quick-tap"
+                      :class="{ 'quick-tap-active': form.sputum_result === 'negative' }"
+                      @click="form.sputum_result = form.sputum_result === 'negative' ? '' : 'negative'"
+                      :disabled="isSubmitting"
+                    >
+                      ผลลบ ✓
+                    </button>
+                  </div>
                 </div>
 
                 <div class="form-group">
@@ -331,6 +357,17 @@ function onKeydown(e: KeyboardEvent) {
                       <option value="worse">แย่ลง (Worse)</option>
                       <option value="not_done">ไม่ได้ตรวจ</option>
                     </select>
+                  </div>
+                  <div class="quick-taps">
+                    <button
+                      type="button"
+                      class="quick-tap"
+                      :class="{ 'quick-tap-active': form.xray_result === 'improved' }"
+                      @click="form.xray_result = form.xray_result === 'improved' ? '' : 'improved'"
+                      :disabled="isSubmitting"
+                    >
+                      ดีขึ้น ✓
+                    </button>
                   </div>
                 </div>
               </div>
@@ -351,6 +388,26 @@ function onKeydown(e: KeyboardEvent) {
                     <option value="poor">ไม่ดี (Poor)</option>
                   </select>
                 </div>
+                <div class="quick-taps">
+                  <button
+                    type="button"
+                    class="quick-tap"
+                    :class="{ 'quick-tap-active': form.adherence === 'good' }"
+                    @click="form.adherence = form.adherence === 'good' ? '' : 'good'"
+                    :disabled="isSubmitting"
+                  >
+                    ดี ✓
+                  </button>
+                  <button
+                    type="button"
+                    class="quick-tap"
+                    :class="{ 'quick-tap-active': form.adherence === 'fair' }"
+                    @click="form.adherence = form.adherence === 'fair' ? '' : 'fair'"
+                    :disabled="isSubmitting"
+                  >
+                    พอใช้
+                  </button>
+                </div>
               </div>
 
               <!-- Side effect checkboxes -->
@@ -369,29 +426,33 @@ function onKeydown(e: KeyboardEvent) {
                 </Transition>
 
                 <div class="checkbox-list">
-                  <label
-                    v-for="se in SIDE_EFFECT_OPTIONS"
-                    :key="se.key"
-                    class="checkbox-item"
-                    :class="{
-                      'checkbox-item-priority': se.isPriority,
-                      'checkbox-item-checked-priority':
-                        se.isPriority && selectedSideEffects.includes(se.key),
-                    }"
-                  >
-                    <input
-                      type="checkbox"
-                      class="checkbox-input"
-                      :value="se.key"
-                      v-model="selectedSideEffects"
-                      :disabled="isSubmitting"
-                    />
-                    <span class="checkbox-content">
-                      <span class="checkbox-label-th">{{ se.label }}</span>
-                      <span class="checkbox-label-en">{{ se.labelEn }}</span>
-                    </span>
-                    <span class="drug-tag">{{ se.drug }}</span>
-                  </label>
+                  <template v-for="group in seGroups" :key="group.label">
+                    <div class="se-group-header">
+                      <span class="se-group-label">{{ group.label }}</span>
+                    </div>
+                    <label
+                      v-for="se in group.items"
+                      :key="se.key"
+                      class="checkbox-item"
+                      :class="{
+                        'checkbox-item-priority': se.isPriority,
+                        'checkbox-item-checked-priority':
+                          se.isPriority && selectedSideEffects.includes(se.key),
+                      }"
+                    >
+                      <input
+                        type="checkbox"
+                        class="checkbox-input"
+                        :value="se.key"
+                        v-model="selectedSideEffects"
+                        :disabled="isSubmitting"
+                      />
+                      <span class="checkbox-content">
+                        <span class="checkbox-label-th">{{ se.label }}</span>
+                        <span class="checkbox-label-en">{{ se.labelEn }}</span>
+                      </span>
+                    </label>
+                  </template>
                 </div>
               </div>
 
@@ -680,6 +741,18 @@ function onKeydown(e: KeyboardEvent) {
   padding: var(--space-3) var(--space-4);
 }
 
+.se-group-header {
+  padding: var(--space-2) 7px 2px;
+}
+
+.se-group-label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-heading);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .checkbox-item {
   display: flex;
   align-items: center;
@@ -738,6 +811,46 @@ function onKeydown(e: KeyboardEvent) {
   border-radius: var(--radius-pill);
   padding: 1px 6px;
   white-space: nowrap;
+}
+
+/* -- Quick-tap buttons -- */
+.quick-taps {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: 4px;
+}
+
+.quick-tap {
+  padding: 2px 8px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-emphasis);
+  font-family: var(--font-family);
+  color: var(--color-blue);
+  background: var(--tint-blue);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: var(--transition-btn);
+  white-space: nowrap;
+}
+
+.quick-tap:hover:not(:disabled) {
+  background: var(--tint-blue-hover);
+}
+
+.quick-tap-active {
+  background: var(--color-blue);
+  color: var(--color-text-inverse);
+  border-color: var(--color-blue);
+}
+
+.quick-tap-active:hover:not(:disabled) {
+  background: var(--color-blue-active);
+}
+
+.quick-tap:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .form-error {
