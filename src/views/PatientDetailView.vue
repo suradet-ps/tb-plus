@@ -92,6 +92,7 @@ function refresh() {
 const detail = computed(() => patientStore.currentPatient);
 const isLoading = computed(() => patientStore.isLoadingDetail);
 const loadError = computed(() => patientStore.error);
+const demographicsSource = computed(() => patientStore.demographicsSource);
 
 const patientName = computed(() => detail.value?.demographics?.full_name ?? props.hn);
 
@@ -316,7 +317,10 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
           <!-- Full name -->
           <h1 class="patient-name">{{ patientName }}</h1>
           <!-- HOSxP connection / error status -->
-          <p v-if="!detail.mysql_connected" class="demo-unavailable demo-unavailable--warn">
+          <p v-if="patientStore.demographicsSource === 'cache'" class="demo-unavailable demo-unavailable--warn">
+            ⚠️ ข้อมูลผู้ป่วยมาจากแคช — ข้อมูลอาจไม่เป็นปัจจุบัน (HOSxP ไม่ได้เชื่อมต่อ)
+          </p>
+          <p v-else-if="!detail.mysql_connected" class="demo-unavailable demo-unavailable--warn">
             ⚠️ ยังไม่ได้เชื่อมต่อ HOSxP — ข้อมูลผู้ป่วยและประวัติยาจะไม่แสดง
           </p>
           <p v-else-if="detail.mysql_error" class="demo-unavailable demo-unavailable--error">
