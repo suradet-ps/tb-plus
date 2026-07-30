@@ -4753,7 +4753,7 @@ dependencies = [
 
 [[package]]
 name = "tb-database"
-version = "1.7.0"
+version = "1.8.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -4770,7 +4770,7 @@ dependencies = [
 
 [[package]]
 name = "tb-logic"
-version = "1.7.0"
+version = "1.8.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -4785,7 +4785,7 @@ dependencies = [
 
 [[package]]
 name = "tb-models"
-version = "1.7.0"
+version = "1.8.0"
 dependencies = [
  "chrono",
  "serde",
@@ -4794,7 +4794,7 @@ dependencies = [
 
 [[package]]
 name = "tb-plus"
-version = "1.7.0"
+version = "1.8.0"
 dependencies = [
  "anyhow",
  "chrono",
