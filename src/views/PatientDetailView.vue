@@ -58,6 +58,25 @@ const TABS: Tab[] = [
   { key: 'sideeffects', label: 'ผลข้างเคียง' },
 ];
 
+function onTabKeydown(e: KeyboardEvent, currentKey: TabKey) {
+  const idx = TABS.findIndex((t) => t.key === currentKey);
+  if (idx === -1) return;
+  let nextIdx: number | null = null;
+  if (e.key === 'ArrowRight') {
+    nextIdx = (idx + 1) % TABS.length;
+  } else if (e.key === 'ArrowLeft') {
+    nextIdx = (idx - 1 + TABS.length) % TABS.length;
+  } else if (e.key === 'Home') {
+    nextIdx = 0;
+  } else if (e.key === 'End') {
+    nextIdx = TABS.length - 1;
+  }
+  if (nextIdx !== null) {
+    e.preventDefault();
+    activeTab.value = TABS[nextIdx].key;
+  }
+}
+
 // -- Data loading --
 
 onMounted(() => {
@@ -434,6 +453,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
           :aria-selected="activeTab === tab.key"
           :aria-controls="`tabpanel-${tab.key}`"
           @click="activeTab = tab.key"
+          @keydown="onTabKeydown($event, tab.key)"
         >
           {{ tab.label }}
 
