@@ -36,6 +36,12 @@ bun tauri dev
 The dev server runs on `http://localhost:1420`. The Tauri window opens
 automatically.
 
+> **Dev vs Prod isolation**: `tauri dev` uses `tauri.dev.conf.json` which
+> overrides the identifier to `tb-plus-dev`, giving it a separate SQLite
+> database (`%LOCALAPPDATA%\tb-plus-dev\`) from the installed version
+> (`%LOCALAPPDATA%\tb-plus\`). This prevents WAL lock conflicts when
+> switching between dev and installed builds.
+
 ---
 
 ## Project Structure

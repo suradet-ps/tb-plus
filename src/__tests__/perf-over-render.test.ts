@@ -10,11 +10,7 @@ import { describe, expect, it } from 'vitest';
  * entire table. This test verifies the structural invariants that make this
  * possible.
  */
-const patientTablePath = resolve(
-  // biome-ignore lint/style/noNonNullAssertion: import.meta.dirname is always defined in vitest
-  import.meta.dirname!,
-  '../components/screening/PatientTable.vue',
-);
+const patientTablePath = resolve(process.cwd(), 'src/components/screening/PatientTable.vue');
 
 describe('PatientTable over-render audit', () => {
   const source = readFileSync(patientTablePath, 'utf-8');

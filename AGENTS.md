@@ -60,6 +60,20 @@ for clinic-specific tracking data not available in HIS.
 | HOSxP MySQL | Read-only | Patient demographics, drug dispensing records, appointments |
 | Local SQLite | Read-Write | TB clinic enrollment, treatment plans, follow-up notes, geocoding cache, app settings |
 
+### Dev vs Prod Data Isolation
+
+`tauri dev` reads `tauri.dev.conf.json` which overrides the identifier to
+`tb-plus-dev`. This gives dev and prod separate data directories so they never
+share a SQLite database or lock files:
+
+| Mode | Identifier | Data Directory (Windows) |
+|------|-----------|--------------------------|
+| `tauri dev` | `tb-plus-dev` | `%LOCALAPPDATA%\tb-plus-dev\` |
+| Installed (prod) | `tb-plus` | `%LOCALAPPDATA%\tb-plus\` |
+
+> **Never** change the prod identifier in `tauri.conf.json` — it would
+> orphan existing clinic data on users' machines.
+
 ---
 
 ## Database Schema
@@ -666,7 +680,8 @@ tb-plus/
 │   │   ├── 0003_settings_appointments.sql  # app_settings table
 │   │   └── 0004_mapping_locations.sql      # tb_patient_locations
 │   ├── Cargo.toml
-│   └── tauri.conf.json
+│   ├── tauri.conf.json          # prod identifier: "tb-plus"
+│   └── tauri.dev.conf.json      # dev identifier: "tb-plus-dev" (overrides on `tauri dev`)
 ├── src/
 │   ├── main.ts
 │   ├── App.vue

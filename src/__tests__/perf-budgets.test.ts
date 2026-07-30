@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
@@ -21,12 +21,11 @@ interface PerfBudgets {
   frontend_tests: { min_total: number; min_files: number };
 }
 
-const budgetsPath = resolve(
-  // biome-ignore lint/style/noNonNullAssertion: import.meta.dirname is always defined in vitest
-  import.meta.dirname!,
-  '../../perf-budgets.json',
-);
+const rootDir = resolve(process.cwd());
+const budgetsPath = resolve(rootDir, 'perf-budgets.json');
 const budgets: PerfBudgets = JSON.parse(readFileSync(budgetsPath, 'utf-8'));
+const distDir = resolve(rootDir, 'dist/assets');
+const hasDist = existsSync(distDir);
 
 describe('Performance budgets', () => {
   describe('budget file structure', () => {
@@ -69,10 +68,7 @@ describe('Performance budgets', () => {
     });
   });
 
-  describe('actual build output vs budget', () => {
-    // biome-ignore lint/style/noNonNullAssertion: import.meta.dirname is always defined in vitest
-    const distDir = resolve(import.meta.dirname!, '../../dist/assets');
-
+  describe.skipIf(!hasDist)('actual build output vs budget', () => {
     function getGzipSize(filePath: string): number {
       const content = readFileSync(filePath);
       return gzipSync(content).length;
@@ -90,7 +86,7 @@ describe('Performance budgets', () => {
     }
 
     it('total JS gzip should be under budget', () => {
-      const files = readdirSync(distDir).filter((f) => f.endsWith('.js'));
+      const files = readdirSync(distDir).filter((f: string) => f.endsWith('.js'));
       let totalGzip = 0;
       for (const f of files) {
         totalGzip += getGzipSize(join(distDir, f));
@@ -100,7 +96,7 @@ describe('Performance budgets', () => {
     });
 
     it('total CSS gzip should be under budget', () => {
-      const files = readdirSync(distDir).filter((f) => f.endsWith('.css'));
+      const files = readdirSync(distDir).filter((f: string) => f.endsWith('.css'));
       let totalGzip = 0;
       for (const f of files) {
         totalGzip += getGzipSize(join(distDir, f));
