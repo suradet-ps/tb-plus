@@ -67,6 +67,12 @@ function close() {
   emit('update:modelValue', false);
 }
 
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape' && props.modelValue) {
+    close();
+  }
+}
+
 async function submit() {
   if (!treatmentStartDate.value) {
     error.value = 'กรุณาระบุวันเริ่มการรักษา';
@@ -111,7 +117,7 @@ function unfocus(e: Event) {
 <template>
   <Teleport to="body">
     <Transition name="modal-fade">
-        <div v-if="modelValue" class="modal-overlay" @click.self="close">
+        <div v-if="modelValue" class="modal-overlay" @click.self="close" @keydown="onKeydown">
         <div ref="panelRef" class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
           <!-- Header -->
           <div class="modal-header">
