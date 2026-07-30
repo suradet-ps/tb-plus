@@ -53,20 +53,20 @@ checked against it.
 - **Rust tests**: 46 unit tests across crates — alert logic (11), date
   arithmetic (7), duration parsing (6), icode mapping (7+6), crypto (5),
   dosage (3), settings (3). All passing.
-- **Frontend tests**: 14 test files (191 tests) — 6 store test files covering
+- **Frontend tests**: 14 test files (206 tests) — 6 store test files covering
   alerts, patient, screening, settings, mapping, appointments stores; 4
   component tests (AlertBadge, ProgressBar, TreatmentTimeline, DischargeModal);
   4 integration tests (alert full path, dosage round-trip, screening filters,
   enrollment flow). Test factories and Tauri invoke mocks in `src/__tests__/`.
 - **41 Tauri commands** across 10 command modules: screening (2), patients (5),
-  followups (2), alerts (1), settings (22), dosage (2), mapping (4),
+  followups (2), alerts (1), settings (22), dosage (2), mapping (5),
   appointments (1), reports (1).
 - **10 views**: Screening, Active, Discharged, Appointments, Dosage Assessment,
   Patient Detail, Mapping, Reports, Settings, About.
 - **19 Vue components** across 6 directories: layout (2), screening (2), active
   (3), patient (6), mapping (2), shared (4).
-- **4 SQLite migrations**: core tables, drug class fix, settings, mapping
-  locations.
+- **5 SQLite migrations**: core tables, drug class fix, settings, mapping
+  locations, mapping pin_note.
 - **Security**: AES-256-GCM encrypted MySQL credentials, `#![deny(unsafe_code)]`
   in Rust crates, no `unwrap` in production paths, RLS-like single-database
   boundary (SQLite is local-only, HOSxP is read-only).
@@ -230,32 +230,49 @@ catches invalid data before backend round-trips; encryption audit verified clean
 
 ## Phase 4: The Clinical Loop, Made Excellent
 
+> **Status: ✅ Complete** — pending PR
+
 Deepen exactly the loop TB Plus already has — screen, enroll, track, follow up,
 discharge — without adding a second product.
 
-- [ ] **Screening that respects the nurse's time.** Persistent filter state
+- [x] **Screening that respects the nurse's time.** Persistent filter state
   across sessions (remember last drug class filter, date range), keyboard
   shortcuts for common actions (Enter to enroll selected, Escape to clear
   selection), and a "recently screened" quick-reaccess entry point.
-- [ ] **Follow-up recording that feels fast.** The follow-up form should
+  ✅ **Done in Phase 4.** localStorage filter persistence, lastSearchAt badge,
+  Escape/Enter keyboard shortcuts, resetFilters clears storage.
+- [x] **Follow-up recording that feels fast.** The follow-up form should
   pre-fill the next expected month number, default today's date, and offer
   one-tap common values (e.g., "sputum: negative", "adherence: good"). Side
   effect checklist should be scannable, not a wall of checkboxes.
-- [ ] **Patient detail that tells a story.** The treatment timeline should
+  ✅ **Done in Phase 4.** Quick-tap toggle buttons for sputum/xray/adherence,
+  side effects grouped by drug class (H/R/Z/E/others).
+- [x] **Patient detail that tells a story.** The treatment timeline should
   visually highlight the current month, show dispensing gaps as warning zones,
   and make the "days since last dispensing" number impossible to miss.
-- [ ] **Active dashboard that prioritizes.** Sort by urgency (most overdue
+  ✅ **Done in Phase 4.** currentMonthIndex with month-tick-current class,
+  gapZones detecting gaps >45 days with dashed orange overlays.
+- [x] **Active dashboard that prioritizes.** Sort by urgency (most overdue
   first), group by alert severity, and make the top card the patient who needs
   attention now — not the most recently enrolled.
-- [ ] **Dosage assessment as a clinical decision support tool.** Show the
+  ✅ **Done in Phase 4.** Days-since-dispensing tie-breaking in sort (most
+  overdue first), Clock icon on days badge, days-ok/warn/over color classes.
+- [x] **Dosage assessment as a clinical decision support tool.** Show the
   calculation chain (weight → mg/kg → dose → units), highlight when a dose
   exceeds the configured max, and suggest the optimal unit strength.
-- [ ] **Mapping that serves contact tracing.** Allow annotating map pins with
+  ✅ **Done in Phase 4.** Calculation chain visualization with step display
+  (weight × mg/kg → mg → units/day).
+- [x] **Mapping that serves contact tracing.** Allow annotating map pins with
   notes ("household contact", "workplace cluster"), filter by treatment phase,
   and show cluster density as a heat overlay.
+  ✅ **Done in Phase 4.** Pin annotation (save_pin_note command + textarea UI),
+  phase filter in MapFilters, treatment phase/regimen display in list and popup.
 
 **Acceptance:** each improvement has a component test where logic exists; nothing
 here adds sharing, social, or multi-user features.
+✅ **Done in Phase 4.** 206 frontend tests (15 new in Phase 4: filter
+persistence, resetFilters, lastSearchAt, savePinNote, gap zones, current month
+tick, mapping factory Phase 4.6 fields).
 
 ---
 
@@ -499,4 +516,4 @@ For reference, the current module architecture that this roadmap builds on:
 ---
 
 *Last updated: 2026-07-30*
-*Next review: after Phase 4 acceptance is met*
+*Next review: after Phase 5 acceptance is met*

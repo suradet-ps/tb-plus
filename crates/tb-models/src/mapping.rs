@@ -14,6 +14,7 @@ pub struct TbPatientLocation {
   pub geocode_attempts: i64,
   pub geocoded_at: Option<String>,
   pub updated_at: String,
+  pub pin_note: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -32,6 +33,9 @@ pub struct MappingPatientRow {
   pub lat: Option<f64>,
   pub lng: Option<f64>,
   pub geocoded_at: Option<String>,
+  pub current_phase: Option<String>,
+  pub regimen: Option<String>,
+  pub pin_note: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

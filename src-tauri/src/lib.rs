@@ -149,6 +149,7 @@ pub fn run() {
       commands::mapping::get_mapping_summary,
       commands::mapping::geocode_patient_address,
       commands::mapping::batch_geocode_patients,
+      commands::mapping::save_pin_note,
       commands::alerts::get_patient_alerts,
       commands::settings::test_mysql_connection,
       commands::settings::connect_mysql,

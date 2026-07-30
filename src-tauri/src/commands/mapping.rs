@@ -7,6 +7,7 @@ use tb_logic::address::{
 use tb_models::mapping::{BatchGeocodeResult, MappingPatientRow, MappingSummary};
 use tb_models::patient::{PatientDemographics, TbPatient};
 use tb_models::settings::GeocodeConfig;
+use tb_models::treatment::TreatmentPlan;
 
 use chrono::Local;
 use reqwest::Client;
@@ -41,6 +42,9 @@ pub async fn get_mapping_patients(
   let locations = tb_database::sqlite::get_all_patient_locations(&sqlite)
     .await
     .map_err(|e| e.to_string())?;
+  let treatment_plans = tb_database::sqlite::get_current_treatment_plans_for_all(&sqlite)
+    .await
+    .map_err(|e| e.to_string())?;
 
   let hns = patients
     .iter()
@@ -55,7 +59,12 @@ pub async fn get_mapping_patients(
     HashMap::new()
   };
 
-  Ok(build_mapping_rows(&patients, &locations, &demographics))
+  Ok(build_mapping_rows(
+    &patients,
+    &locations,
+    &demographics,
+    &treatment_plans,
+  ))
 }
 
 #[tauri::command]
@@ -70,6 +79,9 @@ pub async fn get_mapping_summary(
   let locations = tb_database::sqlite::get_all_patient_locations(&sqlite)
     .await
     .map_err(|e| e.to_string())?;
+  let treatment_plans = tb_database::sqlite::get_current_treatment_plans_for_all(&sqlite)
+    .await
+    .map_err(|e| e.to_string())?;
 
   let hns = patients
     .iter()
@@ -84,7 +96,12 @@ pub async fn get_mapping_summary(
     HashMap::new()
   };
 
-  let rows = build_mapping_rows(&patients, &locations, &demographics);
+  let rows = build_mapping_rows(
+    &patients,
+    &locations,
+    &demographics,
+    &treatment_plans,
+  );
 
   let total_patients = rows.len() as i64;
   let active_patients = rows.iter().filter(|row| row.tb_status == "active").count() as i64;
@@ -221,6 +238,7 @@ fn build_mapping_rows(
   patients: &[TbPatient],
   locations: &HashMap<String, tb_models::mapping::TbPatientLocation>,
   demographics: &HashMap<String, PatientDemographics>,
+  treatment_plans: &HashMap<String, TreatmentPlan>,
 ) -> Vec<MappingPatientRow> {
   patients
     .iter()
@@ -246,6 +264,8 @@ fn build_mapping_rows(
           .map(|item| item.geocode_status.clone())
           .unwrap_or_else(|| "pending".to_string())
       };
+
+      let plan = treatment_plans.get(&patient.hn);
 
       MappingPatientRow {
         hn: patient.hn.clone(),
@@ -276,6 +296,9 @@ fn build_mapping_rows(
           location.and_then(|item| item.jittered_lng.or(item.lng))
         },
         geocoded_at: location.and_then(|item| item.geocoded_at.clone()),
+        current_phase: plan.map(|p| p.phase.clone()),
+        regimen: plan.map(|p| p.regimen.clone()),
+        pin_note: location.and_then(|item| item.pin_note.clone()),
       }
     })
     .collect()
@@ -285,11 +308,13 @@ fn build_single_mapping_row(
   patient: &TbPatient,
   location: tb_models::mapping::TbPatientLocation,
   demographics: PatientDemographics,
+  treatment_plans: &HashMap<String, TreatmentPlan>,
 ) -> Result<MappingPatientRow, anyhow::Error> {
   build_mapping_rows(
     std::slice::from_ref(patient),
     &HashMap::from([(patient.hn.clone(), location)]),
     &HashMap::from([(patient.hn.clone(), demographics)]),
+    treatment_plans,
   )
   .into_iter()
   .next()
@@ -319,7 +344,14 @@ async fn geocode_patient_core(
     && location.lng.is_some()
     && location.normalized_address.as_deref() == Some(normalized_address.as_str())
   {
-    return build_single_mapping_row(patient, location.clone(), demographics.clone());
+    let plan = tb_database::sqlite::get_current_treatment_plan(sqlite, &patient.hn)
+      .await
+      .unwrap_or(None);
+    let plans: HashMap<String, TreatmentPlan> = plan
+      .map(|p| (patient.hn.clone(), p))
+      .into_iter()
+      .collect();
+    return build_single_mapping_row(patient, location.clone(), demographics.clone(), &plans);
   }
 
   let previous_attempts = existing
@@ -376,7 +408,57 @@ async fn geocode_patient_core(
     .await?
     .ok_or_else(|| anyhow::anyhow!("บันทึกตำแหน่งผู้ป่วยไม่สำเร็จ"))?;
 
-  build_single_mapping_row(patient, location, demographics.clone())
+  let plan = tb_database::sqlite::get_current_treatment_plan(sqlite, &patient.hn)
+    .await
+    .unwrap_or(None);
+  let plans: HashMap<String, TreatmentPlan> = plan
+    .map(|p| (patient.hn.clone(), p))
+    .into_iter()
+    .collect();
+
+  build_single_mapping_row(patient, location, demographics.clone(), &plans)
+}
+
+#[tauri::command]
+pub async fn save_pin_note(
+  sqlite: State<'_, SqlitePool>,
+  hn: String,
+  pin_note: Option<String>,
+) -> Result<MappingPatientRow, String> {
+  tb_database::sqlite::update_patient_pin_note(&sqlite, &hn, pin_note.as_deref())
+    .await
+    .map_err(|e| e.to_string())?;
+
+  let patient = tb_database::sqlite::get_patient_by_hn(&sqlite, &hn)
+    .await
+    .map_err(|e| e.to_string())?
+    .ok_or_else(|| format!("ไม่พบผู้ป่วย HN {}", hn))?;
+
+  let location = tb_database::sqlite::get_patient_location(&sqlite, &hn)
+    .await
+    .map_err(|e| e.to_string())?
+    .ok_or_else(|| format!("ไม่พบข้อมูลตำแหน่งผู้ป่วย HN {}", hn))?;
+
+  let plan = tb_database::sqlite::get_current_treatment_plan(&sqlite, &hn)
+    .await
+    .unwrap_or(None);
+  let plans: HashMap<String, TreatmentPlan> = plan
+    .map(|p| (hn.clone(), p))
+    .into_iter()
+    .collect();
+
+  let locations_map: HashMap<String, tb_models::mapping::TbPatientLocation> =
+    HashMap::from([(hn.clone(), location)]);
+
+  build_mapping_rows(
+    std::slice::from_ref(&patient),
+    &locations_map,
+    &HashMap::new(),
+    &plans,
+  )
+  .into_iter()
+  .next()
+  .ok_or_else(|| "ไม่สามารถสร้างข้อมูลแผนที่ของผู้ป่วยได้".to_string())
 }
 
 async fn geocode_address_with_rate_limit(

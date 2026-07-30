@@ -3,6 +3,7 @@ import {
   Activity,
   AlertTriangle,
   CheckCircle,
+  Clock,
   Eye,
   Loader2,
   RefreshCw,
@@ -52,9 +53,17 @@ const sortedPatients = computed<ActivePatientRow[]>(() => {
           'th',
         );
         break;
-      default:
-        cmp = alertWeight(a) - alertWeight(b);
+      default: {
+        const wa = alertWeight(a);
+        const wb = alertWeight(b);
+        cmp = wa - wb;
+        if (cmp === 0) {
+          const da = a.days_since_last_dispensing ?? 0;
+          const db = b.days_since_last_dispensing ?? 0;
+          cmp = db - da;
+        }
         break;
+      }
     }
     return cmp * dir;
   });
@@ -281,6 +290,7 @@ function sortIcon(key: SortKey): string {
                     'days-over': p.days_since_last_dispensing > 60,
                   }"
                 >
+                  <Clock :size="11" class="days-icon" />
                   {{ p.days_since_last_dispensing }} วัน
                 </span>
               </template>
@@ -405,9 +415,11 @@ tbody tr:last-child td { border-bottom: none; }
 .progress-fill { height: 100%; background: var(--color-blue); border-radius: var(--radius-pill); transition: width 0.3s; }
 
 .days-badge {
-  display: inline-block; padding: var(--badge-padding-sm); border-radius: var(--radius-pill);
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: var(--badge-padding-sm); border-radius: var(--radius-pill);
   font-size: var(--text-caption); font-weight: var(--weight-heading);
 }
+.days-icon { flex-shrink: 0; }
 .days-ok { background: rgba(26,174,57,0.1); color: var(--color-green); }
 .days-warn { background: rgba(221,91,0,0.1); color: var(--color-orange); }
 .days-over { background: rgba(185,28,28,0.1); color: var(--color-alert-red); }

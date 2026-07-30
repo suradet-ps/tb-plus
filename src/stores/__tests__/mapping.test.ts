@@ -170,6 +170,47 @@ describe('mapping store', () => {
     });
   });
 
+  describe('savePinNote', () => {
+    it('should update the matched patient pin_note and return the updated row', async () => {
+      const store = useMappingStore();
+      store.patients = [
+        createMappingPatientRow({ hn: 'A', pin_note: null }),
+        createMappingPatientRow({ hn: 'B', pin_note: 'old note' }),
+      ];
+      const updated: MappingPatientRow = createMappingPatientRow({
+        hn: 'A',
+        pin_note: 'Household contact',
+      });
+      vi.mocked(invoke).mockResolvedValue(updated);
+
+      const result = await store.savePinNote('A', 'Household contact');
+
+      expect(result).toEqual(updated);
+      expect(store.patients[0].pin_note).toBe('Household contact');
+      expect(store.patients[1].pin_note).toBe('old note'); // unchanged
+    });
+
+    it('should clear pin_note when passed null', async () => {
+      const store = useMappingStore();
+      store.patients = [createMappingPatientRow({ hn: 'A', pin_note: 'old' })];
+      const updated: MappingPatientRow = createMappingPatientRow({ hn: 'A', pin_note: null });
+      vi.mocked(invoke).mockResolvedValue(updated);
+
+      const result = await store.savePinNote('A', null);
+
+      expect(result.pin_note).toBeNull();
+      expect(store.patients[0].pin_note).toBeNull();
+    });
+
+    it('should set error and throw on failure', async () => {
+      const store = useMappingStore();
+      vi.mocked(invoke).mockRejectedValue(new Error('Save failed'));
+
+      await expect(store.savePinNote('A', 'note')).rejects.toThrow('Save failed');
+      expect(store.error).toContain('Save failed');
+    });
+  });
+
   describe('selectedPatient', () => {
     it('should return the patient matching selectedHn', () => {
       const store = useMappingStore();

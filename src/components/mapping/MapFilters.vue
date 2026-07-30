@@ -2,12 +2,14 @@
 type FilterStatus = 'all' | 'active' | 'completed' | 'transferred' | 'died' | 'defaulted';
 type FilterTbType = 'all' | 'pulmonary' | 'extra_pulmonary';
 type FilterGeocode = 'all' | 'success' | 'pending' | 'failed' | 'missing_address';
+type FilterPhase = 'all' | 'intensive' | 'continuation';
 
 const props = defineProps<{
   search: string;
   status: FilterStatus;
   tbType: FilterTbType;
   geocodeStatus: FilterGeocode;
+  phase: FilterPhase;
   enrolledFrom: string;
   enrolledTo: string;
 }>();
@@ -17,6 +19,7 @@ const emit = defineEmits<{
   'update:status': [value: FilterStatus];
   'update:tbType': [value: FilterTbType];
   'update:geocodeStatus': [value: FilterGeocode];
+  'update:phase': [value: FilterPhase];
   'update:enrolledFrom': [value: string];
   'update:enrolledTo': [value: string];
   reset: [];
@@ -84,6 +87,20 @@ const emit = defineEmits<{
           <option value="pending">รอแปลงพิกัด</option>
           <option value="failed">แปลงพิกัดไม่สำเร็จ</option>
           <option value="missing_address">ไม่มีที่อยู่</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="mappingPhase">ระยะการรักษา</label>
+        <select
+          id="mappingPhase"
+          class="filter-input"
+          :value="props.phase"
+          @change="emit('update:phase', ($event.target as HTMLSelectElement).value as FilterPhase)"
+        >
+          <option value="all">ทั้งหมด</option>
+          <option value="intensive">ระยะเข้มข้น</option>
+          <option value="continuation">ระยะต่อเนื่อง</option>
         </select>
       </div>
     </div>

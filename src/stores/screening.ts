@@ -1,33 +1,83 @@
 import { invoke } from '@tauri-apps/api/core';
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { PatientDrugRecord, SearchFilters } from '@/types/patient';
+
+const STORAGE_KEY_FILTERS = 'tb_screening_filters';
+const STORAGE_KEY_LAST_SEARCH = 'tb_screening_last_search';
+
+function formatDate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function loadSavedFilters(): SearchFilters | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_FILTERS);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    if (typeof parsed !== 'object' || parsed === null) return null;
+    return {
+      date_from: typeof parsed.date_from === 'string' ? parsed.date_from : undefined,
+      date_to: typeof parsed.date_to === 'string' ? parsed.date_to : undefined,
+      drug_classes: Array.isArray(parsed.drug_classes)
+        ? (parsed.drug_classes as string[])
+        : undefined,
+      enrollment_status:
+        typeof parsed.enrollment_status === 'string'
+          ? (parsed.enrollment_status as SearchFilters['enrollment_status'])
+          : 'all',
+      page: typeof parsed.page === 'number' ? parsed.page : 1,
+      page_size: typeof parsed.page_size === 'number' ? parsed.page_size : 50,
+      hn_search: typeof parsed.hn_search === 'string' ? parsed.hn_search : undefined,
+      name_search: typeof parsed.name_search === 'string' ? parsed.name_search : undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function saveFiltersToStorage(filters: SearchFilters): void {
+  try {
+    localStorage.setItem(STORAGE_KEY_FILTERS, JSON.stringify(filters));
+  } catch {
+    // storage full or unavailable — silent
+  }
+}
+
+function buildDefaultFilters(): SearchFilters {
+  const today = new Date();
+  const dateTo = formatDate(today);
+  const oneYearAgo = new Date(today);
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  return {
+    date_from: formatDate(oneYearAgo),
+    date_to: dateTo,
+    enrollment_status: 'all',
+    page: 1,
+    page_size: 50,
+  };
+}
 
 export const useScreeningStore = defineStore('screening', () => {
   const results = ref<PatientDrugRecord[]>([]);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
   const selectedHns = ref<Set<string>>(new Set());
-  const today = new Date();
-  function formatDate(d: Date): string {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  }
-  const dateTo = formatDate(today);
-  const oneYearAgo = new Date(today);
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-  const dateFrom = formatDate(oneYearAgo);
+  const lastSearchAt = ref<string | null>(localStorage.getItem(STORAGE_KEY_LAST_SEARCH));
 
-  const filters = ref<SearchFilters>({
-    date_from: dateFrom,
-    date_to: dateTo,
-    enrollment_status: 'all',
-    page: 1,
-    page_size: 50,
-  });
+  const filters = ref<SearchFilters>(loadSavedFilters() ?? buildDefaultFilters());
   const totalCount = ref(0);
+
+  watch(
+    filters,
+    (val) => {
+      saveFiltersToStorage(val);
+    },
+    { deep: true },
+  );
 
   async function search(): Promise<void> {
     try {
@@ -37,6 +87,13 @@ export const useScreeningStore = defineStore('screening', () => {
         filters: filters.value,
       });
       results.value = data;
+      const now = new Date().toISOString();
+      lastSearchAt.value = now;
+      try {
+        localStorage.setItem(STORAGE_KEY_LAST_SEARCH, now);
+      } catch {
+        // silent
+      }
     } catch (e) {
       error.value = String(e);
     } finally {
@@ -56,6 +113,15 @@ export const useScreeningStore = defineStore('screening', () => {
     selectedHns.value.clear();
   }
 
+  function resetFilters(): void {
+    filters.value = buildDefaultFilters();
+    try {
+      localStorage.removeItem(STORAGE_KEY_FILTERS);
+    } catch {
+      // silent
+    }
+  }
+
   const selectedRecords = computed(() =>
     results.value.filter(
       (r) =>
@@ -71,9 +137,11 @@ export const useScreeningStore = defineStore('screening', () => {
     selectedHns,
     filters,
     totalCount,
+    lastSearchAt,
     selectedRecords,
     search,
     toggleSelect,
     clearSelection,
+    resetFilters,
   };
 });
