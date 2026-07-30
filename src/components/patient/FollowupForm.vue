@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { AlertTriangle, Loader2, X } from '@lucide/vue';
+import { AlertTriangle, Info, Loader2, X } from '@lucide/vue';
 import { invoke } from '@tauri-apps/api/core';
 import { computed, ref, toRef, watch } from 'vue';
 import { useFocusTrap } from '@/composables/useFocusTrap';
+import { useSettingsStore } from '@/stores/settings';
 import type { FollowupInput } from '@/types/treatment';
+
+const settingsStore = useSettingsStore();
 
 // -- Props & Emits --
 
@@ -265,6 +268,11 @@ function onKeydown(e: KeyboardEvent) {
 
           <!-- Body -->
           <div class="panel-body">
+            <!-- Offline dispensing warning -->
+            <div v-if="!settingsStore.isConnected" class="offline-note">
+              <Info :size="14" class="offline-note-icon" aria-hidden="true" />
+              <span>ข้อมูลการจ่ายยาอาจไม่เป็นปัจจุบัน — HOSxP ไม่ได้เชื่อมต่อ</span>
+            </div>
             <form
               id="followup-form"
               class="followup-form"
@@ -606,6 +614,24 @@ function onKeydown(e: KeyboardEvent) {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-10);
+}
+
+.offline-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  margin-bottom: var(--space-6);
+  background: var(--tint-blue);
+  border: 1px solid rgba(0, 117, 222, 0.15);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-body-sm);
+  color: var(--color-accent);
+}
+
+.offline-note-icon {
+  flex-shrink: 0;
+  opacity: 0.8;
 }
 
 .followup-form {
