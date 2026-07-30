@@ -230,8 +230,8 @@ describe('patient store', () => {
 
       const cached = localStorage.getItem('tb_patient_demographics');
       expect(cached).toBeTruthy();
-      const parsed = JSON.parse(cached!);
-      expect(parsed['HN00005']).toEqual(demographics);
+      const parsed = JSON.parse(cached as string);
+      expect(parsed.HN00005).toEqual(demographics);
       expect(store.demographicsSource).toBe('live');
     });
 
@@ -240,10 +240,7 @@ describe('patient store', () => {
       const demographics = createPatientDemographics({ hn: 'HN00005' });
 
       // Pre-populate cache
-      localStorage.setItem(
-        'tb_patient_demographics',
-        JSON.stringify({ HN00005: demographics }),
-      );
+      localStorage.setItem('tb_patient_demographics', JSON.stringify({ HN00005: demographics }));
 
       // Reload cache into store
       store.demographicsCache = { HN00005: demographics };
@@ -257,7 +254,7 @@ describe('patient store', () => {
 
       await store.fetchPatientDetail('HN00005');
 
-      expect(store.currentPatient!.demographics).toEqual(demographics);
+      expect(store.currentPatient?.demographics).toEqual(demographics);
       expect(store.demographicsSource).toBe('cache');
     });
 

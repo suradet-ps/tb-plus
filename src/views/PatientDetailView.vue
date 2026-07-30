@@ -317,7 +317,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
           <!-- Full name -->
           <h1 class="patient-name">{{ patientName }}</h1>
           <!-- HOSxP connection / error status -->
-          <p v-if="patientStore.demographicsSource === 'cache'" class="demo-unavailable demo-unavailable--warn">
+          <p v-if="demographicsSource === 'cache'" class="demo-unavailable demo-unavailable--warn">
             ⚠️ ข้อมูลผู้ป่วยมาจากแคช — ข้อมูลอาจไม่เป็นปัจจุบัน (HOSxP ไม่ได้เชื่อมต่อ)
           </p>
           <p v-else-if="!detail.mysql_connected" class="demo-unavailable demo-unavailable--warn">

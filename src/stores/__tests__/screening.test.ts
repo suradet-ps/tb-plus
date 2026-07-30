@@ -324,7 +324,7 @@ describe('screening store', () => {
 
       const cached = localStorage.getItem('tb_screening_cache');
       expect(cached).toBeTruthy();
-      const parsed = JSON.parse(cached!);
+      const parsed = JSON.parse(cached as string);
       expect(parsed.results).toEqual(mockResults);
       expect(parsed.cachedAt).toBeTruthy();
     });
@@ -332,7 +332,14 @@ describe('screening store', () => {
     it('should load cached results as stale on init', () => {
       const cachedData = {
         results: makeRecords(2),
-        filters: { date_from: null, date_to: null, drug_classes: null, enrollment_status: 'all', page: 1, page_size: 50 },
+        filters: {
+          date_from: null,
+          date_to: null,
+          drug_classes: null,
+          enrollment_status: 'all',
+          page: 1,
+          page_size: 50,
+        },
         cachedAt: new Date(Date.now() - 60_000).toISOString(),
       };
       localStorage.setItem('tb_screening_cache', JSON.stringify(cachedData));
