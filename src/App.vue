@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { WifiOff } from '@lucide/vue';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 
 import AppSidebar from '@/components/layout/AppSidebar.vue';
 import { useAlertStore } from '@/stores/alerts';
@@ -11,6 +11,21 @@ import { useSettingsStore } from '@/stores/settings';
 const alertStore = useAlertStore();
 const settingsStore = useSettingsStore();
 const appointmentsStore = useAppointmentsStore();
+
+const connectionAnnounce = ref('');
+let prevConnected: boolean | null = null;
+
+watch(
+  () => settingsStore.isConnected,
+  (connected) => {
+    if (prevConnected !== null && prevConnected !== connected) {
+      connectionAnnounce.value = connected
+        ? 'เชื่อมต่อ HOSxP สำเร็จ'
+        : 'ขาดการเชื่อมต่อ HOSxP — ข้อมูลอาจไม่เป็นปัจจุบัน';
+    }
+    prevConnected = connected;
+  },
+);
 
 let startupRetryTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -64,18 +79,47 @@ onUnmounted(() => {
 
 <template>
   <div class="app-shell">
+    <!-- Skip to main content link (visible on keyboard focus only) -->
+    <a href="#main-content" class="skip-link">ข้ามไปยังเนื้อหา</a>
+
     <AppSidebar />
-    <main class="app-main">
-      <div v-if="!settingsStore.isConnected" class="mysql-banner">
-        <WifiOff :size="14" class="mysql-banner-icon" />
+    <main id="main-content" class="app-main" tabindex="-1">
+      <div v-if="!settingsStore.isConnected" class="mysql-banner" role="alert">
+        <WifiOff :size="14" class="mysql-banner-icon" aria-hidden="true" />
         <span>ยังไม่ได้เชื่อมต่อ HOSxP — ข้อมูลการจ่ายยาและข้อมูลผู้ป่วยอาจไม่เป็นปัจจุบัน</span>
       </div>
       <RouterView />
     </main>
+
+    <!-- Live region for connection status announcements -->
+    <div class="sr-only" role="status" aria-live="polite">{{ connectionAnnounce }}</div>
   </div>
 </template>
 
 <style scoped>
+/* -- Skip to content link -- */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: var(--space-4);
+  z-index: 9999;
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-family: var(--font-family);
+  font-size: var(--text-body);
+  font-weight: var(--weight-emphasis);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: top var(--duration-fast) var(--ease-standard);
+}
+
+.skip-link:focus {
+  top: var(--space-4);
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
 /* -- App Shell Layout -- */
 .app-shell {
   display: flex;

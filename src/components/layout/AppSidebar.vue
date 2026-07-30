@@ -70,13 +70,14 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
     <div class="sidebar-divider" />
 
     <!-- Navigation -->
-    <nav class="sidebar-nav">
+    <nav class="sidebar-nav" aria-label="เมนูหลัก">
       <RouterLink
         v-for="item in navItems"
         :key="item.path"
         :to="item.path"
         class="nav-item"
         :class="{ 'nav-item--active': isActive(item.path) }"
+        :aria-current="isActive(item.path) ? 'page' : undefined"
       >
         <component :is="item.icon" :size="17" stroke-width="2" class="nav-icon" />
         <span class="nav-label">{{ item.label }}</span>

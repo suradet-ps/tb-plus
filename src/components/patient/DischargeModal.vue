@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { AlertTriangle, Loader2, LogOut } from '@lucide/vue';
 import { invoke } from '@tauri-apps/api/core';
-import { ref, watch } from 'vue';
+import { ref, toRef, watch } from 'vue';
+import { useFocusTrap } from '@/composables/useFocusTrap';
 import type { OutcomeInput } from '@/types/treatment';
 
 // -- Props & Emits --
@@ -118,6 +119,11 @@ const submitError = ref<string | null>(null);
 // Derived: selected outcome config for colored preview
 const selectedOutcomeConfig = ref<OutcomeOption | null>(null);
 
+// -- Focus trap --
+const panelRef = ref<HTMLElement | null>(null);
+const isOpen = toRef(props, 'modelValue');
+useFocusTrap(isOpen, panelRef);
+
 watch(
   () => form.value.outcome,
   (val) => {
@@ -212,6 +218,7 @@ function onKeydown(e: KeyboardEvent) {
       >
         <!-- Dialog panel -->
         <div
+          ref="panelRef"
           class="modal-panel"
           role="dialog"
           aria-modal="true"

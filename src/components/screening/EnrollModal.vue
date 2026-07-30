@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { AlertCircle, CheckCircle, Loader2, UserPlus, X } from '@lucide/vue';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, toRef, watch } from 'vue';
+import { useFocusTrap } from '@/composables/useFocusTrap';
 import { usePatientStore } from '@/stores/patient';
 import { useSettingsStore } from '@/stores/settings';
 import type { EnrollmentInput, PatientDrugRecord } from '@/types/patient';
@@ -28,6 +29,11 @@ const notes = ref('');
 const isSubmitting = ref(false);
 const error = ref<string | null>(null);
 const success = ref(false);
+
+// -- Focus trap --
+const panelRef = ref<HTMLElement | null>(null);
+const isOpen = toRef(props, 'modelValue');
+useFocusTrap(isOpen, panelRef);
 
 // -- Re-enrollment detection --
 const reenrollCount = computed(
@@ -105,15 +111,15 @@ function unfocus(e: Event) {
 <template>
   <Teleport to="body">
     <Transition name="modal-fade">
-      <div v-if="modelValue" class="modal-overlay" @click.self="close">
-        <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div v-if="modelValue" class="modal-overlay" @click.self="close">
+        <div ref="panelRef" class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
           <!-- Header -->
           <div class="modal-header">
             <div class="modal-title-row">
               <UserPlus :size="18" class="modal-title-icon" />
               <h2 id="modal-title" class="modal-title">ลงทะเบียนเข้าคลินิก TB</h2>
             </div>
-            <button class="close-btn" @click="close" :disabled="isSubmitting" title="ปิด">
+            <button class="close-btn" @click="close" :disabled="isSubmitting" aria-label="ปิด">
               <X :size="18" />
             </button>
           </div>
