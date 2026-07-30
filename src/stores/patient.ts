@@ -109,6 +109,7 @@ export const usePatientStore = defineStore('patient', () => {
     currentPatient,
     isLoadingDetail,
     demographicsSource,
+    demographicsCache,
     dischargedPatients,
     isLoadingDischarged,
     fetchActivePatients,

@@ -2,6 +2,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   createActivePatientRow,
+  createPatientDemographics,
   createPatientDetail,
   createTbPatient,
 } from '@/__tests__/factories/patient';
@@ -208,6 +209,74 @@ describe('patient store', () => {
       resolveActive?.([]);
       await activePromise;
       expect(store.isLoading).toBe(false);
+    });
+  });
+
+  describe('demographics cache', () => {
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it('should cache demographics after successful detail fetch', async () => {
+      const store = usePatientStore();
+      const demographics = createPatientDemographics({ hn: 'HN00005' });
+      const detail = createPatientDetail({
+        patient: createTbPatient({ hn: 'HN00005' }),
+        demographics,
+      });
+      vi.mocked(invoke).mockResolvedValue(detail);
+
+      await store.fetchPatientDetail('HN00005');
+
+      const cached = localStorage.getItem('tb_patient_demographics');
+      expect(cached).toBeTruthy();
+      const parsed = JSON.parse(cached!);
+      expect(parsed['HN00005']).toEqual(demographics);
+      expect(store.demographicsSource).toBe('live');
+    });
+
+    it('should use cached demographics when MySQL is offline', async () => {
+      const store = usePatientStore();
+      const demographics = createPatientDemographics({ hn: 'HN00005' });
+
+      // Pre-populate cache
+      localStorage.setItem(
+        'tb_patient_demographics',
+        JSON.stringify({ HN00005: demographics }),
+      );
+
+      // Reload cache into store
+      store.demographicsCache = { HN00005: demographics };
+
+      const detail = createPatientDetail({
+        patient: createTbPatient({ hn: 'HN00005' }),
+        demographics: null,
+        mysql_connected: false,
+      });
+      vi.mocked(invoke).mockResolvedValue(detail);
+
+      await store.fetchPatientDetail('HN00005');
+
+      expect(store.currentPatient!.demographics).toEqual(demographics);
+      expect(store.demographicsSource).toBe('cache');
+    });
+
+    it('should set demographicsSource to null on fetch error', async () => {
+      const store = usePatientStore();
+      vi.mocked(invoke).mockRejectedValue(new Error('Network error'));
+
+      await store.fetchPatientDetail('HN99999');
+
+      expect(store.demographicsSource).toBeNull();
+    });
+
+    it('should handle corrupted demographics cache gracefully', () => {
+      localStorage.setItem('tb_patient_demographics', 'not-json');
+
+      const store = usePatientStore();
+
+      // Should not throw, cache should be empty
+      expect(store.demographicsCache).toEqual({});
     });
   });
 });
