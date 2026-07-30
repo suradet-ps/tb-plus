@@ -230,7 +230,7 @@ catches invalid data before backend round-trips; encryption audit verified clean
 
 ## Phase 4: The Clinical Loop, Made Excellent
 
-> **Status: ✅ Complete** — pending PR
+> **Status: ✅ Complete** — PR [#83](https://github.com/suradet-ps/tb-plus/pull/83)
 
 Deepen exactly the loop TB Plus already has — screen, enroll, track, follow up,
 discharge — without adding a second product.
@@ -502,13 +502,13 @@ For reference, the current module architecture that this roadmap builds on:
 
 | Module | Route | Purpose | Status |
 |--------|-------|---------|--------|
-| Screening | `/screening` | Query HOSxP for TB drug recipients | Core feature, needs UX refinement |
-| Active Patients | `/active` | Dashboard with alerts and progress | Core feature, needs prioritization |
-| Patient Detail | `/patient/:hn` | Full clinical timeline | Core feature, needs offline support |
+| Screening | `/screening` | Query HOSxP for TB drug recipients | Phase 4 done (filter persistence, shortcuts) |
+| Active Patients | `/active` | Dashboard with alerts and progress | Phase 4 done (urgency sorting, days badge) |
+| Patient Detail | `/patient/:hn` | Full clinical timeline | Phase 4 done (gap zones, current month); needs offline |
 | Discharged | `/discharged` | Completed/failed/died patients | Exists, needs export |
 | Appointments | `/appointments` | Upcoming HOSxP appointments | Exists |
-| Dosage Assessment | `/dosage-assessment` | Weight-based dosage calculator | Exists, needs decision support UX |
-| Mapping | `/mapping` | Epidemiological patient mapping | Exists, needs annotation feature |
+| Dosage Assessment | `/dosage-assessment` | Weight-based dosage calculator | Phase 4 done (calc chain visualization) |
+| Mapping | `/mapping` | Epidemiological patient mapping | Phase 4 done (pin notes, phase filter) |
 | Reports | `/reports` | Drug consumption reports | Exists, needs more report types |
 | Settings | `/settings` | DB config, drug codes, regimens | Exists with setup wizard |
 | About | `/about` | Application info | Exists |
