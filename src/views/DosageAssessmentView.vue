@@ -248,8 +248,8 @@ function sexLabel(sex: string | null | undefined): string | null {
                     {{ item.suggested_daily_dose_mg != null ? `${formatNumber(item.suggested_daily_dose_mg)} mg/day` : item.note ?? '-' }}
                   </div>
                   <!-- Calculation chain -->
-                  <div v-if="result?.patient_summary.latest_weight_kg && item.suggested_units_per_day != null && item.strength" class="calc-chain">
-                    <span class="calc-step">{{ result.patient_summary.latest_weight_kg }} กก.</span>
+                  <div v-if="result?.patient.latest_weight_kg && item.suggested_units_per_day != null && item.strength" class="calc-chain">
+                    <span class="calc-step">{{ result.patient.latest_weight_kg }} กก.</span>
                     <span class="calc-arrow">×</span>
                     <span class="calc-step">{{ formatNumber(item.min_mg_per_kg_day) }}-{{ formatNumber(item.max_mg_per_kg_day) }} mg/kg</span>
                     <span class="calc-arrow">→</span>
