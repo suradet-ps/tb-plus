@@ -29,7 +29,14 @@ const barColor = computed(() => {
       </span>
       <span class="progress__pct" :style="{ color: barColor }">{{ pct }}%</span>
     </div>
-    <div class="progress__track">
+    <div
+      class="progress__track"
+      role="progressbar"
+      :aria-valuenow="currentMonth ?? undefined"
+      :aria-valuemin="0"
+      :aria-valuemax="totalMonths ?? undefined"
+      :aria-label="`ความคืบหน้าการรักษา เดือนที่ ${currentMonth ?? '?'} จาก ${totalMonths ?? '?'}`"
+    >
       <div
         class="progress__fill"
         :class="{ 'progress__fill--overrun': isOverrun }"

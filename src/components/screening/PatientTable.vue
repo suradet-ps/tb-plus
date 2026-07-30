@@ -114,7 +114,7 @@ function sexLabel(sex: string | null | undefined): string {
 
 <template>
   <div class="table-wrapper">
-    <table class="patient-table">
+    <table class="patient-table" aria-label="ผลการคัดกรองผู้ป่วย">
       <!-- Header -->
       <thead>
         <tr>
@@ -125,24 +125,26 @@ function sexLabel(sex: string | null | undefined): string {
               :checked="allSelected"
               :disabled="selectableRows.length === 0 || store.isLoading"
               @change="toggleAll"
-              title="เลือก / ยกเลิกทั้งหมด"
+              aria-label="เลือก / ยกเลิกทั้งหมด"
             />
           </th>
 
-          <th class="sortable" @click="sortBy('hn')">
+          <th class="sortable" @click="sortBy('hn')" :aria-sort="sortKey === 'hn' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" tabindex="0" @keydown.enter="sortBy('hn')" @keydown.space.prevent="sortBy('hn')">
             HN
             <ChevronDown
               :size="11"
               class="sort-icon"
+              aria-hidden="true"
               :class="{ 'sort-active': sortKey === 'hn', 'sort-asc': sortKey === 'hn' && sortDir === 'asc' }"
             />
           </th>
 
-          <th class="sortable" @click="sortBy('full_name')">
+          <th class="sortable" @click="sortBy('full_name')" :aria-sort="sortKey === 'full_name' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" tabindex="0" @keydown.enter="sortBy('full_name')" @keydown.space.prevent="sortBy('full_name')">
             ชื่อ-สกุล
             <ChevronDown
               :size="11"
               class="sort-icon"
+              aria-hidden="true"
               :class="{
                 'sort-active': sortKey === 'full_name',
                 'sort-asc': sortKey === 'full_name' && sortDir === 'asc',
@@ -150,11 +152,12 @@ function sexLabel(sex: string | null | undefined): string {
             />
           </th>
 
-          <th class="sortable" @click="sortBy('age')">
+          <th class="sortable" @click="sortBy('age')" :aria-sort="sortKey === 'age' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" tabindex="0" @keydown.enter="sortBy('age')" @keydown.space.prevent="sortBy('age')">
             อายุ/เพศ
             <ChevronDown
               :size="11"
               class="sort-icon"
+              aria-hidden="true"
               :class="{
                 'sort-active': sortKey === 'age',
                 'sort-asc': sortKey === 'age' && sortDir === 'asc',
@@ -162,11 +165,12 @@ function sexLabel(sex: string | null | undefined): string {
             />
           </th>
 
-          <th class="sortable" @click="sortBy('first_dispensed')">
+          <th class="sortable" @click="sortBy('first_dispensed')" :aria-sort="sortKey === 'first_dispensed' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" tabindex="0" @keydown.enter="sortBy('first_dispensed')" @keydown.space.prevent="sortBy('first_dispensed')">
             จ่ายยาครั้งแรก
             <ChevronDown
               :size="11"
               class="sort-icon"
+              aria-hidden="true"
               :class="{
                 'sort-active': sortKey === 'first_dispensed',
                 'sort-asc': sortKey === 'first_dispensed' && sortDir === 'asc',
@@ -174,11 +178,12 @@ function sexLabel(sex: string | null | undefined): string {
             />
           </th>
 
-          <th class="sortable" @click="sortBy('last_dispensed')">
+          <th class="sortable" @click="sortBy('last_dispensed')" :aria-sort="sortKey === 'last_dispensed' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" tabindex="0" @keydown.enter="sortBy('last_dispensed')" @keydown.space.prevent="sortBy('last_dispensed')">
             จ่ายยาล่าสุด
             <ChevronDown
               :size="11"
               class="sort-icon"
+              aria-hidden="true"
               :class="{
                 'sort-active': sortKey === 'last_dispensed',
                 'sort-asc': sortKey === 'last_dispensed' && sortDir === 'asc',
@@ -186,11 +191,12 @@ function sexLabel(sex: string | null | undefined): string {
             />
           </th>
 
-          <th class="sortable th-center" @click="sortBy('visit_count')">
+          <th class="sortable th-center" @click="sortBy('visit_count')" :aria-sort="sortKey === 'visit_count' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" tabindex="0" @keydown.enter="sortBy('visit_count')" @keydown.space.prevent="sortBy('visit_count')">
             ครั้ง
             <ChevronDown
               :size="11"
               class="sort-icon"
+              aria-hidden="true"
               :class="{
                 'sort-active': sortKey === 'visit_count',
                 'sort-asc': sortKey === 'visit_count' && sortDir === 'asc',

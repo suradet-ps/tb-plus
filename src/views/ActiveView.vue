@@ -193,7 +193,7 @@ function sortIcon(key: SortKey): string {
     <div class="toolbar">
       <div class="search-wrap">
         <Search :size="14" class="search-icon" />
-        <input v-model="searchQuery" class="search-input" placeholder="ค้นหา HN หรือชื่อผู้ป่วย..." />
+        <input v-model="searchQuery" class="search-input" placeholder="ค้นหา HN หรือชื่อผู้ป่วย..." aria-label="ค้นหา HN หรือชื่อผู้ป่วย" />
       </div>
       <div v-if="searchQuery.trim()" class="search-count">
         แสดง <strong>{{ filteredPatients.length }}</strong> จาก {{ sortedPatients.length }} ราย
@@ -230,14 +230,14 @@ function sortIcon(key: SortKey): string {
         ไม่พบผู้ป่วยที่ตรงกับการค้นหา
       </p>
 
-      <table v-else class="patient-table">
+      <table v-else class="patient-table" aria-label="รายชื่อผู้ป่วยกำลังรักษา">
         <thead>
           <tr>
-            <th class="th-hn sortable" @click="toggleSort('hn')">HN {{ sortIcon('hn') }}</th>
-            <th class="th-name sortable" @click="toggleSort('name')">ชื่อ-สกุล {{ sortIcon('name') }}</th>
+            <th class="th-hn sortable" @click="toggleSort('hn')" :aria-sort="sortBy === 'hn' ? (sortAsc ? 'ascending' : 'descending') : 'none'" tabindex="0" @keydown.enter="toggleSort('hn')" @keydown.space.prevent="toggleSort('hn')">HN {{ sortIcon('hn') }}</th>
+            <th class="th-name sortable" @click="toggleSort('name')" :aria-sort="sortBy === 'name' ? (sortAsc ? 'ascending' : 'descending') : 'none'" tabindex="0" @keydown.enter="toggleSort('name')" @keydown.space.prevent="toggleSort('name')">ชื่อ-สกุล {{ sortIcon('name') }}</th>
             <th class="th-regimen">สูตรยา</th>
             <th class="th-phase">Phase</th>
-            <th class="th-month sortable" @click="toggleSort('month')">เดือนที่ {{ sortIcon('month') }}</th>
+            <th class="th-month sortable" @click="toggleSort('month')" :aria-sort="sortBy === 'month' ? (sortAsc ? 'ascending' : 'descending') : 'none'" tabindex="0" @keydown.enter="toggleSort('month')" @keydown.space.prevent="toggleSort('month')">เดือนที่ {{ sortIcon('month') }}</th>
             <th class="th-last">รับยาล่าสุด</th>
             <th class="th-action">รายละเอียด</th>
           </tr>
