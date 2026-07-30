@@ -34,6 +34,18 @@ describe('alert store', () => {
 
       expect(store.alerts).toEqual(mockAlerts);
       expect(store.isLoading).toBe(false);
+      expect(store.error).toBeNull();
+    });
+
+    it('should clear previous error on successful refresh', async () => {
+      const store = useAlertStore();
+      vi.mocked(invoke).mockRejectedValueOnce(new Error('fail'));
+      await store.refresh();
+      expect(store.error).toContain('fail');
+
+      vi.mocked(invoke).mockResolvedValueOnce([]);
+      await store.refresh();
+      expect(store.error).toBeNull();
     });
 
     it('should keep empty array when backend returns no alerts', async () => {
@@ -53,6 +65,7 @@ describe('alert store', () => {
 
       expect(store.isLoading).toBe(false);
       expect(store.alerts).toEqual([]);
+      expect(store.error).toContain('timeout');
     });
 
     it('should set isLoading to true during fetch', async () => {

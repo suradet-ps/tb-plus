@@ -131,13 +131,21 @@ function geocodeStatusClass(value: MappingPatientRow['geocode_status']): string 
 
 async function handleBatchGeocode(): Promise<void> {
   batchMessage.value = null;
-  const result = await mappingStore.batchGeocode(10);
-  batchMessage.value = `ประมวลผล ${result.processed} ราย • สำเร็จ ${result.succeeded} • ข้าม ${result.skipped} • ไม่สำเร็จ ${result.failed}`;
+  try {
+    const result = await mappingStore.batchGeocode(10);
+    batchMessage.value = `ประมวลผล ${result.processed} ราย • สำเร็จ ${result.succeeded} • ข้าม ${result.skipped} • ไม่สำเร็จ ${result.failed}`;
+  } catch {
+    batchMessage.value = 'เกิดข้อผิดพลาดในการทำ geocoding';
+  }
 }
 
 async function handleSingleGeocode(hn: string): Promise<void> {
   batchMessage.value = null;
-  await mappingStore.geocodePatient(hn);
+  try {
+    await mappingStore.geocodePatient(hn);
+  } catch {
+    batchMessage.value = `ไม่สามารถทำ geocoding สำหรับ ${hn}`;
+  }
 }
 </script>
 

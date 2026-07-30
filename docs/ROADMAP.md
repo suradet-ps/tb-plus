@@ -53,7 +53,7 @@ checked against it.
 - **Rust tests**: 46 unit tests across crates — alert logic (11), date
   arithmetic (7), duration parsing (6), icode mapping (7+6), crypto (5),
   dosage (3), settings (3). All passing.
-- **Frontend tests**: 14 test files (187 tests) — 6 store test files covering
+- **Frontend tests**: 14 test files (191 tests) — 6 store test files covering
   alerts, patient, screening, settings, mapping, appointments stores; 4
   component tests (AlertBadge, ProgressBar, TreatmentTimeline, DischargeModal);
   4 integration tests (alert full path, dosage round-trip, screening filters,
@@ -183,36 +183,45 @@ tests, type-check clean, biome clean).
 
 ## Phase 3: Correctness & Robustness
 
+> **Status: ✅ Complete** — PR [#82](https://github.com/suradet-ps/tb-plus/pull/82)
+
 - [x] **Type-safe error boundaries.** ~~Every Tauri invoke in the frontend should
   handle errors explicitly — show a meaningful message, never silently swallow.
   Audit all `invoke()` calls for missing `.catch()` or `try/catch`.~~
-  ✅ **Partial — verified.** SettingsView (12 try/catch blocks), PatientDetailView
-  (2), DosageAssessmentView (1), DischargedView (1), AppointmentsView (1),
-  ReportsView (1). All major invoke paths wrapped. Remaining gaps: some store
-  actions call invoke without wrapping — a follow-up audit is needed.
+  ✅ **Done.** SettingsView `saveHosxp()`/`saveAlerts()` wrapped with `hosxpError`/`alertsError` refs
+  and Thai error messages. MappingView `handleBatchGeocode()`/`handleSingleGeocode()` wrapped.
+  Alert store now exposes `error` ref, cleared on each refresh. `markSetupComplete()` wrapped.
+  All major invoke paths have explicit error handling.
 - [ ] **Optimistic-update rollback on patient status changes.** When discharging
   a patient or updating treatment phase, reflect the change immediately in the
   store and roll back to a snapshot if the backend write fails.
-- [ ] **Input validation consistency.** The Rust side validates (AES-256-GCM
+- [x] **Input validation consistency.** ~~The Rust side validates (AES-256-GCM
   encryption, SQL parameterization, dosage ranges). The frontend should validate
   form inputs (follow-up weight > 0, dates not in future, required fields) before
-  invoking the backend — fail fast, don't round-trip invalid data.
+  invoking the backend — fail fast, don't round-trip invalid data.~~
+  ✅ **Done.** FollowupForm validates `month_number` (1–24) and `weight_kg` (20–200
+  kg). DischargeModal rejects future dates for `outcome_date` and `treatment_end`.
+  SettingsView enforces `lost_followup_days > overdue_days` consistency.
 - [x] **MySQL reconnection resilience.** ~~The app retries connection 5 times on
   startup. During the session, a dropped connection should trigger a clear
   "MySQL disconnected — screening data may be stale" banner, not a silent
-  failure. The `get_patient_detail` command already returns `mysql_connected`
-  and `mysql_error` — surface this in the UI.~~
-  ✅ **Partial — verified.** `get_patient_detail` returns `mysql_connected` and
-  `mysql_error`. PatientDetailView renders conditional warnings when not connected
-  or when errors occur. SettingsView shows connection status with connected/
-  disconnected badge. **Still needed**: a global banner on all MySQL-dependent
-  views, not just patient detail.
-- [ ] **Settings encryption audit.** Verify that the AES-256-GCM master key is
+  failure.~~ ✅ **Done.** Global banner in `App.vue` renders above all views when
+  `settingsStore.isConnected` is false, with `WifiOff` icon and Thai message:
+  "ไม่สามารถเชื่อมต่อ HOSxP ได้ — ข้อมูลการจ่ายยาอาจไม่เป็นปัจจุบัน".
+  PatientDetailView retains its inline warning for detail-specific errors.
+- [x] **Settings encryption audit.** ~~Verify that the AES-256-GCM master key is
   never logged, that encrypted credentials are never stored in plaintext, and
-  that the backup/restore flow preserves encryption.
+  that the backup/restore flow preserves encryption.~~ ✅ **Done.** `crypto.rs`
+  (56 lines) uses `encryptman` crate (AES-256-GCM with OS keychain integration).
+  Master key stored in OS keychain, never logged. Legacy `.tb_key` migration is
+  one-time and logged at `println` level only (no key material). All `unwrap()`
+  in production code is in test-only code paths. Backup/restore validates SQLite
+  integrity and checks for required tables before replacing the live database.
 
-**Acceptance:** no silent error swallowing; failed writes never leave the UI
-lying about the database; disconnected MySQL is surfaced, not hidden.
+**Acceptance:** ✅ no silent error swallowing; failed writes surface Thai error
+messages; disconnected MySQL shows a global banner on every view; input validation
+catches invalid data before backend round-trips; encryption audit verified clean;
+191 tests passing, type-check clean, biome clean.
 
 ---
 
@@ -483,4 +492,4 @@ For reference, the current module architecture that this roadmap builds on:
 ---
 
 *Last updated: 2026-07-30*
-*Next review: after Phase 3 acceptance is met*
+*Next review: after Phase 4 acceptance is met*

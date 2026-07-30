@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { WifiOff } from '@lucide/vue';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { onMounted, onUnmounted } from 'vue';
 
@@ -65,6 +66,10 @@ onUnmounted(() => {
   <div class="app-shell">
     <AppSidebar />
     <main class="app-main">
+      <div v-if="!settingsStore.isConnected" class="mysql-banner">
+        <WifiOff :size="14" class="mysql-banner-icon" />
+        <span>ยังไม่ได้เชื่อมต่อ HOSxP — ข้อมูลการจ่ายยาและข้อมูลผู้ป่วยอาจไม่เป็นปัจจุบัน</span>
+      </div>
       <RouterView />
     </main>
   </div>
@@ -86,5 +91,23 @@ onUnmounted(() => {
   height: 100vh;
   overflow-y: auto;
   background-color: var(--color-surface);
+}
+
+/* -- MySQL Disconnected Banner -- */
+.mysql-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  background: var(--tint-orange);
+  border-bottom: 1px solid var(--warning-border-15);
+  font-size: var(--text-body-sm);
+  color: var(--palette-orange-dark);
+  line-height: var(--leading-body);
+}
+
+.mysql-banner-icon {
+  flex-shrink: 0;
+  opacity: 0.8;
 }
 </style>

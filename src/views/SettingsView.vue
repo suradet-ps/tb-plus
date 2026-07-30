@@ -152,21 +152,40 @@ function selectClinic(code: string) {
 
 // -- HOSxP / Alert save --
 const hosxpSaved = ref(false);
+const hosxpError = ref<string | null>(null);
 async function saveHosxp() {
-  await settingsStore.saveHosxpSettings();
-  hosxpSaved.value = true;
-  setTimeout(() => {
-    hosxpSaved.value = false;
-  }, 2500);
+  hosxpError.value = null;
+  try {
+    await settingsStore.saveHosxpSettings();
+    hosxpSaved.value = true;
+    setTimeout(() => {
+      hosxpSaved.value = false;
+    }, 2500);
+  } catch (e) {
+    hosxpError.value = String(e);
+  }
 }
 
 const alertsSaved = ref(false);
+const alertsError = ref<string | null>(null);
 async function saveAlerts() {
-  await settingsStore.saveAlertThresholds();
-  alertsSaved.value = true;
-  setTimeout(() => {
-    alertsSaved.value = false;
-  }, 2500);
+  alertsError.value = null;
+
+  const cfg = settingsStore.alertThresholds;
+  if (cfg.lost_followup_days <= cfg.overdue_days) {
+    alertsError.value = 'จำนวนวันขาดการรักษาต้องมากกว่าจำนวนวันเกินกำหนด';
+    return;
+  }
+
+  try {
+    await settingsStore.saveAlertThresholds();
+    alertsSaved.value = true;
+    setTimeout(() => {
+      alertsSaved.value = false;
+    }, 2500);
+  } catch (e) {
+    alertsError.value = String(e);
+  }
 }
 
 // -- Drug class management — search-first flow --
@@ -711,6 +730,9 @@ function cancelRestore() {
               <span v-if="hosxpSaved" class="test-result test-success">
                 <CheckCircle :size="14" /> บันทึกแล้ว
               </span>
+              <span v-if="hosxpError" class="test-result test-fail">
+                <AlertTriangle :size="14" /> {{ hosxpError }}
+              </span>
             </div>
           </div>
         </template>
@@ -1004,6 +1026,9 @@ function cancelRestore() {
               </button>
               <span v-if="alertsSaved" class="test-result test-success">
                 <CheckCircle :size="14" /> บันทึกแล้ว
+              </span>
+              <span v-if="alertsError" class="test-result test-fail">
+                <AlertTriangle :size="14" /> {{ alertsError }}
               </span>
             </div>
           </div>

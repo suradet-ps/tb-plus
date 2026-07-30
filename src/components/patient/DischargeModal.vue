@@ -152,6 +152,17 @@ async function handleSubmit() {
     return;
   }
 
+  const today = new Date().toISOString().slice(0, 10);
+  if (form.value.outcome_date > today) {
+    submitError.value = 'วันที่จำหน่ายต้องไม่เป็นวันในอนาคต';
+    return;
+  }
+
+  if (form.value.treatment_end && form.value.treatment_end > today) {
+    submitError.value = 'วันที่สิ้นสุดการรักษาต้องไม่เป็นวันในอนาคต';
+    return;
+  }
+
   isSubmitting.value = true;
   try {
     const input: OutcomeInput = {
