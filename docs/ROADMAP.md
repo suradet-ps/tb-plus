@@ -32,7 +32,8 @@ checked against it.
 ## Current State (verified against the repo, not assumed)
 
 - **Stack**: Rust 2024 edition + Tauri 2.5, Vue 3.5 (Composition API, `<script
-  setup>`), TypeScript 6, Pinia 4, Vue Router 5, `@lucide/vue`, Vite 8, bun.
+  setup>`), TypeScript 6.0.3 (vue-tsc) + 7.0.2 Go compiler (`@typescript/native`),
+  Pinia 4, Vue Router 5, `@lucide/vue`, Vite 8, bun.
   Version `1.3.0` in `Cargo.toml` and `package.json`. Three workspace crates:
   `tb-models` (pure data), `tb-logic` (algorithms), `tb-database` (queries +
   settings).

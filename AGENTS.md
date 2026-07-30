@@ -564,7 +564,7 @@ Plus `rust-safety` (clippy + miri on pure crates) and `test-build` (full Tauri b
 | Encryption | `encryptman` 0.2.0 + `encryptman-keyring` 0.1 (AES-256-GCM) |
 | HTTP client | `reqwest` 0.13 (for geocoding) |
 | Frontend framework | Vue 3.5 (Composition API, `<script setup>`) |
-| Language | TypeScript 6 |
+| Language | TypeScript 6.0.3 (vue-tsc) + TypeScript 7.0.2 Go compiler (`@typescript/native`) |
 | State management | Pinia 4 |
 | Routing | Vue Router 5 |
 | Icons | @lucide/vue |
