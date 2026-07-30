@@ -189,6 +189,43 @@ function dotTooltip(f: Followup): string {
   const dateStr = toThaiDate(f.followup_date);
   return f.month_number ? `ติดตามผล: ${dateStr} (เดือนที่ ${f.month_number})` : `ติดตามผล: ${dateStr}`;
 }
+
+// -- Current month highlight --
+
+const currentMonthIndex = computed<number | null>(() => {
+  if (!overallStart.value || !overallEnd.value) return null;
+  const now = new Date();
+  if (now < overallStart.value || now > overallEnd.value) return null;
+  const daysSinceStart = (now.getTime() - overallStart.value.getTime()) / 86_400_000;
+  return Math.floor(daysSinceStart / 30.44) + 1;
+});
+
+// -- Dispensing gap warnings --
+// Detect gaps > 45 days between consecutive followups
+
+interface GapZone {
+  leftPct: number;
+  widthPct: number;
+}
+
+const gapZones = computed<GapZone[]>((() => {
+  if (!overallStart.value || props.followups.length < 2) return [];
+  const sorted = [...props.followups].sort((a, b) =>
+    a.followup_date.localeCompare(b.followup_date),
+  );
+  const zones: GapZone[] = [];
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = new Date(sorted[i - 1].followup_date);
+    const curr = new Date(sorted[i].followup_date);
+    const gapDays = (curr.getTime() - prev.getTime()) / 86_400_000;
+    if (gapDays > 45) {
+      const left = pctFromDate(prev);
+      const right = pctFromDate(curr);
+      zones.push({ leftPct: left, widthPct: right - left });
+    }
+  }
+  return zones;
+}) as () => GapZone[]);
 </script>
 
 <template>
@@ -241,6 +278,15 @@ function dotTooltip(f: Followup): string {
 
         <!-- Overlay layer: dots + today marker -->
         <div class="overlay-layer" aria-hidden="true">
+          <!-- Dispensing gap warning zones -->
+          <div
+            v-for="(gap, i) in gapZones"
+            :key="'gap-' + i"
+            class="gap-zone"
+            :style="{ left: gap.leftPct + '%', width: gap.widthPct + '%' }"
+            title="ช่วงห่างจากการติดตามผลมากกว่า 45 วัน"
+          />
+
           <!-- Phase boundary label -->
           <div
             v-if="showBoundary && boundaryPctClamped !== null"
@@ -276,7 +322,12 @@ function dotTooltip(f: Followup): string {
 
       <!-- Month ticks -->
       <div v-if="totalMonths > 0" class="month-ticks" aria-hidden="true">
-        <span v-for="m in totalMonths" :key="m" class="month-tick">{{ m }}</span>
+        <span
+          v-for="m in totalMonths"
+          :key="m"
+          class="month-tick"
+          :class="{ 'month-tick-current': m === currentMonthIndex }"
+        >{{ m }}</span>
       </div>
 
       <!-- Phase legend -->
@@ -519,5 +570,31 @@ function dotTooltip(f: Followup): string {
   width: 3px;
   height: 11px;
   border-radius: 1px;
+}
+
+/* -- Gap warning zones -- */
+.gap-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 3px,
+    rgba(221, 91, 0, 0.12) 3px,
+    rgba(221, 91, 0, 0.12) 6px
+  );
+  border-top: 2px dashed rgba(221, 91, 0, 0.35);
+  border-bottom: 2px dashed rgba(221, 91, 0, 0.35);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* -- Current month highlight -- */
+.month-tick-current {
+  font-weight: var(--weight-heading);
+  color: var(--color-blue);
+  background: var(--tint-blue);
+  border-radius: var(--radius-sm);
 }
 </style>

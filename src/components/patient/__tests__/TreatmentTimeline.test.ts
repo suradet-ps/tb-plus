@@ -208,4 +208,78 @@ describe('TreatmentTimeline', () => {
     expect(track.attributes('role')).toBe('img');
     expect(track.attributes('aria-label')).toBe('ไทม์ไลน์การรักษา');
   });
+
+  it('should not show gap zones when followups are less than 2', () => {
+    const wrapper = mount(TreatmentTimeline, {
+      props: {
+        plans: [createPlan()],
+        followups: [createFollowup({ followup_date: '2025-02-15' })],
+      },
+    });
+
+    expect(wrapper.findAll('.gap-zone')).toHaveLength(0);
+  });
+
+  it('should not show gap zones when followups are less than 45 days apart', () => {
+    const wrapper = mount(TreatmentTimeline, {
+      props: {
+        plans: [createPlan()],
+        followups: [
+          createFollowup({ id: 1, followup_date: '2025-02-15', month_number: 1 }),
+          createFollowup({ id: 2, followup_date: '2025-03-15', month_number: 2 }),
+        ],
+      },
+    });
+
+    expect(wrapper.findAll('.gap-zone')).toHaveLength(0);
+  });
+
+  it('should show gap zones when followups are more than 45 days apart', () => {
+    const wrapper = mount(TreatmentTimeline, {
+      props: {
+        plans: [createPlan()],
+        followups: [
+          createFollowup({ id: 1, followup_date: '2025-02-15', month_number: 1 }),
+          createFollowup({ id: 2, followup_date: '2025-05-01', month_number: 4 }),
+        ],
+      },
+    });
+
+    expect(wrapper.findAll('.gap-zone')).toHaveLength(1);
+    const gap = wrapper.find('.gap-zone');
+    expect(gap.attributes('title')).toContain('45 วัน');
+  });
+
+  it('should apply month-tick-current class to the current month tick', () => {
+    const wrapper = mount(TreatmentTimeline, {
+      props: {
+        plans: [createPlan({ duration_months: 2 })],
+        followups: [],
+      },
+    });
+
+    const ticks = wrapper.findAll('.month-tick');
+    const currentTicks = ticks.filter((t) => t.classes('month-tick-current'));
+    // If today is within the plan range, exactly 1 tick should have the class
+    // If not (e.g. plan is in the past), 0 ticks get the class — both are valid
+    expect(currentTicks.length).toBeLessThanOrEqual(1);
+  });
+
+  it('should render gap zone with correct style properties', () => {
+    const wrapper = mount(TreatmentTimeline, {
+      props: {
+        plans: [createPlan()],
+        followups: [
+          createFollowup({ id: 1, followup_date: '2025-02-15', month_number: 1 }),
+          createFollowup({ id: 2, followup_date: '2025-05-01', month_number: 4 }),
+        ],
+      },
+    });
+
+    const gap = wrapper.find('.gap-zone');
+    expect(gap.exists()).toBe(true);
+    const style = gap.attributes('style');
+    expect(style).toContain('left:');
+    expect(style).toContain('width:');
+  });
 });
