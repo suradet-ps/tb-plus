@@ -176,7 +176,7 @@ calling `close()`. This would have prevented the modal from closing after a
 successful discharge.
 
 **Acceptance:** ✅ every critical rendering path has a component test; alert and
-dosage logic verified end-to-end; enrollment flow tested; all blocking CI (187
+dosage logic verified end-to-end; enrollment flow tested; all blocking CI (191
 tests, type-check clean, biome clean).
 
 ---
@@ -315,6 +315,10 @@ tool that fails without wifi fails at its core job.
 - [ ] **Honest connectivity UI.** Distinguish "MySQL offline" from "operation
   failed." A calm banner at the top: "ไม่สามารถเชื่อมต่อ HOSxP ได้ — ข้อมูล
  การจ่ายยาอาจไม่เป็นปัจจุบัน". Not a toast storm, not a modal.
+  ✅ **Partial — Phase 3.** Global MySQL banner in `App.vue` renders when
+  `settingsStore.isConnected` is false with `WifiOff` icon and Thai message.
+  **Still needed**: distinguish "MySQL offline" from "operation failed" at the
+  operation level; per-view stale data indicators.
 - [ ] **Auto-sync on reconnect.** When MySQL comes back online, automatically
   refresh cached data and clear the stale banner.
 
