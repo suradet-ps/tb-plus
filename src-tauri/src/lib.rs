@@ -15,6 +15,11 @@ pub fn run() {
     .setup(|app| {
       let app_handle = app.handle().clone();
 
+      // Maximize the main window on startup
+      if let Some(window) = app.get_webview_window("main") {
+        let _ = window.maximize();
+      }
+
       // ── Step 1: SQLite — synchronous init ─────────────────────────────────
       let sqlite_pool = tauri::async_runtime::block_on(async {
         let app_data_dir = app_handle

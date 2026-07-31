@@ -19,7 +19,7 @@
         "height": 800,
         "minWidth": 1024,
         "minHeight": 640,
-        "center": true,
+        "maximized": true,
         "visible": true,
         "backgroundColor": "#f6f5f4",
         "focus": true,
