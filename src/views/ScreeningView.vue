@@ -259,7 +259,7 @@ function formatLastSearch(iso: string | null): string {
 /* -- Root layout -- */
 .view-root {
   padding: var(--page-root-padding);
-  max-width: 1200px;
+  max-width: 1440px;
 }
 
 /* -- Page header -- */

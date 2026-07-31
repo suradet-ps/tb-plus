@@ -50,7 +50,7 @@ interface InfoItem {
 
 const infoItems: InfoItem[] = [
   { label: 'โปรแกรม', value: 'TB Plus' },
-  { label: 'เวอร์ชัน', value: '1.0.0' },
+  { label: 'เวอร์ชัน', value: '1.8.0' },
   { label: 'พัฒนาโดย', value: 'ทีมเภสัชกรรม โรงพยาบาลสระโบสถ์' },
   { label: 'แพลตฟอร์ม', value: 'Tauri 2.5 + Vue 3.5' },
   { label: 'ฐานข้อมูลภายในเครื่อง', value: 'SQLite' },
@@ -64,7 +64,7 @@ const infoItems: InfoItem[] = [
     <!--Page header -->
     <div class="view-header">
       <h1>เกี่ยวกับโปรแกรม</h1>
-      <p>TB Plus — โรงพยาบาลสระโบสถ์</p>
+      <p>TB Plus - โรงพยาบาลสระโบสถ์</p>
     </div>
 
     <div class="about-cards">
@@ -214,7 +214,7 @@ const infoItems: InfoItem[] = [
 /* Page root */
 .view-root {
   padding: var(--page-root-padding);
-  max-width: 780px;
+  max-width: 1440px;
 }
 
 /* Page header */
@@ -240,8 +240,8 @@ const infoItems: InfoItem[] = [
 
 /* Cards container */
 .about-cards {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
