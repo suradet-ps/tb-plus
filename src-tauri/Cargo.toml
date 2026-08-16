@@ -32,9 +32,5 @@ chrono = { version = "0.4", features = ["serde"] }
 anyhow = "1"
 reqwest = { version = "0.13", features = ["json", "rustls"] }
 
-[dev-dependencies]
-tempfile = "3"
-serial_test = "4"
-
 [build-dependencies]
 tauri-build = { version = "2", features = [] }

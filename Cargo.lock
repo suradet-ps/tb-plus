@@ -3892,31 +3892,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serial_test"
-version = "4.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a6df5ed973ad8d834e09f824f9e9f449af6b9a3745f78dec7cc752770bd3bf11"
-dependencies = [
- "futures-executor",
- "futures-util",
- "log",
- "once_cell",
- "parking_lot",
- "serial_test_derive",
-]
-
-[[package]]
-name = "serial_test_derive"
-version = "4.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a22144e767da4ddd8416dbf383700542ffd8a5dc493dfecedfe1fe3ad03c98ae"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 3.0.3",
-]
-
-[[package]]
 name = "serialize-to-javascript"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4791,10 +4766,8 @@ dependencies = [
  "encryptman-keyring",
  "serde",
  "serde_json",
- "serial_test",
  "sqlx",
  "tb-models",
- "tempfile",
  "tokio",
 ]
 
@@ -4804,7 +4777,6 @@ version = "1.8.0"
 dependencies = [
  "anyhow",
  "chrono",
- "reqwest",
  "serde",
  "serde_json",
  "sqlx",
@@ -4831,7 +4803,6 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
- "serial_test",
  "sqlx",
  "tauri",
  "tauri-build",
@@ -4840,7 +4811,6 @@ dependencies = [
  "tb-database",
  "tb-logic",
  "tb-models",
- "tempfile",
  "tokio",
 ]
 
