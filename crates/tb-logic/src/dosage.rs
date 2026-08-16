@@ -123,9 +123,26 @@ pub fn build_assessment_item(
     note,
   ) = match weight {
     Some(weight_kg) => {
-      let target_min = weight_kg * rule.min_mg_per_kg_day;
-      let target_max = weight_kg * rule.max_mg_per_kg_day;
-      match choose_dose(target_min, target_max, strength.as_deref()) {
+      let mut target_min = weight_kg * rule.min_mg_per_kg_day;
+      let mut target_max = weight_kg * rule.max_mg_per_kg_day;
+      let mut cap_note = String::new();
+      if let Some(cap) = rule.max_daily_mg
+        && cap > 0.0
+      {
+        if target_max > cap {
+          target_max = cap;
+        }
+        if target_min > cap {
+          target_min = cap;
+        }
+        cap_note = format!(" (จำกัดสูงสุดไม่เกิน {} มก./วัน)", cap);
+      }
+      match choose_dose(
+        target_min,
+        target_max,
+        strength.as_deref(),
+        rule.max_daily_mg,
+      ) {
         Some(result) => (
           Some(target_min),
           Some(target_max),
@@ -133,7 +150,7 @@ pub fn build_assessment_item(
           Some(result.daily_dose_mg),
           Some(result.delta_mg),
           result.within_target_range,
-          Some(result.note),
+          Some(format!("{}{}", result.note, cap_note)),
         ),
         None => (
           Some(target_min),
@@ -165,6 +182,7 @@ pub fn build_assessment_item(
     units,
     min_mg_per_kg_day: rule.min_mg_per_kg_day,
     max_mg_per_kg_day: rule.max_mg_per_kg_day,
+    max_daily_mg: rule.max_daily_mg,
     target_min_mg_day,
     target_max_mg_day,
     suggested_units_per_day,
@@ -187,6 +205,7 @@ pub fn choose_dose(
   target_min: f64,
   target_max: f64,
   strength_text: Option<&str>,
+  max_daily_mg: Option<f64>,
 ) -> Option<DoseChoice> {
   let strength_mg = parse_strength_mg(strength_text?)?;
   let midpoint = (target_min + target_max) / 2.0;
@@ -198,6 +217,7 @@ pub fn choose_dose(
     compare_candidates(*left, *right, strength_mg, target_min, target_max, midpoint)
   })?;
 
+  let best = clamp_to_daily_cap(best, strength_mg, max_daily_mg)?;
   let daily_dose_mg = f64::from(best) * strength_mg;
   let within_target_range = daily_dose_mg >= target_min && daily_dose_mg <= target_max;
   let delta_mg = (daily_dose_mg - midpoint).abs();
@@ -214,6 +234,20 @@ pub fn choose_dose(
     within_target_range,
     note,
   })
+}
+
+fn clamp_to_daily_cap(units: u32, strength_mg: f64, max_daily_mg: Option<f64>) -> Option<u32> {
+  match max_daily_mg {
+    Some(cap) if cap > 0.0 => {
+      let capped_units = (cap / strength_mg).floor() as u32;
+      if capped_units < 1 {
+        None
+      } else {
+        Some(units.min(capped_units))
+      }
+    }
+    _ => Some(units),
+  }
 }
 
 pub fn compare_candidates(
@@ -280,9 +314,76 @@ mod tests {
 
   #[test]
   fn choose_dose_prefers_range_match() {
-    let dose = choose_dose(150.0, 300.0, Some("100 mg")).unwrap();
+    let dose = choose_dose(150.0, 300.0, Some("100 mg"), None).unwrap();
     assert!(dose.within_target_range);
     assert_eq!(dose.units_per_day, 2);
+  }
+
+  #[test]
+  fn choose_dose_respects_daily_cap() {
+    let dose = choose_dose(280.0, 480.0, Some("100 mg"), Some(300.0)).unwrap();
+    assert_eq!(dose.units_per_day, 3);
+    assert_eq!(dose.daily_dose_mg, 300.0);
+    assert!(dose.within_target_range);
+  }
+
+  #[test]
+  fn choose_dose_cap_clamps_even_below_weight_based_min() {
+    let dose = choose_dose(320.0, 480.0, Some("100 mg"), Some(300.0)).unwrap();
+    assert_eq!(dose.units_per_day, 3);
+    assert_eq!(dose.daily_dose_mg, 300.0);
+    assert!(!dose.within_target_range);
+  }
+
+  #[test]
+  fn choose_dose_returns_none_when_cap_below_one_unit() {
+    assert!(choose_dose(100.0, 200.0, Some("300 mg"), Some(100.0)).is_none());
+  }
+
+  #[test]
+  fn build_assessment_item_applies_cap_to_target_range() {
+    let rule = DosageRule {
+      class: "H".into(),
+      icode: "1430104".into(),
+      drug_name: "Isoniazid".into(),
+      strength: Some("100 mg".into()),
+      units: Some("เม็ด".into()),
+      min_mg_per_kg_day: 4.0,
+      max_mg_per_kg_day: 6.0,
+      max_daily_mg: Some(300.0),
+    };
+    let item = build_assessment_item(&rule, None, Some(90.0));
+    assert_eq!(item.target_min_mg_day, Some(300.0));
+    assert_eq!(item.target_max_mg_day, Some(300.0));
+    assert_eq!(item.suggested_units_per_day, Some(3));
+    assert_eq!(item.suggested_daily_dose_mg, Some(300.0));
+    assert!(item.within_target_range);
+    assert!(
+      item
+        .note
+        .as_deref()
+        .unwrap()
+        .contains("จำกัดสูงสุดไม่เกิน 300 มก./วัน")
+    );
+  }
+
+  #[test]
+  fn build_assessment_item_without_cap_keeps_weight_range() {
+    let rule = DosageRule {
+      class: "H".into(),
+      icode: "1430104".into(),
+      drug_name: "Isoniazid".into(),
+      strength: Some("100 mg".into()),
+      units: Some("เม็ด".into()),
+      min_mg_per_kg_day: 4.0,
+      max_mg_per_kg_day: 6.0,
+      max_daily_mg: None,
+    };
+    let item = build_assessment_item(&rule, None, Some(90.0));
+    assert_eq!(item.target_min_mg_day, Some(360.0));
+    assert_eq!(item.target_max_mg_day, Some(540.0));
+    assert_eq!(item.suggested_units_per_day, Some(4));
+    assert_eq!(item.suggested_daily_dose_mg, Some(400.0));
   }
 
   #[test]

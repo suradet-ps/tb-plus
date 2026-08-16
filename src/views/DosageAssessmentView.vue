@@ -235,6 +235,7 @@ function sexLabel(sex: string | null | undefined): string | null {
                 <td>
                   <div class="target-range">{{ formatRange(item.target_min_mg_day, item.target_max_mg_day) }}</div>
                   <div class="dose-rule">{{ item.min_mg_per_kg_day }}-{{ item.max_mg_per_kg_day }} mg/kg/day</div>
+                  <div v-if="item.max_daily_mg" class="dose-cap">ไม่เกิน {{ formatNumber(item.max_daily_mg) }} มก./วัน</div>
                 </td>
                 <td>
                   <div class="strength-text">{{ item.strength ?? '-' }}</div>
@@ -313,11 +314,17 @@ function sexLabel(sex: string | null | undefined): string | null {
 .state-sub,
 .phase-header p,
 .dose-rule,
+.dose-cap,
 .empty-sub {
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   margin: 0;
   line-height: var(--leading-body);
+}
+
+.dose-cap {
+  color: var(--color-orange);
+  font-weight: var(--weight-emphasis);
 }
 
 .header-chip,

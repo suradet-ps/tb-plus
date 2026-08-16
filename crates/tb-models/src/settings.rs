@@ -56,6 +56,9 @@ pub struct DosageRule {
   pub units: Option<String>,
   pub min_mg_per_kg_day: f64,
   pub max_mg_per_kg_day: f64,
+  /// Absolute daily ceiling (mg/day) regardless of weight — e.g. INH never exceeds 300 mg.
+  #[serde(default)]
+  pub max_daily_mg: Option<f64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

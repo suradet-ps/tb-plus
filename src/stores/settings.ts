@@ -56,6 +56,8 @@ export interface DosageRule {
   units: string | null;
   min_mg_per_kg_day: number;
   max_mg_per_kg_day: number;
+  /** Optional absolute daily ceiling (mg/day), e.g. 300 for INH. */
+  max_daily_mg?: number | null;
 }
 
 export interface RegimenPhase {

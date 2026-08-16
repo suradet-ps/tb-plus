@@ -16,6 +16,7 @@ export interface DosageAssessmentItem {
   units: string | null;
   min_mg_per_kg_day: number;
   max_mg_per_kg_day: number;
+  max_daily_mg: number | null;
   target_min_mg_day: number | null;
   target_max_mg_day: number | null;
   suggested_units_per_day: number | null;

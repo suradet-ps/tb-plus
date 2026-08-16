@@ -340,6 +340,7 @@ async function loadDosageCandidates() {
         units: candidate.units,
         min_mg_per_kg_day: existing?.min_mg_per_kg_day ?? 0,
         max_mg_per_kg_day: existing?.max_mg_per_kg_day ?? 0,
+        max_daily_mg: existing?.max_daily_mg ?? null,
       };
     });
   } catch (e) {
@@ -355,7 +356,8 @@ async function saveDosageRules() {
     (rule) =>
       rule.min_mg_per_kg_day > 0 &&
       rule.max_mg_per_kg_day > 0 &&
-      rule.max_mg_per_kg_day >= rule.min_mg_per_kg_day,
+      rule.max_mg_per_kg_day >= rule.min_mg_per_kg_day &&
+      (rule.max_daily_mg == null || rule.max_daily_mg > 0),
   );
 
   if (!validRules.length) {
@@ -377,6 +379,7 @@ async function saveDosageRules() {
         units: candidate.units,
         min_mg_per_kg_day: savedRule?.min_mg_per_kg_day ?? 0,
         max_mg_per_kg_day: savedRule?.max_mg_per_kg_day ?? 0,
+        max_daily_mg: savedRule?.max_daily_mg ?? null,
       };
     });
 
@@ -933,6 +936,7 @@ function cancelRestore() {
                 <span>icode / strength</span>
                 <span>ต่ำสุด (mg/kg/day)</span>
                 <span>สูงสุด (mg/kg/day)</span>
+                <span>เพดานสูงสุด (mg/day)</span>
               </div>
               <div
                 v-for="rule in settingsStore.dosageRules"
@@ -964,6 +968,14 @@ function cancelRestore() {
                   min="0"
                   step="0.1"
                 />
+                <input
+                  v-model.number="rule.max_daily_mg"
+                  class="form-input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  placeholder="ว่าง = ไม่จำกัด"
+                />
               </div>
 
               <div class="form-actions">
@@ -986,6 +998,8 @@ function cancelRestore() {
               <div class="info-note">
                 หลังบันทึกแล้ว หน้า "การประเมินขนาดยา" จะนำค่าช่วงนี้ไปคำนวณ target mg/day
                 และแนะนำจำนวนยาต่อวันให้ใกล้จำนวนเต็มที่สุดตาม strength ของยาแต่ละรายการ
+                คอลัมน์ "เพดานสูงสุด" ใช้จำกัดปริมาณยาสูงสุดต่อวันโดยไม่คิดตามน้ำหนัก
+                เช่น Isoniazid ให้ไม่เกิน 300 มก./วัน (เว้นว่าง = ไม่จำกัด)
               </div>
             </template>
           </div>
@@ -1598,7 +1612,7 @@ function cancelRestore() {
 
 .dosage-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(96px, 120px) minmax(96px, 120px);
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(96px, 120px) minmax(96px, 120px) minmax(96px, 130px);
   gap: 10px;
   align-items: center;
 }

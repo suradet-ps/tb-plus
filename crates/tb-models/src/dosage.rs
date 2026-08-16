@@ -29,6 +29,7 @@ pub struct DosageAssessmentItem {
   pub units: Option<String>,
   pub min_mg_per_kg_day: f64,
   pub max_mg_per_kg_day: f64,
+  pub max_daily_mg: Option<f64>,
   pub target_min_mg_day: Option<f64>,
   pub target_max_mg_day: Option<f64>,
   pub suggested_units_per_day: Option<u32>,
