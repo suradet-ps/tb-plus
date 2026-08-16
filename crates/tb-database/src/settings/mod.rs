@@ -15,6 +15,16 @@ use tb_models::settings::{
 const KEYRING_SERVICE: &str = "tb-plus";
 const LEGACY_KEY_FILENAME: &str = ".tb_key";
 
+/// Informational default matching the app crate's `sqlite_db_filename()`.
+/// Dev (debug) builds use a separate database from release builds.
+fn sqlite_db_filename() -> &'static str {
+  if cfg!(debug_assertions) {
+    "tb_plus_dev.db"
+  } else {
+    "tb_plus.db"
+  }
+}
+
 pub struct SettingsManager {
   pool: SqlitePool,
   vault: Vault,
@@ -62,7 +72,7 @@ impl SettingsManager {
       ("mysql.connect_timeout_seconds", "8"),
       // SQLite
       ("sqlite.max_connections", "5"),
-      ("sqlite.db_filename", "tb_plus.db"),
+      ("sqlite.db_filename", sqlite_db_filename()),
     ];
 
     for (key, value) in &defaults {

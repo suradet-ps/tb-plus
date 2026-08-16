@@ -8,6 +8,18 @@ use tauri::{Emitter, Manager};
 use tb_database::SettingsManager;
 use tokio::sync::Mutex;
 
+/// SQLite database file name. Dev (debug) and release builds must never share a
+/// database — `tauri dev` runs a debug build → `tb_plus_dev.db`; the installed
+/// app (release) → `tb_plus.db`. Keeps dev testing isolated from real clinic
+/// data and prevents migration checksum mismatches between build types.
+pub fn sqlite_db_filename() -> &'static str {
+  if cfg!(debug_assertions) {
+    "tb_plus_dev.db"
+  } else {
+    "tb_plus.db"
+  }
+}
+
 pub fn run() {
   tauri::Builder::default()
     .plugin(tauri_plugin_opener::init())
@@ -28,7 +40,9 @@ pub fn run() {
           .expect("Failed to get app data dir");
         std::fs::create_dir_all(&app_data_dir).expect("Failed to create app data dir");
 
-        let db_path = app_data_dir.join("tb_plus.db");
+        // Dev (debug) and release builds must never share a SQLite database —
+        // see `sqlite_db_filename()`.
+        let db_path = app_data_dir.join(sqlite_db_filename());
         let db_url = format!(
           "sqlite://{}?mode=rwc",
           db_path.to_str().expect("db path is not valid UTF-8")

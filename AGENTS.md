@@ -62,17 +62,28 @@ for clinic-specific tracking data not available in HIS.
 
 ### Dev vs Prod Data Isolation
 
-`tauri dev` reads `tauri.dev.conf.json` which overrides the identifier to
-`tb-plus-dev`. This gives dev and prod separate data directories so they never
-share a SQLite database or lock files:
+> **Note**: `tauri.dev.conf.json` does **not** exist anymore — Tauri 2's CLI
+> (2.11+) never reads it (verified in `tauri-cli` source: only `tauri.conf.json`,
+> platform config, and `--config` flags are merged). Dev/prod isolation is
+> instead enforced by the SQLite **database filename**, chosen in
+> `sqlite_db_filename()` (`src-tauri/src/lib.rs`) via `cfg!(debug_assertions)`:
 
-| Mode | Identifier | Data Directory (Windows) |
-|------|-----------|--------------------------|
-| `tauri dev` | `tb-plus-dev` | `%LOCALAPPDATA%\tb-plus-dev\` |
-| Installed (prod) | `tb-plus` | `%LOCALAPPDATA%\tb-plus\` |
+| Mode | Build Profile | Database File |
+|------|---------------|---------------|
+| `tauri dev` | debug | `%APPDATA%\tb-plus\tb_plus_dev.db` |
+| Installed (prod) | release | `%APPDATA%\tb-plus\tb_plus.db` |
 
-> **Never** change the prod identifier in `tauri.conf.json` — it would
+`backup_sqlite` / `restore_sqlite` and the `sqlite.db_filename` settings seed
+all use the same helper, so dev and prod never share a SQLite database or lock
+files (`-wal` / `-shm`).
+
+> **Never** change the identifier in `tauri.conf.json` — it would
 > orphan existing clinic data on users' machines.
+
+> **Migration discipline**: migration files are checksummed (SHA-384) by sqlx
+> and stored in `_sqlx_migrations`. Never edit an applied migration file
+> (line-ending changes alone — e.g. CRLF↔LF — invalidate the checksum and panic
+> with `VersionMismatch`). Always append a new `000N_*.sql` migration instead.
 
 ---
 

@@ -81,7 +81,7 @@ pub async fn get_mysql_status(mysql: State<'_, MySqlState>) -> Result<bool, Stri
 pub async fn backup_sqlite(app: tauri::AppHandle, target_path: String) -> Result<(), String> {
   use tauri::Manager;
   let app_data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
-  let source_path = app_data_dir.join("tb_plus.db");
+  let source_path = app_data_dir.join(crate::sqlite_db_filename());
   if !source_path.exists() {
     return Err("ไม่พบไฟล์ฐานข้อมูล SQLite".to_string());
   }
@@ -141,15 +141,16 @@ pub async fn restore_sqlite(app: tauri::AppHandle, source_path: String) -> Resul
 
   // Replace the current database file with the backup.
   let app_data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
-  let db_path = app_data_dir.join("tb_plus.db");
+  let db_filename = crate::sqlite_db_filename();
+  let db_path = app_data_dir.join(db_filename);
 
   std::fs::copy(&source, &db_path)
     .map_err(|e| format!("ไม่สามารถแทนที่ฐานข้อมูลได้ — กรุณาปิดแอปพลิเคชันแล้วลองอีกครั้ง ({})", e))?;
 
   // Remove WAL and SHM files that may belong to the old database to prevent
   // compatibility issues when the app restarts.
-  let _ = std::fs::remove_file(app_data_dir.join("tb_plus.db-wal"));
-  let _ = std::fs::remove_file(app_data_dir.join("tb_plus.db-shm"));
+  let _ = std::fs::remove_file(app_data_dir.join(format!("{db_filename}-wal")));
+  let _ = std::fs::remove_file(app_data_dir.join(format!("{db_filename}-shm")));
 
   Ok(())
 }
