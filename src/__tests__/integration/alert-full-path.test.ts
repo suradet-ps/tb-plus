@@ -9,7 +9,7 @@ vi.mock('@tauri-apps/api/core', () => ({
 
 import { invoke } from '@tauri-apps/api/core';
 
-describe('alert store — full integration path', () => {
+describe('alert store - full integration path', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();

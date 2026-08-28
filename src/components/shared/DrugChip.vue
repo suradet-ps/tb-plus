@@ -74,6 +74,6 @@ const config = computed<DrugConfig>(() => {
 <style scoped>
 /*
  * Uses global .chip / .chip--sm / .chip--md classes from base.css.
- * No component-specific overrides needed — all values are tokenized.
+ * No component-specific overrides needed - all values are tokenized.
  */
 </style>

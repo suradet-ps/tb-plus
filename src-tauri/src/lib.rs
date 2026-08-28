@@ -9,7 +9,7 @@ use tb_database::SettingsManager;
 use tokio::sync::Mutex;
 
 /// SQLite database file name. Dev (debug) and release builds must never share a
-/// database — `tauri dev` runs a debug build → `tb_plus_dev.db`; the installed
+/// database - `tauri dev` runs a debug build → `tb_plus_dev.db`; the installed
 /// app (release) → `tb_plus.db`. Keeps dev testing isolated from real clinic
 /// data and prevents migration checksum mismatches between build types.
 pub fn sqlite_db_filename() -> &'static str {
@@ -32,7 +32,7 @@ pub fn run() {
         let _ = window.maximize();
       }
 
-      // ── Step 1: SQLite — synchronous init ─────────────────────────────────
+      // ── Step 1: SQLite - synchronous init ─────────────────────────────────
       let sqlite_pool = tauri::async_runtime::block_on(async {
         let app_data_dir = app_handle
           .path()
@@ -40,7 +40,7 @@ pub fn run() {
           .expect("Failed to get app data dir");
         std::fs::create_dir_all(&app_data_dir).expect("Failed to create app data dir");
 
-        // Dev (debug) and release builds must never share a SQLite database —
+        // Dev (debug) and release builds must never share a SQLite database -
         // see `sqlite_db_filename()`.
         let db_path = app_data_dir.join(sqlite_db_filename());
         let db_url = format!(
@@ -72,7 +72,7 @@ pub fn run() {
 
       app_handle.manage(sqlite_pool.clone());
 
-      // ── Step 2: SettingsManager — wraps SqlitePool + master encryption key ─
+      // ── Step 2: SettingsManager - wraps SqlitePool + master encryption key ─
       let app_data_dir = app_handle
         .path()
         .app_data_dir()
@@ -84,7 +84,7 @@ pub fn run() {
       });
       app_handle.manage(settings_manager);
 
-      // ── Step 3: MySQL — pre-register as None, connect asynchronously ─────
+      // ── Step 3: MySQL - pre-register as None, connect asynchronously ─────
       let mysql_state: MySqlState = Arc::new(Mutex::new(None));
       app_handle.manage(Arc::clone(&mysql_state));
 

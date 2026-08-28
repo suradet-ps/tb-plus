@@ -194,12 +194,12 @@ function sortIcon(key: SortKey): 'none' | 'asc' | 'desc' {
             <!-- กลุ่มยา -->
             <td class="td-class">
               <DrugChip v-if="r.drug_class" :drug="r.drug_class" size="sm" />
-              <span v-else class="no-class">—</span>
+              <span v-else class="no-class">-</span>
             </td>
 
             <!-- จำนวน -->
             <td class="td-qty">
-              <span class="qty-value">{{ r.qty != null ? r.qty : '—' }}</span>
+              <span class="qty-value">{{ r.qty != null ? r.qty : '-' }}</span>
               <span v-if="r.units" class="qty-unit">{{ r.units }}</span>
             </td>
           </tr>

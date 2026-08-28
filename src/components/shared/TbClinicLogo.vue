@@ -26,7 +26,7 @@ withDefaults(
       :fill="'var(--color-surface-alt)'"
     />
 
-    <!-- Left lobe — Teal (T) -->
+    <!-- Left lobe - Teal (T) -->
     <path
       d="M10.5 9h-0.2C7.4 9 5 11.4 5 14.4c0 3.3 2.2 5.6 5.5 5.6 1 0 1-1 1-2v-8c0-1 0-1-1-1z"
       :fill="'var(--palette-teal)'"
@@ -34,7 +34,7 @@ withDefaults(
       stroke-width="0.1"
     />
 
-    <!-- Right lobe — Blue (B) -->
+    <!-- Right lobe - Blue (B) -->
     <path
       d="M13.5 9h0.2c2.9 0 5.3 2.4 5.3 5.4 0 3.3-2.2 5.6-5.5 5.6-1 0-1-1-1-2v-8c0-1 0-1 1-1z"
       :fill="'var(--palette-blue)'"

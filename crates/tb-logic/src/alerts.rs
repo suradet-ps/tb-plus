@@ -117,7 +117,7 @@ pub async fn compute_alerts_for_patient(
       } else {
         (
           "phase_not_updated",
-          "ผู้ป่วยอยู่ในระยะ Continuation แล้ว — กรุณาอัปเดตแผนการรักษาในระบบ",
+          "ผู้ป่วยอยู่ในระยะ Continuation แล้ว - กรุณาอัปเดตแผนการรักษาในระบบ",
         )
       };
 
@@ -132,7 +132,7 @@ pub async fn compute_alerts_for_patient(
       });
     }
   } else {
-    // No MySQL — fire phase-transition alert based on date alone (conservative).
+    // No MySQL - fire phase-transition alert based on date alone (conservative).
     if let Some(plan) = current_plan
       && plan.phase == "intensive"
       && let Some(end_date) = intensive_end_date

@@ -60,6 +60,6 @@ const config = computed<StatusConfig>(() => {
 /*
  * Uses global .badge class from base.css.
  * Scoped block only for any component-specific overrides.
- * All token values are CSS variables — no hardcoded values.
+ * All token values are CSS variables - no hardcoded values.
  */
 </style>

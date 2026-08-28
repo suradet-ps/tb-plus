@@ -1,7 +1,7 @@
 # Enforce LF line endings for all text files
 * text=auto eol=lf
 
-# Binary files — do not modify
+# Binary files - do not modify
 *.png binary
 *.jpg binary
 *.jpeg binary

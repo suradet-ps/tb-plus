@@ -271,7 +271,7 @@ function onKeydown(e: KeyboardEvent) {
             <!-- Offline dispensing warning -->
             <div v-if="!settingsStore.isConnected" class="offline-note">
               <Info :size="14" class="offline-note-icon" aria-hidden="true" />
-              <span>ข้อมูลการจ่ายยาอาจไม่เป็นปัจจุบัน — HOSxP ไม่ได้เชื่อมต่อ</span>
+              <span>ข้อมูลการจ่ายยาอาจไม่เป็นปัจจุบัน - HOSxP ไม่ได้เชื่อมต่อ</span>
             </div>
             <form
               id="followup-form"
@@ -338,7 +338,7 @@ function onKeydown(e: KeyboardEvent) {
                       v-model="form.sputum_result"
                       :disabled="isSubmitting"
                     >
-                      <option value="">— เลือก —</option>
+                      <option value="">- เลือก -</option>
                       <option value="negative">ผลลบ (Negative)</option>
                       <option value="positive">ผลบวก (Positive)</option>
                       <option value="not_done">ไม่ได้ตรวจ</option>
@@ -366,7 +366,7 @@ function onKeydown(e: KeyboardEvent) {
                       v-model="form.xray_result"
                       :disabled="isSubmitting"
                     >
-                      <option value="">— เลือก —</option>
+                      <option value="">- เลือก -</option>
                       <option value="improved">ดีขึ้น (Improved)</option>
                       <option value="stable">คงที่ (Stable)</option>
                       <option value="worse">แย่ลง (Worse)</option>
@@ -397,7 +397,7 @@ function onKeydown(e: KeyboardEvent) {
                     v-model="form.adherence"
                     :disabled="isSubmitting"
                   >
-                    <option value="">— เลือก —</option>
+                    <option value="">- เลือก -</option>
                     <option value="good">ดี (Good)</option>
                     <option value="fair">พอใช้ (Fair)</option>
                     <option value="poor">ไม่ดี (Poor)</option>
@@ -434,7 +434,7 @@ function onKeydown(e: KeyboardEvent) {
                   <div v-if="hasOpticNeuritisChecked" class="se-priority-alert" role="alert">
                     <AlertTriangle :size="14" class="se-alert-icon" />
                     <span>
-                      พบการรายงานตาพร่า/ตาบอดสี — ควรพิจารณาหยุดยา Ethambutol (E)
+                      พบการรายงานตาพร่า/ตาบอดสี - ควรพิจารณาหยุดยา Ethambutol (E)
                       และนัดตรวจตาโดยเร็ว
                     </span>
                   </div>

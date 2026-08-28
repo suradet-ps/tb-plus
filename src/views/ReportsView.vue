@@ -568,7 +568,7 @@ function exportCSV() {
                 :key="p.tb_patient.hn"
               >
                 <td class="mono">{{ p.tb_patient.hn }}</td>
-                <td>{{ p.demographics?.full_name ?? '—' }}</td>
+                <td>{{ p.demographics?.full_name ?? '-' }}</td>
                 <td>
                   <span
                     class="outcome-pill"
@@ -579,10 +579,10 @@ function exportCSV() {
                       'outcome-info': p.outcome_value === 'transferred_out',
                     }"
                   >
-                    {{ p.outcome_value ?? '—' }}
+                    {{ p.outcome_value ?? '-' }}
                   </span>
                 </td>
-                <td>{{ p.tb_patient.updated_at?.slice(0, 10) ?? '—' }}</td>
+                <td>{{ p.tb_patient.updated_at?.slice(0, 10) ?? '-' }}</td>
               </tr>
             </tbody>
           </table>
@@ -636,7 +636,7 @@ function exportCSV() {
     <!-- Ethambutol overrun detail -->
     <div v-if="activeReport === 'ethambutol-overrun'" class="report-detail">
       <div class="detail-header">
-        <h3>Ethambutol Overrun — ผู้ป่วยที่ได้รับ E เกินระยะ</h3>
+        <h3>Ethambutol Overrun - ผู้ป่วยที่ได้รับ E เกินระยะ</h3>
       </div>
 
       <div v-if="eOverrunPatients.length === 0" class="mini-empty">
@@ -656,15 +656,15 @@ function exportCSV() {
           <tbody>
             <tr v-for="p in eOverrunPatients" :key="p.tb_patient.hn">
               <td class="mono">{{ p.tb_patient.hn }}</td>
-              <td>{{ p.demographics?.full_name ?? '—' }}</td>
+              <td>{{ p.demographics?.full_name ?? '-' }}</td>
               <td>
                 <span v-if="p.current_plan?.regimen" class="regimen-tag">
                   {{ p.current_plan.regimen }}
                 </span>
-                <span v-else class="muted-dash">—</span>
+                <span v-else class="muted-dash">-</span>
               </td>
               <td class="col-center">
-                {{ p.current_month !== null ? `${p.current_month}/${p.total_months ?? '?'}` : '—' }}
+                {{ p.current_month !== null ? `${p.current_month}/${p.total_months ?? '?'}` : '-' }}
               </td>
               <td>
                 <span class="alert-pill alert-red" v-if="p.alerts.find(a => a.alert_type === 'ethambutol_overrun')?.details">
@@ -695,7 +695,7 @@ function exportCSV() {
       </div>
 
       <div v-if="overduePatients.length > 0" class="detail-subsection">
-        <h4>เกินกำหนด (35–60 วัน)</h4>
+        <h4>เกินกำหนด (35-60 วัน)</h4>
         <table class="data-table mini-table">
           <thead>
             <tr>
@@ -707,7 +707,7 @@ function exportCSV() {
           <tbody>
             <tr v-for="p in overduePatients" :key="p.tb_patient.hn">
               <td class="mono">{{ p.tb_patient.hn }}</td>
-              <td>{{ p.demographics?.full_name ?? '—' }}</td>
+              <td>{{ p.demographics?.full_name ?? '-' }}</td>
               <td class="overdue-cell">{{ p.days_since_last_dispensing }} วัน</td>
             </tr>
           </tbody>
@@ -727,7 +727,7 @@ function exportCSV() {
           <tbody>
             <tr v-for="p in lostPatientsList" :key="p.tb_patient.hn">
               <td class="mono">{{ p.tb_patient.hn }}</td>
-              <td>{{ p.demographics?.full_name ?? '—' }}</td>
+              <td>{{ p.demographics?.full_name ?? '-' }}</td>
               <td class="overdue-cell overrun">{{ p.days_since_last_dispensing }} วัน</td>
             </tr>
           </tbody>
@@ -805,7 +805,7 @@ function exportCSV() {
                     {{ p.status === 'active' ? 'กำลังรักษา' : p.status }}
                   </span>
                 </td>
-                <td>{{ p.outcome ?? '—' }}</td>
+                <td>{{ p.outcome ?? '-' }}</td>
               </tr>
             </tbody>
           </table>
@@ -864,14 +864,14 @@ function exportCSV() {
               <td class="mono">{{ p.tb_patient.hn }}</td>
               <td>
                 <span class="patient-name">
-                  {{ p.demographics?.full_name ?? '—' }}
+                  {{ p.demographics?.full_name ?? '-' }}
                 </span>
               </td>
               <td>
                 <span v-if="p.current_plan?.regimen" class="regimen-tag">
                   {{ p.current_plan.regimen }}
                 </span>
-                <span v-else class="muted-dash">—</span>
+                <span v-else class="muted-dash">-</span>
               </td>
               <td>
                 <span
@@ -881,13 +881,13 @@ function exportCSV() {
                 >
                   {{ getEffectivePhase(p.current_plan) === 'intensive' ? 'Intensive' : 'Continuation' }}
                 </span>
-                <span v-else class="muted-dash">—</span>
+                <span v-else class="muted-dash">-</span>
               </td>
               <td class="col-center">
                 <span v-if="p.current_month !== null" class="month-progress">
                   {{ p.current_month }}<span class="month-sep">/</span>{{ p.total_months ?? '?' }}
                 </span>
-                <span v-else class="muted-dash">—</span>
+                <span v-else class="muted-dash">-</span>
               </td>
               <td
                 :class="{
@@ -897,7 +897,7 @@ function exportCSV() {
                 <span v-if="p.days_since_last_dispensing !== null">
                   {{ p.days_since_last_dispensing }} วันที่แล้ว
                 </span>
-                <span v-else class="muted-dash">—</span>
+                <span v-else class="muted-dash">-</span>
               </td>
               <td>
                 <span
@@ -1229,7 +1229,7 @@ function exportCSV() {
   color: var(--color-text-muted);
 }
 
-/* Mini table variant — higher specificity to override .data-table defaults */
+/* Mini table variant - higher specificity to override .data-table defaults */
 .data-table.mini-table {
   font-size: var(--text-sm);
 }

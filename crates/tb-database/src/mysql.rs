@@ -137,7 +137,7 @@ pub async fn search_tb_patients(
     })
     .unwrap_or_else(|| all_icodes.to_vec());
 
-  // Build SQL dynamically — IN clause, optional date predicates, optional
+  // Build SQL dynamically - IN clause, optional date predicates, optional
   // hn/name search predicates all go into WHERE (before GROUP BY).
   let mut sql = format!(
     "SELECT \
@@ -163,11 +163,11 @@ pub async fn search_tb_patients(
   if filters.date_to.is_some() {
     sql.push_str("AND o.vstdate <= ? ");
   }
-  // HN search — exact prefix match on the real column (before GROUP BY)
+  // HN search - exact prefix match on the real column (before GROUP BY)
   if filters.hn_search.is_some() {
     sql.push_str("AND p.hn LIKE ? ");
   }
-  // Name search — match against the concatenated name expression (before GROUP BY)
+  // Name search - match against the concatenated name expression (before GROUP BY)
   if filters.name_search.is_some() {
     sql.push_str("AND CONCAT(COALESCE(p.pname,''), p.fname, ' ', p.lname) LIKE ? ");
   }
@@ -443,7 +443,7 @@ pub async fn get_drug_items_by_icodes(
 /// expression so that the result maps directly onto `DispensingRecord`.
 ///
 /// Design notes:
-/// - Uses `WHERE o.hn = ?` directly (no patient JOIN) — avoids any HN
+/// - Uses `WHERE o.hn = ?` directly (no patient JOIN) - avoids any HN
 ///   format mismatch between tables and keeps the query simple.
 /// - LEFT JOIN drugitems so that rows are returned even when an icode does
 ///   not have a matching entry in drugitems; drug_name falls back to the
@@ -778,7 +778,7 @@ pub async fn get_drug_consumption_by_month(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Tests — pure helper functions (no DB required)
+// Tests - pure helper functions (no DB required)
 // ─────────────────────────────────────────────────────────────────────────────
 
 #[cfg(test)]

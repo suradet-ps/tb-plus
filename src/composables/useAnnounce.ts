@@ -3,7 +3,7 @@ import { ref } from 'vue';
 /**
  * Returns a live-region announcer for screen readers.
  * Call `announce(message)` to push a message into the ARIA live region.
- * Messages are debounced — rapid calls keep only the latest message.
+ * Messages are debounced - rapid calls keep only the latest message.
  */
 export function useAnnounce() {
   const message = ref('');

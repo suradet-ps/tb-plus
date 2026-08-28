@@ -256,7 +256,7 @@ function onKeydown(e: KeyboardEvent) {
           <!-- Offline dispensing warning -->
           <div v-if="!settingsStore.isConnected" class="offline-note">
             <Info :size="14" class="offline-note-icon" aria-hidden="true" />
-            <span>ข้อมูลการจ่ายยาอาจไม่เป็นปัจจุบัน — HOSxP ไม่ได้เชื่อมต่อ</span>
+            <span>ข้อมูลการจ่ายยาอาจไม่เป็นปัจจุบัน - HOSxP ไม่ได้เชื่อมต่อ</span>
           </div>
 
           <!-- Form -->
@@ -280,7 +280,7 @@ function onKeydown(e: KeyboardEvent) {
                   :disabled="isSubmitting"
                   required
                 >
-                  <option value="" disabled>— เลือกผลการรักษา —</option>
+                  <option value="" disabled>- เลือกผลการรักษา -</option>
                   <option
                     v-for="opt in OUTCOME_OPTIONS"
                     :key="opt.value"
@@ -306,7 +306,7 @@ function onKeydown(e: KeyboardEvent) {
                   <span class="outcome-preview-dot"
                     :style="{ background: selectedOutcomeConfig.text }"
                   />
-                  {{ selectedOutcomeConfig.labelTh }} — {{ selectedOutcomeConfig.labelEn }}
+                  {{ selectedOutcomeConfig.labelTh }} - {{ selectedOutcomeConfig.labelEn }}
                 </div>
               </Transition>
             </div>

@@ -50,7 +50,7 @@ function saveFiltersToStorage(filters: SearchFilters): void {
   try {
     localStorage.setItem(STORAGE_KEY_FILTERS, JSON.stringify(filters));
   } catch {
-    // storage full or unavailable — silent
+    // storage full or unavailable - silent
   }
 }
 
@@ -89,7 +89,7 @@ function saveScreeningCache(results: PatientDrugRecord[], filters: SearchFilters
     };
     localStorage.setItem(STORAGE_KEY_CACHE, JSON.stringify(cache));
   } catch {
-    // storage full or unavailable — silent
+    // storage full or unavailable - silent
   }
 }
 

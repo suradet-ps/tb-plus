@@ -9,7 +9,7 @@ vi.mock('@tauri-apps/api/core', () => ({
 
 import { invoke } from '@tauri-apps/api/core';
 
-describe('dosage round-trip — invoke and type validation', () => {
+describe('dosage round-trip - invoke and type validation', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();

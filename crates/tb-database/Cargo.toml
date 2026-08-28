@@ -2,7 +2,7 @@
 name = "tb-database"
 version = "1.8.0"
 edition = "2024"
-description = "TB Plus — database queries and encrypted settings manager"
+description = "TB Plus - database queries and encrypted settings manager"
 license = "MIT"
 
 [lib]

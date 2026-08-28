@@ -69,7 +69,7 @@ const infoItems: InfoItem[] = [
 
     <div class="about-cards">
 
-      <!-- Section 1 — โปรแกรมนี้คืออะไร-->
+      <!-- Section 1 - โปรแกรมนี้คืออะไร-->
       <div class="about-card">
 
         <div class="card-header">
@@ -96,7 +96,7 @@ const infoItems: InfoItem[] = [
 
       </div>
 
-      <!-- Section 2 — ความปลอดภัยของฐานข้อมูล HOSxP -->
+      <!-- Section 2 - ความปลอดภัยของฐานข้อมูล HOSxP -->
       <div class="about-card">
 
         <div class="card-header">
@@ -135,7 +135,7 @@ const infoItems: InfoItem[] = [
 
       </div>
 
-      <!-- Section 3 — ฐานข้อมูลภายในเครื่อง -->
+      <!-- Section 3 - ฐานข้อมูลภายในเครื่อง -->
       <div class="about-card">
 
         <div class="card-header">
@@ -185,7 +185,7 @@ const infoItems: InfoItem[] = [
 
       </div>
 
-      <!-- Section 4 — เวอร์ชันและข้อมูลระบบ -->
+      <!-- Section 4 - เวอร์ชันและข้อมูลระบบ -->
       <div class="about-card">
 
         <div class="card-header">

@@ -59,7 +59,7 @@ tb-plus/
 ```
 
 The Rust workspace has four crates. `tb-models`, `tb-logic`, and `tb-database`
-are pure Rust libraries — they can be tested and linted without Tauri system
+are pure Rust libraries - they can be tested and linted without Tauri system
 dependencies. `src-tauri` is the Tauri application that ties everything together.
 
 ---

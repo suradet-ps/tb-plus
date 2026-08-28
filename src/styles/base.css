@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   Global Base Styles + Utility Classes — TB Plus
+   Global Base Styles + Utility Classes - TB Plus
    Architecture: Reset → Typography → Utilities → Common component patterns
    ═══════════════════════════════════════════════════════════════════════ */
 
@@ -110,7 +110,7 @@ p {
   white-space: nowrap;
 }
 
-/* -- 6. BUTTONS (Global base — use in templates with class) -- */
+/* -- 6. BUTTONS (Global base - use in templates with class) -- */
 .btn {
   display: inline-flex;
   align-items: center;

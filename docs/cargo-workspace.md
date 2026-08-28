@@ -43,7 +43,7 @@ project-root/
 - Run `cargo +nightly miri test -p <crate-name>` for pure logic changes when possible.
 
 ### 4. Dependency Management
-- Each crate declares its own dependency versions explicitly in its own `Cargo.toml`. Do NOT use `{ workspace = true }` to inherit from root — this keeps each crate self-contained and independently understandable.
+- Each crate declares its own dependency versions explicitly in its own `Cargo.toml`. Do NOT use `{ workspace = true }` to inherit from root - this keeps each crate self-contained and independently understandable.
 - When suggesting new dependencies, verify they exist on crates.io and are actively maintained.
 - If `cargo-vet` is configured, never bypass audit requirements. Use `cargo vet certify` for reviewed crates.
 

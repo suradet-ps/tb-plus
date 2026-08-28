@@ -27,7 +27,7 @@ pub type MySqlState = Arc<Mutex<Option<MySqlPool>>>;
 // Commands
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Test connectivity with a one-shot pool — does not persist the connection.
+/// Test connectivity with a one-shot pool - does not persist the connection.
 #[tauri::command]
 pub async fn test_mysql_connection(config: DbConfig) -> Result<bool, String> {
   let url = format!(
@@ -145,7 +145,7 @@ pub async fn restore_sqlite(app: tauri::AppHandle, source_path: String) -> Resul
   let db_path = app_data_dir.join(db_filename);
 
   std::fs::copy(&source, &db_path)
-    .map_err(|e| format!("ไม่สามารถแทนที่ฐานข้อมูลได้ — กรุณาปิดแอปพลิเคชันแล้วลองอีกครั้ง ({})", e))?;
+    .map_err(|e| format!("ไม่สามารถแทนที่ฐานข้อมูลได้ - กรุณาปิดแอปพลิเคชันแล้วลองอีกครั้ง ({})", e))?;
 
   // Remove WAL and SHM files that may belong to the old database to prevent
   // compatibility issues when the app restarts.
@@ -156,7 +156,7 @@ pub async fn restore_sqlite(app: tauri::AppHandle, source_path: String) -> Resul
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Persistent connection settings — stored in SQLite app_settings with encryption
+// Persistent connection settings - stored in SQLite app_settings with encryption
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Persist all connection fields and list settings to SQLite `app_settings`.
@@ -225,7 +225,7 @@ pub async fn delete_db_config(settings: State<'_, SettingsManager>) -> Result<()
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Setup wizard — drug search, drug classes, regimen definitions
+// Setup wizard - drug search, drug classes, regimen definitions
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Search HOSxP drugitems by name/icode. Used in the settings page to let

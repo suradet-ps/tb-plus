@@ -93,7 +93,7 @@ export const useSettingsStore = defineStore('settings', () => {
   let connectionMonitorTimer: ReturnType<typeof setInterval> | null = null;
   let onReconnectCallback: (() => void) | null = null;
 
-  // Hospital-specific — start empty, filled by setup wizard or loadAllSettings()
+  // Hospital-specific - start empty, filled by setup wizard or loadAllSettings()
   const staffNames = ref<string[]>([]);
   const drugClasses = ref<DrugClassEntry[]>([]);
   const regimenDefinitions = ref<RegimenEntry[]>([]);

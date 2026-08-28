@@ -1,4 +1,4 @@
-# TB Plus — Agent Specification
+# TB Plus - Agent Specification
 
 ## Project Overview
 
@@ -7,7 +7,7 @@ tuberculosis (TB) clinic operations at Sabot Hospital (โรงพยาบา�
 system bridges HOSxP's MySQL database (read-only) with a local SQLite database
 for clinic-specific tracking data not available in HIS.
 
-> **Version**: 1.8.0 — see `Cargo.toml` and `package.json`.
+> **Version**: 1.8.0 - see `Cargo.toml` and `package.json`.
 
 ---
 
@@ -62,7 +62,7 @@ for clinic-specific tracking data not available in HIS.
 
 ### Dev vs Prod Data Isolation
 
-> **Note**: `tauri.dev.conf.json` does **not** exist anymore — Tauri 2's CLI
+> **Note**: `tauri.dev.conf.json` does **not** exist anymore - Tauri 2's CLI
 > (2.11+) never reads it (verified in `tauri-cli` source: only `tauri.conf.json`,
 > platform config, and `--config` flags are merged). Dev/prod isolation is
 > instead enforced by the SQLite **database filename**, chosen in
@@ -77,12 +77,12 @@ for clinic-specific tracking data not available in HIS.
 all use the same helper, so dev and prod never share a SQLite database or lock
 files (`-wal` / `-shm`).
 
-> **Never** change the identifier in `tauri.conf.json` — it would
+> **Never** change the identifier in `tauri.conf.json` - it would
 > orphan existing clinic data on users' machines.
 
 > **Migration discipline**: migration files are checksummed (SHA-384) by sqlx
 > and stored in `_sqlx_migrations`. Never edit an applied migration file
-> (line-ending changes alone — e.g. CRLF↔LF — invalidate the checksum and panic
+> (line-ending changes alone - e.g. CRLF↔LF - invalidate the checksum and panic
 > with `VersionMismatch`). Always append a new `000N_*.sql` migration instead.
 
 ---
@@ -91,7 +91,7 @@ files (`-wal` / `-shm`).
 
 ### HOSxP Tables Used (Read-Only)
 
-#### `opitemrece` — Drug Dispensing Records
+#### `opitemrece` - Drug Dispensing Records
 
 ```sql
 - an          VARCHAR  -- visit number
@@ -102,7 +102,7 @@ files (`-wal` / `-shm`).
 - unitprice   DECIMAL  -- unit price
 ```
 
-#### `ovst` — Outpatient Visit Records
+#### `ovst` - Outpatient Visit Records
 
 ```sql
 - hn          VARCHAR  -- hospital number
@@ -112,7 +112,7 @@ files (`-wal` / `-shm`).
 - diagtext    VARCHAR  -- diagnosis text
 ```
 
-#### `patient` — Patient Demographics
+#### `patient` - Patient Demographics
 
 ```sql
 - hn          VARCHAR  -- hospital number
@@ -125,7 +125,7 @@ files (`-wal` / `-shm`).
 - phone       VARCHAR  -- phone number
 ```
 
-#### `drugitems` — Drug Master
+#### `drugitems` - Drug Master
 
 ```sql
 - icode       VARCHAR  -- drug code
@@ -134,7 +134,7 @@ files (`-wal` / `-shm`).
 - units       VARCHAR  -- dispensing unit
 ```
 
-#### `oapp` — Outpatient Appointments
+#### `oapp` - Outpatient Appointments
 
 ```sql
 - hn          VARCHAR  -- hospital number
@@ -154,11 +154,11 @@ files (`-wal` / `-shm`).
 | 1000129 | Ethambutol (EMB / E) | อีแทมบูทอล |
 | 1000258 | Pyrazinamide (PZA / Z) | ไพราซินาไมด์ |
 
-> Note: Rifampicin and Ethambutol each have two icodes — always query both when filtering.
+> Note: Rifampicin and Ethambutol each have two icodes - always query both when filtering.
 
 ### Local SQLite Schema
 
-#### `tb_patients` — Enrolled TB Clinic Patients
+#### `tb_patients` - Enrolled TB Clinic Patients
 
 ```sql
 CREATE TABLE tb_patients (
@@ -176,7 +176,7 @@ CREATE TABLE tb_patients (
 );
 ```
 
-#### `tb_treatment_plans` — Treatment Regimen per Patient
+#### `tb_treatment_plans` - Treatment Regimen per Patient
 
 ```sql
 CREATE TABLE tb_treatment_plans (
@@ -194,7 +194,7 @@ CREATE TABLE tb_treatment_plans (
 );
 ```
 
-#### `tb_followups` — Monthly Follow-up Records
+#### `tb_followups` - Monthly Follow-up Records
 
 ```sql
 CREATE TABLE tb_followups (
@@ -214,7 +214,7 @@ CREATE TABLE tb_followups (
 );
 ```
 
-#### `tb_outcomes` — Treatment Outcome on Discharge
+#### `tb_outcomes` - Treatment Outcome on Discharge
 
 ```sql
 CREATE TABLE tb_outcomes (
@@ -231,7 +231,7 @@ CREATE TABLE tb_outcomes (
 );
 ```
 
-#### `tb_patient_locations` — Geocoded Patient Addresses
+#### `tb_patient_locations` - Geocoded Patient Addresses
 
 ```sql
 CREATE TABLE tb_patient_locations (
@@ -250,7 +250,7 @@ CREATE TABLE tb_patient_locations (
 );
 ```
 
-#### `app_settings` — Key-Value Settings Store
+#### `app_settings` - Key-Value Settings Store
 
 ```sql
 -- Stores all app configuration: DB credentials (encrypted), drug classes,
@@ -262,7 +262,7 @@ CREATE TABLE tb_patient_locations (
 
 ## Application Modules
 
-### Module 1: Screening — HN Drug Search (`/screening`)
+### Module 1: Screening - HN Drug Search (`/screening`)
 
 **Purpose:** Query all HOSxP patients who have ever received TB drugs. Entry point for enrolling new patients.
 
@@ -285,7 +285,7 @@ CREATE TABLE tb_patient_locations (
 - HN, name, age, TB type badge
 - Current treatment phase badge (Intensive / Continuation)
 - Regimen string (e.g. 2HRZE/4HR)
-- Treatment month progress bar — **critical feature**
+- Treatment month progress bar - **critical feature**
 - Days since last dispensing
 - Alert indicators: overdue (red), phase transition due (yellow), ethambutol overrun (red), treatment overrun (red)
 - Quick actions: View Details, Add Follow-up, Discharge
@@ -472,7 +472,7 @@ CREATE TABLE tb_patient_locations (
 
 | Route | View | Thai Title |
 |-------|------|------------|
-| `/` | redirect → `/screening` | — |
+| `/` | redirect → `/screening` | - |
 | `/screening` | ScreeningView | คัดกรองผู้ป่วย |
 | `/active` | ActiveView | ผู้ป่วยในการรักษา |
 | `/discharged` | DischargedView | ผู้ป่วยจำหน่ายแล้ว |
@@ -538,17 +538,17 @@ Alerts are computed in Rust (`tb-logic::alerts`), stored in Pinia `useAlertStore
 
 Key pointers:
 
-- **Colors** — warm neutral palette; Notion Blue (`#0075de`) is the sole saturated accent
-- **CSS tokens** — 3-tier hierarchy in `variables.css` (primitive → semantic → component); all ~46 inline hex colors eliminated, CI-enforced
-- **Typography** — full type hierarchy (Display → Body → Badge) with negative letter-spacing at larger sizes
-- **Spacing** — 8px base unit; sidebar + main content layout
-- **Borders & Shadows** — whisper border (`1px solid rgba(0,0,0,0.1)`); multi-layer shadow stacks
-- **Border Radius** — 4px buttons/inputs, 12px cards, 9999px pill badges
-- **Components** — buttons (primary blue, secondary, ghost), cards, inputs, pill badges, navigation
-- **Alert semantics** — Orange (`#dd5b00`) for overrun/overdue, Teal (`#2a9d99`) for success
-- **Drug class chips** — one semantic accent per class (H, R, Z, E) across chips, timelines, and table highlights
-- **Icons** — `@lucide/vue` exclusively
-- **Accessibility** — focus rings, contrast ratios, interactive states
+- **Colors** - warm neutral palette; Notion Blue (`#0075de`) is the sole saturated accent
+- **CSS tokens** - 3-tier hierarchy in `variables.css` (primitive → semantic → component); all ~46 inline hex colors eliminated, CI-enforced
+- **Typography** - full type hierarchy (Display → Body → Badge) with negative letter-spacing at larger sizes
+- **Spacing** - 8px base unit; sidebar + main content layout
+- **Borders & Shadows** - whisper border (`1px solid rgba(0,0,0,0.1)`); multi-layer shadow stacks
+- **Border Radius** - 4px buttons/inputs, 12px cards, 9999px pill badges
+- **Components** - buttons (primary blue, secondary, ghost), cards, inputs, pill badges, navigation
+- **Alert semantics** - Orange (`#dd5b00`) for overrun/overdue, Teal (`#2a9d99`) for success
+- **Drug class chips** - one semantic accent per class (H, R, Z, E) across chips, timelines, and table highlights
+- **Icons** - `@lucide/vue` exclusively
+- **Accessibility** - focus rings, contrast ratios, interactive states
 
 ---
 
@@ -564,15 +564,15 @@ Key pointers:
 - 6 store test files (~1,500 lines) in `src/stores/__tests__/`
 - Test factories in `src/__tests__/factories/`
 - Tauri invoke mocks in `src/__tests__/mocks/`
-- **No component tests yet** — views and components are untested (see ROADMAP Phase 2)
+- **No component tests yet** - views and components are untested (see ROADMAP Phase 2)
 
 ### CI (5 merge-gate jobs)
 
-1. `No Inline Hex Colors` — grep gate on `.vue` and `.css` files
-2. `Cargo Audit` — supply-chain advisory check
-3. `Frontend Lint & Format` — `biome ci .`
-4. `Frontend Tests` — `vitest run`
-5. `Cargo Deny` — advisories + licenses + bans
+1. `No Inline Hex Colors` - grep gate on `.vue` and `.css` files
+2. `Cargo Audit` - supply-chain advisory check
+3. `Frontend Lint & Format` - `biome ci .`
+4. `Frontend Tests` - `vitest run`
+5. `Cargo Deny` - advisories + licenses + bans
 
 Plus `rust-safety` (clippy + miri on pure crates) and `test-build` (full Tauri build).
 
@@ -752,8 +752,8 @@ tb-plus/
 1. **Dual Rifampicin codes**: Always query BOTH `1000265` and `1000264` together and display as one drug class (R).
 2. **Dual Ethambutol codes**: Always query BOTH `1600004` and `1000129` together and display as one drug class (E).
 3. **Standard regimen durations**:
-   - `2HRZE/4HR`: 2 months intensive (H+R+Z+E), 4 months continuation (H+R) — total 6 months
-   - `2HRZE/6HR`: 2 months intensive (H+R+Z+E), 6 months continuation (H+R) — total 8 months
+   - `2HRZE/4HR`: 2 months intensive (H+R+Z+E), 4 months continuation (H+R) - total 6 months
+   - `2HRZE/6HR`: 2 months intensive (H+R+Z+E), 6 months continuation (H+R) - total 8 months
 4. **Ethambutol safety rule**: E should NOT be dispensed after the intensive phase ends. Any dispensing of E beyond month 2 (for standard regimens) triggers a red alert.
 5. **HOSxP is read-only**: Never write to HOSxP MySQL. All clinic tracking data lives in SQLite only.
 6. **Buddhist Era dates**: HOSxP `vstdate` stores Gregorian dates (CE) internally; display in Thai (BE) format as `วัน/เดือน/พ.ศ.` in the UI.

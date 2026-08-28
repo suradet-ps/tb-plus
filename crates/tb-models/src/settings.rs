@@ -24,7 +24,7 @@ pub struct DrugItem {
   pub units: Option<String>,
 }
 
-/// A drug class definition — user assigns a letter (e.g. "H") to one or more icodes.
+/// A drug class definition - user assigns a letter (e.g. "H") to one or more icodes.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DrugClassEntry {
   pub class: String,
@@ -40,7 +40,7 @@ pub struct RegimenPhase {
   pub drug_classes: Vec<String>,
 }
 
-/// A complete treatment regimen — user can define any number of phases.
+/// A complete treatment regimen - user can define any number of phases.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RegimenEntry {
   pub name: String,
@@ -56,7 +56,7 @@ pub struct DosageRule {
   pub units: Option<String>,
   pub min_mg_per_kg_day: f64,
   pub max_mg_per_kg_day: f64,
-  /// Absolute daily ceiling (mg/day) regardless of weight — e.g. INH never exceeds 300 mg.
+  /// Absolute daily ceiling (mg/day) regardless of weight - e.g. INH never exceeds 300 mg.
   #[serde(default)]
   pub max_daily_mg: Option<f64>,
 }

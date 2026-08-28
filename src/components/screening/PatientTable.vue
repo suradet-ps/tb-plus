@@ -69,7 +69,7 @@ const someSelected = computed(
   () => selectableRows.value.some((r) => store.selectedHns.has(r.hn)) && !allSelected.value,
 );
 
-// Sync indeterminate state — cannot be set via HTML attribute, must be a JS property
+// Sync indeterminate state - cannot be set via HTML attribute, must be a JS property
 watchEffect(() => {
   if (headerCheckbox.value) {
     headerCheckbox.value.indeterminate = someSelected.value;

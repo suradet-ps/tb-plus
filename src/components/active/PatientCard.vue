@@ -119,7 +119,7 @@ function handleDischarge() {
         <span
           class="patient-card__phase-badge"
           :style="{ background: phaseColor + '20', color: phaseColor }"
-          :title="phaseIsStale ? 'ระยะนี้อ้างอิงจากวันที่ — แผนการรักษาในระบบยังไม่ได้อัปเดต' : undefined"
+          :title="phaseIsStale ? 'ระยะนี้อ้างอิงจากวันที่ - แผนการรักษาในระบบยังไม่ได้อัปเดต' : undefined"
         >
           {{ phaseLabel }}
           <span v-if="phaseIsStale" class="patient-card__phase-stale" title="แผนยังไม่ได้อัปเดต">*</span>

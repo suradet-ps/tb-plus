@@ -71,19 +71,19 @@ function getOutcomeColor(p: import('@/types/patient').ActivePatientRow): string 
 }
 
 function toThaiDate(iso: string | null | undefined): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   try {
     const [y, m, d] = iso.split('-').map(Number);
     return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
   } catch {
-    return iso ?? '—';
+    return iso ?? '-';
   }
 }
 
 function getTbTypeLabel(tbType: string | null | undefined): string {
   if (tbType === 'pulmonary') return 'วัณโรคปอด';
   if (tbType === 'extra_pulmonary') return 'วัณโรคนอกปอด';
-  return '—';
+  return '-';
 }
 </script>
 

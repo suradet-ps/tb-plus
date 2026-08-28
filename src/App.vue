@@ -25,7 +25,7 @@ watch(
     if (prevConnected !== null && prevConnected !== connected) {
       connectionAnnounce.value = connected
         ? 'เชื่อมต่อ HOSxP สำเร็จ'
-        : 'ขาดการเชื่อมต่อ HOSxP — ข้อมูลอาจไม่เป็นปัจจุบัน';
+        : 'ขาดการเชื่อมต่อ HOSxP - ข้อมูลอาจไม่เป็นปัจจุบัน';
     }
     prevConnected = connected;
   },
@@ -105,7 +105,7 @@ onUnmounted(() => {
       </div>
       <div v-else-if="!settingsStore.isConnected" class="mysql-banner" role="alert">
         <WifiOff :size="14" class="mysql-banner-icon" aria-hidden="true" />
-        <span>ไม่สามารถเชื่อมต่อ HOSxP ได้ — ข้อมูลการจ่ายยาและข้อมูลผู้ป่วยอาจไม่เป็นปัจจุบัน</span>
+        <span>ไม่สามารถเชื่อมต่อ HOSxP ได้ - ข้อมูลการจ่ายยาและข้อมูลผู้ป่วยอาจไม่เป็นปัจจุบัน</span>
       </div>
       <RouterView />
     </main>

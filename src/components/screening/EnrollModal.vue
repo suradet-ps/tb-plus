@@ -149,7 +149,7 @@ function unfocus(e: Event) {
               <span class="reenroll-warning-icon">⚠️</span>
               <span>
                 มีผู้ป่วย <strong>{{ reenrollCount }} ราย</strong>
-                เคยรักษาในคลินิกมาก่อน — ระบบจะสร้างแผนการรักษาใหม่โดยเก็บประวัติเดิมไว้
+                เคยรักษาในคลินิกมาก่อน - ระบบจะสร้างแผนการรักษาใหม่โดยเก็บประวัติเดิมไว้
               </span>
             </div>
 

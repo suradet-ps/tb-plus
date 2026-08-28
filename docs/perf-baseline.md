@@ -1,4 +1,4 @@
-# TB Plus — Performance Baseline
+# TB Plus - Performance Baseline
 
 Measured on 2026-07-30 against v1.8.0 build output (`vite build`).
 Device: mid-range Windows desktop. Network: local (no throttling).
@@ -31,10 +31,10 @@ Device: mid-range Windows desktop. Network: local (no throttling).
 ### Key observations
 
 - `leaflet` is the largest chunk (50 KB gzip) but only loads on the `/mapping` route.
-- `vue` chunk includes Vue core + Router + Pinia — 34.2 KB gzip is expected.
-- `index` chunk is lean at 19 KB gzip — the manual chunk splitting in `vite.config.ts` is effective.
+- `vue` chunk includes Vue core + Router + Pinia - 34.2 KB gzip is expected.
+- `index` chunk is lean at 19 KB gzip - the manual chunk splitting in `vite.config.ts` is effective.
 - `PatientDetailView` is the heaviest route chunk (16.2 KB) due to timeline + dispensing table + followup list.
-- Total JS gzip (165.6 KB) is well under the 650 KB ceiling — 75% headroom.
+- Total JS gzip (165.6 KB) is well under the 650 KB ceiling - 75% headroom.
 
 ---
 
@@ -68,10 +68,10 @@ However, the ActiveView patient table reads alerts from `patientStore.activePati
 - Full patient list re-render only happens on explicit `fetchActivePatients()` call.
 
 Two independent alert data sources exist (alertStore vs embedded in ActivePatientRow).
-They can diverge between refreshes — this is a design tradeoff, not a bug.
+They can diverge between refreshes - this is a design tradeoff, not a bug.
 
 **No `shallowRef` or `shallowReactive` is used** anywhere in the frontend.
-All store state uses standard `ref()`. For the current data sizes (50–200 patients,
+All store state uses standard `ref()`. For the current data sizes (50-200 patients,
 small alert objects), deep reactivity overhead is negligible.
 
 **Screening table** renders all rows without virtualization (up to 200 per page).
@@ -98,7 +98,7 @@ as the baseline. Re-audit if patient count exceeds 500 or if users report UI lag
 
 - Simple lookups (`WHERE hn = ?`), single-table or 1-table JOIN
 - 10-second timeout applied to all queries (Phase 7)
-- No progressive loading — binary loading state per query
+- No progressive loading - binary loading state per query
 
 ---
 

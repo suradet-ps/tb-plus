@@ -272,7 +272,7 @@ pub async fn get_patient_detail(
 }
 
 // ---------------------------------------------------------------------------
-// Shared alert helper — pub(crate) so alerts.rs can call it directly
+// Shared alert helper - pub(crate) so alerts.rs can call it directly
 
 #[tauri::command]
 pub async fn discharge_patient(
@@ -337,7 +337,7 @@ pub async fn get_discharged_patients(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Tests — alert logic (pure date math, no DB required)
+// Tests - alert logic (pure date math, no DB required)
 // ─────────────────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -527,7 +527,7 @@ mod tests {
   }
 
   // ---------------------------------------------------------------------------
-  // Phase transition — intensive phase end date passed but still intensive
+  // Phase transition - intensive phase end date passed but still intensive
   // ---------------------------------------------------------------------------
 
   #[test]

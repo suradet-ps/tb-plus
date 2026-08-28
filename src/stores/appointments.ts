@@ -14,7 +14,7 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   const error = ref<string | null>(null);
   const daysAhead = ref(30);
 
-  // Computed once at store creation — stable reference for the current day
+  // Computed once at store creation - stable reference for the current day
   const todayISO = new Date().toISOString().split('T')[0];
 
   const todayAppointments = computed(() =>

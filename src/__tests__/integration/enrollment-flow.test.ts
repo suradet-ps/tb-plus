@@ -15,7 +15,7 @@ vi.mock('@tauri-apps/api/core', () => ({
 
 import { invoke } from '@tauri-apps/api/core';
 
-describe('enrollment flow — screening to patient store', () => {
+describe('enrollment flow - screening to patient store', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();

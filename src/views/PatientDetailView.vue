@@ -128,7 +128,7 @@ const phaseIsStale = computed(
   () => !!detail.value?.current_plan && effectivePhase.value !== detail.value.current_plan.phase,
 );
 
-/** Drug letters to display — uses effective continuation drugs when plan is stale */
+/** Drug letters to display - uses effective continuation drugs when plan is stale */
 const currentDrugs = computed<string[]>(() => {
   const plan = detail.value?.current_plan;
   if (!plan) return [];
@@ -178,7 +178,7 @@ function handleDischarged() {
 // -- Helpers --
 
 function toThaiDate(iso: string | null | undefined): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   try {
     const [y, m, d] = iso.split('-').map(Number);
     return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
@@ -318,10 +318,10 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
           <h1 class="patient-name">{{ patientName }}</h1>
           <!-- HOSxP connection / error status -->
           <p v-if="demographicsSource === 'cache'" class="demo-unavailable demo-unavailable--warn">
-            ⚠️ ข้อมูลผู้ป่วยมาจากแคช — ข้อมูลอาจไม่เป็นปัจจุบัน (HOSxP ไม่ได้เชื่อมต่อ)
+            ⚠️ ข้อมูลผู้ป่วยมาจากแคช - ข้อมูลอาจไม่เป็นปัจจุบัน (HOSxP ไม่ได้เชื่อมต่อ)
           </p>
           <p v-else-if="!detail.mysql_connected" class="demo-unavailable demo-unavailable--warn">
-            ⚠️ ยังไม่ได้เชื่อมต่อ HOSxP — ข้อมูลผู้ป่วยและประวัติยาจะไม่แสดง
+            ⚠️ ยังไม่ได้เชื่อมต่อ HOSxP - ข้อมูลผู้ป่วยและประวัติยาจะไม่แสดง
           </p>
           <p v-else-if="detail.mysql_error" class="demo-unavailable demo-unavailable--error">
             ⚠️ HOSxP error: {{ detail.mysql_error }}
@@ -362,7 +362,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
               v-if="phaseLabel"
               class="phase-badge"
               :style="{ background: phaseColor + '1a', color: phaseColor }"
-              :title="phaseIsStale ? 'ระยะนี้อ้างอิงจากวันที่ — แผนการรักษาในระบบยังไม่ได้อัปเดต' : undefined"
+              :title="phaseIsStale ? 'ระยะนี้อ้างอิงจากวันที่ - แผนการรักษาในระบบยังไม่ได้อัปเดต' : undefined"
             >
               {{ phaseLabel }}
               <span v-if="phaseIsStale" class="phase-stale-dot">*</span>
@@ -381,7 +381,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
             </div>
           </div>
           <p v-if="phaseIsStale" class="stale-plan-note">
-            * แสดงยาตามระยะที่คาดจากวันที่ — แผนการรักษายังไม่ได้อัปเดต
+            * แสดงยาตามระยะที่คาดจากวันที่ - แผนการรักษายังไม่ได้อัปเดต
           </p>
         </div>
 

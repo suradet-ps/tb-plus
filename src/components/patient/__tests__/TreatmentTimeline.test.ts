@@ -261,7 +261,7 @@ describe('TreatmentTimeline', () => {
     const ticks = wrapper.findAll('.month-tick');
     const currentTicks = ticks.filter((t) => t.classes('month-tick-current'));
     // If today is within the plan range, exactly 1 tick should have the class
-    // If not (e.g. plan is in the past), 0 ticks get the class — both are valid
+    // If not (e.g. plan is in the past), 0 ticks get the class - both are valid
     expect(currentTicks.length).toBeLessThanOrEqual(1);
   });
 

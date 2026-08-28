@@ -1,6 +1,6 @@
 # TB Plus Roadmap
 
-This roadmap describes what TB Plus is, honestly, from reading its own code — and
+This roadmap describes what TB Plus is, honestly, from reading its own code - and
 where it should end up. It follows the architecture in [AGENTS.md](../AGENTS.md),
 the conventions in [CONTRIBUTING.md](CONTRIBUTING.md), the security posture in
 [security.md](security.md), and the design system in [DESIGN.md](DESIGN.md).
@@ -12,7 +12,7 @@ the conventions in [CONTRIBUTING.md](CONTRIBUTING.md), the security posture in
 > tracking system, follow their treatment month by month, record side effects,
 > adjust dosages by weight, map patient locations for epidemiological insight,
 > and discharge them with a documented outcome. Everything you see is the
-> clinic's own data — bridged from HOSxP's read-only MySQL with a local SQLite
+> clinic's own data - bridged from HOSxP's read-only MySQL with a local SQLite
 > that holds what HOSxP cannot.
 >
 > **What TB Plus is not.** Not a hospital-wide HIS, not a social platform, not
@@ -43,17 +43,17 @@ checked against it.
 - **Design system** (`DESIGN.md`): Notion-inspired warm neutrals, Notion Blue
   (`#0075de`) as the sole saturated accent, whisper borders, 8px spacing base.
   CSS tokens in `variables.css` form a 3-tier hierarchy: primitive → semantic →
-  component. All ~46 inline hex colors have been eliminated — every color value
+  component. All ~46 inline hex colors have been eliminated - every color value
   routes through CSS custom properties. CI enforces no raw `#rrggbb` in `.vue`
   `<style>` blocks or `.css` files (excluding `variables.css`).
 - **CI** (5 merge-gate jobs): `No Inline Hex Colors` (grep gate),
   `Cargo Audit`, `Frontend Lint & Format` (biome), `Frontend Tests` (vitest),
   `Cargo Deny` (advisories + licenses + bans). Plus `rust-safety` (clippy +
   miri) and `test-build` (full Tauri build).
-- **Rust tests**: 48 unit tests across crates — date arithmetic (14),
+- **Rust tests**: 48 unit tests across crates - date arithmetic (14),
   duration parsing (7), icode mapping (16), crypto (5), dosage (3),
   settings (3). All passing.
-- **Frontend tests**: 16 test files (236 tests) — 6 store test files covering
+- **Frontend tests**: 16 test files (236 tests) - 6 store test files covering
   alerts, patient, screening, settings, mapping, appointments stores; 4
   component tests (AlertBadge, ProgressBar, TreatmentTimeline, DischargeModal);
   4 integration tests (alert full path, dosage round-trip, screening filters,
@@ -79,14 +79,14 @@ checked against it.
 1. ~~**~46 inline hex colors** bypass the token system in Vue components
    (`SideEffectTracker`, `FollowupList`, `DischargeModal`, `MapCanvas`,
    `TbClinicLogo`, `MapFilters`, `DischargedView`). A design system that isn't
-   enforced isn't a system. The `DESIGN.md` tokens exist — the components just
+   enforced isn't a system. The `DESIGN.md` tokens exist - the components just
    don't use them consistently.~~ ✅ **Done in Phase 1.**
 2. ~~**No CI gate for frontend tests.** Vitest runs locally but is never a merge
    blocker. Component tests don't exist at all. The Rust side is well-tested;
    the Vue side has a gap.~~ ✅ **Done in Phase 1 + Phase 2.**
 3. ~~**No `cargo audit` or `cargo deny` in CI.** Supply-chain drift can creep in
    silently.~~ ✅ **Done in Phase 1.**
-4. ~~**No component tests.** Views and components are the UI boundary — they
+4. ~~**No component tests.** Views and components are the UI boundary - they
    receive data from stores and render it. A regression in rendering logic (alert
    badge visibility, progress bar calculation, timeline phase coloring) would not
    be caught.~~ ✅ **Done in Phase 2.**
@@ -103,10 +103,10 @@ checked against it.
 
 ## Phase 1: A Design System That Is Enforced, Not Aspirational
 
-> **Status: ✅ Complete** — PR [#68](https://github.com/suradet-ps/tb-plus/pull/68)
+> **Status: ✅ Complete** - PR [#68](https://github.com/suradet-ps/tb-plus/pull/68)
 
 TB Plus already has a documented design language (Notion-inspired warm neutrals,
-blue accent, whisper borders). The gap is enforcement — 46 inline hex values
+blue accent, whisper borders). The gap is enforcement - 46 inline hex values
 bypass the token system, and supply-chain safety has no CI gate.
 
 - [x] **Eliminate all ~46 inline hex colors** in Vue components. Every color
@@ -116,7 +116,7 @@ bypass the token system, and supply-chain safety has no CI gate.
   and-replace pass, not a redesign.
 - [x] **Add a CI lint step** that fails the build on raw `#rrggbb` in `.vue`
   `<style>` blocks and `.css` files (excluding `variables.css` where palette
-  primitives live). The design system, enforced — not aspirational.
+  primitives live). The design system, enforced - not aspirational.
 - [x] **Add `cargo audit` and `cargo deny` jobs** to CI. Advisories, licenses,
   yanked/duplicate crates must all be green for merge. This is supply-chain
   safety, not a feature, but it belongs in the foundation phase because it gates
@@ -133,7 +133,7 @@ audit` + `cargo deny` green; `vitest run` and `biome ci` are merge gates.~~ ✅ 
 
 ## Phase 2: Trust the Things That Must Never Silently Break
 
-> **Status: ✅ Complete** — PR [#81](https://github.com/suradet-ps/tb-plus/pull/81)
+> **Status: ✅ Complete** - PR [#81](https://github.com/suradet-ps/tb-plus/pull/81)
 
 The alert engine, dosage calculator, and date arithmetic are the three places a
 silent regression does real clinical harm. They get tests before anything is
@@ -150,25 +150,25 @@ built on top of them.
   rendering, validation, submit, close/escape, error handling).
 - [x] **Alert engine integration tests.** The Rust-side `compute_alerts_for_patient`
   is well unit-tested. Add frontend tests that verify the alert store correctly
-  classifies, counts, and surfaces alerts per patient — the full path from
+  classifies, counts, and surfaces alerts per patient - the full path from
   Tauri invoke result to computed `redAlerts`/`yellowAlerts`.
-  ✅ **Done.** `alert-full-path.test.ts` — refresh → computed stats →
+  ✅ **Done.** `alert-full-path.test.ts` - refresh → computed stats →
   per-patient filtering round-trip (3 tests).
 - [x] **Dosage calculation round-trip tests.** Verify that `assess_patient_dosage`
-  output is correctly rendered in the dosage assessment view — weight, drug,
+  output is correctly rendered in the dosage assessment view - weight, drug,
   phase, suggested units all display correctly.
-  ✅ **Done.** `dosage-roundtrip.test.ts` — settings store drug loading,
+  ✅ **Done.** `dosage-roundtrip.test.ts` - settings store drug loading,
   dosage assessment invoke + type validation, warning propagation (3 tests).
 - [x] **Screening search integration tests.** Verify that search filters (date
   range, drug class, enrollment status) correctly produce Tauri invoke arguments
   and that results render with proper enrollment status badges.
-  ✅ **Done.** `screening-filters.test.ts` — filter-to-invoke arg passing for
+  ✅ **Done.** `screening-filters.test.ts` - filter-to-invoke arg passing for
   all SearchFilters fields including date range, enrollment status, pagination,
   drug classes, hn/name search (7 tests).
 - [x] **Enrollment flow end-to-end test.** From selected patients through the
-  enrollment modal to the Tauri invoke call — verify all fields are passed and
+  enrollment modal to the Tauri invoke call - verify all fields are passed and
   the patient list refreshes.
-  ✅ **Done.** `enrollment-flow.test.ts` — search → select → enroll → active
+  ✅ **Done.** `enrollment-flow.test.ts` - search → select → enroll → active
   list refresh cycle, already-active patient exclusion, re-enrollment of
   discharged patients, error propagation (5 tests).
 
@@ -186,10 +186,10 @@ tests, type-check clean, biome clean).
 
 ## Phase 3: Correctness & Robustness
 
-> **Status: ✅ Complete** — PR [#82](https://github.com/suradet-ps/tb-plus/pull/82)
+> **Status: ✅ Complete** - PR [#82](https://github.com/suradet-ps/tb-plus/pull/82)
 
 - [x] **Type-safe error boundaries.** ~~Every Tauri invoke in the frontend should
-  handle errors explicitly — show a meaningful message, never silently swallow.
+  handle errors explicitly - show a meaningful message, never silently swallow.
   Audit all `invoke()` calls for missing `.catch()` or `try/catch`.~~
   ✅ **Done.** SettingsView `saveHosxp()`/`saveAlerts()` wrapped with `hosxpError`/`alertsError` refs
   and Thai error messages. MappingView `handleBatchGeocode()`/`handleSingleGeocode()` wrapped.
@@ -204,16 +204,16 @@ tests, type-check clean, biome clean).
 - [x] **Input validation consistency.** ~~The Rust side validates (AES-256-GCM
   encryption, SQL parameterization, dosage ranges). The frontend should validate
   form inputs (follow-up weight > 0, dates not in future, required fields) before
-  invoking the backend — fail fast, don't round-trip invalid data.~~
-  ✅ **Done.** FollowupForm validates `month_number` (1–24) and `weight_kg` (20–200
+  invoking the backend - fail fast, don't round-trip invalid data.~~
+  ✅ **Done.** FollowupForm validates `month_number` (1-24) and `weight_kg` (20-200
   kg). DischargeModal rejects future dates for `outcome_date` and `treatment_end`.
   SettingsView enforces `lost_followup_days > overdue_days` consistency.
 - [x] **MySQL reconnection resilience.** ~~The app retries connection 5 times on
   startup. During the session, a dropped connection should trigger a clear
-  "MySQL disconnected — screening data may be stale" banner, not a silent
+  "MySQL disconnected - screening data may be stale" banner, not a silent
   failure.~~ ✅ **Done.** Global banner in `App.vue` renders above all views when
   `settingsStore.isConnected` is false, with `WifiOff` icon and Thai message:
-  "ไม่สามารถเชื่อมต่อ HOSxP ได้ — ข้อมูลการจ่ายยาอาจไม่เป็นปัจจุบัน".
+  "ไม่สามารถเชื่อมต่อ HOSxP ได้ - ข้อมูลการจ่ายยาอาจไม่เป็นปัจจุบัน".
   PatientDetailView retains its inline warning for detail-specific errors.
 - [x] **Settings encryption audit.** ~~Verify that the AES-256-GCM master key is
   never logged, that encrypted credentials are never stored in plaintext, and
@@ -233,10 +233,10 @@ catches invalid data before backend round-trips; encryption audit verified clean
 
 ## Phase 4: The Clinical Loop, Made Excellent
 
-> **Status: ✅ Complete** — PR [#83](https://github.com/suradet-ps/tb-plus/pull/83)
+> **Status: ✅ Complete** - PR [#83](https://github.com/suradet-ps/tb-plus/pull/83)
 
-Deepen exactly the loop TB Plus already has — screen, enroll, track, follow up,
-discharge — without adding a second product.
+Deepen exactly the loop TB Plus already has - screen, enroll, track, follow up,
+discharge - without adding a second product.
 
 - [x] **Screening that respects the nurse's time.** Persistent filter state
   across sessions (remember last drug class filter, date range), keyboard
@@ -257,7 +257,7 @@ discharge — without adding a second product.
   gapZones detecting gaps >45 days with dashed orange overlays.
 - [x] **Active dashboard that prioritizes.** Sort by urgency (most overdue
   first), group by alert severity, and make the top card the patient who needs
-  attention now — not the most recently enrolled.
+  attention now - not the most recently enrolled.
   ✅ **Done in Phase 4.** Days-since-dispensing tie-breaking in sort (most
   overdue first), Clock icon on days badge, days-ok/warn/over color classes.
 - [x] **Dosage assessment as a clinical decision support tool.** Show the
@@ -288,7 +288,7 @@ job for its one audience.
 
 - [x] **Keyboard-only pass across every view.** Chapter-like navigation (the
   patient list, the screening table, the sidebar), follow-up form tab order,
-  modal focus-trap, Escape to close — all reachable and operable without a
+  modal focus-trap, Escape to close - all reachable and operable without a
   mouse. Document the key map.
   ✅ **Done.** Focus-trap on ConfirmDialog, DischargeModal, FollowupForm,
   EnrollModal via `useFocusTrap` composable. Arrow-key tab navigation on
@@ -315,7 +315,7 @@ job for its one audience.
   ✅ **Done.** Added `"Noto Sans Thai", "Sarabun"` to `--font-family` token in
   `variables.css` for explicit Thai font support.
 - [x] **High-contrast mode for clinical environments.** Hospital lighting is
-  harsh — offer a high-contrast theme that maximizes readability in bright
+  harsh - offer a high-contrast theme that maximizes readability in bright
   conditions, driven by token remaps (no new hex).
   ✅ **Done.** `@media (prefers-contrast: more)` block in `variables.css` remaps
   token values to higher-contrast alternatives.
@@ -335,7 +335,7 @@ tests, type-check clean, biome clean.
 ## Phase 6: Offline-First (the natural end-state for a clinical tool)
 
 Because TB Plus is already a Tauri desktop app with a local SQLite database,
-offline is a natural fit. Rural clinic networks are unreliable — a tracking
+offline is a natural fit. Rural clinic networks are unreliable - a tracking
 tool that fails without wifi fails at its core job.
 
 - [x] **Offline screening cache.** Cache the last HOSxP screening query result
@@ -346,19 +346,19 @@ tool that fails without wifi fails at its core job.
   to cached results. ScreeningView shows orange stale badge + last search time.
 - [x] **Offline patient detail.** Patient demographics from HOSxP should be
   cached locally after first fetch. All SQLite data (enrollment, follow-ups,
-  treatment plans, outcomes) is already local — verify that the patient detail
+  treatment plans, outcomes) is already local - verify that the patient detail
   view works fully offline for clinic-tracked data.
   ✅ **Done.** Demographics cached to localStorage after each successful detail
   fetch. When MySQL is offline, cached demographics merge into the detail
   response. PatientDetailView shows "ข้อมูลผู้ป่วยมาจากแคช" warning.
 - [x] **Offline follow-up and discharge.** Follow-up recording and patient
-  discharge write to local SQLite only — they should work offline. Queue
+  discharge write to local SQLite only - they should work offline. Queue
   any MySQL-dependent reads (dispensing history refresh) for when reconnected.
   ✅ **Done.** FollowupForm and DischargeModal show blue info banner
-  "ข้อมูลการจ่ายยาอาจไม่เป็นปัจจุบัน — HOSxP ไม่ได้เชื่อมต่อ" when MySQL
+  "ข้อมูลการจ่ายยาอาจไม่เป็นปัจจุบัน - HOSxP ไม่ได้เชื่อมต่อ" when MySQL
   is offline. Both forms already use SQLite-only writes.
 - [x] **Honest connectivity UI.** Distinguish "MySQL offline" from "operation
-  failed." A calm banner at the top: "ไม่สามารถเชื่อมต่อ HOSxP ได้ — ข้อมูล
+  failed." A calm banner at the top: "ไม่สามารถเชื่อมต่อ HOSxP ได้ - ข้อมูล
   การจ่ายยาอาจไม่เป็นปัจจุบัน". Not a toast storm, not a modal.
   ✅ **Done.** 3-state banner in App.vue: connected (no banner), checking
   (blue "กำลังตรวจสอบการเชื่อมต่อ HOSxP..."), disconnected (orange with
@@ -371,7 +371,7 @@ tool that fails without wifi fails at its core job.
 
 **Acceptance:** enrollment, follow-up, and discharge all work with MySQL fully
 offline; reconnecting refreshes stale data; the user always knows what's fresh
-and what's cached. ✅ Met — 236 frontend tests passing, 16 test files.
+and what's cached. ✅ Met - 236 frontend tests passing, 16 test files.
 
 ---
 
@@ -381,7 +381,7 @@ and what's cached. ✅ Met — 236 frontend tests passing, 16 test files.
 
 - [x] **Measure a baseline first.** WASM bundle size (gzip + brotli), cold
   start time, screening search latency (first row visible), patient detail load
-  time, and MySQL reconnection time — measured on a mid-range device over a
+  time, and MySQL reconnection time - measured on a mid-range device over a
   throttled network. Record in `perf-baseline.md`.
   ✅ **Done.** `docs/perf-baseline.md` documents all baselines: JS total gzip
   165.6KB, vue 34.2KB, leaflet 50.0KB, index 19.0KB, CSS 37.5KB.
@@ -407,7 +407,7 @@ and what's cached. ✅ Met — 236 frontend tests passing, 16 test files.
   descriptive error messages.
 - [x] **SQLite WAL mode.** Verify SQLite is in WAL mode for concurrent read/
   write performance during the alert refresh cycle.
-  ✅ **Done.** WAL mode already enabled at `src-tauri/src/lib.rs:41` —
+  ✅ **Done.** WAL mode already enabled at `src-tauri/src/lib.rs:41` -
   `PRAGMA journal_mode=WAL`.
 
 **Acceptance:** ✅ budgets enforced in CI; baseline doc exists; no regression
@@ -427,7 +427,7 @@ merges without a noted exception. All MySQL queries have timeouts.
   uses AES-256-GCM with random nonces (verified by tests). Master key stored in
   OS keychain via `encryptman-keyring::Vault`, never logged. Legacy `.tb_key`
   migration is one-time with no key material exposure.
-- [x] **Tauri allowlist lockdown.** ~~Audit `tauri.conf.json` — every capability
+- [x] **Tauri allowlist lockdown.** ~~Audit `tauri.conf.json` - every capability
   must be justified.~~ Remove any unused plugin permissions. The principle of
   least privilege applies to the desktop shell too.
   ✅ **Done.** `capabilities/default.json` now explicitly denies `window:create`,
@@ -443,7 +443,7 @@ merges without a noted exception. All MySQL queries have timeouts.
   ES module imports).
 - [x] **HOSxP query sanitization.** ~~The screening command builds dynamic SQL
   with user-provided filters. Verify that all input is parameterized (not
-  string-concatenated).~~ The `sqlx` query builder handles this — confirm with a
+  string-concatenated).~~ The `sqlx` query builder handles this - confirm with a
   targeted audit.~~ ✅ **Done.** All MySQL and SQLite queries use parameterized
   `.bind()`. No string concatenation in SQL. LIKE patterns use
   `format!("%{}%", value)` wrapped in `.bind()`.
@@ -452,9 +452,9 @@ merges without a noted exception. All MySQL queries have timeouts.
   Document the restore failure modes.~~ ✅ **Done.** `restore_sqlite` validates
   SQLite integrity and checks for required tables before replacing live DB.
 - [x] **`cargo audit` + `cargo deny`** ~~remain green~~ ✅ **Done.** Both run as
-  merge-gate CI jobs (Phase 1). Local verification: `cargo audit` — 17 warnings
+  merge-gate CI jobs (Phase 1). Local verification: `cargo audit` - 17 warnings
   (all transitive unmaintained gtk-rs/unic deps, no vulnerabilities). `cargo
-  deny` — `advisories ok, bans ok, licenses ok, sources ok`.
+  deny` - `advisories ok, bans ok, licenses ok, sources ok`.
 
 **Acceptance:** ✅ encryption posture documented in `security.md`; allowlist
 locked down with deny rules; CSP blocks inline scripts and eval; no
@@ -479,7 +479,7 @@ locked down with deny rules; CSP blocks inline scripts and eval; no
 - [ ] **Export/import for clinic data.** Allow exporting all local SQLite data
   (patients, follow-ups, outcomes) to a JSON or CSV file for clinic audits
   and HA accreditation.
-- [ ] **`v2.0.0` tag** once Phases 1–8 acceptance checks pass; CHANGELOG cut
+- [ ] **`v2.0.0` tag** once Phases 1-8 acceptance checks pass; CHANGELOG cut
   with git-cliff.
 
 **Acceptance:** a tagged, reproducible release; branch protection live; docs
@@ -491,7 +491,7 @@ match the app; HA accreditation export works.
 
 ```
 Phase 1 (enforced design system + CI gates)  ─┐
-Phase 2 (trust the critical paths)            ─┤ foundation — do these first
+Phase 2 (trust the critical paths)            ─┤ foundation - do these first
 Phase 3 (correctness & robustness)            ─┘
         │
         ▼
@@ -510,7 +510,7 @@ Phase 9 (v2.0.0)
 
 Phase 1 comes first on purpose: the design system and CI gates are the
 foundation everything else builds on. Phase 2 comes with it because the alert
-engine and dosage calculator are the two things a silent regression hurts most —
+engine and dosage calculator are the two things a silent regression hurts most -
 clinically, not just cosmetically. Everything after is deepening the one
 clinical loop TB Plus has, never adding a second product.
 
@@ -521,37 +521,37 @@ clinical loop TB Plus has, never adding a second product.
 Each of these is valuable *for a different product*. TB Plus stays focused on
 Sabot Hospital's TB clinic on purpose:
 
-- **Multi-clinic / multi-tenant support** — TB Plus is one clinic's tool; the
+- **Multi-clinic / multi-tenant support** - TB Plus is one clinic's tool; the
   data model has no notion of another clinic, and it stays that way.
-- **Cloud / SaaS deployment** — the desktop-first, local-SQLite shape is the
+- **Cloud / SaaS deployment** - the desktop-first, local-SQLite shape is the
   product. A cloud version would be a different product with different security
   trade-offs.
-- **AI-assisted diagnosis or treatment recommendations** — adds a liability and
+- **AI-assisted diagnosis or treatment recommendations** - adds a liability and
   cost surface that a clinical tracking tool shouldn't carry. TB Plus tracks
   what clinicians decide; it doesn't decide for them.
-- **Integration with other HIS systems** (HOSxP plugins, FHIR, HL7) — TB Plus
+- **Integration with other HIS systems** (HOSxP plugins, FHIR, HL7) - TB Plus
   bridges one HIS (HOSxP) with local tracking. Broader interoperability is
   post-v2.0 at the earliest.
-- **Telemetry / analytics on user behavior** — explicitly never. The clinic's
+- **Telemetry / analytics on user behavior** - explicitly never. The clinic's
   data is the clinic's data.
-- **Native mobile apps** — the desktop app is the story for now. A mobile
+- **Native mobile apps** - the desktop app is the story for now. A mobile
   companion for field workers is post-v2.0, if ever.
 
 ## Future / Ecosystem (post-v2.0, if they keep TB Plus focused)
 
-- **Multi-disease tracking** — adapt the same screen-enroll-track-discharge
+- **Multi-disease tracking** - adapt the same screen-enroll-track-discharge
   loop for other chronic diseases (diabetes, hypertension) that Sabot Hospital
   manages. The architecture supports it; the product focus doesn't, yet.
-- **HA accreditation report generator** — automated PDF reports formatted to
+- **HA accreditation report generator** - automated PDF reports formatted to
   Thai HA standards, pulling from the local SQLite data.
-- **Batch patient import from HOSxP** — auto-enroll patients who match
+- **Batch patient import from HOSxP** - auto-enroll patients who match
   criteria (e.g., all patients on HRZE regimen in the last 6 months) rather
   than one at a time.
-- **Drug inventory integration** — connect to hospital pharmacy stock data to
+- **Drug inventory integration** - connect to hospital pharmacy stock data to
   alert when TB drug supply is low.
-- **Contact tracing workflow** — extend the mapping module with a structured
+- **Contact tracing workflow** - extend the mapping module with a structured
   contact tracing form (household contacts, screening status, outcome).
-- **Additional UI languages** — once the string surface is externalized (i18n),
+- **Additional UI languages** - once the string surface is externalized (i18n),
   add English for non-Thai-speaking staff.
 
 ---

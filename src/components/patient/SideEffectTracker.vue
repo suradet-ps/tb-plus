@@ -144,7 +144,7 @@ const showEPriorityAlert = computed(() => hasOpticNeuritis.value && isCurrentlyO
 /** Set of uppercase drug letters in the current plan (for dimming inactive drugs) */
 const activeDrugLetters = computed<Set<string>>(() => {
   if (!props.currentPlan) {
-    // no plan info — show all drugs as potentially active
+    // no plan info - show all drugs as potentially active
     return new Set(['H', 'R', 'Z', 'E']);
   }
   try {
@@ -218,7 +218,7 @@ function drugColor(drug: string): DrugColor {
             ผู้ป่วยรายงานอาการตาพร่าหรือตาบอดสี ซึ่งเป็นผลข้างเคียงสำคัญของยา
             <strong>Ethambutol (E)</strong>
             และขณะนี้ผู้ป่วยยังได้รับยานี้อยู่ในแผนการรักษาปัจจุบัน
-            — ควรพิจารณาหยุดยาและนัดตรวจตาโดยเร็วที่สุด
+            - ควรพิจารณาหยุดยาและนัดตรวจตาโดยเร็วที่สุด
           </p>
         </div>
       </div>
@@ -362,7 +362,7 @@ function drugColor(drug: string): DrugColor {
                 </span>
 
                 <!-- Not reported: dash -->
-                <span v-else class="count-none" aria-label="ไม่มีรายงาน">—</span>
+                <span v-else class="count-none" aria-label="ไม่มีรายงาน">-</span>
               </div>
             </li>
           </ul>

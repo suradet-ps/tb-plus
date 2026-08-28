@@ -52,7 +52,7 @@
 
 - Enable Tauri's CSP (Content Security Policy) in `tauri.conf.json`.
 - Disable `devtools` in production builds.
-- Use allowlists for shell, filesystem, and network access — never enable global permissions.
+- Use allowlists for shell, filesystem, and network access - never enable global permissions.
 - Validate and sanitize ALL IPC command parameters server-side (in Rust), not just client-side.
 - Never expose internal file paths, system info, or debug endpoints via IPC.
 - Use Tauri's built-in secure storage over localStorage for sensitive data.
@@ -67,8 +67,8 @@
 ## 8. AI-Specific Precautions
 
 - Treat ALL AI-generated code as UNTRUSTED until manually reviewed.
-- AI frequently hallucinates non-existent APIs — verify every function signature against official docs.
-- AI often suggests outdated or vulnerable crate versions — always cross-check.
+- AI frequently hallucinates non-existent APIs - verify every function signature against official docs.
+- AI often suggests outdated or vulnerable crate versions - always cross-check.
 - When AI generates `unsafe` code, assume it is INCORRECT until proven otherwise.
 - Request test cases BEFORE implementation for security-critical logic.
 
@@ -86,26 +86,26 @@ Before considering any AI-generated code complete:
 
 ---
 
-## TB Plus — Encryption Posture (verified 2026-07-30)
+## TB Plus - Encryption Posture (verified 2026-07-30)
 
 ### AES-256-GCM Credential Encryption
 
 | Property | Status | Detail |
 |----------|--------|--------|
-| Algorithm | AES-256-GCM | Via `encryptman` crate — authenticated encryption with random nonces |
+| Algorithm | AES-256-GCM | Via `encryptman` crate - authenticated encryption with random nonces |
 | Key derivation | OS keychain | `encryptman-keyring::Vault` stores master key in Windows Credential Manager / macOS Keychain / Linux Secret Service |
 | Key material logged | **Never** | No `println!`, `eprintln!`, or `tracing` logs expose key bytes |
-| Nonce randomness | Verified | `test_encrypt_produces_different_output_each_time` confirms random nonces — same plaintext encrypts to different ciphertext |
-| Wrong-key rejection | Verified | `test_decrypt_wrong_key_fails` — decryption fails with wrong key |
+| Nonce randomness | Verified | `test_encrypt_produces_different_output_each_time` confirms random nonces - same plaintext encrypts to different ciphertext |
+| Wrong-key rejection | Verified | `test_decrypt_wrong_key_fails` - decryption fails with wrong key |
 | Ciphertext integrity | Verified | `test_decrypt_truncated_ciphertext_fails` and `test_decrypt_invalid_base64_fails` |
-| Legacy migration | One-time | `.tb_key` file → OS keychain via `Vault::migrate_from_file()` — logged at `println` level only, no key material exposed |
+| Legacy migration | One-time | `.tb_key` file → OS keychain via `Vault::migrate_from_file()` - logged at `println` level only, no key material exposed |
 
 ### Credential Lifecycle
 
 1. **Storage**: MySQL credentials encrypted with AES-256-GCM before writing to `app_settings` SQLite table
-2. **Retrieval**: `SettingsManager::get_encrypted()` decrypts on demand — plaintext lives on heap briefly as `String`
+2. **Retrieval**: `SettingsManager::get_encrypted()` decrypts on demand - plaintext lives on heap briefly as `String`
 3. **Usage**: Decrypted credentials used to construct MySQL connection URL (`lib.rs:88-91`), then dropped when `config` goes out of scope
-4. **Zeroization**: Not explicitly zeroized — acceptable for desktop app where OS reclaims process memory on exit. Would require `zeroize` crate for server/long-lived processes.
+4. **Zeroization**: Not explicitly zeroized - acceptable for desktop app where OS reclaims process memory on exit. Would require `zeroize` crate for server/long-lived processes.
 
 ### Tauri Security Configuration
 
@@ -118,7 +118,7 @@ Before considering any AI-generated code complete:
 
 ### SQL Injection Prevention
 
-All MySQL and SQLite queries use parameterized `.bind()` — no string concatenation in SQL.
+All MySQL and SQLite queries use parameterized `.bind()` - no string concatenation in SQL.
 LIKE patterns use `format!("%{}%", value)` wrapped in `.bind()`, never interpolated into query strings.
 IN clauses use `in_placeholders()` generating `?, ?, ?` with individual `.bind()` per value.
 

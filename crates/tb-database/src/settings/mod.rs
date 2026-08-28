@@ -91,7 +91,7 @@ impl SettingsManager {
       }
     }
 
-    // Seed JSON defaults — ONLY infrastructure configs that are universal.
+    // Seed JSON defaults - ONLY infrastructure configs that are universal.
     // Hospital-specific data (drug_classes, regimen_definitions) are intentionally
     // NOT seeded; they are configured fresh during the setup wizard.
     self

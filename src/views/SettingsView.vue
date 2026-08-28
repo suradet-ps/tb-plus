@@ -56,7 +56,7 @@ const savedSuccess = ref(false);
 const settingsSaveError = ref<string | null>(null);
 const settingsSaveSuccess = ref<string | null>(null);
 
-// Keep the form in sync with the store — handles loadSavedConfig() being called
+// Keep the form in sync with the store - handles loadSavedConfig() being called
 // after this component mounts (e.g. navigating to /settings after app init).
 watch(
   () => settingsStore.dbConfig,
@@ -188,7 +188,7 @@ async function saveAlerts() {
   }
 }
 
-// -- Drug class management — search-first flow --
+// -- Drug class management - search-first flow --
 const drugSearchQuery = ref('');
 const drugSearchResults = ref<DrugItem[]>([]);
 const isSearching = ref(false);
@@ -205,7 +205,7 @@ async function searchDrugs() {
     drugSearchResults.value = await settingsStore.searchDrugs(drugSearchQuery.value.trim());
     assignLetters.value = {};
     if (drugSearchResults.value.length === 0) {
-      searchErrorMsg.value = 'ไม่พบรายการยา — ตรวจสอบชื่อหรือ icode';
+      searchErrorMsg.value = 'ไม่พบรายการยา - ตรวจสอบชื่อหรือ icode';
     }
   } catch (e) {
     searchErrorMsg.value = String(e);
@@ -540,7 +540,7 @@ function cancelRestore() {
       <div class="settings-content">
 
         <!-- ══════════════════════════════════════════════════
-             Section 1 — MySQL Connection
+             Section 1 - MySQL Connection
         ══════════════════════════════════════════════════ -->
         <template v-if="activeSection === 'mysql'">
           <div class="settings-card">
@@ -672,7 +672,7 @@ function cancelRestore() {
         </template>
 
         <!-- ══════════════════════════════════════════════════
-             Section 2 — HOSxP clinic code
+             Section 2 - HOSxP clinic code
         ══════════════════════════════════════════════════ -->
         <template v-else-if="activeSection === 'hosxp'">
           <div class="settings-card">
@@ -704,7 +704,7 @@ function cancelRestore() {
                 :class="{ 'sr-row--assigned': settingsStore.hosxpSettings.clinic_code === item.clinic }"
               >
                 <span class="sr-icode">{{ item.clinic }}</span>
-                <span class="sr-name">{{ item.name ?? '—' }}</span>
+                <span class="sr-name">{{ item.name ?? '-' }}</span>
                 <div class="sr-assign">
                   <button
                     class="sr-btn"
@@ -741,7 +741,7 @@ function cancelRestore() {
         </template>
 
         <!-- ══════════════════════════════════════════════════
-             Section 3 — Drug Codes
+             Section 3 - Drug Codes
         ══════════════════════════════════════════════════ -->
         <template v-else-if="activeSection === 'drugcodes'">
           <div class="settings-card">
@@ -862,7 +862,7 @@ function cancelRestore() {
                 </div>
               </div>
               <div v-else class="empty-hint">
-                ยังไม่มีสูตรยา — เพิ่มสูตรยาด้านบน
+                ยังไม่มีสูตรยา - เพิ่มสูตรยาด้านบน
               </div>
 
               <span v-if="settingsSaveSuccess" class="test-result test-success">
@@ -909,7 +909,7 @@ function cancelRestore() {
         </template>
 
         <!-- ══════════════════════════════════════════════════
-             Section 4 — Dosage Rules
+             Section 4 - Dosage Rules
         ══════════════════════════════════════════════════ -->
         <template v-else-if="activeSection === 'dosage'">
           <div class="settings-card">
@@ -1006,7 +1006,7 @@ function cancelRestore() {
         </template>
 
         <!-- ══════════════════════════════════════════════════
-             Section 5 — Alert Thresholds
+             Section 5 - Alert Thresholds
         ══════════════════════════════════════════════════ -->
         <template v-else-if="activeSection === 'alerts'">
           <div class="settings-card">
@@ -1049,7 +1049,7 @@ function cancelRestore() {
         </template>
 
         <!-- ══════════════════════════════════════════════════
-             Section 6 — Staff Names
+             Section 6 - Staff Names
         ══════════════════════════════════════════════════ -->
         <template v-else-if="activeSection === 'staff'">
           <div class="settings-card">
@@ -1082,7 +1082,7 @@ function cancelRestore() {
 
             <!-- Empty state -->
             <p v-else class="staff-empty">
-              ยังไม่มีรายชื่อผู้ใช้งาน — กรุณาเพิ่มด้านล่าง
+              ยังไม่มีรายชื่อผู้ใช้งาน - กรุณาเพิ่มด้านล่าง
             </p>
 
             <!-- Add staff row -->
@@ -1110,7 +1110,7 @@ function cancelRestore() {
         </template>
 
         <!-- ══════════════════════════════════════════════════
-             Section 7 — Backup & Restore
+             Section 7 - Backup & Restore
         ══════════════════════════════════════════════════ -->
         <template v-else-if="activeSection === 'backup'">
           <div class="settings-card">
@@ -1166,7 +1166,7 @@ function cancelRestore() {
               </span>
               <span v-if="restoreSuccess" class="test-result test-success">
                 <CheckCircle :size="14" />
-                กู้คืนข้อมูลสำเร็จ — กรุณาปิดและเปิดแอปพลิเคชันใหม่
+                กู้คืนข้อมูลสำเร็จ - กรุณาปิดและเปิดแอปพลิเคชันใหม่
               </span>
               <p v-if="backupError" class="error-note">
                 ไม่สามารถสำรองข้อมูลได้: {{ backupError }}
@@ -1180,7 +1180,7 @@ function cancelRestore() {
               <strong>คำแนะนำ:</strong>
               ควรสำรองข้อมูลเป็นประจำทุกสัปดาห์หรือทุกเดือน
               เก็บไฟล์ไว้ในที่ปลอดภัย เช่น Google Drive หรือ USB Flash Drive
-              การกู้คืนข้อมูลจะแทนที่ฐานข้อมูลปัจจุบันทั้งหมด — กรุณาตรวจสอบไฟล์สำรองก่อนนำเข้า
+              การกู้คืนข้อมูลจะแทนที่ฐานข้อมูลปัจจุบันทั้งหมด - กรุณาตรวจสอบไฟล์สำรองก่อนนำเข้า
             </div>
           </div>
         </template>
@@ -1841,7 +1841,7 @@ function cancelRestore() {
   to { transform: rotate(360deg); }
 }
 
-/* -- Drug search — search-first flow -- */
+/* -- Drug search - search-first flow -- */
 .drug-search-row {
   display: flex;
   gap: var(--space-4);

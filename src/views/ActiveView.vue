@@ -259,7 +259,7 @@ function sortIcon(key: SortKey): string {
             </td>
             <td class="td-regimen">
               <span v-if="p.current_plan" class="regimen-text">{{ p.current_plan.regimen }}</span>
-              <span v-else class="muted">—</span>
+              <span v-else class="muted">-</span>
             </td>
             <td class="td-phase">
               <span
@@ -269,7 +269,7 @@ function sortIcon(key: SortKey): string {
               >
                 {{ getEffectivePhase(p.current_plan) === 'intensive' ? 'Intensive' : 'Continuation' }}
               </span>
-              <span v-else class="muted">—</span>
+              <span v-else class="muted">-</span>
             </td>
             <td class="td-month">
               <template v-if="p.current_month && p.total_months">
@@ -278,7 +278,7 @@ function sortIcon(key: SortKey): string {
                   <div class="progress-fill" :style="{ width: Math.min(100, (p.current_month / p.total_months) * 100) + '%' }"></div>
                 </div>
               </template>
-              <span v-else class="muted">—</span>
+              <span v-else class="muted">-</span>
             </td>
             <td class="td-last">
               <template v-if="p.days_since_last_dispensing != null">
@@ -294,7 +294,7 @@ function sortIcon(key: SortKey): string {
                   {{ p.days_since_last_dispensing }} วัน
                 </span>
               </template>
-              <span v-else class="muted">—</span>
+              <span v-else class="muted">-</span>
             </td>
             <td class="td-action">
               <button class="btn-detail-icon" @click="viewDetail(p.tb_patient.hn)" title="ดูรายละเอียด">

@@ -2,7 +2,7 @@
 name = "tb-logic"
 version = "1.8.0"
 edition = "2024"
-description = "TB Plus — pure business logic (alerts, dosage, address parsing)"
+description = "TB Plus - pure business logic (alerts, dosage, address parsing)"
 license = "MIT"
 
 [lib]

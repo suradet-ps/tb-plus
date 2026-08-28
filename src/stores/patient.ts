@@ -41,7 +41,7 @@ export const usePatientStore = defineStore('patient', () => {
   const dischargedPatients = ref<ActivePatientRow[]>([]);
   const isLoadingDischarged = ref(false);
 
-  // Patient demographics cache — persists across sessions
+  // Patient demographics cache - persists across sessions
   const demographicsCache = ref<Record<string, PatientDemographics>>(loadDemographicsCache());
 
   async function fetchActivePatients(): Promise<void> {
@@ -70,7 +70,7 @@ export const usePatientStore = defineStore('patient', () => {
         saveDemographicsCache(demographicsCache.value);
         demographicsSource.value = 'live';
       } else if (demographicsCache.value[hn]) {
-        // MySQL offline — merge cached demographics into the detail
+        // MySQL offline - merge cached demographics into the detail
         data.demographics = demographicsCache.value[hn];
         demographicsSource.value = 'cache';
       }

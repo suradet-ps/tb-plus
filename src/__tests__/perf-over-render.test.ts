@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
  * Over-render audit for PatientTable.
  *
  * Vue 3 re-renders v-for items by comparing :key values. When a single
- * patient's alert changes, only that patient's row should update — not the
+ * patient's alert changes, only that patient's row should update - not the
  * entire table. This test verifies the structural invariants that make this
  * possible.
  */

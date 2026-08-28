@@ -53,7 +53,7 @@ fn parse_regimen_durations(regimen: &str) -> (i32, i32) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// tb_patients — read
+// tb_patients - read
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Return a map of `hn` → `status` for all patients in `tb_patients`.
@@ -248,7 +248,7 @@ pub async fn update_patient_pin_note(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// tb_patients — write
+// tb_patients - write
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Enrol a patient and create their initial treatment plan rows inside a
@@ -272,7 +272,7 @@ pub async fn enroll_patient(pool: &SqlitePool, input: &EnrollmentInput) -> Resul
 
   let patient_id = if let Some((existing_id, existing_status)) = existing {
     if existing_status == "active" {
-      // Patient is currently under treatment — block re-enrolment
+      // Patient is currently under treatment - block re-enrolment
       return Err(anyhow::anyhow!("ผู้ป่วยรายนี้ยังอยู่ในการรักษา"));
     }
 
@@ -307,7 +307,7 @@ pub async fn enroll_patient(pool: &SqlitePool, input: &EnrollmentInput) -> Resul
 
     existing_id
   } else {
-    // ── NEW ENROLLMENT: no existing row — plain INSERT ────────────────────
+    // ── NEW ENROLLMENT: no existing row - plain INSERT ────────────────────
     sqlx::query(
       "INSERT INTO tb_patients \
                (hn, enrolled_at, enrolled_by, status, tb_type, \
@@ -412,7 +412,7 @@ async fn create_initial_plans(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// tb_treatment_plans — read
+// tb_treatment_plans - read
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Return the single plan with `is_current = 1` for this patient, or `None`.
@@ -486,14 +486,14 @@ pub async fn get_first_phase_start(pool: &SqlitePool, hn: &str) -> Result<Option
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// tb_treatment_plans — write
+// tb_treatment_plans - write
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Transition the patient to a new treatment phase within a single transaction:
 ///
 /// 1. Mark every existing plan for this patient as `is_current = 0`.
 /// 2. If a plan for the requested `new_phase` already exists (pre-created at
-///    enrolment), **update** it in-place — this keeps `total_months` stable.
+///    enrolment), **update** it in-place - this keeps `total_months` stable.
 /// 3. Otherwise **insert** a brand-new plan row (handles custom / third-line
 ///    regimens that were not anticipated at enrolment).
 pub async fn update_treatment_phase(pool: &SqlitePool, update: &TreatmentPlanUpdate) -> Result<()> {
@@ -506,13 +506,13 @@ pub async fn update_treatment_phase(pool: &SqlitePool, update: &TreatmentPlanUpd
 
   let mut tx = pool.begin().await?;
 
-  // Step 1 — deactivate all current plans
+  // Step 1 - deactivate all current plans
   sqlx::query("UPDATE tb_treatment_plans SET is_current = 0 WHERE hn = ?")
     .bind(&update.hn)
     .execute(&mut *tx)
     .await?;
 
-  // Step 2 — attempt in-place update of the matching phase row
+  // Step 2 - attempt in-place update of the matching phase row
   let rows = sqlx::query(
     "UPDATE tb_treatment_plans
          SET    is_current         = 1,
@@ -536,7 +536,7 @@ pub async fn update_treatment_phase(pool: &SqlitePool, update: &TreatmentPlanUpd
   .await?
   .rows_affected();
 
-  // Step 3 — fall back to insert when no matching row existed
+  // Step 3 - fall back to insert when no matching row existed
   if rows == 0 {
     sqlx::query(
       "INSERT INTO tb_treatment_plans
@@ -568,7 +568,7 @@ pub async fn update_treatment_phase(pool: &SqlitePool, update: &TreatmentPlanUpd
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// tb_followups — read / write
+// tb_followups - read / write
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Insert a follow-up record and touch `updated_at` on the parent patient row,
@@ -636,7 +636,7 @@ pub async fn get_followups(pool: &SqlitePool, hn: &str) -> Result<Vec<Followup>>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// tb_outcomes — read / write
+// tb_outcomes - read / write
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Return the outcome record for `hn`, or `None` when the patient has not yet
@@ -654,7 +654,7 @@ pub async fn get_outcome(pool: &SqlitePool, hn: &str) -> Result<Option<Outcome>>
 }
 
 /// Record a treatment outcome, set `tb_patients.status` to the corresponding
-/// terminal state, and deactivate all treatment plans — all within one
+/// terminal state, and deactivate all treatment plans - all within one
 /// transaction.
 ///
 /// | `outcome` value        | `tb_patients.status` |
@@ -677,7 +677,7 @@ pub async fn discharge_patient(pool: &SqlitePool, input: &OutcomeInput) -> Resul
 
   let mut tx = pool.begin().await?;
 
-  // Upsert — the UNIQUE constraint on `hn` allows at most one outcome row
+  // Upsert - the UNIQUE constraint on `hn` allows at most one outcome row
   sqlx::query(
     "INSERT INTO tb_outcomes
              (hn, outcome, outcome_date, treatment_end, notes, created_by, created_at)
@@ -706,7 +706,7 @@ pub async fn discharge_patient(pool: &SqlitePool, input: &OutcomeInput) -> Resul
     .execute(&mut *tx)
     .await?;
 
-  // Deactivate all treatment plans — patient is no longer receiving treatment
+  // Deactivate all treatment plans - patient is no longer receiving treatment
   sqlx::query("UPDATE tb_treatment_plans SET is_current = 0 WHERE hn = ?")
     .bind(&input.hn)
     .execute(&mut *tx)
@@ -718,7 +718,7 @@ pub async fn discharge_patient(pool: &SqlitePool, input: &OutcomeInput) -> Resul
 
 /// Return the `phase_end_expected` of the intensive plan for `hn`, or `None`.
 /// The intensive plan row may have `is_current = 0` if the patient has already
-/// transitioned to continuation — we still need this date for the E-overrun check.
+/// transitioned to continuation - we still need this date for the E-overrun check.
 pub async fn get_intensive_phase_end(pool: &SqlitePool, hn: &str) -> Result<Option<String>> {
   let row: Option<Option<String>> = sqlx::query_scalar(
     "SELECT phase_end_expected \
@@ -734,7 +734,7 @@ pub async fn get_intensive_phase_end(pool: &SqlitePool, hn: &str) -> Result<Opti
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Tests — pure helper functions (no DB required)
+// Tests - pure helper functions (no DB required)
 // ─────────────────────────────────────────────────────────────────────────────
 
 #[cfg(test)]

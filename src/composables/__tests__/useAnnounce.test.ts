@@ -35,7 +35,7 @@ describe('useAnnounce', () => {
     expect(message.value).toBe('');
   });
 
-  it('debounces rapid calls — only last message survives', () => {
+  it('debounces rapid calls - only last message survives', () => {
     const { message, announce } = useAnnounce();
 
     announce('First');

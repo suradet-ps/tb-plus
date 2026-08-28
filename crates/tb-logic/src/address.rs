@@ -204,5 +204,5 @@ pub fn address_preview(raw_address: &str) -> String {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Tests — pure helper functions (no DB, no network required)
+// Tests - pure helper functions (no DB, no network required)
 // ─────────────────────────────────────────────────────────────────────────────
