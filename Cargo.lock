@@ -1178,9 +1178,9 @@ dependencies = [
 
 [[package]]
 name = "encryptman"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36aff0ba34008b358148dfc333695fd0a5a3ae505ad74c7c0272b09f1ecde6ca"
+checksum = "2af2d062571f0b6e505ce44c752b7d45b693b373a90833ff799b2dc570134008"
 dependencies = [
  "aes-gcm",
  "base64 0.23.1",
@@ -4777,7 +4777,7 @@ version = "1.8.0"
 dependencies = [
  "anyhow",
  "chrono",
- "encryptman 0.4.0",
+ "encryptman 0.5.0",
  "encryptman-keyring",
  "serde",
  "serde_json",
