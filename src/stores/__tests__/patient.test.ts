@@ -161,6 +161,77 @@ describe('patient store', () => {
       await refresh;
       expect(store.currentPatient).toEqual(detail);
     });
+
+    it('should ignore a superseded response that resolves after the latest one', async () => {
+      const store = usePatientStore();
+      const detailA = createPatientDetail({
+        patient: createTbPatient({ hn: 'HN00001' }),
+      });
+      const detailB = createPatientDetail({
+        patient: createTbPatient({ hn: 'HN00002' }),
+      });
+
+      let resolveA: ((value: PatientDetail) => void) | undefined;
+      let resolveB: ((value: PatientDetail) => void) | undefined;
+      vi.mocked(invoke)
+        .mockReturnValueOnce(
+          new Promise<PatientDetail>((resolve) => {
+            resolveA = resolve;
+          }),
+        )
+        .mockReturnValueOnce(
+          new Promise<PatientDetail>((resolve) => {
+            resolveB = resolve;
+          }),
+        );
+
+      const requestA = store.fetchPatientDetail('HN00001');
+      const requestB = store.fetchPatientDetail('HN00002');
+
+      resolveB?.(detailB);
+      await requestB;
+      expect(store.currentPatient?.patient.hn).toBe('HN00002');
+
+      resolveA?.(detailA);
+      await requestA;
+
+      expect(store.currentPatient?.patient.hn).toBe('HN00002');
+      expect(store.isLoadingDetail).toBe(false);
+      expect(store.error).toBeNull();
+    });
+
+    it('should not apply a superseded failure to the latest request', async () => {
+      const store = usePatientStore();
+      const detailB = createPatientDetail({
+        patient: createTbPatient({ hn: 'HN00002' }),
+      });
+
+      let rejectA: ((reason?: unknown) => void) | undefined;
+      let resolveB: ((value: PatientDetail) => void) | undefined;
+      vi.mocked(invoke)
+        .mockReturnValueOnce(
+          new Promise<PatientDetail>((_resolve, reject) => {
+            rejectA = reject;
+          }),
+        )
+        .mockReturnValueOnce(
+          new Promise<PatientDetail>((resolve) => {
+            resolveB = resolve;
+          }),
+        );
+
+      const requestA = store.fetchPatientDetail('HN00001');
+      const requestB = store.fetchPatientDetail('HN00002');
+
+      resolveB?.(detailB);
+      await requestB;
+
+      rejectA?.(new Error('stale failure'));
+      await requestA;
+
+      expect(store.error).toBeNull();
+      expect(store.currentPatient?.patient.hn).toBe('HN00002');
+    });
   });
 
   describe('fetchDischargedPatients', () => {
