@@ -97,4 +97,21 @@ describe('PatientDetailView', () => {
     expect(style).toContain('var(--phase-intensive-bg)');
     expect(style).toContain('var(--phase-intensive-text)');
   });
+
+  it('should render continuation phase badge tokens', async () => {
+    const detail = createPatientDetail({
+      patient: createTbPatient({ hn: 'HN00001' }),
+      current_plan: createTreatmentPlan({ phase: 'continuation' }),
+    });
+    vi.mocked(invoke).mockResolvedValueOnce(detail);
+
+    const wrapper = mountView('HN00001');
+    await flushPromises();
+
+    const badge = wrapper.find('.phase-badge');
+    expect(badge.exists()).toBe(true);
+    const style = badge.attributes('style') ?? '';
+    expect(style).toContain('var(--phase-continuation-bg)');
+    expect(style).toContain('var(--phase-continuation-text)');
+  });
 });
