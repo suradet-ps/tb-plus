@@ -161,6 +161,7 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 .dialog-leave-active {
+  pointer-events: none;
   transition: opacity var(--duration-base) var(--ease-standard);
 }
 

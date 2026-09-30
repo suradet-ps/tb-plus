@@ -16,12 +16,15 @@ import {
   Users,
   Wifi,
   WifiOff,
+  X,
   XCircle,
 } from '@lucide/vue';
 import { invoke } from '@tauri-apps/api/core';
 import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog';
-import { reactive, ref, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
+import ConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import DrugChip from '@/components/shared/DrugChip.vue';
+import { useFocusTrap } from '@/composables/useFocusTrap';
 import {
   type DbConfig,
   type DosageDrugCandidate,
@@ -314,6 +317,23 @@ function togglePhaseDrug(phase: RegimenPhase, cls: string) {
   else phase.drug_classes.push(cls);
 }
 
+// -- Phase editor dialog --
+
+const phaseEditorPanel = ref<HTMLElement | null>(null);
+const isPhaseEditorOpen = computed(() => editingRegimen.value !== null);
+useFocusTrap(isPhaseEditorOpen, phaseEditorPanel);
+
+function closePhaseEditor() {
+  editingRegimen.value = null;
+  editingRegimenIdx.value = -1;
+}
+
+function onPhaseEditorKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    closePhaseEditor();
+  }
+}
+
 async function saveRegimens() {
   try {
     await settingsStore.saveRegimenDefinitions();
@@ -461,6 +481,11 @@ const restoreSuccess = ref(false);
 const showRestoreConfirm = ref(false);
 const pendingRestorePath = ref<string | null>(null);
 
+const restoreConfirmMessage = computed(() => {
+  const path = pendingRestorePath.value ?? '';
+  return `การกู้คืนข้อมูลจะแทนที่ฐานข้อมูลปัจจุบันทั้งหมดด้วยข้อมูลจากไฟล์สำรอง ข้อมูลปัจจุบันที่ยังไม่ได้สำรองจะหายไปถาวร ไฟล์ที่เลือก: ${path}`;
+});
+
 async function selectBackupFile() {
   restoreError.value = null;
   restoreSuccess.value = false;
@@ -483,14 +508,20 @@ async function selectBackupFile() {
 }
 
 async function confirmRestore() {
-  if (!pendingRestorePath.value) return;
+  // Single-flight: the dialog fades out after confirm but stays interactive
+  // during the leave transition. Admit only one restore at a time and consume
+  // the pending path before awaiting so the same admission cannot be reused.
+  if (isRestoring.value) return;
+  const sourcePath = pendingRestorePath.value;
+  if (!sourcePath) return;
+
   isRestoring.value = true;
   restoreError.value = null;
   showRestoreConfirm.value = false;
+  pendingRestorePath.value = null;
   try {
-    await invoke('restore_sqlite', { sourcePath: pendingRestorePath.value });
+    await invoke('restore_sqlite', { sourcePath });
     restoreSuccess.value = true;
-    pendingRestorePath.value = null;
   } catch (e) {
     restoreError.value = String(e);
   } finally {
@@ -876,34 +907,74 @@ function cancelRestore() {
 
             <!-- Phase editor modal -->
             <Teleport to="body">
-              <div v-if="editingRegimen" class="modal-overlay" @click.self="editingRegimen = null">
-                <div class="modal-card">
-                  <h3 style="margin-bottom:16px">{{ editingRegimen.name }}</h3>
-                  <div v-for="(ph, idx) in editingRegimen.phases" :key="idx" class="phase-row">
-                    <input v-model="ph.phase" class="form-input" style="width:130px" placeholder="intensive" />
-                    <input v-model.number="ph.months" class="form-input" style="width:60px" type="number" min="1" placeholder="2" />
-                    <span class="phase-label">เดือน</span>
-                    <div class="drug-toggle-group">
-                      <button
-                        v-for="cls in settingsStore.drugClasses"
-                        :key="cls.class"
-                        class="toggle-btn"
-                        :class="{ active: ph.drug_classes.includes(cls.class) }"
-                        @click="togglePhaseDrug(ph, cls.class)"
-                      >
-                        {{ cls.class }}
+              <Transition name="dialog">
+                <div
+                  v-if="editingRegimen"
+                  class="modal-overlay"
+                  role="presentation"
+                  @click.self="closePhaseEditor"
+                  @keydown="onPhaseEditorKeydown"
+                >
+                  <div
+                    ref="phaseEditorPanel"
+                    class="modal-card"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="phase-editor-title"
+                    tabindex="-1"
+                  >
+                    <div class="modal-header">
+                      <h3 id="phase-editor-title" class="modal-title">{{ editingRegimen.name }}</h3>
+                      <button type="button" class="modal-close" aria-label="ปิด" @click="closePhaseEditor">
+                        <X :size="16" />
                       </button>
                     </div>
-                    <button class="btn-ghost-danger-sm" @click="removePhase(idx)">
-                      <Trash2 :size="13" />
-                    </button>
-                  </div>
-                  <div class="phase-actions">
-                    <button class="btn-secondary" @click="addPhase"><Plus :size="13" /> เพิ่มระยะ</button>
-                    <button class="btn-primary" @click="savePhaseEdit">บันทึก</button>
+                    <div class="phase-list">
+                      <div v-for="(ph, idx) in editingRegimen.phases" :key="idx" class="phase-row">
+                        <input
+                          v-model="ph.phase"
+                          class="form-input phase-name-input"
+                          placeholder="intensive"
+                        />
+                        <input
+                          v-model.number="ph.months"
+                          class="form-input phase-months-input"
+                          type="number"
+                          min="1"
+                          placeholder="2"
+                        />
+                        <span class="phase-label">เดือน</span>
+                        <div class="drug-toggle-group">
+                          <button
+                            v-for="cls in settingsStore.drugClasses"
+                            :key="cls.class"
+                            type="button"
+                            class="toggle-btn"
+                            :class="{ active: ph.drug_classes.includes(cls.class) }"
+                            @click="togglePhaseDrug(ph, cls.class)"
+                          >
+                            {{ cls.class }}
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          class="btn-ghost-danger-sm"
+                          aria-label="ลบระยะ"
+                          @click="removePhase(idx)"
+                        >
+                          <Trash2 :size="13" />
+                        </button>
+                      </div>
+                    </div>
+                    <div class="phase-actions">
+                      <button type="button" class="btn-secondary" @click="addPhase">
+                        <Plus :size="13" /> เพิ่มระยะ
+                      </button>
+                      <button type="button" class="btn-primary" @click="savePhaseEdit">บันทึก</button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Transition>
             </Teleport>
           </div>
         </template>
@@ -1189,31 +1260,16 @@ function cancelRestore() {
     </div><!-- /settings-layout -->
   </div><!-- /view-root -->
 
-  <!-- Restore confirmation modal -->
-  <Teleport to="body">
-    <div v-if="showRestoreConfirm" class="modal-overlay" @click.self="cancelRestore">
-      <div class="modal-card restore-confirm-modal">
-        <div class="restore-confirm-icon">
-          <AlertTriangle :size="28" />
-        </div>
-        <h3 class="restore-confirm-title">ยืนยันการกู้คืนข้อมูล</h3>
-        <p class="restore-confirm-desc">
-          การกู้คืนข้อมูลจะ<strong>แทนที่ฐานข้อมูลปัจจุบันทั้งหมด</strong> ด้วยข้อมูลจากไฟล์สำรอง
-          ข้อมูลปัจจุบันที่ยังไม่ได้สำรองจะหายไปถาวร
-        </p>
-        <p class="restore-confirm-file">
-          ไฟล์: <strong>{{ pendingRestorePath }}</strong>
-        </p>
-        <div class="restore-confirm-actions">
-          <button class="btn-secondary" @click="cancelRestore">ยกเลิก</button>
-          <button class="btn-primary btn-restore-confirm" @click="confirmRestore">
-            <Upload :size="14" />
-            กู้คืนข้อมูล
-          </button>
-        </div>
-      </div>
-    </div>
-  </Teleport>
+  <!-- Restore confirmation dialog -->
+  <ConfirmDialog
+    v-model="showRestoreConfirm"
+    title="ยืนยันการกู้คืนข้อมูล"
+    :message="restoreConfirmMessage"
+    confirm-text="กู้คืนข้อมูล"
+    variant="danger"
+    @confirm="confirmRestore"
+    @cancel="cancelRestore"
+  />
 </template>
 
 <style scoped>
@@ -2058,16 +2114,98 @@ function cancelRestore() {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: var(--z-overlay-settings);
+  padding: var(--space-8);
+  z-index: var(--z-modal);
 }
 
 .modal-card {
+  display: flex;
+  flex-direction: column;
   background: var(--color-surface);
   border-radius: var(--radius-card);
   padding: 24px;
   min-width: 520px;
   max-width: 640px;
+  max-height: 90vh;
   box-shadow: var(--shadow-deep);
+  outline: none;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: 16px;
+}
+
+.modal-title {
+  font-size: var(--text-heading-sm);
+  font-weight: var(--weight-heading);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: var(--transition-bg), var(--transition-color);
+}
+
+.modal-close:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+
+.phase-list {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.phase-name-input {
+  width: 130px;
+}
+
+.phase-months-input {
+  width: 60px;
+}
+
+/* -- Dialog transition -- */
+.dialog-enter-active {
+  transition: var(--transition-modal);
+}
+
+.dialog-leave-active {
+  transition: opacity var(--duration-base) var(--ease-standard);
+}
+
+.dialog-enter-from,
+.dialog-leave-to {
+  opacity: 0;
+}
+
+.dialog-enter-active .modal-card {
+  transition: opacity var(--duration-slow) var(--ease-standard),
+    transform var(--duration-slow) var(--ease-standard);
+}
+
+.dialog-leave-active .modal-card {
+  transition: opacity var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-standard);
+}
+
+.dialog-enter-from .modal-card,
+.dialog-leave-to .modal-card {
+  opacity: 0;
+  transform: scale(0.96) translateY(6px);
 }
 
 .phase-row {
@@ -2140,52 +2278,6 @@ function cancelRestore() {
   font-size: var(--text-heading-sm);
 }
 
-/* -- Restore confirmation modal -- */
-.restore-confirm-modal {
-  text-align: center;
-  max-width: 440px;
-  min-width: 360px;
-}
-
-.restore-confirm-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: var(--radius-md);
-  background: var(--status-defaulted-bg);
-  color: var(--color-orange);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 16px;
-}
-
-.restore-confirm-title {
-  font-size: var(--text-heading-sm);
-  font-weight: var(--weight-heading);
-  color: var(--color-text);
-  margin: 0 0 8px;
-}
-
-.restore-confirm-desc {
-  font-size: var(--text-body-sm);
-  color: var(--color-text-secondary);
-  line-height: var(--leading-relaxed);
-  margin: 0 0 12px;
-}
-
-.restore-confirm-file {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  margin: 0 0 20px;
-  word-break: break-all;
-}
-
-.restore-confirm-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
-
 @media (max-width: 960px) {
   .settings-layout {
     flex-direction: column;
@@ -2199,13 +2291,5 @@ function cancelRestore() {
   .dosage-grid {
     grid-template-columns: 1fr;
   }
-}
-
-.btn-restore-confirm {
-  background: var(--color-orange);
-}
-
-.btn-restore-confirm:hover:not(:disabled) {
-  background: var(--palette-orange-darker);
 }
 </style>
