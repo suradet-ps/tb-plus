@@ -508,14 +508,20 @@ async function selectBackupFile() {
 }
 
 async function confirmRestore() {
-  if (!pendingRestorePath.value) return;
+  // Single-flight: the dialog fades out after confirm but stays interactive
+  // during the leave transition. Admit only one restore at a time and consume
+  // the pending path before awaiting so the same admission cannot be reused.
+  if (isRestoring.value) return;
+  const sourcePath = pendingRestorePath.value;
+  if (!sourcePath) return;
+
   isRestoring.value = true;
   restoreError.value = null;
   showRestoreConfirm.value = false;
+  pendingRestorePath.value = null;
   try {
-    await invoke('restore_sqlite', { sourcePath: pendingRestorePath.value });
+    await invoke('restore_sqlite', { sourcePath });
     restoreSuccess.value = true;
-    pendingRestorePath.value = null;
   } catch (e) {
     restoreError.value = String(e);
   } finally {

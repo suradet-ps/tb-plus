@@ -1,6 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import ConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import { useSettingsStore } from '@/stores/settings';
 import SettingsView from '@/views/SettingsView.vue';
 
@@ -91,5 +92,43 @@ describe('SettingsView dialogs', () => {
 
     await dialog.trigger('keydown', { key: 'Escape' });
     expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
+  });
+
+  it('admits only one restore when confirm is triggered twice', async () => {
+    vi.mocked(openDialog).mockResolvedValue('C:/backup/tb.db');
+    let resolveRestore: ((value: unknown) => void) | undefined;
+    const restorePending = new Promise((resolve) => {
+      resolveRestore = resolve;
+    });
+    vi.mocked(invoke).mockImplementation((cmd: string) => {
+      if (cmd === 'restore_sqlite') {
+        return restorePending;
+      }
+      return Promise.resolve(undefined);
+    });
+
+    const wrapper = mountView();
+    await openSection(wrapper, 'สำรองข้อมูล');
+
+    const pickButton = wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('(Import)'));
+    expect(pickButton).toBeTruthy();
+    await pickButton?.trigger('click');
+    await flushPromises();
+
+    const dialog = wrapper.findComponent(ConfirmDialog);
+    expect(dialog.exists()).toBe(true);
+    dialog.vm.$emit('confirm');
+    dialog.vm.$emit('confirm');
+    await flushPromises();
+
+    const restoreCalls = vi.mocked(invoke).mock.calls.filter(([cmd]) => cmd === 'restore_sqlite');
+    expect(restoreCalls.length).toBe(1);
+    expect(restoreCalls[0][1]).toEqual({ sourcePath: 'C:/backup/tb.db' });
+
+    resolveRestore?.(undefined);
+    await flushPromises();
+    wrapper.unmount();
   });
 });
