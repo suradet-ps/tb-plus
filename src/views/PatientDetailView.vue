@@ -165,9 +165,15 @@ const phaseLabel = computed(() => {
 });
 
 const phaseColor = computed(() => {
-  if (effectivePhase.value === 'intensive') return 'var(--color-warning)';
-  if (effectivePhase.value === 'continuation') return 'var(--color-info)';
+  if (effectivePhase.value === 'intensive') return 'var(--phase-intensive-text)';
+  if (effectivePhase.value === 'continuation') return 'var(--phase-continuation-text)';
   return 'var(--color-text-muted)';
+});
+
+const phaseBgColor = computed(() => {
+  if (effectivePhase.value === 'intensive') return 'var(--phase-intensive-bg)';
+  if (effectivePhase.value === 'continuation') return 'var(--phase-continuation-bg)';
+  return 'transparent';
 });
 
 const tbTypeLabel = computed(() => {
@@ -376,7 +382,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
             <span
               v-if="phaseLabel"
               class="phase-badge"
-              :style="{ background: phaseColor + '1a', color: phaseColor }"
+              :style="{ background: phaseBgColor, color: phaseColor }"
               :title="phaseIsStale ? 'ระยะนี้อ้างอิงจากวันที่ - แผนการรักษาในระบบยังไม่ได้อัปเดต' : undefined"
             >
               {{ phaseLabel }}
