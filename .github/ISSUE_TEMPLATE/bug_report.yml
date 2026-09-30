@@ -1,0 +1,107 @@
+name: Bug report
+description: Something is not working as it should
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping make TB Plus better. Please fill in the fields below.
+
+        A wrong result is a patient-safety event - especially a patient who
+        received TB drugs but does not appear in screening, or an alert that
+        should have fired but did not. If that is what you hit, say so up front.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: A short, clear description of the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Search ...
+        3. See ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the error message shown in the app, if any.
+    validations:
+      required: true
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module affected
+      description: Which screen were you on when this happened?
+      options:
+        - Screening
+        - Active patients
+        - Patient detail
+        - Discharged patients
+        - Appointments
+        - Dosage assessment
+        - Mapping
+        - Reports
+        - Settings
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: datasource
+    attributes:
+      label: Suspected data source
+      description: If the bug involves incorrect data, where did it come from?
+      options:
+        - HOSxP MySQL (read-only dispensing / demographics)
+        - Local SQLite (clinic tracking data)
+        - Computed result (alert, dosage, report)
+        - Not applicable
+    validations:
+      required: false
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: TB Plus version
+      description: From the GitHub release or installer you used.
+      placeholder: "e.g. 1.8.0"
+    validations:
+      required: true
+  - type: input
+    id: hosxp
+    attributes:
+      label: HOSxP / MariaDB version
+      description: If known - HOSxP schema and TB drug icodes drift between sites and versions (each drug class may have more than one icode).
+      placeholder: "e.g. HOSxP XE 4.x, MariaDB 10.5"
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or extra context
+      description: Remove patient identifiers (HN, CID, names) and database credentials before pasting anything. Never attach the SQLite database or its backups - they contain patient data.
+      render: text
+    validations:
+      required: false
