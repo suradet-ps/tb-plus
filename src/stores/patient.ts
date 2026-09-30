@@ -44,6 +44,11 @@ export const usePatientStore = defineStore('patient', () => {
   // Patient demographics cache - persists across sessions
   const demographicsCache = ref<Record<string, PatientDemographics>>(loadDemographicsCache());
 
+  // Generation counter for detail requests. Only the latest request may
+  // apply its result, so a slow response for a patient the user already
+  // navigated away from can never overwrite the current state.
+  let detailRequestId = 0;
+
   async function fetchActivePatients(): Promise<void> {
     try {
       isLoading.value = true;
@@ -57,12 +62,25 @@ export const usePatientStore = defineStore('patient', () => {
     }
   }
 
+  /**
+   * Load one patient's full chart. Superseded requests are ignored so the
+   * most recent navigation always wins.
+   */
   async function fetchPatientDetail(hn: string): Promise<void> {
+    const requestId = ++detailRequestId;
+    // Drop the previously loaded patient when switching HNs so a stale chart
+    // can never render while the request is in flight or if it fails.
+    if (currentPatient.value?.patient.hn !== hn) {
+      currentPatient.value = null;
+    }
     try {
       isLoadingDetail.value = true;
       error.value = null;
       demographicsSource.value = null;
       const data = await invoke<PatientDetail>('get_patient_detail', { hn });
+
+      // A newer request superseded this one. Ignore the response.
+      if (requestId !== detailRequestId) return;
 
       // If MySQL returned demographics, cache them
       if (data.demographics) {
@@ -77,9 +95,12 @@ export const usePatientStore = defineStore('patient', () => {
 
       currentPatient.value = data;
     } catch (e) {
+      if (requestId !== detailRequestId) return;
       error.value = String(e);
     } finally {
-      isLoadingDetail.value = false;
+      if (requestId === detailRequestId) {
+        isLoadingDetail.value = false;
+      }
     }
   }
 
