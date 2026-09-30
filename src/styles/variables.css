@@ -120,6 +120,19 @@
   --outcome-lost-text: var(--palette-orange);
   --outcome-transferred-text: var(--palette-blue-focus);
   --outcome-not-evaluated-text: var(--palette-warm-gray-300);
+  --outcome-cured-bg: rgba(26, 174, 57, 0.1);
+  --outcome-completed-bg: rgba(42, 157, 153, 0.1);
+  --outcome-failed-bg: rgba(221, 91, 0, 0.1);
+  --outcome-died-bg: rgba(49, 48, 46, 0.1);
+  --outcome-lost-bg: rgba(221, 91, 0, 0.1);
+  --outcome-transferred-bg: #f2f9ff;
+  --outcome-not-evaluated-bg: rgba(49, 48, 46, 0.06);
+
+  /* Semantic - phase badge colors */
+  --phase-intensive-text: var(--palette-orange);
+  --phase-intensive-bg: rgba(221, 91, 0, 0.1);
+  --phase-continuation-text: var(--palette-teal);
+  --phase-continuation-bg: rgba(42, 157, 153, 0.1);
 
   /* Semantic - mapping status */
   --map-active: var(--palette-orange);

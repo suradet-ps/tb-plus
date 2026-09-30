@@ -70,6 +70,29 @@ function getOutcomeColor(p: import('@/types/patient').ActivePatientRow): string 
   }
 }
 
+function getOutcomeBg(p: import('@/types/patient').ActivePatientRow): string {
+  const outcome = p.outcome_value ?? p.tb_patient.status;
+  switch (outcome) {
+    case 'cured':
+      return 'var(--outcome-cured-bg)';
+    case 'treatment_completed':
+    case 'completed':
+      return 'var(--outcome-completed-bg)';
+    case 'treatment_failed':
+      return 'var(--outcome-failed-bg)';
+    case 'died':
+      return 'var(--outcome-died-bg)';
+    case 'lost_to_followup':
+    case 'defaulted':
+      return 'var(--outcome-lost-bg)';
+    case 'transferred_out':
+    case 'transferred':
+      return 'var(--outcome-transferred-bg)';
+    default:
+      return 'var(--outcome-not-evaluated-bg)';
+  }
+}
+
 function toThaiDate(iso: string | null | undefined): string {
   if (!iso) return '-';
   try {
@@ -224,7 +247,7 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
               <span
                 class="outcome-badge"
                 :style="{
-                  background: getOutcomeColor(p) + '18',
+                  background: getOutcomeBg(p),
                   color: getOutcomeColor(p),
                 }"
               >
