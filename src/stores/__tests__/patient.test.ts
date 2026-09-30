@@ -113,6 +113,54 @@ describe('patient store', () => {
       await store.fetchPatientDetail('HN00001');
       expect(store.error).toBeNull();
     });
+
+    it('should drop the previous patient while a different HN is loading', async () => {
+      const store = usePatientStore();
+      const detailA = createPatientDetail({
+        patient: createTbPatient({ hn: 'HN00001' }),
+      });
+      vi.mocked(invoke).mockResolvedValueOnce(detailA);
+      await store.fetchPatientDetail('HN00001');
+      expect(store.currentPatient?.patient.hn).toBe('HN00001');
+
+      let rejectB: ((reason?: unknown) => void) | undefined;
+      const pendingB = new Promise<PatientDetail>((_resolve, reject) => {
+        rejectB = reject;
+      });
+      vi.mocked(invoke).mockReturnValueOnce(pendingB);
+
+      const requestB = store.fetchPatientDetail('HN00002');
+      // The previous chart must be gone before the new request resolves.
+      expect(store.currentPatient).toBeNull();
+
+      rejectB?.(new Error('offline'));
+      await requestB;
+
+      expect(store.currentPatient).toBeNull();
+      expect(store.error).toContain('offline');
+    });
+
+    it('should keep the current patient while refreshing the same HN', async () => {
+      const store = usePatientStore();
+      const detail = createPatientDetail({
+        patient: createTbPatient({ hn: 'HN00001' }),
+      });
+      vi.mocked(invoke).mockResolvedValueOnce(detail);
+      await store.fetchPatientDetail('HN00001');
+
+      let resolveRefresh: ((value: PatientDetail) => void) | undefined;
+      const pending = new Promise<PatientDetail>((resolve) => {
+        resolveRefresh = resolve;
+      });
+      vi.mocked(invoke).mockReturnValueOnce(pending);
+
+      const refresh = store.fetchPatientDetail('HN00001');
+      expect(store.currentPatient).toEqual(detail);
+
+      resolveRefresh?.(detail);
+      await refresh;
+      expect(store.currentPatient).toEqual(detail);
+    });
   });
 
   describe('fetchDischargedPatients', () => {

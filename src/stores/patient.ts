@@ -58,6 +58,11 @@ export const usePatientStore = defineStore('patient', () => {
   }
 
   async function fetchPatientDetail(hn: string): Promise<void> {
+    // Drop the previously loaded patient when switching HNs so a stale chart
+    // can never render while the request is in flight or if it fails.
+    if (currentPatient.value?.patient.hn !== hn) {
+      currentPatient.value = null;
+    }
     try {
       isLoadingDetail.value = true;
       error.value = null;

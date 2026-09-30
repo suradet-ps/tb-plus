@@ -11,7 +11,7 @@ import {
   RefreshCw,
   UserCheck,
 } from '@lucide/vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import AlertBadge from '@/components/active/AlertBadge.vue';
 import DischargeModal from '@/components/patient/DischargeModal.vue';
@@ -83,13 +83,28 @@ onMounted(() => {
   patientStore.fetchPatientDetail(props.hn);
 });
 
+// Route param changes reuse this component instance; refetch so a new HN
+// never renders the previous patient's chart.
+watch(
+  () => props.hn,
+  (hn) => {
+    patientStore.fetchPatientDetail(hn);
+  },
+);
+
 function refresh() {
   patientStore.fetchPatientDetail(props.hn);
 }
 
 // -- Computed --
 
-const detail = computed(() => patientStore.currentPatient);
+// Only render the loaded detail when it belongs to the current route HN.
+// This is defense in depth on top of the store clearing stale data.
+const detail = computed(() => {
+  const patient = patientStore.currentPatient;
+  if (!patient || patient.patient.hn !== props.hn) return null;
+  return patient;
+});
 const isLoading = computed(() => patientStore.isLoadingDetail);
 const loadError = computed(() => patientStore.error);
 const demographicsSource = computed(() => patientStore.demographicsSource);
