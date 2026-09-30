@@ -168,7 +168,15 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
-  async function checkConnection(): Promise<void> {
+  /**
+   * Check the MySQL connection status.
+   *
+   * Returns true when the status call completed, regardless of whether MySQL
+   * is reachable (`isConnected`), and false only when the call itself failed.
+   * Startup surfaces the false case as a retryable error; being offline is a
+   * normal state for this app and is not an error.
+   */
+  async function checkConnection(): Promise<boolean> {
     try {
       const connected = await invoke<boolean>('get_mysql_status');
       const wasDisconnected = !isConnected.value;
@@ -181,9 +189,11 @@ export const useSettingsStore = defineStore('settings', () => {
           onReconnectCallback();
         }
       }
+      return true;
     } catch {
       isConnected.value = false;
       connectionStatus.value = 'disconnected';
+      return false;
     }
   }
 
@@ -236,31 +246,43 @@ export const useSettingsStore = defineStore('settings', () => {
 
   // -- Load ALL settings from backend (after restart) --
 
-  async function loadAllSettings(): Promise<void> {
+  /**
+   * Load all persisted settings, falling back to defaults per key.
+   *
+   * Returns true when every load succeeded and false when any failed, so
+   * startup can surface a retryable error without losing the fallbacks.
+   */
+  async function loadAllSettings(): Promise<boolean> {
+    let failed = false;
     try {
       drugClasses.value = await invoke<DrugClassEntry[]>('load_drug_classes');
       syncDrugCodesFromClasses();
     } catch {
+      failed = true;
       drugClasses.value = [];
     }
     try {
       regimenDefinitions.value = await invoke<RegimenEntry[]>('get_regimen_definitions');
     } catch {
+      failed = true;
       regimenDefinitions.value = [];
     }
     try {
       dosageRules.value = await invoke<DosageRule[]>('load_dosage_rules');
     } catch {
+      failed = true;
       dosageRules.value = [];
     }
     try {
       hosxpSettings.value = await invoke<HosxpSettings>('load_hosxp_config');
     } catch {
+      failed = true;
       /* keep defaults */
     }
     try {
       alertThresholds.value = await invoke<AlertThresholds>('load_alert_config');
     } catch {
+      failed = true;
       /* keep defaults */
     }
     try {
@@ -276,8 +298,10 @@ export const useSettingsStore = defineStore('settings', () => {
         staffNames.value = saved.staff_names ?? [];
       }
     } catch {
+      failed = true;
       /* keep empty */
     }
+    return !failed;
   }
 
   // -- Staff names --

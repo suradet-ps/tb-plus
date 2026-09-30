@@ -206,8 +206,9 @@ describe('settings store', () => {
       const store = useSettingsStore();
       vi.mocked(invoke).mockResolvedValue(true);
 
-      await store.checkConnection();
+      const completed = await store.checkConnection();
 
+      expect(completed).toBe(true);
       expect(store.isConnected).toBe(true);
       expect(invoke).toHaveBeenCalledWith('get_mysql_status');
     });
@@ -217,8 +218,9 @@ describe('settings store', () => {
       store.isConnected = true;
       vi.mocked(invoke).mockRejectedValue(new Error('timeout'));
 
-      await store.checkConnection();
+      const completed = await store.checkConnection();
 
+      expect(completed).toBe(false);
       expect(store.isConnected).toBe(false);
     });
   });
@@ -354,8 +356,9 @@ describe('settings store', () => {
         .mockResolvedValueOnce(alertConfig) // load_alert_config
         .mockResolvedValueOnce(savedConfig); // load_db_config
 
-      await store.loadAllSettings();
+      const loaded = await store.loadAllSettings();
 
+      expect(loaded).toBe(true);
       expect(store.drugClasses).toEqual(drugClasses);
       expect(store.drugCodes.H).toEqual(['1430104']);
       expect(store.regimenDefinitions).toEqual(regimens);
@@ -378,8 +381,9 @@ describe('settings store', () => {
         .mockRejectedValueOnce(new Error('fail')) // alerts
         .mockRejectedValueOnce(new Error('fail')); // config
 
-      await store.loadAllSettings();
+      const loaded = await store.loadAllSettings();
 
+      expect(loaded).toBe(false);
       expect(store.drugClasses).toEqual([]);
       expect(store.alertThresholds).toEqual(defaultThresholds);
     });

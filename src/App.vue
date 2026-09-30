@@ -69,8 +69,16 @@ async function initialize(): Promise<void> {
 
   try {
     await getCurrentWindow().show();
-    await settingsStore.loadAllSettings();
-    await settingsStore.checkConnection();
+
+    const settingsLoaded = await settingsStore.loadAllSettings();
+    const connectionChecked = await settingsStore.checkConnection();
+    if (!settingsLoaded || !connectionChecked) {
+      startupError.value = settingsLoaded
+        ? 'ตรวจสอบการเชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่'
+        : 'โหลดการตั้งค่าไม่สำเร็จ กรุณาลองใหม่';
+      return;
+    }
+
     alertStore.stopAutoRefresh();
     alertStore.startAutoRefresh();
     appointmentsStore.fetchAppointments();
