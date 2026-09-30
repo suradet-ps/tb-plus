@@ -21,7 +21,7 @@
         "minHeight": 640,
         "center": true,
         "resizable": true,
-        "visible": true,
+        "visible": false,
         "backgroundColor": "#f6f5f4",
         "focus": true,
         "shadow": false,
