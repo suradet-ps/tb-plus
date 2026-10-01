@@ -483,7 +483,7 @@ td {
 }
 
 .skeleton-line {
-  height: 14px;
+  height: 18px;
   border-radius: var(--radius-sm);
   background: linear-gradient(90deg, var(--skeleton-color-1) 25%, var(--skeleton-color-2) 50%, var(--skeleton-color-1) 75%);
   background-size: 200% 100%;

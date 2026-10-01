@@ -6,6 +6,8 @@ import {
   createTbPatient,
   createTreatmentPlan,
 } from '@/__tests__/factories/patient';
+import ErrorState from '@/components/shared/ErrorState.vue';
+import LoadingState from '@/components/shared/LoadingState.vue';
 import PatientDetailView from '@/views/PatientDetailView.vue';
 
 vi.mock('@tauri-apps/api/core', () => ({
@@ -45,7 +47,7 @@ describe('PatientDetailView', () => {
     await wrapper.setProps({ hn: 'HN00002' });
     await flushPromises();
 
-    expect(wrapper.find('.error-state').exists()).toBe(true);
+    expect(wrapper.findComponent(ErrorState).exists()).toBe(true);
     expect(wrapper.text()).not.toContain('นาย ทดสอบ ใจดี');
   });
 
@@ -65,7 +67,7 @@ describe('PatientDetailView', () => {
     vi.mocked(invoke).mockReturnValueOnce(pendingB);
 
     await wrapper.setProps({ hn: 'HN00002' });
-    expect(wrapper.find('.loading-state').exists()).toBe(true);
+    expect(wrapper.findComponent(LoadingState).exists()).toBe(true);
     expect(wrapper.text()).not.toContain('นาย ทดสอบ ใจดี');
 
     resolveB?.(

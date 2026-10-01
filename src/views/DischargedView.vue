@@ -2,6 +2,9 @@
 import { AlertTriangle, CheckCircle, Loader2, RefreshCw, UserMinus, Users } from '@lucide/vue';
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
+import EmptyState from '@/components/shared/EmptyState.vue';
+import ErrorState from '@/components/shared/ErrorState.vue';
+import LoadingState from '@/components/shared/LoadingState.vue';
 import { usePatientStore } from '@/stores/patient';
 
 const patientStore = usePatientStore();
@@ -194,27 +197,27 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
     </div>
 
     <!-- Loading state -->
-    <div
+    <LoadingState
       v-if="patientStore.isLoadingDischarged && patientStore.dischargedPatients.length === 0"
-      class="state-container"
-    >
-      <div class="loading-state">
-        <Loader2 :size="28" class="spin loading-icon" />
-        <span class="state-title">กำลังโหลดข้อมูล...</span>
-      </div>
-    </div>
+    />
+
+    <!-- Error state -->
+    <ErrorState
+      v-else-if="patientStore.error && patientStore.dischargedPatients.length === 0"
+      :message="patientStore.error"
+      @retry="patientStore.fetchDischargedPatients()"
+    />
 
     <!-- Empty state -->
-    <div
+    <EmptyState
       v-else-if="!patientStore.isLoadingDischarged && patientStore.dischargedPatients.length === 0"
-      class="state-container"
+      title="ยังไม่มีผู้ป่วยที่จำหน่าย"
+      subtitle="ผู้ป่วยที่จำหน่ายออกจากคลินิกจะแสดงที่นี่"
     >
-      <div class="empty-state">
-        <UserMinus :size="44" class="empty-icon" />
-        <span class="state-title">ยังไม่มีผู้ป่วยที่จำหน่าย</span>
-        <span class="state-sub">ผู้ป่วยที่จำหน่ายออกจากคลินิกจะแสดงที่นี่</span>
-      </div>
-    </div>
+      <template #icon>
+        <UserMinus :size="44" class="view-state__icon" aria-hidden="true" />
+      </template>
+    </EmptyState>
 
     <!-- Table -->
     <div v-else class="table-card">
@@ -386,48 +389,6 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
   margin-top: 1px;
-}
-
-/* -- Loading / empty states -- */
-.state-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-}
-
-.loading-state,
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  color: var(--color-text-muted);
-  text-align: center;
-}
-
-.loading-icon {
-  color: var(--color-blue);
-  opacity: 0.7;
-  margin-bottom: var(--space-2);
-}
-
-.empty-icon {
-  opacity: 0.2;
-  margin-bottom: var(--space-2);
-  color: var(--color-text-muted);
-}
-
-.state-title {
-  font-size: var(--text-ui);
-  font-weight: var(--weight-emphasis);
-  color: var(--color-text-secondary);
-}
-
-.state-sub {
-  font-size: var(--text-body-sm);
-  color: var(--color-text-muted);
-  max-width: 320px;
 }
 
 /* -- Table card -- */

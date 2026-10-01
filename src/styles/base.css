@@ -734,7 +734,57 @@ p {
   gap: var(--space-12);
 }
 
-/* -- 21. REDUCED MOTION -- */
+/* -- 21. VIEW STATE PANELS (LoadingState / EmptyState / ErrorState) -- */
+.view-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  padding: var(--space-8);
+}
+
+.view-state__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 480px;
+  text-align: center;
+}
+
+.view-state__title {
+  font-size: var(--text-body);
+  font-weight: var(--weight-emphasis);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
+.view-state__sub {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  line-height: var(--leading-body);
+}
+
+.view-state__icon {
+  color: var(--color-text-muted);
+  opacity: 0.7;
+}
+
+.view-state__icon--error {
+  color: var(--color-alert-red);
+  opacity: 1;
+}
+
+.view-state__icon--loading {
+  color: var(--color-accent);
+  opacity: 1;
+}
+
+.view-state__retry {
+  margin-top: var(--space-2);
+}
+
+/* -- 22. REDUCED MOTION -- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

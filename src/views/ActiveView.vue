@@ -12,6 +12,9 @@ import {
 } from '@lucide/vue';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import EmptyState from '@/components/shared/EmptyState.vue';
+import ErrorState from '@/components/shared/ErrorState.vue';
+import LoadingState from '@/components/shared/LoadingState.vue';
 import { useAlertStore } from '@/stores/alerts';
 import { usePatientStore } from '@/stores/patient';
 import type { ActivePatientRow } from '@/types/patient';
@@ -200,30 +203,24 @@ function sortIcon(key: SortKey): string {
       </div>
     </div>
 
-    <div v-if="isInitialLoad" class="state-container">
-      <div class="loading-state">
-        <Loader2 :size="28" class="spin loading-icon" />
-        <span class="state-title">กำลังโหลดข้อมูล...</span>
-      </div>
-    </div>
+    <LoadingState v-if="isInitialLoad" />
 
-    <div v-else-if="!patientStore.isLoading && patientStore.activePatients.length === 0" class="state-container">
-      <div class="empty-state">
-        <CheckCircle :size="44" class="empty-icon" />
-        <span class="state-title">ยังไม่มีผู้ป่วยที่กำลังรับการรักษา</span>
-        <span class="state-sub">ไปที่หน้าคัดกรองเพื่อลงทะเบียนผู้ป่วย</span>
-        <RouterLink to="/screening" class="empty-cta">ไปที่การคัดกรอง</RouterLink>
-      </div>
-    </div>
+    <ErrorState
+      v-else-if="patientStore.error && patientStore.activePatients.length === 0"
+      :message="patientStore.error"
+      @retry="patientStore.fetchActivePatients()"
+    />
 
-    <div v-else-if="patientStore.error && patientStore.activePatients.length === 0" class="state-container">
-      <div class="error-state">
-        <AlertTriangle :size="44" class="error-icon" />
-        <span class="state-title">ไม่สามารถโหลดข้อมูลได้</span>
-        <span class="state-sub">{{ patientStore.error }}</span>
-        <button class="empty-cta" @click="patientStore.fetchActivePatients()">ลองใหม่</button>
-      </div>
-    </div>
+    <EmptyState
+      v-else-if="!patientStore.isLoading && patientStore.activePatients.length === 0"
+      title="ยังไม่มีผู้ป่วยที่กำลังรับการรักษา"
+      subtitle="ไปที่หน้าคัดกรองเพื่อลงทะเบียนผู้ป่วย"
+    >
+      <template #icon>
+        <CheckCircle :size="44" class="view-state__icon" aria-hidden="true" />
+      </template>
+      <RouterLink to="/screening" class="empty-cta">ไปที่การคัดกรอง</RouterLink>
+    </EmptyState>
 
     <div v-else class="table-wrap">
       <p v-if="filteredPatients.length === 0 && searchQuery.trim()" class="search-empty">
@@ -433,13 +430,6 @@ tbody tr:last-child td { border-bottom: none; }
 }
 .btn-detail-icon:hover { background: var(--color-blue-active); }
 
-.state-container { display: flex; align-items: center; justify-content: center; min-height: 400px; }
-.loading-state, .empty-state, .error-state { display: flex; flex-direction: column; align-items: center; gap: 10px; color: var(--color-text-muted); text-align: center; }
-.loading-icon { color: var(--color-blue); opacity: 0.7; margin-bottom: var(--space-2); }
-.empty-icon { color: var(--color-teal); opacity: 0.25; margin-bottom: var(--space-2); }
-.error-icon { color: var(--color-orange); opacity: 0.4; margin-bottom: var(--space-2); }
-.state-title { font-size: var(--text-ui); font-weight: var(--weight-emphasis); color: var(--color-text-secondary); }
-.state-sub { font-size: var(--text-body-sm); color: var(--color-text-muted); max-width: 320px; }
 .empty-cta {
   margin-top: 6px; display: inline-flex; align-items: center;
   padding: 7px 16px; background: var(--color-blue); color: var(--color-text-inverse);

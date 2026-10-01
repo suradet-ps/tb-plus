@@ -21,6 +21,8 @@ import FollowupList from '@/components/patient/FollowupList.vue';
 import SideEffectTracker from '@/components/patient/SideEffectTracker.vue';
 import TreatmentTimeline from '@/components/patient/TreatmentTimeline.vue';
 import DrugChip from '@/components/shared/DrugChip.vue';
+import ErrorState from '@/components/shared/ErrorState.vue';
+import LoadingState from '@/components/shared/LoadingState.vue';
 import StatusBadge from '@/components/shared/StatusBadge.vue';
 import { useAlertStore } from '@/stores/alerts';
 import { usePatientStore } from '@/stores/patient';
@@ -226,26 +228,14 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   <div class="view-root">
 
     <!-- Loading (initial, before any data) -->
-    <div v-if="isLoading && !detail" class="state-container">
-      <div class="loading-state">
-        <Loader2 :size="34" class="spin loading-icon" aria-hidden="true" />
-        <span class="state-title">กำลังโหลดข้อมูลผู้ป่วย...</span>
-        <span class="state-sub">HN {{ hn }}</span>
-      </div>
-    </div>
+    <LoadingState
+      v-if="isLoading && !detail"
+      title="กำลังโหลดข้อมูลผู้ป่วย..."
+      :subtitle="`HN ${hn}`"
+    />
 
     <!-- Error (no cached data to fall back on) -->
-    <div v-else-if="loadError && !detail" class="state-container">
-      <div class="error-state">
-        <AlertTriangle :size="44" class="error-icon" aria-hidden="true" />
-        <span class="state-title">ไม่สามารถโหลดข้อมูลได้</span>
-        <span class="state-sub">{{ loadError }}</span>
-        <button class="btn-retry" type="button" @click="refresh">
-          <RefreshCw :size="13" aria-hidden="true" />
-          ลองใหม่
-        </button>
-      </div>
-    </div>
+    <ErrorState v-else-if="loadError && !detail" :message="loadError" @retry="refresh" />
 
     <!-- Main detail content -->
     <template v-else-if="detail">
@@ -605,69 +595,6 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 .view-root {
   padding: var(--page-root-padding);
   max-width: 1100px;
-}
-
-/* -- State containers -- */
-.state-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 480px;
-}
-
-.loading-state,
-.error-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  text-align: center;
-}
-
-.loading-icon {
-  color: var(--color-blue);
-  opacity: 0.65;
-  margin-bottom: 6px;
-}
-
-.error-icon {
-  color: var(--color-orange);
-  opacity: 0.35;
-  margin-bottom: 6px;
-}
-
-.state-title {
-  font-size: var(--text-ui);
-  font-weight: var(--weight-emphasis);
-  color: var(--color-text-secondary);
-}
-
-.state-sub {
-  font-size: var(--text-body-sm);
-  color: var(--color-text-muted);
-  max-width: 340px;
-  line-height: var(--leading-body);
-}
-
-.btn-retry {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 8px;
-  padding: 8px 18px;
-  background: var(--color-blue);
-  color: var(--color-text-inverse);
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-emphasis);
-  font-family: var(--font-family);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.btn-retry:hover {
-  background: var(--color-blue-active);
 }
 
 /* -- Red alert banner -- */

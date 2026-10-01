@@ -69,4 +69,22 @@ describe('DischargedView', () => {
       expect(badge.attributes('style') ?? '').toContain(expectedBg);
     },
   );
+
+  it('should show a retryable error state when the fetch fails', async () => {
+    vi.mocked(invoke).mockRejectedValueOnce(new Error('offline'));
+
+    const wrapper = mount(DischargedView, {
+      global: { stubs: { RouterLink: true } },
+    });
+    await flushPromises();
+
+    expect(wrapper.find('[role="alert"]').exists()).toBe(true);
+    expect(wrapper.text()).toContain('offline');
+
+    vi.mocked(invoke).mockResolvedValueOnce([outcomeRow('HN00001', 'cured')]);
+    await wrapper.find('[role="alert"] button').trigger('click');
+    await flushPromises();
+
+    expect(wrapper.find('.outcome-badge').exists()).toBe(true);
+  });
 });

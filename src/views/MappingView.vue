@@ -11,6 +11,7 @@ import {
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import MapCanvas from '@/components/mapping/MapCanvas.vue';
 import MapFilters from '@/components/mapping/MapFilters.vue';
+import LoadingState from '@/components/shared/LoadingState.vue';
 import StatusBadge from '@/components/shared/StatusBadge.vue';
 import { useMappingStore } from '@/stores/mapping';
 import { useSettingsStore } from '@/stores/settings';
@@ -26,6 +27,8 @@ const geocodeStatus = ref<'all' | 'success' | 'pending' | 'failed' | 'missing_ad
 const phase = ref<'all' | 'intensive' | 'continuation'>('all');
 const enrolledFrom = ref('');
 const enrolledTo = ref('');
+
+const initialLoading = computed(() => mappingStore.isLoading && mappingStore.patients.length === 0);
 const mapError = ref<string | null>(null);
 const isOnline = ref(window.navigator.onLine);
 const batchMessage = ref<string | null>(null);
@@ -204,7 +207,9 @@ async function handleSingleGeocode(hn: string): Promise<void> {
       </div>
     </div>
 
-    <div class="stats-bar">
+    <LoadingState v-if="initialLoading" />
+
+    <div v-if="!initialLoading" class="stats-bar">
       <div class="stat-card">
         <div class="stat-icon stat-icon--blue"><MapPinned :size="16" /></div>
         <div>
@@ -255,6 +260,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
     </div>
 
     <MapFilters
+      v-if="!initialLoading"
       :search="search"
       :status="status"
       :tb-type="tbType"
@@ -272,7 +278,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
       @reset="resetFilters"
     />
 
-    <div class="content-grid">
+    <div v-if="!initialLoading" class="content-grid">
       <div class="side-card">
         <div class="side-card__header">
           <div>
