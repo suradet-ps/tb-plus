@@ -58,7 +58,8 @@ What makes Notion's visual language distinctive is its border philosophy. Rather
 ## 3. Typography Rules
 
 ### Font Family
-- **Primary**: `NotionInter`, with fallbacks: `Inter, -apple-system, system-ui, Segoe UI, Helvetica, Apple Color Emoji, Arial, Segoe UI Emoji, Segoe UI Symbol`
+- **Primary**: `Inter Variable` for Latin text, rendered by `Noto Sans Thai Variable` for Thai, both bundled with the app via `@fontsource-variable/inter` and `@fontsource-variable/noto-sans-thai`. Fallbacks: `Sarabun, -apple-system, system-ui, Segoe UI, Helvetica, Arial, sans-serif`.
+- **Offline**: fonts ship with the bundle and are never fetched from Google Fonts, so the UI renders identically on isolated clinic machines.
 - **OpenType Features**: `"lnum"` (lining numerals) and `"locl"` (localized forms) enabled on display and heading text.
 
 ### Hierarchy
