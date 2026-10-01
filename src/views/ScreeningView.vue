@@ -66,6 +66,9 @@ function resetFilters() {
 }
 
 function handleEnrolled(count: number) {
+  // The enrolled patients no longer appear in the selectable results, so the
+  // selection must be dropped or the action bar would stay stuck.
+  screeningStore.clearSelection();
   enrollSuccessMessage.value = `ลงทะเบียนสำเร็จ ${count} ราย`;
   if (enrollSuccessTimer) {
     clearTimeout(enrollSuccessTimer);
