@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { AlertCircle, Calendar, CalendarDays, RefreshCw } from '@lucide/vue';
 import { onMounted } from 'vue';
+import EmptyState from '@/components/shared/EmptyState.vue';
+import ErrorState from '@/components/shared/ErrorState.vue';
 import { useAppointmentsStore } from '@/stores/appointments';
 import { useSettingsStore } from '@/stores/settings';
 
@@ -77,13 +79,12 @@ onMounted(() => {
     </div>
 
     <!-- Error State -->
-    <div v-else-if="store.error && !store.isLoading" class="state-box state-box--error">
-      <AlertCircle :size="28" class="state-icon" stroke-width="1.75" />
-      <div class="state-text">
-        <p class="state-title">เกิดข้อผิดพลาดในการดึงข้อมูล</p>
-        <p class="state-sub">{{ store.error }}</p>
-      </div>
-    </div>
+    <ErrorState
+      v-else-if="store.error && !store.isLoading"
+      title="เกิดข้อผิดพลาดในการดึงข้อมูล"
+      :message="store.error"
+      @retry="store.fetchAppointments()"
+    />
 
     <!-- Main Content -->
     <template v-else>
@@ -118,11 +119,15 @@ onMounted(() => {
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="store.appointments.length === 0" class="empty-state">
-        <Calendar :size="36" class="empty-icon" stroke-width="1.5" />
-        <p class="empty-title">ไม่มีการนัดหมาย</p>
-        <p class="empty-sub">ไม่พบข้อมูลนัดหมายในช่วง {{ store.daysAhead }} วันข้างหน้า</p>
-      </div>
+      <EmptyState
+        v-else-if="store.appointments.length === 0"
+        title="ไม่มีการนัดหมาย"
+        :subtitle="`ไม่พบข้อมูลนัดหมายในช่วง ${store.daysAhead} วันข้างหน้า`"
+      >
+        <template #icon>
+          <Calendar :size="36" class="view-state__icon" aria-hidden="true" />
+        </template>
+      </EmptyState>
 
       <!-- Appointments Table -->
       <div v-else class="table-card">
@@ -295,13 +300,7 @@ onMounted(() => {
   background: rgba(221, 91, 0, 0.04);
 }
 
-.state-box--error {
-  border-color: rgba(221, 91, 0, 0.2);
-  background: rgba(221, 91, 0, 0.04);
-}
-
-.state-box--warn .state-icon,
-.state-box--error .state-icon {
+.state-box--warn .state-icon {
   color: var(--color-orange);
   flex-shrink: 0;
 }
@@ -502,7 +501,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 28px;
-  padding: 11px 16px;
+  padding: 12px 16px;
   border-bottom: var(--border-standard);
 }
 
@@ -511,7 +510,7 @@ onMounted(() => {
 }
 
 .skeleton-cell {
-  height: 13px;
+  height: 16px;
   border-radius: var(--radius-sm);
   background: linear-gradient(90deg, var(--skeleton-color-1) 25%, var(--skeleton-color-2) 50%, var(--skeleton-color-1) 75%);
   background-size: 200% 100%;
@@ -525,38 +524,6 @@ onMounted(() => {
   100% {
     background-position: -200% 0;
   }
-}
-
-/* -- Empty State -- */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 60px 24px;
-  background: var(--color-surface);
-  border: var(--border-standard);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
-  color: var(--color-text-muted);
-  text-align: center;
-}
-
-.empty-icon {
-  opacity: 0.3;
-  margin-bottom: var(--space-2);
-}
-
-.empty-title {
-  font-size: var(--text-ui);
-  font-weight: var(--weight-emphasis);
-  color: var(--color-text-secondary);
-}
-
-.empty-sub {
-  font-size: var(--text-body-sm);
-  color: var(--color-text-muted);
 }
 
 /* -- Spin Animation -- */

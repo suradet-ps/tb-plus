@@ -12,6 +12,9 @@ import {
 } from '@lucide/vue';
 import { invoke } from '@tauri-apps/api/core';
 import { computed, onMounted, ref } from 'vue';
+import EmptyState from '@/components/shared/EmptyState.vue';
+import ErrorState from '@/components/shared/ErrorState.vue';
+import LoadingState from '@/components/shared/LoadingState.vue';
 import { useAlertStore } from '@/stores/alerts';
 import { usePatientStore } from '@/stores/patient';
 import type { DrugConsumptionRow } from '@/types/reports';
@@ -160,6 +163,27 @@ const cohortDetailPatients = computed(() => {
     .filter((p) => p.enrolled_at.startsWith(month))
     .sort((a, b) => a.name.localeCompare(b.name));
 });
+
+const patientsInitialLoading = computed(
+  () =>
+    (patientStore.isLoading && patientStore.activePatients.length === 0) ||
+    (patientStore.isLoadingDischarged && patientStore.dischargedPatients.length === 0),
+);
+
+const activePatientsInitialError = computed(
+  () => !!patientStore.activePatientsError && patientStore.activePatients.length === 0,
+);
+
+const dischargedPatientsInitialError = computed(
+  () => !!patientStore.dischargedPatientsError && patientStore.dischargedPatients.length === 0,
+);
+
+const patientsUnavailable = computed(
+  () =>
+    patientsInitialLoading.value ||
+    activePatientsInitialError.value ||
+    dischargedPatientsInitialError.value,
+);
 
 // -- Drug consumption --
 async function fetchDrugConsumption() {
@@ -352,8 +376,22 @@ function exportCSV() {
       </div>
     </div>
 
+    <LoadingState v-if="patientsInitialLoading" />
+
+    <ErrorState
+      v-else-if="activePatientsInitialError"
+      :message="patientStore.activePatientsError ?? ''"
+      @retry="patientStore.fetchActivePatients()"
+    />
+
+    <ErrorState
+      v-else-if="dischargedPatientsInitialError"
+      :message="patientStore.dischargedPatientsError ?? ''"
+      @retry="patientStore.fetchDischargedPatients()"
+    />
+
     <!-- Quick stats strip -->
-    <div class="quick-stats">
+    <div v-if="!patientsUnavailable" class="quick-stats">
       <div class="qs-item">
         <span class="qs-value">{{ totalActive }}</span>
         <span class="qs-label">Active ทั้งหมด</span>
@@ -376,7 +414,7 @@ function exportCSV() {
     </div>
 
     <!-- Report cards grid -->
-    <div class="report-grid">
+    <div v-if="!patientsUnavailable" class="report-grid">
       <div
         v-for="card in reportCards"
         :key="card.id"
@@ -813,26 +851,9 @@ function exportCSV() {
       </div>
     </div>
 
-    <!-- Loading state -->
-    <div v-if="patientStore.isLoading && patientStore.activePatients.length === 0" class="state-container">
-      <Loader2 :size="28" class="spin loading-icon" />
-      <span class="state-title">กำลังโหลดข้อมูล...</span>
-    </div>
-
-    <!-- Error state -->
-    <div
-      v-else-if="patientStore.error && patientStore.activePatients.length === 0"
-      class="state-container"
-    >
-      <AlertTriangle :size="32" class="error-icon" />
-      <span class="state-title">ไม่สามารถโหลดข้อมูลได้</span>
-      <span class="state-sub">{{ patientStore.error }}</span>
-      <button class="retry-btn" @click="patientStore.fetchActivePatients()">ลองใหม่</button>
-    </div>
-
     <!-- Active patients table -->
     <div
-      v-else-if="patientStore.activePatients.length > 0"
+      v-if="patientStore.activePatients.length > 0"
       class="report-table-card"
     >
       <div class="table-header">
@@ -923,13 +944,11 @@ function exportCSV() {
     </div>
 
     <!-- Empty state -->
-    <div
-      v-else-if="!patientStore.isLoading"
-      class="state-container"
-    >
-      <span class="state-title">ยังไม่มีผู้ป่วยที่กำลังรับการรักษา</span>
-      <span class="state-sub">ไปที่หน้าคัดกรองเพื่อลงทะเบียนผู้ป่วย</span>
-    </div>
+    <EmptyState
+      v-else-if="!patientsUnavailable"
+      title="ยังไม่มีผู้ป่วยที่กำลังรับการรักษา"
+      subtitle="ไปที่หน้าคัดกรองเพื่อลงทะเบียนผู้ป่วย"
+    />
 
   </div>
 </template>
@@ -1504,63 +1523,6 @@ function exportCSV() {
 .alert-red    { background: var(--status-defaulted-bg);    color: var(--color-warning); }
 .alert-yellow { background: rgba(245, 166, 35, 0.1);  color: var(--color-alert-yellow); }
 .alert-ok     { background: var(--status-active-bg);   color: var(--color-success); }
-
-/* -- State containers -- */
-.state-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 200px;
-  background: var(--color-surface);
-  border: var(--border-standard);
-  border-radius: var(--radius-card);
-  padding: 48px 32px;
-}
-
-.loading-icon {
-  color: var(--color-blue);
-  opacity: 0.6;
-}
-
-.error-icon {
-  color: var(--color-orange);
-  opacity: 0.5;
-}
-
-.state-title {
-  font-size: var(--text-body);
-  font-weight: var(--weight-emphasis);
-  color: var(--color-text-secondary);
-}
-
-.state-sub {
-  font-size: var(--text-body-sm);
-  color: var(--color-text-muted);
-  max-width: 360px;
-  text-align: center;
-}
-
-.retry-btn {
-  margin-top: 4px;
-  display: inline-flex;
-  align-items: center;
-  padding: 7px 16px;
-  background: var(--color-blue);
-  color: var(--color-text-inverse);
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-emphasis);
-  font-family: var(--font-family);
-  cursor: pointer;
-  transition: background 0.13s;
-}
-
-.retry-btn:hover {
-  background: var(--color-blue-active);
-}
 
 /* -- Spin animation -- */
 .spin {

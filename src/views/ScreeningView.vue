@@ -220,7 +220,10 @@ function formatLastSearch(iso: string | null): string {
 
     <!-- Error banner -->
     <div v-if="screeningStore.error" class="error-banner" role="alert">
-      ⚠️ {{ screeningStore.error }}
+      <span>⚠️ {{ screeningStore.error }}</span>
+      <button type="button" class="error-banner__retry" @click="screeningStore.search()">
+        ลองใหม่
+      </button>
     </div>
 
     <!-- Results meta row -->
@@ -468,6 +471,10 @@ function formatLastSearch(iso: string | null): string {
 
 /* -- Error banner -- */
 .error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
   background: var(--alert-error-bg);
   border: 1px solid rgba(221, 91, 0, 0.25);
   border-radius: var(--radius-md);
@@ -475,6 +482,22 @@ function formatLastSearch(iso: string | null): string {
   font-size: var(--text-body-sm);
   color: var(--color-orange);
   margin-bottom: var(--space-8);
+}
+
+.error-banner__retry {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm);
+  cursor: pointer;
+}
+
+.error-banner__retry:hover {
+  background: rgba(221, 91, 0, 0.08);
 }
 
 /* -- Results meta -- */
