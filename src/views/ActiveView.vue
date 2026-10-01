@@ -206,8 +206,8 @@ function sortIcon(key: SortKey): string {
     <LoadingState v-if="isInitialLoad" />
 
     <ErrorState
-      v-else-if="patientStore.error && patientStore.activePatients.length === 0"
-      :message="patientStore.error"
+      v-else-if="patientStore.activePatientsError && patientStore.activePatients.length === 0"
+      :message="patientStore.activePatientsError"
       @retry="patientStore.fetchActivePatients()"
     />
 

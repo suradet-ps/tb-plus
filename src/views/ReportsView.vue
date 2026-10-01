@@ -165,11 +165,24 @@ const cohortDetailPatients = computed(() => {
 });
 
 const patientsInitialLoading = computed(
-  () => patientStore.isLoading && patientStore.activePatients.length === 0,
+  () =>
+    (patientStore.isLoading && patientStore.activePatients.length === 0) ||
+    (patientStore.isLoadingDischarged && patientStore.dischargedPatients.length === 0),
 );
 
-const patientsInitialError = computed(
-  () => !!patientStore.error && patientStore.activePatients.length === 0,
+const activePatientsInitialError = computed(
+  () => !!patientStore.activePatientsError && patientStore.activePatients.length === 0,
+);
+
+const dischargedPatientsInitialError = computed(
+  () => !!patientStore.dischargedPatientsError && patientStore.dischargedPatients.length === 0,
+);
+
+const patientsUnavailable = computed(
+  () =>
+    patientsInitialLoading.value ||
+    activePatientsInitialError.value ||
+    dischargedPatientsInitialError.value,
 );
 
 // -- Drug consumption --
@@ -366,13 +379,19 @@ function exportCSV() {
     <LoadingState v-if="patientsInitialLoading" />
 
     <ErrorState
-      v-else-if="patientsInitialError"
-      :message="patientStore.error ?? ''"
+      v-else-if="activePatientsInitialError"
+      :message="patientStore.activePatientsError ?? ''"
       @retry="patientStore.fetchActivePatients()"
     />
 
+    <ErrorState
+      v-else-if="dischargedPatientsInitialError"
+      :message="patientStore.dischargedPatientsError ?? ''"
+      @retry="patientStore.fetchDischargedPatients()"
+    />
+
     <!-- Quick stats strip -->
-    <div v-if="!patientsInitialLoading && !patientsInitialError" class="quick-stats">
+    <div v-if="!patientsUnavailable" class="quick-stats">
       <div class="qs-item">
         <span class="qs-value">{{ totalActive }}</span>
         <span class="qs-label">Active ทั้งหมด</span>
@@ -395,7 +414,7 @@ function exportCSV() {
     </div>
 
     <!-- Report cards grid -->
-    <div v-if="!patientsInitialLoading && !patientsInitialError" class="report-grid">
+    <div v-if="!patientsUnavailable" class="report-grid">
       <div
         v-for="card in reportCards"
         :key="card.id"
@@ -926,7 +945,7 @@ function exportCSV() {
 
     <!-- Empty state -->
     <EmptyState
-      v-else-if="!patientStore.isLoading"
+      v-else-if="!patientsUnavailable"
       title="ยังไม่มีผู้ป่วยที่กำลังรับการรักษา"
       subtitle="ไปที่หน้าคัดกรองเพื่อลงทะเบียนผู้ป่วย"
     />

@@ -203,8 +203,8 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 
     <!-- Error state -->
     <ErrorState
-      v-else-if="patientStore.error && patientStore.dischargedPatients.length === 0"
-      :message="patientStore.error"
+      v-else-if="patientStore.dischargedPatientsError && patientStore.dischargedPatients.length === 0"
+      :message="patientStore.dischargedPatientsError"
       @retry="patientStore.fetchDischargedPatients()"
     />
 

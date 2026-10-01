@@ -11,6 +11,7 @@ import {
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import MapCanvas from '@/components/mapping/MapCanvas.vue';
 import MapFilters from '@/components/mapping/MapFilters.vue';
+import ErrorState from '@/components/shared/ErrorState.vue';
 import LoadingState from '@/components/shared/LoadingState.vue';
 import StatusBadge from '@/components/shared/StatusBadge.vue';
 import { useMappingStore } from '@/stores/mapping';
@@ -29,6 +30,8 @@ const enrolledFrom = ref('');
 const enrolledTo = ref('');
 
 const initialLoading = computed(() => mappingStore.isLoading && mappingStore.patients.length === 0);
+
+const initialError = computed(() => !!mappingStore.error && mappingStore.patients.length === 0);
 const mapError = ref<string | null>(null);
 const isOnline = ref(window.navigator.onLine);
 const batchMessage = ref<string | null>(null);
@@ -209,7 +212,13 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 
     <LoadingState v-if="initialLoading" />
 
-    <div v-if="!initialLoading" class="stats-bar">
+    <ErrorState
+      v-else-if="initialError"
+      :message="mappingStore.error ?? ''"
+      @retry="mappingStore.fetchAll()"
+    />
+
+    <div v-if="!initialLoading && !initialError" class="stats-bar">
       <div class="stat-card">
         <div class="stat-icon stat-icon--blue"><MapPinned :size="16" /></div>
         <div>
@@ -255,12 +264,12 @@ async function handleSingleGeocode(hn: string): Promise<void> {
     <div v-if="batchMessage" class="notice-banner notice-banner--success">
       {{ batchMessage }}
     </div>
-    <div v-if="mappingStore.error" class="notice-banner notice-banner--error">
+    <div v-if="mappingStore.error && !initialError" class="notice-banner notice-banner--error">
       {{ mappingStore.error }}
     </div>
 
     <MapFilters
-      v-if="!initialLoading"
+      v-if="!initialLoading && !initialError"
       :search="search"
       :status="status"
       :tb-type="tbType"
@@ -278,7 +287,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
       @reset="resetFilters"
     />
 
-    <div v-if="!initialLoading" class="content-grid">
+    <div v-if="!initialLoading && !initialError" class="content-grid">
       <div class="side-card">
         <div class="side-card__header">
           <div>

@@ -33,6 +33,7 @@ function saveDemographicsCache(cache: Record<string, PatientDemographics>): void
 export const usePatientStore = defineStore('patient', () => {
   const activePatients = ref<ActivePatientRow[]>([]);
   const isLoading = ref(false);
+  const activePatientsError = ref<string | null>(null);
   const error = ref<string | null>(null);
   const currentPatient = ref<PatientDetail | null>(null);
   const isLoadingDetail = ref(false);
@@ -40,6 +41,7 @@ export const usePatientStore = defineStore('patient', () => {
 
   const dischargedPatients = ref<ActivePatientRow[]>([]);
   const isLoadingDischarged = ref(false);
+  const dischargedPatientsError = ref<string | null>(null);
 
   // Patient demographics cache - persists across sessions
   const demographicsCache = ref<Record<string, PatientDemographics>>(loadDemographicsCache());
@@ -53,10 +55,12 @@ export const usePatientStore = defineStore('patient', () => {
     try {
       isLoading.value = true;
       error.value = null;
+      activePatientsError.value = null;
       const data = await invoke<ActivePatientRow[]>('get_active_patients');
       activePatients.value = data;
     } catch (e) {
       error.value = String(e);
+      activePatientsError.value = String(e);
     } finally {
       isLoading.value = false;
     }
@@ -108,10 +112,12 @@ export const usePatientStore = defineStore('patient', () => {
     try {
       isLoadingDischarged.value = true;
       error.value = null;
+      dischargedPatientsError.value = null;
       const data = await invoke<ActivePatientRow[]>('get_discharged_patients');
       dischargedPatients.value = data;
     } catch (e) {
       error.value = String(e);
+      dischargedPatientsError.value = String(e);
     } finally {
       isLoadingDischarged.value = false;
     }
@@ -126,6 +132,7 @@ export const usePatientStore = defineStore('patient', () => {
   return {
     activePatients,
     isLoading,
+    activePatientsError,
     error,
     currentPatient,
     isLoadingDetail,
@@ -133,6 +140,7 @@ export const usePatientStore = defineStore('patient', () => {
     demographicsCache,
     dischargedPatients,
     isLoadingDischarged,
+    dischargedPatientsError,
     fetchActivePatients,
     fetchPatientDetail,
     fetchDischargedPatients,

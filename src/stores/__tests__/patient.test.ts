@@ -262,6 +262,27 @@ describe('patient store', () => {
     });
   });
 
+  describe('resource-specific errors', () => {
+    it('should keep active and discharged errors separate', async () => {
+      const store = usePatientStore();
+
+      vi.mocked(invoke).mockRejectedValueOnce(new Error('active failed'));
+      await store.fetchActivePatients();
+      expect(store.activePatientsError).toContain('active failed');
+      expect(store.dischargedPatientsError).toBeNull();
+
+      vi.mocked(invoke).mockRejectedValueOnce(new Error('discharged failed'));
+      await store.fetchDischargedPatients();
+      expect(store.dischargedPatientsError).toContain('discharged failed');
+
+      // A successful active retry must not clear the discharged failure.
+      vi.mocked(invoke).mockResolvedValueOnce([]);
+      await store.fetchActivePatients();
+      expect(store.activePatientsError).toBeNull();
+      expect(store.dischargedPatientsError).toContain('discharged failed');
+    });
+  });
+
   describe('enrollPatient', () => {
     const enrollment: EnrollmentInput = {
       hn: 'HN00003',
