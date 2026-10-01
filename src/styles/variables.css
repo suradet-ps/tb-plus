@@ -221,8 +221,8 @@
 :root {
   /* Font family */
   --font-family:
-    "Inter", "Noto Sans Thai", "Sarabun", -apple-system, system-ui, "Segoe UI", Helvetica, Arial,
-    sans-serif;
+    "Inter Variable", "Noto Sans Thai Variable", "Sarabun", -apple-system, system-ui, "Segoe UI",
+    Helvetica, Arial, sans-serif;
   --font-family-mono: "SF Mono", "Roboto Mono", "Fira Code", monospace;
   --font-family-mono-simple: monospace;
 

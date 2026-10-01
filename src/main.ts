@@ -2,6 +2,9 @@ import { createPinia } from 'pinia';
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
+import { attachSplashStatusListener } from './splash';
+import '@fontsource-variable/inter';
+import '@fontsource-variable/noto-sans-thai';
 import './styles/variables.css';
 import './styles/base.css';
 import 'leaflet/dist/leaflet.css';
@@ -37,6 +40,11 @@ const inputPatcher = new MutationObserver((mutations) => {
 
 // Start observing before Vue mounts so no element is missed
 inputPatcher.observe(document.documentElement, { childList: true, subtree: true });
+
+// -- Splash status bridge --
+// The splash overlay lives in index.html, before Vue mounts. Wire the Rust
+// setup progress events into its label as early as possible.
+void attachSplashStatusListener();
 
 // -- App bootstrap --
 const app = createApp(App);

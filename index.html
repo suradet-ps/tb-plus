@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TB Plus</title>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
       *,
       *::before,
       *::after {
@@ -20,7 +18,8 @@
         height: 100%;
         width: 100%;
         overflow: hidden;
-        font-family: 'Inter', -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif;
+        font-family: 'Inter Variable', 'Noto Sans Thai Variable', -apple-system, system-ui,
+          'Segoe UI', Helvetica, Arial, sans-serif;
         background: #f6f5f4;
         color: rgba(0, 0, 0, 0.95);
         -webkit-font-smoothing: antialiased;
@@ -41,7 +40,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: 'Inter', -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif;
+        font-family: 'Inter Variable', 'Noto Sans Thai Variable', -apple-system, system-ui,
+          'Segoe UI', Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
         user-select: none;
         -webkit-user-select: none;
@@ -202,32 +202,5 @@
 
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
-
-    <script>
-      // Poll for Tauri API availability then listen for splash-status events
-      (function () {
-        var label = document.getElementById('splash-loading-label');
-        function attachListener() {
-          if (
-            typeof window.__TAURI__ !== 'undefined' &&
-            window.__TAURI__.event &&
-            typeof window.__TAURI__.event.listen === 'function'
-          ) {
-            window.__TAURI__.event.listen('splash-status', function (event) {
-              if (label && event.payload) {
-                label.textContent = event.payload;
-              }
-            });
-          } else {
-            setTimeout(attachListener, 80);
-          }
-        }
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', attachListener);
-        } else {
-          attachListener();
-        }
-      })();
-    </script>
   </body>
 </html>
