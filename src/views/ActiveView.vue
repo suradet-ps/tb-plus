@@ -251,8 +251,10 @@ function sortIcon(key: SortKey): string {
           >
             <td class="td-hn">{{ p.tb_patient.hn }}</td>
             <td class="td-name">
-              <span class="patient-name">{{ p.demographics?.full_name ?? p.tb_patient.hn }}</span>
-              <span v-if="p.demographics?.age" class="patient-age">อายุ {{ p.demographics.age }} ปี</span>
+              <div class="td-name__stack">
+                <span class="patient-name">{{ p.demographics?.full_name ?? p.tb_patient.hn }}</span>
+                <span v-if="p.demographics?.age" class="patient-age">อายุ {{ p.demographics.age }} ปี</span>
+              </div>
             </td>
             <td class="td-regimen">
               <span v-if="p.current_plan" class="regimen-text">{{ p.current_plan.regimen }}</span>
@@ -360,8 +362,14 @@ function sortIcon(key: SortKey): string {
 .search-input::placeholder { color: var(--color-text-muted); }
 .search-count { font-size: var(--text-sm); color: var(--color-text-muted); }
 
-.table-wrap { overflow-x: auto; }
-.patient-table { width: 100%; border-collapse: collapse; border: var(--border-standard); border-radius: var(--radius-card); overflow: hidden; box-shadow: var(--shadow-card); }
+.table-wrap {
+  overflow-x: auto;
+  background: var(--color-surface);
+  border: var(--border-standard);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+.patient-table { width: 100%; min-width: 860px; border-collapse: collapse; }
 
 thead { background: var(--color-surface-alt); }
 th {
@@ -381,7 +389,13 @@ tbody tr:last-child td { border-bottom: none; }
 .row--red { background: rgba(221,91,0,0.04); }
 .row--yellow { background: rgba(199,139,0,0.03); }
 
-.th-hn { width: 90px; }
+.th-hn {
+  width: 90px;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--color-surface-alt);
+}
 .th-name { min-width: 180px; }
 .th-regimen { width: 120px; }
 .th-phase { width: 120px; }
@@ -389,8 +403,16 @@ tbody tr:last-child td { border-bottom: none; }
 .th-last { width: 100px; }
 .th-action { width: 130px; text-align: center; }
 
-.td-hn { font-family: var(--font-family-mono-simple); font-weight: var(--weight-emphasis); color: var(--color-text); }
-.td-name { display: flex; flex-direction: column; gap: 2px; }
+.td-hn {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--color-surface);
+  font-family: var(--font-family-mono-simple);
+  font-weight: var(--weight-emphasis);
+  color: var(--color-text);
+}
+.td-name__stack { display: flex; flex-direction: column; gap: 2px; }
 .patient-name { font-weight: var(--weight-emphasis); color: var(--color-text); }
 .patient-age { font-size: var(--text-sm); color: var(--color-text-muted); }
 .regimen-text { font-family: 'SF Mono', 'Roboto Mono', monospace; font-weight: var(--weight-emphasis); font-size: var(--text-sm); }
