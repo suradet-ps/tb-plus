@@ -534,6 +534,14 @@ p {
   overflow: hidden;
 }
 
+@supports (overflow: clip) {
+  .table-card {
+    /* `clip` keeps the rounded corners but, unlike `hidden`, does not create a
+       scroll container, so `position: sticky` headers stick to the page. */
+    overflow: clip;
+  }
+}
+
 /* -- 17. EMPTY STATE -- */
 .empty-state {
   display: flex;
