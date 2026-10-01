@@ -5,22 +5,13 @@ import EmptyState from '@/components/shared/EmptyState.vue';
 import ErrorState from '@/components/shared/ErrorState.vue';
 import { useAppointmentsStore } from '@/stores/appointments';
 import { useSettingsStore } from '@/stores/settings';
+import { formatThaiDate as toThaiDate } from '@/utils/format';
 
 const store = useAppointmentsStore();
 const settingsStore = useSettingsStore();
 
 const todayISO = store.todayISO;
 const daysOptions = [7, 14, 30, 60];
-
-function toThaiDate(isoDate: string | null | undefined): string {
-  if (!isoDate) return '-';
-  try {
-    const [y, m, d] = isoDate.split('-').map(Number);
-    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
-  } catch {
-    return '-';
-  }
-}
 
 function setDays(days: number) {
   store.daysAhead = days;
@@ -442,6 +433,7 @@ onMounted(() => {
 .appt-table td {
   padding: 10px 16px;
   vertical-align: middle;
+  font-variant-numeric: tabular-nums;
 }
 
 /* -- Table Cells -- */

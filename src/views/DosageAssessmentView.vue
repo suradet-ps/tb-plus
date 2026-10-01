@@ -13,6 +13,7 @@ import { computed, ref, watch } from 'vue';
 import DrugChip from '@/components/shared/DrugChip.vue';
 import { useSettingsStore } from '@/stores/settings';
 import type { DosageAssessmentResult } from '@/types/dosage';
+import { formatThaiDate as toThaiDate } from '@/utils/format';
 
 const settingsStore = useSettingsStore();
 
@@ -62,13 +63,6 @@ async function assessDosage() {
   } finally {
     isLoading.value = false;
   }
-}
-
-function toThaiDate(isoDate: string | null | undefined): string {
-  if (!isoDate) return '-';
-  const [year, month, day] = isoDate.split('-').map(Number);
-  if (!year || !month || !day) return '-';
-  return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year + 543}`;
 }
 
 function formatNumber(value: number | null | undefined, digits = 0): string {

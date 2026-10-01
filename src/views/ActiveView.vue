@@ -426,7 +426,7 @@ tbody tr:last-child td { border-bottom: none; }
 .phase-continuation { background: rgba(42,157,153,0.1); color: var(--color-teal); }
 
 .td-month { min-width: 110px; }
-.month-text { font-weight: var(--weight-emphasis); font-size: var(--text-sm); color: var(--color-text); display: block; margin-bottom: var(--space-2); }
+.month-text { font-weight: var(--weight-emphasis); font-size: var(--text-sm); color: var(--color-text); display: block; margin-bottom: var(--space-2); font-variant-numeric: tabular-nums; }
 .progress-track {
   width: 100%; height: 4px; background: var(--color-surface-alt);
   border-radius: var(--radius-pill); overflow: hidden;
@@ -437,6 +437,7 @@ tbody tr:last-child td { border-bottom: none; }
   display: inline-flex; align-items: center; gap: 3px;
   padding: var(--badge-padding-sm); border-radius: var(--radius-pill);
   font-size: var(--text-caption); font-weight: var(--weight-heading);
+  font-variant-numeric: tabular-nums;
 }
 .days-icon { flex-shrink: 0; }
 .days-ok { background: rgba(26,174,57,0.1); color: var(--color-green); }

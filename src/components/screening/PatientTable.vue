@@ -4,6 +4,7 @@ import { computed, ref, watchEffect } from 'vue';
 import DrugChip from '@/components/shared/DrugChip.vue';
 import { useScreeningStore } from '@/stores/screening';
 import type { PatientDrugRecord } from '@/types/patient';
+import { formatThaiDate as toThaiDate } from '@/utils/format';
 
 const store = useScreeningStore();
 
@@ -95,16 +96,6 @@ function toggleRow(row: PatientDrugRecord) {
 }
 
 // -- Formatters --
-function toThaiDate(isoDate: string | null | undefined): string {
-  if (!isoDate) return '-';
-  try {
-    const [y, m, d] = isoDate.split('-').map(Number);
-    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
-  } catch {
-    return '-';
-  }
-}
-
 function sexLabel(sex: string | null | undefined): string {
   if (sex === 'M' || sex === '1') return '♂';
   if (sex === 'F' || sex === '2') return '♀';

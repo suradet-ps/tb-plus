@@ -17,6 +17,7 @@ import StatusBadge from '@/components/shared/StatusBadge.vue';
 import { useMappingStore } from '@/stores/mapping';
 import { useSettingsStore } from '@/stores/settings';
 import type { MappingPatientRow } from '@/types/mapping';
+import { formatThaiDate } from '@/utils/format';
 
 const mappingStore = useMappingStore();
 const settingsStore = useSettingsStore();
@@ -321,7 +322,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
             </div>
             <div>
               <span class="meta-label">ลงทะเบียน</span>
-              <span class="meta-value">{{ selectedPatient.enrolled_at }}</span>
+              <span class="meta-value">{{ formatThaiDate(selectedPatient.enrolled_at) }}</span>
             </div>
           </div>
 
