@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Clock, Loader2, RotateCcw, Search, UserPlus } from '@lucide/vue';
+import { CheckCircle, Clock, Loader2, RotateCcw, Search, UserPlus, X } from '@lucide/vue';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import EnrollModal from '@/components/screening/EnrollModal.vue';
 import PatientTable from '@/components/screening/PatientTable.vue';
@@ -9,6 +9,8 @@ import { useSettingsStore } from '@/stores/settings';
 const screeningStore = useScreeningStore();
 const settingsStore = useSettingsStore();
 const showEnrollModal = ref(false);
+const enrollSuccessMessage = ref<string | null>(null);
+let enrollSuccessTimer: ReturnType<typeof setTimeout> | null = null;
 
 onMounted(() => {
   if (settingsStore.isConnected) {
@@ -52,6 +54,10 @@ onMounted(() => {
 onUnmounted(() => {
   stopConnectionWatch();
   document.removeEventListener('keydown', onKeydown);
+  if (enrollSuccessTimer) {
+    clearTimeout(enrollSuccessTimer);
+    enrollSuccessTimer = null;
+  }
 });
 
 function resetFilters() {
@@ -59,8 +65,27 @@ function resetFilters() {
   screeningStore.search();
 }
 
-function handleEnrolled() {
+function handleEnrolled(count: number) {
+  // The enrolled patients no longer appear in the selectable results, so the
+  // selection must be dropped or the action bar would stay stuck.
+  screeningStore.clearSelection();
+  enrollSuccessMessage.value = `ลงทะเบียนสำเร็จ ${count} ราย`;
+  if (enrollSuccessTimer) {
+    clearTimeout(enrollSuccessTimer);
+  }
+  enrollSuccessTimer = setTimeout(() => {
+    enrollSuccessMessage.value = null;
+    enrollSuccessTimer = null;
+  }, 4000);
   screeningStore.search();
+}
+
+function dismissEnrollSuccess() {
+  enrollSuccessMessage.value = null;
+  if (enrollSuccessTimer) {
+    clearTimeout(enrollSuccessTimer);
+    enrollSuccessTimer = null;
+  }
 }
 
 function toggleDrugFilter(drug: string) {
@@ -225,6 +250,22 @@ function formatLastSearch(iso: string | null): string {
         ลองใหม่
       </button>
     </div>
+
+    <!-- Enrollment success banner -->
+    <Transition name="action-bar-fade">
+      <div v-if="enrollSuccessMessage" class="success-banner" role="status">
+        <CheckCircle :size="15" aria-hidden="true" />
+        <span>{{ enrollSuccessMessage }}</span>
+        <button
+          type="button"
+          class="success-banner__close"
+          aria-label="ปิด"
+          @click="dismissEnrollSuccess"
+        >
+          <X :size="14" aria-hidden="true" />
+        </button>
+      </div>
+    </Transition>
 
     <!-- Results meta row -->
     <div
@@ -498,6 +539,38 @@ function formatLastSearch(iso: string | null): string {
 
 .error-banner__retry:hover {
   background: rgba(221, 91, 0, 0.08);
+}
+
+/* -- Enrollment success banner -- */
+.success-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  background: var(--alert-success-bg);
+  border: 1px solid var(--border-color-green);
+  border-radius: var(--radius-md);
+  padding: var(--alert-padding);
+  font-size: var(--text-body-sm);
+  color: var(--color-success);
+  margin-bottom: var(--space-8);
+}
+
+.success-banner__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.success-banner__close:hover {
+  background: var(--status-active-bg);
 }
 
 /* -- Results meta -- */

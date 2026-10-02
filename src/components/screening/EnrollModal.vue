@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertCircle, CheckCircle, Loader2, UserPlus, X } from '@lucide/vue';
+import { AlertCircle, Loader2, UserPlus, X } from '@lucide/vue';
 import { computed, ref, toRef, watch } from 'vue';
 import { useFocusTrap } from '@/composables/useFocusTrap';
 import { usePatientStore } from '@/stores/patient';
@@ -13,7 +13,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean];
-  enrolled: [];
+  enrolled: [count: number];
 }>();
 
 const patientStore = usePatientStore();
@@ -28,7 +28,6 @@ const enrolledBy = ref('');
 const notes = ref('');
 const isSubmitting = ref(false);
 const error = ref<string | null>(null);
-const success = ref(false);
 
 // -- Focus trap --
 const panelRef = ref<HTMLElement | null>(null);
@@ -55,7 +54,6 @@ watch(
       enrolledBy.value = '';
       notes.value = '';
       error.value = null;
-      success.value = false;
       isSubmitting.value = false;
     }
   },
@@ -82,8 +80,14 @@ async function submit() {
   isSubmitting.value = true;
   error.value = null;
 
+  // Snapshot the selection: the parent may clear it while the batch is in
+  // flight (for example when Escape clears the selection), and the modal must
+  // still report the number actually enrolled.
+  const patientsToEnroll = [...props.patients];
+
+  let succeeded = false;
   try {
-    for (const patient of props.patients) {
+    for (const patient of patientsToEnroll) {
       const input: EnrollmentInput = {
         hn: patient.hn,
         tb_type: tbType.value,
@@ -95,22 +99,19 @@ async function submit() {
       };
       await patientStore.enrollPatient(input);
     }
-
-    success.value = true;
-    setTimeout(() => {
-      emit('enrolled');
-      close();
-      success.value = false;
-    }, 1200);
+    succeeded = true;
   } catch (e) {
     error.value = String(e);
   } finally {
     isSubmitting.value = false;
   }
-}
 
-function unfocus(e: Event) {
-  (e.target as HTMLElement)?.blur();
+  // Close first and let the page confirm the result, so the success state is
+  // never removed while the modal is fading out.
+  if (succeeded) {
+    emit('enrolled', patientsToEnroll.length);
+    close();
+  }
 }
 </script>
 
@@ -215,23 +216,26 @@ function unfocus(e: Event) {
             <!-- Enrolled by -->
             <div class="form-group">
               <label class="form-label" for="enrolledBy">ลงทะเบียนโดย</label>
+              <select
+                v-if="settingsStore.staffNames.length"
+                id="enrolledBy"
+                v-model="enrolledBy"
+                class="form-select"
+              >
+                <option value="">-- ไม่ระบุ --</option>
+                <option v-for="name in settingsStore.staffNames" :key="name" :value="name">
+                  {{ name }}
+                </option>
+              </select>
               <input
+                v-else
                 id="enrolledBy"
                 type="text"
                 v-model="enrolledBy"
-                list="staff-datalist"
                 class="form-input"
                 placeholder="ชื่อผู้บันทึก (ไม่จำเป็น)"
                 autocomplete="off"
-                @change="unfocus"
               />
-              <datalist id="staff-datalist">
-                <option
-                  v-for="name in settingsStore.staffNames"
-                  :key="name"
-                  :value="name"
-                />
-              </datalist>
             </div>
 
             <!-- Notes -->
@@ -251,12 +255,6 @@ function unfocus(e: Event) {
               <AlertCircle :size="15" class="alert-icon" />
               <span>{{ error }}</span>
             </div>
-
-            <!-- Success alert -->
-            <div v-if="success" class="success-alert" role="status">
-              <CheckCircle :size="15" class="alert-icon" />
-              <span>ลงทะเบียนสำเร็จ {{ patients.length }} ราย</span>
-            </div>
           </div>
 
           <!-- Footer -->
@@ -267,7 +265,7 @@ function unfocus(e: Event) {
             <button
               class="btn-primary"
               type="button"
-              :disabled="isSubmitting || success"
+              :disabled="isSubmitting"
               @click="submit"
             >
               <Loader2 v-if="isSubmitting" :size="14" class="spin" />
@@ -508,8 +506,10 @@ function unfocus(e: Event) {
   color: var(--color-text);
 }
 
-.error-alert,
-.success-alert {
+.error-alert {
+  background: var(--alert-error-bg);
+  border: 1px solid var(--border-color-error);
+  color: var(--color-warning);
   border-radius: var(--radius-sm);
   padding: var(--space-5) var(--space-6);
   font-size: var(--text-body-sm);
@@ -517,18 +517,6 @@ function unfocus(e: Event) {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-}
-
-.error-alert {
-  background: var(--alert-error-bg);
-  border: 1px solid var(--border-color-error);
-  color: var(--color-warning);
-}
-
-.success-alert {
-  background: var(--alert-success-bg);
-  border: 1px solid var(--border-color-green);
-  color: var(--color-success);
 }
 
 .alert-icon {
