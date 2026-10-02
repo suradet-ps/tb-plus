@@ -256,7 +256,7 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 .header-title {
   font-size: var(--text-display-sm);
   font-weight: var(--weight-heading);
-  letter-spacing: -0.3px;
+  letter-spacing: var(--tracking-heading);
   color: var(--color-text);
   margin: 0 0 4px;
 }
@@ -343,7 +343,7 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
   font-size: var(--text-display);
   font-weight: var(--weight-heading);
   line-height: 1;
-  letter-spacing: -0.5px;
+  letter-spacing: var(--tracking-tight);
   color: var(--color-text);
 }
 

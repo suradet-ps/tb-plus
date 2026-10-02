@@ -311,7 +311,7 @@ function sortIcon(key: SortKey): string {
 .view-root { padding: var(--page-root-padding); max-width: 1440px; }
 
 .view-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--space-12); gap: var(--space-8); }
-.header-title { font-size: var(--text-display-sm); font-weight: var(--weight-heading); letter-spacing: -0.3px; margin: 0 0 4px; }
+.header-title { font-size: var(--text-display-sm); font-weight: var(--weight-heading); letter-spacing: var(--tracking-heading); margin: 0 0 4px; }
 .header-sub { font-size: var(--text-body); color: var(--color-text-secondary); margin: 0; }
 .header-sub strong { font-weight: var(--weight-heading); color: var(--color-text); }
 .header-right { flex-shrink: 0; }
@@ -339,7 +339,7 @@ function sortIcon(key: SortKey): string {
 .stat-icon-teal { background: rgba(42,157,153,0.1); color: var(--color-teal); }
 .stat-icon-alert { background: rgba(245,166,35,0.1); color: var(--color-alert-yellow); }
 .stat-body { display: flex; flex-direction: column; gap: 2px; }
-.stat-num { font-size: 24px; font-weight: var(--weight-heading); line-height: 1; letter-spacing: -0.5px; color: var(--color-text); }
+.stat-num { font-size: 24px; font-weight: var(--weight-heading); line-height: 1; letter-spacing: var(--tracking-tight); color: var(--color-text); }
 .stat-num-group { display: flex; align-items: baseline; gap: 4px; line-height: 1; }
 .stat-num-group .stat-num { font-size: var(--text-display-sm); }
 .stat-divider { font-size: var(--text-heading-sm); font-weight: var(--weight-body); color: var(--color-text-muted); }
@@ -375,7 +375,7 @@ thead { background: var(--color-surface-alt); }
 th {
   padding: 10px 12px; font-size: var(--text-caption); font-weight: var(--weight-heading);
   color: var(--color-text-muted); text-transform: uppercase;
-  letter-spacing: 0.4px; text-align: left; white-space: nowrap;
+  letter-spacing: var(--tracking-label); text-align: left; white-space: nowrap;
   border-bottom: var(--border-standard);
 }
 th.sortable { cursor: pointer; user-select: none; }
@@ -420,7 +420,7 @@ tbody tr:last-child td { border-bottom: none; }
 
 .phase-pill {
   display: inline-block; padding: var(--badge-padding); border-radius: var(--radius-pill);
-  font-size: var(--text-caption); font-weight: var(--weight-heading); letter-spacing: 0.2px;
+  font-size: var(--text-caption); font-weight: var(--weight-heading); letter-spacing: var(--tracking-badge);
 }
 .phase-intensive { background: rgba(221,91,0,0.1); color: var(--color-orange); }
 .phase-continuation { background: rgba(42,157,153,0.1); color: var(--color-teal); }

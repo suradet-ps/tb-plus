@@ -184,7 +184,7 @@ onMounted(() => {
 .page-title {
   font-size: var(--text-display-sm);
   font-weight: var(--weight-heading);
-  letter-spacing: -0.03em;
+  letter-spacing: var(--tracking-tighter);
   color: var(--color-text);
   line-height: var(--leading-tight);
 }

@@ -446,7 +446,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 .page-title {
   font-size: var(--text-display-sm);
   font-weight: var(--weight-heading);
-  letter-spacing: -0.3px;
+  letter-spacing: var(--tracking-heading);
   margin-bottom: var(--space-2);
   color: var(--color-text);
 }
@@ -636,7 +636,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 .section-title {
   font-size: var(--text-title-sm);
   font-weight: var(--weight-heading);
-  letter-spacing: -0.2px;
+  letter-spacing: var(--tracking-snug);
   color: var(--color-text);
 }
 
@@ -702,7 +702,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 .meta-label {
   font-size: var(--text-caption);
   font-weight: var(--weight-emphasis);
-  letter-spacing: 0.125px;
+  letter-spacing: var(--tracking-badge);
   color: var(--color-text-muted);
   text-transform: uppercase;
 }
@@ -821,7 +821,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   border-radius: var(--radius-pill);
   font-size: var(--text-caption);
   font-weight: var(--weight-emphasis);
-  letter-spacing: 0.125px;
+  letter-spacing: var(--tracking-badge);
   white-space: nowrap;
 }
 

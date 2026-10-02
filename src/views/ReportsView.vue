@@ -972,7 +972,7 @@ function exportCSV() {
 .header-left h1 {
   font-size: var(--text-display-sm);
   font-weight: var(--weight-heading);
-  letter-spacing: -0.25px;
+  letter-spacing: var(--tracking-heading);
   color: var(--color-text);
   margin: 0 0 4px;
 }
@@ -1066,7 +1066,7 @@ function exportCSV() {
 .qs-value {
   font-size: var(--text-display-lg);
   font-weight: var(--weight-heading);
-  letter-spacing: -0.75px;
+  letter-spacing: var(--tracking-tight);
   line-height: 1;
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
@@ -1135,13 +1135,13 @@ function exportCSV() {
   font-weight: var(--weight-heading);
   color: var(--color-text);
   margin-bottom: 6px;
-  letter-spacing: -0.1px;
+  letter-spacing: var(--tracking-snug);
 }
 
 .report-value {
   font-size: var(--text-display-lg);
   font-weight: var(--weight-heading);
-  letter-spacing: -0.75px;
+  letter-spacing: var(--tracking-tight);
   line-height: 1;
   margin-bottom: 5px;
 }
@@ -1178,7 +1178,7 @@ function exportCSV() {
   font-weight: var(--weight-heading);
   color: var(--color-text);
   margin: 0;
-  letter-spacing: -0.15px;
+  letter-spacing: var(--tracking-snug);
 }
 
 .detail-grid-4 {
@@ -1207,7 +1207,7 @@ function exportCSV() {
 .stat-val {
   font-size: var(--text-display);
   font-weight: var(--weight-heading);
-  letter-spacing: -0.5px;
+  letter-spacing: var(--tracking-tight);
   line-height: 1;
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
@@ -1232,7 +1232,7 @@ function exportCSV() {
   font-weight: var(--weight-heading);
   color: var(--color-text);
   margin: 0 0 10px;
-  letter-spacing: -0.1px;
+  letter-spacing: var(--tracking-snug);
 }
 
 .mini-loader {
@@ -1277,7 +1277,7 @@ function exportCSV() {
   font-weight: var(--weight-heading);
   color: var(--color-text-secondary);
   margin: 0 0 6px;
-  letter-spacing: 0.2px;
+  letter-spacing: var(--tracking-badge);
   text-transform: uppercase;
 }
 
@@ -1288,7 +1288,7 @@ function exportCSV() {
   border-radius: var(--radius-pill);
   font-size: var(--text-xs);
   font-weight: var(--weight-heading);
-  letter-spacing: 0.3px;
+  letter-spacing: var(--tracking-label);
 }
 
 .drug-h { background: var(--drug-H-bg); color: var(--drug-H); }
@@ -1378,7 +1378,7 @@ function exportCSV() {
   font-weight: var(--weight-heading);
   color: var(--color-text);
   margin: 0;
-  letter-spacing: -0.1px;
+  letter-spacing: var(--tracking-snug);
 }
 
 .table-count {

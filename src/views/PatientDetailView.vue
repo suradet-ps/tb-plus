@@ -768,7 +768,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   font-size: var(--text-xs);
   font-weight: var(--weight-heading);
   color: var(--color-text-muted);
-  letter-spacing: 1px;
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
 }
 
@@ -808,7 +808,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 .patient-name {
   font-size: var(--text-display-sm);
   font-weight: var(--weight-heading);
-  letter-spacing: -0.3px;
+  letter-spacing: var(--tracking-heading);
   color: var(--color-text);
   line-height: var(--leading-tight);
   margin: 0;
@@ -917,7 +917,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   font-weight: var(--weight-emphasis);
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: var(--tracking-label);
 }
 
 .enroll-dd {
@@ -931,7 +931,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   font-size: var(--text-heading-sm);
   font-weight: var(--weight-heading);
   color: var(--color-blue);
-  letter-spacing: 0.3px;
+  letter-spacing: var(--tracking-label);
 }
 
 .enroll-outcome {
@@ -1042,7 +1042,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   font-size: var(--text-ui);
   font-weight: var(--weight-heading);
   color: var(--color-text);
-  letter-spacing: -0.15px;
+  letter-spacing: var(--tracking-snug);
   margin: 0;
 }
 
@@ -1120,6 +1120,6 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   color: var(--color-text-muted);
   margin: 4px 0 0;
   font-style: italic;
-  letter-spacing: 0.1px;
+  letter-spacing: var(--tracking-badge);
 }
 </style>

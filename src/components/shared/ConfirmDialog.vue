@@ -132,7 +132,7 @@ function onKeydown(event: KeyboardEvent) {
   font-size: var(--text-heading-sm);
   font-weight: var(--weight-heading);
   color: var(--color-text);
-  letter-spacing: -0.125px;
+  letter-spacing: var(--tracking-snug);
   line-height: var(--leading-snug);
   margin: 0;
 }

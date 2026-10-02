@@ -161,7 +161,7 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
   font-family: var(--font-family);
   font-size: var(--text-ui);
   font-weight: var(--weight-emphasis);
-  letter-spacing: -0.3px;
+  letter-spacing: var(--tracking-heading);
   color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
@@ -203,7 +203,7 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
   font-family: var(--font-family);
   font-size: 13.5px;
   font-weight: var(--weight-ui);
-  letter-spacing: -0.1px;
+  letter-spacing: var(--tracking-snug);
   user-select: none;
 }
 
@@ -351,6 +351,6 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
   font-size: var(--text-2xs);
   color: var(--color-text-muted);
   text-align: center;
-  letter-spacing: 0.1px;
+  letter-spacing: var(--tracking-badge);
 }
 </style>
