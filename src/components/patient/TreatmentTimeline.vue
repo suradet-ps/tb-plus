@@ -484,7 +484,7 @@ const gapZones = computed<GapZone[]>((() => {
   color: rgba(0, 0, 0, 0.65);
   white-space: nowrap;
   margin-top: 3px;
-  letter-spacing: 0.3px;
+  letter-spacing: var(--tracking-label);
 }
 
 .boundary-label {

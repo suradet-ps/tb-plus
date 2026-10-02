@@ -575,7 +575,7 @@ function onKeydown(e: KeyboardEvent) {
   font-size: var(--text-heading-sm);
   font-weight: var(--weight-heading);
   color: var(--color-text);
-  letter-spacing: -0.125px;
+  letter-spacing: var(--tracking-snug);
   margin: 0;
 }
 
@@ -583,7 +583,7 @@ function onKeydown(e: KeyboardEvent) {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
   font-weight: var(--weight-emphasis);
-  letter-spacing: 0.3px;
+  letter-spacing: var(--tracking-label);
 }
 
 .btn-close {
@@ -783,7 +783,7 @@ function onKeydown(e: KeyboardEvent) {
   font-weight: var(--weight-heading);
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--tracking-label);
 }
 
 .checkbox-item {

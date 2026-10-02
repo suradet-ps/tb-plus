@@ -550,7 +550,7 @@ function hasMeaningfulData(f: Followup): boolean {
   font-size: var(--text-body);
   font-weight: var(--weight-emphasis);
   color: var(--color-text);
-  letter-spacing: -0.1px;
+  letter-spacing: var(--tracking-snug);
 }
 
 .month-badge {
@@ -654,7 +654,7 @@ function hasMeaningfulData(f: Followup): boolean {
   font-weight: var(--weight-emphasis);
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: var(--tracking-label);
 }
 
 .result-icon {
