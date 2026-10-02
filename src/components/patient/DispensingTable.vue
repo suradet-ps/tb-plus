@@ -3,6 +3,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import DrugChip from '@/components/shared/DrugChip.vue';
 import type { DispensingRecord } from '@/types/dispensing';
+import { formatThaiDate as toThaiDate } from '@/utils/format';
 
 const props = defineProps<{
   records: DispensingRecord[];
@@ -57,15 +58,6 @@ const uniqueClasses = computed(
 );
 
 // -- Helpers --
-
-function toThaiDate(iso: string): string {
-  try {
-    const [y, m, d] = iso.split('-').map(Number);
-    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
-  } catch {
-    return iso;
-  }
-}
 
 function rowClass(drugClass: string | null): string {
   switch (drugClass) {

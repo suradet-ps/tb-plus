@@ -6,6 +6,7 @@ import EmptyState from '@/components/shared/EmptyState.vue';
 import ErrorState from '@/components/shared/ErrorState.vue';
 import LoadingState from '@/components/shared/LoadingState.vue';
 import { usePatientStore } from '@/stores/patient';
+import { outcomeLabel, formatThaiDate as toThaiDate } from '@/utils/format';
 
 const patientStore = usePatientStore();
 
@@ -16,32 +17,7 @@ onMounted(() => {
 const total = computed(() => patientStore.dischargedPatients.length);
 
 function getOutcomeLabel(p: import('@/types/patient').ActivePatientRow): string {
-  const outcome = p.outcome_value ?? p.tb_patient.status;
-  switch (outcome) {
-    case 'cured':
-      return 'หาย';
-    case 'treatment_completed':
-      return 'รักษาครบ';
-    case 'treatment_failed':
-      return 'รักษาล้มเหลว';
-    case 'died':
-      return 'เสียชีวิต';
-    case 'lost_to_followup':
-      return 'ขาดการรักษา';
-    case 'transferred_out':
-      return 'ส่งต่อ';
-    case 'not_evaluated':
-      return 'ไม่ได้ประเมิน';
-    // Fallback for legacy tb_patients.status values
-    case 'completed':
-      return 'รักษาครบ';
-    case 'transferred':
-      return 'ส่งต่อ';
-    case 'defaulted':
-      return 'ขาดการรักษา';
-    default:
-      return outcome;
-  }
+  return outcomeLabel(p.outcome_value ?? p.tb_patient.status);
 }
 
 function getOutcomeColor(p: import('@/types/patient').ActivePatientRow): string {
@@ -93,16 +69,6 @@ function getOutcomeBg(p: import('@/types/patient').ActivePatientRow): string {
       return 'var(--outcome-transferred-bg)';
     default:
       return 'var(--outcome-not-evaluated-bg)';
-  }
-}
-
-function toThaiDate(iso: string | null | undefined): string {
-  if (!iso) return '-';
-  try {
-    const [y, m, d] = iso.split('-').map(Number);
-    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
-  } catch {
-    return iso ?? '-';
   }
 }
 
@@ -462,6 +428,7 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .outcome-badge {

@@ -26,6 +26,7 @@ import LoadingState from '@/components/shared/LoadingState.vue';
 import StatusBadge from '@/components/shared/StatusBadge.vue';
 import { useAlertStore } from '@/stores/alerts';
 import { usePatientStore } from '@/stores/patient';
+import { outcomeLabel, formatThaiDate as toThaiDate } from '@/utils/format';
 
 // -- Props --
 
@@ -199,16 +200,6 @@ function handleDischarged() {
 }
 
 // -- Helpers --
-
-function toThaiDate(iso: string | null | undefined): string {
-  if (!iso) return '-';
-  try {
-    const [y, m, d] = iso.split('-').map(Number);
-    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
-  } catch {
-    return iso;
-  }
-}
 
 function sexLabel(sex: string | null | undefined): string | null {
   if (!sex) return null;
@@ -434,7 +425,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
             <!-- Treatment outcome if available -->
             <div v-if="detail.outcome" class="enroll-item">
               <dt class="enroll-dt">ผลการรักษา</dt>
-              <dd class="enroll-dd enroll-outcome">{{ detail.outcome.outcome }}</dd>
+              <dd class="enroll-dd enroll-outcome">{{ outcomeLabel(detail.outcome.outcome) }}</dd>
             </div>
           </dl>
 

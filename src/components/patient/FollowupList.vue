@@ -11,6 +11,7 @@ import {
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import type { Followup } from '@/types/treatment';
+import { formatThaiDate as toThaiDate } from '@/utils/format';
 
 const props = defineProps<{
   followups: Followup[];
@@ -42,15 +43,6 @@ function isExpanded(id: number): boolean {
 }
 
 // -- Date helpers --
-
-function toThaiDate(iso: string): string {
-  try {
-    const [y, m, d] = iso.split('-').map(Number);
-    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
-  } catch {
-    return iso;
-  }
-}
 
 function toThaiDateLong(iso: string): string {
   const MONTH_TH = [

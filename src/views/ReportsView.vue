@@ -19,6 +19,7 @@ import { useAlertStore } from '@/stores/alerts';
 import { usePatientStore } from '@/stores/patient';
 import type { DrugConsumptionRow } from '@/types/reports';
 import type { TreatmentPlan } from '@/types/treatment';
+import { formatThaiDate, outcomeLabel } from '@/utils/format';
 
 const patientStore = usePatientStore();
 const alertStore = useAlertStore();
@@ -617,10 +618,10 @@ function exportCSV() {
                       'outcome-info': p.outcome_value === 'transferred_out',
                     }"
                   >
-                    {{ p.outcome_value ?? '-' }}
+                    {{ outcomeLabel(p.outcome_value) }}
                   </span>
                 </td>
-                <td>{{ p.tb_patient.updated_at?.slice(0, 10) ?? '-' }}</td>
+                <td>{{ formatThaiDate(p.tb_patient.updated_at) }}</td>
               </tr>
             </tbody>
           </table>
@@ -843,7 +844,7 @@ function exportCSV() {
                     {{ p.status === 'active' ? 'กำลังรักษา' : p.status }}
                   </span>
                 </td>
-                <td>{{ p.outcome ?? '-' }}</td>
+                <td>{{ outcomeLabel(p.outcome) }}</td>
               </tr>
             </tbody>
           </table>
@@ -1068,6 +1069,7 @@ function exportCSV() {
   letter-spacing: -0.75px;
   line-height: 1;
   color: var(--color-text);
+  font-variant-numeric: tabular-nums;
 }
 
 .qs-orange { color: var(--color-orange); }
@@ -1208,6 +1210,7 @@ function exportCSV() {
   letter-spacing: -0.5px;
   line-height: 1;
   color: var(--color-text);
+  font-variant-numeric: tabular-nums;
 }
 
 .stat-lbl {
@@ -1288,9 +1291,9 @@ function exportCSV() {
   letter-spacing: 0.3px;
 }
 
-.drug-h { background: var(--tint-blue); color: var(--color-accent); }
-.drug-r { background: var(--status-defaulted-bg); color: var(--color-warning); }
-.drug-e { background: var(--status-completed-bg); color: var(--color-info); }
+.drug-h { background: var(--drug-H-bg); color: var(--drug-H); }
+.drug-r { background: var(--drug-R-bg); color: var(--drug-R); }
+.drug-e { background: var(--drug-E-bg); color: var(--drug-E); }
 .drug-z { background: var(--drug-Z-bg); color: var(--drug-Z); }
 
 /* Outcome pill */

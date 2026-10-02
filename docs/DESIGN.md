@@ -62,32 +62,46 @@ What makes Notion's visual language distinctive is its border philosophy. Rather
 - **Offline**: fonts ship with the bundle and are never fetched from Google Fonts, so the UI renders identically on isolated clinic machines.
 - **OpenType Features**: `"lnum"` (lining numerals) and `"locl"` (localized forms) enabled on display and heading text.
 
-### Hierarchy
+### Hierarchy (implemented desktop scale)
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
-|------|------|------|--------|-------------|----------------|-------|
-| Display Hero | NotionInter | 64px (4.00rem) | 700 | 1.00 (tight) | -2.125px | Maximum compression, billboard headlines |
-| Display Secondary | NotionInter | 54px (3.38rem) | 700 | 1.04 (tight) | -1.875px | Secondary hero, feature headlines |
-| Section Heading | NotionInter | 48px (3.00rem) | 700 | 1.00 (tight) | -1.5px | Feature section titles, with `"lnum"` |
-| Sub-heading Large | NotionInter | 40px (2.50rem) | 700 | 1.50 | normal | Card headings, feature sub-sections |
-| Sub-heading | NotionInter | 26px (1.63rem) | 700 | 1.23 (tight) | -0.625px | Section sub-titles, content headers |
-| Card Title | NotionInter | 22px (1.38rem) | 700 | 1.27 (tight) | -0.25px | Feature cards, list titles |
-| Body Large | NotionInter | 20px (1.25rem) | 600 | 1.40 | -0.125px | Introductions, feature descriptions |
-| Body | NotionInter | 16px (1.00rem) | 400 | 1.50 | normal | Standard reading text |
-| Body Medium | NotionInter | 16px (1.00rem) | 500 | 1.50 | normal | Navigation, emphasized UI text |
-| Body Semibold | NotionInter | 16px (1.00rem) | 600 | 1.50 | normal | Strong labels, active states |
-| Body Bold | NotionInter | 16px (1.00rem) | 700 | 1.50 | normal | Headlines at body size |
-| Nav / Button | NotionInter | 15px (0.94rem) | 600 | 1.33 | normal | Navigation links, button text |
-| Caption | NotionInter | 14px (0.88rem) | 500 | 1.43 | normal | Metadata, secondary labels |
-| Caption Light | NotionInter | 14px (0.88rem) | 400 | 1.43 | normal | Body captions, descriptions |
-| Badge | NotionInter | 12px (0.75rem) | 600 | 1.33 | 0.125px | Pill badges, tags, status labels |
-| Micro Label | NotionInter | 12px (0.75rem) | 400 | 1.33 | 0.125px | Small metadata, timestamps |
+The application runs a denser scale than the marketing reference above. The
+tokens in `src/styles/variables.css` are canonical; components compose them
+with the weight, leading, and tracking tokens listed below.
+
+| Token | Size | Typical role |
+|-------|------|--------------|
+| `--text-display-lg` | 30px | Hero statistics, large display numbers |
+| `--text-display` | 24px | Page titles |
+| `--text-display-sm` | 22px | Page and section titles |
+| `--text-title` | 20px | Card titles |
+| `--text-title-sm` | 18px | Dialog and panel titles |
+| `--text-heading` | 17px | Sub-sections |
+| `--text-heading-sm` | 16px | Card headings |
+| `--text-ui` | 15px | Navigation, buttons, interactive text |
+| `--text-body` | 14px | Body text |
+| `--text-body-sm` | 13px | Secondary text, table cells |
+| `--text-sm` | 12px | Metadata, captions |
+| `--text-caption` | 11px | Badges, table headers |
+| `--text-xs` / `--text-2xs` | 10px | Chips, micro labels |
+
+- **Weights**: `--weight-body` 400, `--weight-ui` 500, `--weight-emphasis` 600,
+  `--weight-heading` 700, `--weight-heavy` 800.
+- **Leading**: `--leading-tight` 1.2, `--leading-snug` 1.3,
+  `--leading-compact` 1.33, `--leading-normal` 1.4, `--leading-body` 1.5,
+  `--leading-relaxed` 1.6. Thai text keeps at least the body leading (1.5) so
+  ascenders and tone marks do not crowd; the compact values are for Latin-only
+  badges and metadata.
 
 ### Principles
-- **Compression at scale**: NotionInter at display sizes uses -2.125px letter-spacing at 64px, progressively relaxing to -0.625px at 26px and normal at 16px. The compression creates density at headlines while maintaining readability at body sizes.
-- **Four-weight system**: 400 (body/reading), 500 (UI/interactive), 600 (emphasis/navigation), 700 (headings/display). The broader weight range compared to most systems allows nuanced hierarchy.
-- **Warm scaling**: Line height tightens as size increases -- 1.50 at body (16px), 1.23-1.27 at sub-headings, 1.00-1.04 at display. This creates denser, more impactful headlines.
-- **Badge micro-tracking**: The 12px badge text uses positive letter-spacing (0.125px) -- the only positive tracking in the system, creating wider, more legible small text.
+- **Core four-weight system**: 400 for body, 500 for interactive UI, 600 for
+  emphasis and navigation, 700 for headings and display. Use
+  `--weight-heavy` (800) only for extreme emphasis.
+- **Density with legibility**: the desktop app runs one step smaller than the
+  marketing reference -- body text is 14px and table cells are 13px.
+- **Tabular numerals**: numeric and date cells use
+  `font-variant-numeric: tabular-nums` so columns align.
+- **Badge micro-tracking**: small badge and caption text uses
+  `--tracking-badge` (0.125px) for legibility at 10-11px.
 
 ## 4. Component Stylings
 

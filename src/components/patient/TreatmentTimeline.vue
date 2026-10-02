@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { Followup, TreatmentPlan } from '@/types/treatment';
+import { formatThaiDate as toThaiDate } from '@/utils/format';
 
 const props = defineProps<{
   plans: TreatmentPlan[];
@@ -26,15 +27,6 @@ function parseRegimen(regimen: string): { intensiveMonths: number; continuationM
   }
   // sensible fallback for standard regimen
   return { intensiveMonths: 2, continuationMonths: 4 };
-}
-
-function toThaiDate(iso: string): string {
-  try {
-    const [y, m, d] = iso.split('-').map(Number);
-    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y + 543}`;
-  } catch {
-    return iso;
-  }
 }
 
 // -- Plan resolution --
