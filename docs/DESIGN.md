@@ -93,8 +93,9 @@ with the weight, leading, and tracking tokens listed below.
   badges and metadata.
 
 ### Principles
-- **Four-weight system**: 400 for body, 500 for interactive UI, 600 for
-  emphasis and navigation, 700 for headings and display.
+- **Core four-weight system**: 400 for body, 500 for interactive UI, 600 for
+  emphasis and navigation, 700 for headings and display. Use
+  `--weight-heavy` (800) only for extreme emphasis.
 - **Density with legibility**: the desktop app runs one step smaller than the
   marketing reference -- body text is 14px and table cells are 13px.
 - **Tabular numerals**: numeric and date cells use

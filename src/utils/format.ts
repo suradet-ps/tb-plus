@@ -1,12 +1,20 @@
 /**
- * Format a CE ISO date (YYYY-MM-DD, optionally with a time suffix) as a Thai
- * Buddhist Era date (DD/MM/YYYY). Empty input yields '-'; unrecognized input
- * is returned unchanged so a malformed value is visible instead of hidden.
+ * Format a CE ISO date (`YYYY-MM-DD`, optionally followed by a time part) as a
+ * Thai Buddhist Era date (DD/MM/YYYY). Empty input yields '-'; malformed dates
+ * or invalid calendar dates are returned unchanged so bad data stays visible.
  */
 export function formatThaiDate(iso: string | null | undefined): string {
   if (!iso) return '-';
-  const [year, month, day] = iso.slice(0, 10).split('-').map(Number);
-  if (!year || !month || !day) return iso;
+  const match = /^(\d{4})-(\d{2})-(\d{2})(?:[T ].*)?$/.exec(iso);
+  if (!match) return iso;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (month < 1 || month > 12) return iso;
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  if (day < 1 || day > daysInMonth) return iso;
+
   return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year + 543}`;
 }
 
