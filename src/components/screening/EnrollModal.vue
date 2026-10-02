@@ -80,9 +80,14 @@ async function submit() {
   isSubmitting.value = true;
   error.value = null;
 
+  // Snapshot the selection: the parent may clear it while the batch is in
+  // flight (for example when Escape clears the selection), and the modal must
+  // still report the number actually enrolled.
+  const patientsToEnroll = [...props.patients];
+
   let succeeded = false;
   try {
-    for (const patient of props.patients) {
+    for (const patient of patientsToEnroll) {
       const input: EnrollmentInput = {
         hn: patient.hn,
         tb_type: tbType.value,
@@ -104,7 +109,7 @@ async function submit() {
   // Close first and let the page confirm the result, so the success state is
   // never removed while the modal is fading out.
   if (succeeded) {
-    emit('enrolled', props.patients.length);
+    emit('enrolled', patientsToEnroll.length);
     close();
   }
 }

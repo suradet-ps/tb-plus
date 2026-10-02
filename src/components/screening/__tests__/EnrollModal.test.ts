@@ -67,4 +67,42 @@ describe('EnrollModal', () => {
     expect(wrapper.emitted('update:modelValue')).toEqual([[false]]);
     expect(wrapper.find('.success-alert').exists()).toBe(false);
   });
+
+  it('should emit the number actually enrolled when the selection changes mid-flight', async () => {
+    const resolvers: Array<(value: unknown) => void> = [];
+    vi.mocked(invoke).mockImplementation((cmd: string) => {
+      if (cmd === 'enroll_patient') {
+        return new Promise((resolve) => {
+          resolvers.push(resolve);
+        });
+      }
+      return Promise.resolve([]);
+    });
+
+    const wrapper = mount(EnrollModal, {
+      props: {
+        modelValue: true,
+        patients: [
+          createPatientDrugRecord({ hn: 'HN00001' }),
+          createPatientDrugRecord({ hn: 'HN00002' }),
+        ],
+      },
+      global: {
+        stubs: { Teleport: true },
+      },
+    });
+
+    await wrapper.find('input#treatmentStart').setValue('2026-09-01');
+    await wrapper.find('.modal-footer .btn-primary').trigger('click');
+
+    // The parent clears the selection while the first enrollment is pending.
+    await wrapper.setProps({ patients: [] });
+
+    resolvers[0]?.(1);
+    await flushPromises();
+    resolvers[1]?.(1);
+    await flushPromises();
+
+    expect(wrapper.emitted('enrolled')).toEqual([[2]]);
+  });
 });
