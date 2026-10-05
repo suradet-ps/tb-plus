@@ -204,29 +204,29 @@ function sexLabel(sex: string | null | undefined): string {
       <tbody v-if="store.isLoading">
         <tr v-for="i in 5" :key="i" class="skeleton-row">
           <td>
-            <div class="skeleton-line" style="width: 16px; height: 16px; border-radius: 3px" />
+            <div class="skeleton skeleton-line" style="width: 16px; height: 16px; border-radius: 3px" />
           </td>
-          <td><div class="skeleton-line" style="width: 76px" /></td>
-          <td><div class="skeleton-line" style="width: 148px" /></td>
-          <td><div class="skeleton-line" style="width: 54px" /></td>
-          <td><div class="skeleton-line" style="width: 88px" /></td>
-          <td><div class="skeleton-line" style="width: 88px" /></td>
+          <td><div class="skeleton skeleton-line" style="width: 76px" /></td>
+          <td><div class="skeleton skeleton-line" style="width: 148px" /></td>
+          <td><div class="skeleton skeleton-line" style="width: 54px" /></td>
+          <td><div class="skeleton skeleton-line" style="width: 88px" /></td>
+          <td><div class="skeleton skeleton-line" style="width: 88px" /></td>
           <td>
-            <div class="skeleton-line" style="width: 26px; margin: 0 auto" />
+            <div class="skeleton skeleton-line" style="width: 26px; margin: 0 auto" />
           </td>
           <td>
             <div style="display: flex; gap: 4px">
               <div
-                class="skeleton-line"
+                class="skeleton skeleton-line"
                 style="width: 26px; height: 20px; border-radius: 9999px"
               />
               <div
-                class="skeleton-line"
+                class="skeleton skeleton-line"
                 style="width: 26px; height: 20px; border-radius: 9999px"
               />
             </div>
           </td>
-          <td><div class="skeleton-line" style="width: 96px" /></td>
+          <td><div class="skeleton skeleton-line" style="width: 96px" /></td>
         </tr>
       </tbody>
 
@@ -475,15 +475,6 @@ td {
 
 .skeleton-line {
   height: 18px;
-  border-radius: var(--radius-sm);
-  background: linear-gradient(90deg, var(--skeleton-color-1) 25%, var(--skeleton-color-2) 50%, var(--skeleton-color-1) 75%);
-  background-size: 200% 100%;
-  animation: skeleton-shimmer 1.4s infinite;
-}
-
-@keyframes skeleton-shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
 }
 
 .empty-td {

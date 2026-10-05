@@ -660,16 +660,6 @@ function formatLastSearch(iso: string | null): string {
 }
 
 /* -- Spinner -- */
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* -- Last search badge -- */
 .last-search-badge {
   display: inline-flex;

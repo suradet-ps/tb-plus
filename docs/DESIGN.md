@@ -318,10 +318,37 @@ with the weight, leading, and tracking tokens listed below.
 
 ### Iteration Guide
 1. Always use warm neutrals -- Notion's grays have yellow-brown undertones (#f6f5f4, #31302e, #615d59, #a39e98), never blue-gray
-2. Letter-spacing scales with font size: -2.125px at 64px, -1.875px at 54px, -0.625px at 26px, normal at 16px
+2. Letter-spacing uses the `--tracking-*` token ladder; never hardcode values
 3. Four weights: 400 (read), 500 (interact), 600 (emphasize), 700 (announce)
 4. Borders are whispers: 1px solid rgba(0,0,0,0.1) -- never heavier
 5. Shadows use 4-5 layers with individual opacity never exceeding 0.05
 6. The warm white (#f6f5f4) section background is essential for visual rhythm
 7. Pill badges (9999px) for status/tags, 4px radius for buttons and inputs
 8. Notion Blue (#0075de) is the only saturated color in core UI -- use it sparingly for CTAs and links
+
+---
+
+## 10. Motion
+
+Motion uses the shared duration and easing tokens in `src/styles/variables.css`;
+components do not hardcode durations or curves.
+
+- **Durations**: `--duration-instant` 80ms, `--duration-fast` 120ms,
+  `--duration-base` 150ms, `--duration-normal` 180ms, `--duration-slow` 200ms,
+  `--duration-medium` 250ms, `--duration-pulse` 400ms, `--duration-animate`
+  900ms, `--duration-loop` 1500ms.
+- **Easing**: `--ease-standard` is `cubic-bezier(0.2, 0, 0, 1)` (Material 3
+  standard) and is used for every utility and content transition.
+  `--ease-in-out` is reserved for looping animations.
+- **Composited properties only**: animate `transform` and `opacity`. Progress
+  fills animate `transform: scaleX()` with `transform-origin: left`, never
+  `width`.
+- **Two dialog recipes**:
+  - Dialog: the backdrop fades (`--transition-modal`) while the panel fades and
+    scales from `scale(0.96) translateY(6px)` (`--transition-modal-panel`).
+    Used by `ConfirmDialog`, the settings phase editor, `EnrollModal`, and
+    `DischargeModal`.
+  - Side panel: the backdrop fades while the panel slides in from the right
+    (`translateX(100%)`). Used by `FollowupForm`.
+- **Reduced motion**: the global `prefers-reduced-motion` override shortens all
+  animation and transition durations.

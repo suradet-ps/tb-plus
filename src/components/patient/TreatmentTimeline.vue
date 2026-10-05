@@ -392,7 +392,6 @@ const gapZones = computed<GapZone[]>((() => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  transition: width var(--duration-pulse) var(--ease-standard);
   min-width: 4px;
   flex-shrink: 0;
 }

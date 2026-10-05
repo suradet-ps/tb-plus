@@ -388,7 +388,7 @@ function sexLabel(sex: string | null | undefined): string | null {
   color: var(--color-text);
   background: var(--color-surface);
   outline: none;
-  transition: border-color 0.13s, box-shadow 0.13s;
+  transition: var(--transition-input);
 }
 
 .form-input:focus {
@@ -417,7 +417,7 @@ function sexLabel(sex: string | null | undefined): string | null {
   font-family: var(--font-family);
   cursor: pointer;
   border-radius: var(--radius-sm);
-  transition: background 0.13s;
+  transition: var(--transition-bg);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -600,14 +600,6 @@ function sexLabel(sex: string | null | undefined): string | null {
 
 .empty-card--large {
   padding: 56px 24px;
-}
-
-.spin {
-  animation: spin 0.85s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 @media (max-width: 960px) {

@@ -1331,7 +1331,7 @@ function cancelRestore() {
   border: none;
   width: 100%;
   text-align: left;
-  transition: background 0.13s, color 0.13s;
+  transition: var(--transition-bg), var(--transition-color);
 }
 
 .nav-item:hover {
@@ -1445,7 +1445,7 @@ function cancelRestore() {
   background: var(--color-surface);
   outline: none;
   width: 100%;
-  transition: border-color 0.13s, box-shadow 0.13s;
+  transition: var(--transition-input);
 }
 
 .form-input:focus {
@@ -1480,7 +1480,7 @@ function cancelRestore() {
   font-family: var(--font-family);
   cursor: pointer;
   border-radius: var(--radius-sm);
-  transition: background 0.13s;
+  transition: var(--transition-bg);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -1505,7 +1505,7 @@ function cancelRestore() {
   cursor: pointer;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
-  transition: background 0.13s;
+  transition: var(--transition-bg);
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -1530,7 +1530,7 @@ function cancelRestore() {
   cursor: pointer;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
-  transition: background 0.13s, border-color 0.13s;
+  transition: var(--transition-bg), var(--transition-border);
 }
 
 .btn-ghost-download:hover:not(:disabled) {
@@ -1556,7 +1556,7 @@ function cancelRestore() {
   cursor: pointer;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
-  transition: background 0.13s, border-color 0.13s;
+  transition: var(--transition-bg), var(--transition-border);
 }
 
 .btn-ghost-restore:hover:not(:disabled) {
@@ -1590,7 +1590,7 @@ function cancelRestore() {
   font-size: var(--text-body-sm);
   font-weight: var(--weight-ui);
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition: var(--transition-bg), var(--transition-color);
   white-space: nowrap;
 }
 
@@ -1764,7 +1764,7 @@ function cancelRestore() {
   background: var(--color-surface-alt);
   border: var(--border-standard);
   border-radius: var(--radius-md);
-  transition: background 0.1s;
+  transition: var(--transition-bg);
 }
 
 .staff-item:hover {
@@ -1807,7 +1807,7 @@ function cancelRestore() {
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
-  transition: color 0.13s, background 0.13s;
+  transition: var(--transition-color), var(--transition-bg);
   flex-shrink: 0;
 }
 
@@ -1889,12 +1889,7 @@ function cancelRestore() {
 
 /* -- Spin animation -- */
 .spin {
-  animation: spin 0.85s linear infinite;
   flex-shrink: 0;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 /* -- Drug search - search-first flow -- */
@@ -1935,7 +1930,7 @@ function cancelRestore() {
   padding: 6px 12px;
   border-bottom: 1px solid rgba(0,0,0,0.05);
   font-size: var(--text-body-sm);
-  transition: background 0.1s;
+  transition: var(--transition-bg);
 }
 .sr-row:last-child { border-bottom: none; }
 .sr-row:hover { background: rgba(0,0,0,0.02); }
@@ -2089,7 +2084,7 @@ function cancelRestore() {
   font-weight: var(--weight-emphasis);
   cursor: pointer;
   color: var(--color-text-secondary);
-  transition: background 0.13s;
+  transition: var(--transition-bg);
 }
 .btn-secondary-sm:hover { background: var(--color-surface-alt); }
 
@@ -2102,7 +2097,7 @@ function cancelRestore() {
   border-radius: var(--radius-sm);
   cursor: pointer;
   color: var(--color-text-muted);
-  transition: color 0.13s, background 0.13s;
+  transition: var(--transition-color), var(--transition-bg);
 }
 .btn-ghost-danger-sm:hover { color: var(--color-orange); background: rgba(221,91,0,0.08); }
 
@@ -2239,7 +2234,7 @@ function cancelRestore() {
   font-family: var(--font-family-mono-simple);
   cursor: pointer;
   color: var(--color-text-muted);
-  transition: all 0.1s;
+  transition: var(--transition-bg), var(--transition-color), var(--transition-border);
 }
 .toggle-btn.active {
   background: var(--color-blue);

@@ -286,7 +286,7 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
   cursor: pointer;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
-  transition: background 0.15s;
+  transition: var(--transition-bg);
 }
 
 .btn-ghost:hover:not(:disabled) {
@@ -390,7 +390,7 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 
 .data-row {
   border-bottom: var(--border-standard);
-  transition: background 0.1s;
+  transition: var(--transition-bg);
 }
 
 .data-row:last-child {
@@ -458,11 +458,4 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 }
 
 /* -- Spinner -- */
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
 </style>

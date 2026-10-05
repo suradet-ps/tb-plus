@@ -751,8 +751,7 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .modal-enter-active .modal-panel {
-  transition: opacity var(--duration-slow) var(--ease-standard),
-    transform var(--duration-slow) cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: var(--transition-modal-panel);
 }
 
 .modal-leave-active .modal-panel {
@@ -782,13 +781,6 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .spin {
-  animation: spin var(--duration-animate) linear infinite;
   flex-shrink: 0;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 </style>

@@ -293,6 +293,21 @@ async function submit() {
   opacity: 0;
 }
 
+.modal-fade-enter-active .modal-panel {
+  transition: var(--transition-modal-panel);
+}
+
+.modal-fade-leave-active .modal-panel {
+  transition: opacity var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-standard);
+}
+
+.modal-fade-enter-from .modal-panel,
+.modal-fade-leave-to .modal-panel {
+  opacity: 0;
+  transform: scale(0.96) translateY(6px);
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -607,13 +622,4 @@ async function submit() {
   cursor: not-allowed;
 }
 
-.spin {
-  animation: spin var(--duration-animate) linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
 </style>

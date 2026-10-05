@@ -648,7 +648,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   color: var(--color-text-secondary);
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
+  transition: var(--transition-bg), var(--transition-color);
 }
 
 .btn-back:hover {
@@ -677,7 +677,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   font-family: var(--font-family);
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: var(--transition-bg), var(--transition-color);
 }
 
 .btn-ghost-sm:hover:not(:disabled) {
@@ -704,7 +704,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   color: var(--color-teal);
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s;
+  transition: var(--transition-bg), var(--transition-border);
 }
 
 .btn-followup:hover {
@@ -726,7 +726,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   color: var(--color-orange);
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s;
+  transition: var(--transition-bg), var(--transition-border);
 }
 
 .btn-discharge:hover {
@@ -987,7 +987,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   white-space: nowrap;
   flex-shrink: 0;
   margin-bottom: -1px; /* overlap the border-bottom of tabs-bar */
-  transition: color 0.15s, border-color 0.15s;
+  transition: var(--transition-color), var(--transition-border);
 }
 
 .tab-btn:hover {
@@ -1012,7 +1012,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   font-weight: var(--weight-heading);
   padding: 0 5px;
   line-height: 1;
-  transition: background 0.15s, color 0.15s;
+  transition: var(--transition-bg), var(--transition-color);
 }
 
 .tab-badge-active {
@@ -1074,7 +1074,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   font-family: var(--font-family);
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s;
+  transition: var(--transition-bg);
 }
 
 .btn-add:hover {
@@ -1083,11 +1083,11 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 
 /* -- Alert banner slide-in transition -- */
 .banner-slide-enter-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: var(--transition-modal-panel);
 }
 
 .banner-slide-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: var(--transition-modal-panel);
 }
 
 .banner-slide-enter-from,
@@ -1098,14 +1098,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 
 /* -- Spin animation -- */
 .spin {
-  animation: spin 1s linear infinite;
   flex-shrink: 0;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .phase-stale-dot {

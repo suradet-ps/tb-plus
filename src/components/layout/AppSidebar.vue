@@ -329,7 +329,7 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
   height: 6px;
   border-radius: var(--radius-pill);
   flex-shrink: 0;
-  animation: pulse-dot 2s ease-in-out infinite;
+  animation: pulse-dot var(--duration-loop) var(--ease-in-out) infinite;
 }
 
 .conn-row--ok .conn-dot {

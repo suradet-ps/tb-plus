@@ -327,13 +327,14 @@
 
 /* -- 10. TRANSITIONS -- */
 :root {
-  --ease-standard: ease;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-in-out: ease-in-out;
   --duration-instant: 80ms;
   --duration-fast: 120ms;
   --duration-base: 150ms;
   --duration-normal: 180ms;
   --duration-slow: 200ms;
+  --duration-medium: 250ms;
   --duration-pulse: 400ms;
   --duration-animate: 900ms;
   --duration-loop: 1500ms;
@@ -352,7 +353,7 @@
   --transition-modal-panel:
     opacity var(--duration-slow) var(--ease-standard),
     transform var(--duration-slow) var(--ease-standard);
-  --transition-progress: width var(--duration-pulse) var(--ease-standard);
+  --transition-progress: transform var(--duration-pulse) var(--ease-standard);
   --transition-fade-slide:
     opacity var(--duration-normal) var(--ease-standard),
     transform var(--duration-normal) var(--ease-standard);

@@ -40,7 +40,7 @@ const barColor = computed(() => {
       <div
         class="progress__fill"
         :class="{ 'progress__fill--overrun': isOverrun }"
-        :style="{ width: pct + '%', background: barColor }"
+        :style="{ transform: `scaleX(${pct / 100})`, background: barColor }"
       />
     </div>
   </div>
@@ -76,8 +76,10 @@ const barColor = computed(() => {
 }
 
 .progress__fill {
+  width: 100%;
   height: 100%;
   border-radius: var(--progress-radius);
+  transform-origin: left;
   transition: var(--transition-progress);
 }
 
@@ -85,8 +87,4 @@ const barColor = computed(() => {
   animation: pulse var(--duration-loop) ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
 </style>
