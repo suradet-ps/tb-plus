@@ -226,7 +226,7 @@ const infoItems: InfoItem[] = [
   font-family: var(--font-family);
   font-size: var(--text-display-sm);
   font-weight: var(--weight-heading);
-  letter-spacing: -0.3px;
+  letter-spacing: var(--tracking-heading);
   color: var(--color-text);
   margin: 0 0 4px;
 }
@@ -305,7 +305,7 @@ const infoItems: InfoItem[] = [
   font-family: var(--font-family);
   font-size: var(--text-ui);
   font-weight: var(--weight-heading);
-  letter-spacing: -0.15px;
+  letter-spacing: var(--tracking-snug);
   color: var(--color-text);
   margin: 0;
 }
@@ -368,7 +368,7 @@ const infoItems: InfoItem[] = [
   font-family: var(--font-family);
   font-size: 13.5px;
   font-weight: var(--weight-emphasis);
-  letter-spacing: -0.1px;
+  letter-spacing: var(--tracking-snug);
   color: var(--color-text);
 }
 
@@ -381,7 +381,7 @@ const infoItems: InfoItem[] = [
   font-family: var(--font-family);
   font-size: 11.5px;
   font-weight: var(--weight-heading);
-  letter-spacing: 0.1px;
+  letter-spacing: var(--tracking-badge);
 }
 
 /* Security points list (Section 2) */
@@ -453,7 +453,7 @@ const infoItems: InfoItem[] = [
   font-family: var(--font-family);
   font-size: 11.5px;
   font-weight: var(--weight-emphasis);
-  letter-spacing: 0.1px;
+  letter-spacing: var(--tracking-badge);
   color: var(--color-text-muted);
   text-transform: uppercase;
   text-align: left;
@@ -509,7 +509,7 @@ const infoItems: InfoItem[] = [
   font-family: var(--font-family);
   font-size: 11.5px;
   font-weight: var(--weight-heading);
-  letter-spacing: 0.05px;
+  letter-spacing: var(--tracking-badge);
   white-space: nowrap;
 }
 
@@ -570,7 +570,7 @@ const infoItems: InfoItem[] = [
   font-family: var(--font-family);
   font-size: var(--text-caption);
   font-weight: var(--weight-emphasis);
-  letter-spacing: 0.15px;
+  letter-spacing: var(--tracking-badge);
   color: var(--color-text-muted);
   text-transform: uppercase;
 }

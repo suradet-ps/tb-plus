@@ -314,7 +314,7 @@ function formatLastSearch(iso: string | null): string {
 .view-header h1 {
   font-size: var(--text-display-sm);
   font-weight: var(--weight-heading);
-  letter-spacing: -0.25px;
+  letter-spacing: var(--tracking-heading);
   color: var(--color-text);
   margin: 0 0 4px;
 }

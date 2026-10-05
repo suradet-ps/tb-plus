@@ -463,7 +463,7 @@ function onKeydown(e: KeyboardEvent) {
   font-size: var(--text-heading);
   font-weight: var(--weight-heading);
   color: var(--color-text);
-  letter-spacing: -0.2px;
+  letter-spacing: var(--tracking-snug);
   margin: 0;
   line-height: var(--leading-tight);
 }

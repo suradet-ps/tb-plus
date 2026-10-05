@@ -1287,7 +1287,7 @@ function cancelRestore() {
 .view-header h1 {
   font-size: var(--text-display-sm);
   font-weight: var(--weight-heading);
-  letter-spacing: -0.25px;
+  letter-spacing: var(--tracking-heading);
   color: var(--color-text);
   margin: 0 0 4px;
 }
@@ -1372,7 +1372,7 @@ function cancelRestore() {
 .card-title {
   font-size: var(--text-ui);
   font-weight: var(--weight-heading);
-  letter-spacing: -0.15px;
+  letter-spacing: var(--tracking-snug);
   color: var(--color-text);
   margin: 0 0 5px;
 }
@@ -1685,7 +1685,7 @@ function cancelRestore() {
   font-weight: var(--weight-heading);
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--tracking-label);
 }
 
 .dosage-grid--row {
@@ -1922,7 +1922,7 @@ function cancelRestore() {
   font-weight: var(--weight-emphasis);
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: var(--tracking-label);
 }
 .sr-h:nth-child(1) { width: 90px; }
 .sr-h:nth-child(2) { flex: 1; }

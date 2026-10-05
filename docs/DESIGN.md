@@ -102,6 +102,9 @@ with the weight, leading, and tracking tokens listed below.
   `font-variant-numeric: tabular-nums` so columns align.
 - **Badge micro-tracking**: small badge and caption text uses
   `--tracking-badge` (0.125px) for legibility at 10-11px.
+- **Tracking ladder**: every `letter-spacing` value uses the `--tracking-*`
+  tokens (tighter, tight, snug, normal, badge, hn, label, heading) instead of
+  one-off values, so type density stays consistent across screens.
 
 ## 4. Component Stylings
 

@@ -170,7 +170,7 @@ const emit = defineEmits<{
 .filter-group label {
   font-size: var(--text-sm);
   font-weight: var(--weight-emphasis);
-  letter-spacing: 0.125px;
+  letter-spacing: var(--tracking-badge);
   color: var(--color-text-secondary);
 }
 
