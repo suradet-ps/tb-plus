@@ -956,10 +956,10 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .panel-enter-active {
-  transition: opacity var(--duration-slow) var(--ease-standard);
+  transition: opacity var(--duration-medium) var(--ease-standard);
 }
 .panel-leave-active {
-  transition: opacity var(--duration-normal) var(--ease-standard);
+  transition: opacity var(--duration-slow) var(--ease-standard);
 }
 .panel-enter-from,
 .panel-leave-to {
