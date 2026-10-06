@@ -186,6 +186,7 @@ async function submit() {
             <!-- Regimen -->
             <div class="form-group">
               <label class="form-label" for="regimen">สูตรยาที่ใช้</label>
+              <div class="select-wrap">
                 <select id="regimen" v-model="regimen" class="form-select">
                   <option
                     v-for="reg in settingsStore.regimenDefinitions"
@@ -195,6 +196,7 @@ async function submit() {
                     {{ reg.name }}
                   </option>
                 </select>
+              </div>
             </div>
 
             <!-- Treatment start date (required) -->
@@ -216,17 +218,18 @@ async function submit() {
             <!-- Enrolled by -->
             <div class="form-group">
               <label class="form-label" for="enrolledBy">ลงทะเบียนโดย</label>
-              <select
-                v-if="settingsStore.staffNames.length"
-                id="enrolledBy"
-                v-model="enrolledBy"
-                class="form-select"
-              >
-                <option value="">-- ไม่ระบุ --</option>
-                <option v-for="name in settingsStore.staffNames" :key="name" :value="name">
-                  {{ name }}
-                </option>
-              </select>
+              <div v-if="settingsStore.staffNames.length" class="select-wrap">
+                <select
+                  id="enrolledBy"
+                  v-model="enrolledBy"
+                  class="form-select"
+                >
+                  <option value="">-- ไม่ระบุ --</option>
+                  <option v-for="name in settingsStore.staffNames" :key="name" :value="name">
+                    {{ name }}
+                  </option>
+                </select>
+              </div>
               <input
                 v-else
                 id="enrolledBy"
@@ -461,38 +464,6 @@ async function submit() {
   margin-left: var(--space-1);
 }
 
-.form-input,
-.form-select,
-.form-textarea {
-  width: 100%;
-  padding: var(--input-padding-md);
-  border: 1px solid var(--input-border);
-  border-radius: var(--input-radius);
-  font-size: var(--input-font-size-md);
-  font-family: var(--font-family);
-  color: var(--input-text);
-  background: var(--input-bg);
-  outline: none;
-  transition: var(--transition-input);
-}
-
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
-  border-color: var(--input-border-focus);
-  box-shadow: var(--shadow-focus-ring);
-}
-
-.form-input--error {
-  border-color: var(--input-border-error);
-  box-shadow: var(--shadow-focus-ring-error);
-}
-
-.form-textarea {
-  resize: vertical;
-  min-height: 72px;
-  line-height: var(--leading-body);
-}
 
 .radio-group {
   display: flex;

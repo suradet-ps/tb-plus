@@ -114,16 +114,18 @@ function sexLabel(sex: string | null | undefined): string | null {
 
         <div class="form-group">
           <label class="form-label" for="dosage-regimen">สูตรยา</label>
-          <select id="dosage-regimen" v-model="selectedRegimen" class="form-input">
-            <option value="" disabled>เลือกสูตรยา</option>
-            <option
-              v-for="regimen in settingsStore.regimenDefinitions"
-              :key="regimen.name"
-              :value="regimen.name"
-            >
-              {{ regimen.name }}
-            </option>
-          </select>
+          <div class="select-wrap">
+            <select id="dosage-regimen" v-model="selectedRegimen" class="form-select">
+              <option value="" disabled>เลือกสูตรยา</option>
+              <option
+                v-for="regimen in settingsStore.regimenDefinitions"
+                :key="regimen.name"
+                :value="regimen.name"
+              >
+                {{ regimen.name }}
+              </option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -378,23 +380,6 @@ function sexLabel(sex: string | null | undefined): string | null {
   color: var(--color-text-secondary);
 }
 
-.form-input {
-  width: 100%;
-  padding: var(--input-padding-lg);
-  border: 1px solid var(--border-color-input);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-family);
-  font-size: var(--text-body-sm);
-  color: var(--color-text);
-  background: var(--color-surface);
-  outline: none;
-  transition: var(--transition-input);
-}
-
-.form-input:focus {
-  border-color: var(--color-blue);
-  box-shadow: 0 0 0 3px var(--tint-blue);
-}
 
 .search-actions {
   display: flex;

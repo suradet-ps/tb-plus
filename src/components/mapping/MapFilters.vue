@@ -35,7 +35,7 @@ const emit = defineEmits<{
           id="mappingSearch"
           :value="props.search"
           type="text"
-          class="filter-input"
+          class="form-input"
           placeholder="ค้นหาจากชื่อย่อ HN ย่อ หรือข้อความที่อยู่..."
           @input="emit('update:search', ($event.target as HTMLInputElement).value)"
         />
@@ -45,63 +45,71 @@ const emit = defineEmits<{
     <div class="filter-row">
       <div class="filter-group">
         <label for="mappingStatus">สถานะผู้ป่วย</label>
-        <select
-          id="mappingStatus"
-          class="filter-input"
-          :value="props.status"
-          @change="emit('update:status', ($event.target as HTMLSelectElement).value as FilterStatus)"
+        <div class="select-wrap">
+          <select
+            id="mappingStatus"
+            class="form-select"
+            :value="props.status"
+            @change="emit('update:status', ($event.target as HTMLSelectElement).value as FilterStatus)"
         >
-          <option value="all">ทั้งหมด</option>
-          <option value="active">กำลังรักษา</option>
-          <option value="completed">รักษาหาย/ครบ</option>
-          <option value="transferred">ส่งต่อ</option>
-          <option value="died">เสียชีวิต</option>
-          <option value="defaulted">ขาดการรักษา</option>
-        </select>
+            <option value="all">ทั้งหมด</option>
+            <option value="active">กำลังรักษา</option>
+            <option value="completed">รักษาหาย/ครบ</option>
+            <option value="transferred">ส่งต่อ</option>
+            <option value="died">เสียชีวิต</option>
+            <option value="defaulted">ขาดการรักษา</option>
+          </select>
+        </div>
       </div>
 
       <div class="filter-group">
         <label for="mappingTbType">ชนิดวัณโรค</label>
-        <select
-          id="mappingTbType"
-          class="filter-input"
-          :value="props.tbType"
-          @change="emit('update:tbType', ($event.target as HTMLSelectElement).value as FilterTbType)"
+        <div class="select-wrap">
+          <select
+            id="mappingTbType"
+            class="form-select"
+            :value="props.tbType"
+            @change="emit('update:tbType', ($event.target as HTMLSelectElement).value as FilterTbType)"
         >
-          <option value="all">ทั้งหมด</option>
-          <option value="pulmonary">Pulmonary</option>
-          <option value="extra_pulmonary">Extra-pulmonary</option>
-        </select>
+            <option value="all">ทั้งหมด</option>
+            <option value="pulmonary">Pulmonary</option>
+            <option value="extra_pulmonary">Extra-pulmonary</option>
+          </select>
+        </div>
       </div>
 
       <div class="filter-group">
         <label for="mappingGeocode">สถานะพิกัด</label>
-        <select
-          id="mappingGeocode"
-          class="filter-input"
-          :value="props.geocodeStatus"
-          @change="emit('update:geocodeStatus', ($event.target as HTMLSelectElement).value as FilterGeocode)"
+        <div class="select-wrap">
+          <select
+            id="mappingGeocode"
+            class="form-select"
+            :value="props.geocodeStatus"
+            @change="emit('update:geocodeStatus', ($event.target as HTMLSelectElement).value as FilterGeocode)"
         >
-          <option value="all">ทั้งหมด</option>
-          <option value="success">พร้อมแสดงบนแผนที่</option>
-          <option value="pending">รอแปลงพิกัด</option>
-          <option value="failed">แปลงพิกัดไม่สำเร็จ</option>
-          <option value="missing_address">ไม่มีที่อยู่</option>
-        </select>
+            <option value="all">ทั้งหมด</option>
+            <option value="success">พร้อมแสดงบนแผนที่</option>
+            <option value="pending">รอแปลงพิกัด</option>
+            <option value="failed">แปลงพิกัดไม่สำเร็จ</option>
+            <option value="missing_address">ไม่มีที่อยู่</option>
+          </select>
+        </div>
       </div>
 
       <div class="filter-group">
         <label for="mappingPhase">ระยะการรักษา</label>
-        <select
-          id="mappingPhase"
-          class="filter-input"
-          :value="props.phase"
-          @change="emit('update:phase', ($event.target as HTMLSelectElement).value as FilterPhase)"
+        <div class="select-wrap">
+          <select
+            id="mappingPhase"
+            class="form-select"
+            :value="props.phase"
+            @change="emit('update:phase', ($event.target as HTMLSelectElement).value as FilterPhase)"
         >
-          <option value="all">ทั้งหมด</option>
-          <option value="intensive">ระยะเข้มข้น</option>
-          <option value="continuation">ระยะต่อเนื่อง</option>
-        </select>
+            <option value="all">ทั้งหมด</option>
+            <option value="intensive">ระยะเข้มข้น</option>
+            <option value="continuation">ระยะต่อเนื่อง</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -110,7 +118,7 @@ const emit = defineEmits<{
         <label for="mappingFrom">ลงทะเบียนตั้งแต่</label>
         <input
           id="mappingFrom"
-          class="filter-input"
+          class="form-input"
           type="date"
           :value="props.enrolledFrom"
           @input="emit('update:enrolledFrom', ($event.target as HTMLInputElement).value)"
@@ -121,7 +129,7 @@ const emit = defineEmits<{
         <label for="mappingTo">ถึง</label>
         <input
           id="mappingTo"
-          class="filter-input"
+          class="form-input"
           type="date"
           :value="props.enrolledTo"
           @input="emit('update:enrolledTo', ($event.target as HTMLInputElement).value)"
@@ -174,23 +182,6 @@ const emit = defineEmits<{
   color: var(--color-text-secondary);
 }
 
-.filter-input {
-  width: 100%;
-  min-height: 36px;
-  padding: var(--input-padding-lg);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-color-input);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-family: var(--font-family);
-  font-size: var(--text-body-sm);
-}
-
-.filter-input:focus {
-  outline: none;
-  border-color: var(--color-focus-ring);
-  box-shadow: var(--shadow-focus-input);
-}
 
 .filter-actions {
   display: flex;

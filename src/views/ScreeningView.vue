@@ -124,6 +124,7 @@ function formatLastSearch(iso: string | null): string {
           <input
             id="hnSearch"
             type="text"
+            class="form-input"
             placeholder="เช่น 12345..."
             v-model="screeningStore.filters.hn_search"
             @keydown.enter="screeningStore.search()"
@@ -134,6 +135,7 @@ function formatLastSearch(iso: string | null): string {
           <input
             id="nameSearch"
             type="text"
+            class="form-input"
             placeholder="ชื่อหรือนามสกุล..."
             v-model="screeningStore.filters.name_search"
             @keydown.enter="screeningStore.search()"
@@ -147,6 +149,7 @@ function formatLastSearch(iso: string | null): string {
           <input
             id="dateFrom"
             type="date"
+            class="form-input"
             v-model="screeningStore.filters.date_from"
           />
         </div>
@@ -157,6 +160,7 @@ function formatLastSearch(iso: string | null): string {
           <input
             id="dateTo"
             type="date"
+            class="form-input"
             v-model="screeningStore.filters.date_to"
           />
         </div>
@@ -164,15 +168,18 @@ function formatLastSearch(iso: string | null): string {
         <!-- Enrollment status -->
         <div class="filter-group">
           <label for="enrollStatus">สถานะ</label>
-          <select
-            id="enrollStatus"
-            v-model="screeningStore.filters.enrollment_status"
-          >
-            <option value="all">ทั้งหมด</option>
-            <option value="not_enrolled">ยังไม่ได้ลงทะเบียน</option>
-            <option value="enrolled">ลงทะเบียนแล้ว</option>
-            <option value="discharged">จำหน่ายแล้ว</option>
-          </select>
+          <div class="select-wrap">
+            <select
+              id="enrollStatus"
+              class="form-select"
+              v-model="screeningStore.filters.enrollment_status"
+            >
+              <option value="all">ทั้งหมด</option>
+              <option value="not_enrolled">ยังไม่ได้ลงทะเบียน</option>
+              <option value="enrolled">ลงทะเบียนแล้ว</option>
+              <option value="discharged">จำหน่ายแล้ว</option>
+            </select>
+          </div>
         </div>
 
         <!-- Drug class filter -->
@@ -356,24 +363,6 @@ function formatLastSearch(iso: string | null): string {
   white-space: nowrap;
 }
 
-.filter-group input[type='date'],
-.filter-group select {
-  padding: var(--input-padding);
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-body-sm);
-  font-family: var(--font-family);
-  color: var(--color-text);
-  background: var(--color-surface);
-  outline: none;
-  transition: var(--transition-input);
-}
-
-.filter-group input[type='date']:focus,
-.filter-group select:focus {
-  border-color: var(--color-focus-ring);
-  box-shadow: var(--shadow-focus-input);
-}
 
 /* -- Search row (HN + Name) -- */
 .filter-search-row {
@@ -388,24 +377,6 @@ function formatLastSearch(iso: string | null): string {
 .filter-group-search {
   flex: 1;
   min-width: 180px;
-}
-
-.filter-group input[type='text'] {
-  padding: var(--input-padding);
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-body-sm);
-  font-family: var(--font-family);
-  color: var(--color-text);
-  background: var(--color-surface);
-  outline: none;
-  width: 100%;
-  transition: var(--transition-input);
-}
-
-.filter-group input[type='text']:focus {
-  border-color: var(--color-focus-ring);
-  box-shadow: var(--shadow-focus-input);
 }
 
 /* -- Drug class filter -- */
