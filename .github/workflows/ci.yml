@@ -98,6 +98,9 @@ jobs:
           fi
           echo "No inline hex colors found. Design system enforced."
 
+      - name: Check design token references
+        run: node scripts/check-tokens.mjs
+
   # ── Supply-chain security ─────────────────────────────────────────
   cargo-audit:
     name: Cargo Audit

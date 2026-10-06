@@ -308,7 +308,7 @@ function sortIcon(key: SortKey): string {
 </template>
 
 <style scoped>
-.view-root { padding: var(--page-root-padding); max-width: 1440px; }
+.view-root { padding: var(--page-root-padding); max-width: var(--page-max-lg); }
 
 .view-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--space-12); gap: var(--space-8); }
 .header-title { font-size: var(--text-display-sm); font-weight: var(--weight-heading); letter-spacing: var(--tracking-heading); margin: 0 0 var(--space-2); }

@@ -432,7 +432,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 <style scoped>
 .view-root {
   padding: var(--page-root-padding);
-  max-width: 1440px;
+  max-width: var(--page-max-lg);
 }
 
 .view-header {

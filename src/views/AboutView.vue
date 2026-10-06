@@ -50,7 +50,7 @@ interface InfoItem {
 
 const infoItems: InfoItem[] = [
   { label: 'โปรแกรม', value: 'TB Plus' },
-  { label: 'เวอร์ชัน', value: '1.8.0' },
+  { label: 'เวอร์ชัน', value: __APP_VERSION__ },
   { label: 'พัฒนาโดย', value: 'ทีมเภสัชกรรม โรงพยาบาลสระโบสถ์' },
   { label: 'แพลตฟอร์ม', value: 'Tauri 2.5 + Vue 3.5' },
   { label: 'ฐานข้อมูลภายในเครื่อง', value: 'SQLite' },
@@ -214,7 +214,7 @@ const infoItems: InfoItem[] = [
 /* Page root */
 .view-root {
   padding: var(--page-root-padding);
-  max-width: 1440px;
+  max-width: var(--page-max-lg);
 }
 
 /* Page header */

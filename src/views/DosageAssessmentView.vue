@@ -548,7 +548,7 @@ function sexLabel(sex: string | null | undefined): string | null {
   margin-top: var(--space-3);
   font-size: 11px;
   color: var(--color-text-muted);
-  background: var(--color-bg-subtle);
+  background: var(--color-surface-alt);
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-sm);
   flex-wrap: wrap;
