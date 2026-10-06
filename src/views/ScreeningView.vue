@@ -124,6 +124,7 @@ function formatLastSearch(iso: string | null): string {
           <input
             id="hnSearch"
             type="text"
+            class="form-input"
             placeholder="เช่น 12345..."
             v-model="screeningStore.filters.hn_search"
             @keydown.enter="screeningStore.search()"
@@ -134,6 +135,7 @@ function formatLastSearch(iso: string | null): string {
           <input
             id="nameSearch"
             type="text"
+            class="form-input"
             placeholder="ชื่อหรือนามสกุล..."
             v-model="screeningStore.filters.name_search"
             @keydown.enter="screeningStore.search()"
@@ -375,24 +377,6 @@ function formatLastSearch(iso: string | null): string {
 .filter-group-search {
   flex: 1;
   min-width: 180px;
-}
-
-.filter-group input[type='text'] {
-  padding: var(--input-padding);
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-body-sm);
-  font-family: var(--font-family);
-  color: var(--color-text);
-  background: var(--color-surface);
-  outline: none;
-  width: 100%;
-  transition: var(--transition-input);
-}
-
-.filter-group input[type='text']:focus {
-  border-color: var(--color-focus-ring);
-  box-shadow: var(--shadow-focus-input);
 }
 
 /* -- Drug class filter -- */
