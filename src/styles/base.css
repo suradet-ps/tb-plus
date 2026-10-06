@@ -667,10 +667,6 @@ p {
   animation: spin var(--duration-animate) linear infinite;
 }
 
-.spin--fast {
-  animation: spin 1s linear infinite;
-}
-
 .pulse {
   animation: pulse var(--duration-loop) ease-in-out infinite;
 }
@@ -684,7 +680,7 @@ p {
     var(--skeleton-color-1) 80px
   );
   background-size: 200px 100%;
-  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  animation: skeleton-shimmer var(--duration-loop) var(--ease-in-out) infinite;
   border-radius: var(--radius-sm);
 }
 

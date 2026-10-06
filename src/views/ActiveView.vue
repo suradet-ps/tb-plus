@@ -274,7 +274,7 @@ function sortIcon(key: SortKey): string {
               <template v-if="p.current_month && p.total_months">
                 <span class="month-text">{{ p.current_month }} / {{ p.total_months }}</span>
                 <div class="progress-track">
-                  <div class="progress-fill" :style="{ width: Math.min(100, (p.current_month / p.total_months) * 100) + '%' }"></div>
+                  <div class="progress-fill" :style="{ transform: 'scaleX(' + Math.min(1, p.current_month / p.total_months) + ')' }"></div>
                 </div>
               </template>
               <span v-else class="muted">-</span>
@@ -321,7 +321,7 @@ function sortIcon(key: SortKey): string {
   background: transparent; border: 1px solid rgba(0,0,0,0.15);
   padding: 7px 13px; font-size: var(--text-body-sm); font-weight: var(--weight-emphasis);
   font-family: var(--font-family); cursor: pointer; border-radius: var(--radius-sm);
-  color: var(--color-text-secondary); transition: background 0.15s, border-color 0.15s;
+  color: var(--color-text-secondary); transition: var(--transition-bg), var(--transition-border);
 }
 .btn-ghost:hover:not(:disabled) { background: var(--color-surface-alt); border-color: rgba(0,0,0,0.22); }
 .btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -384,7 +384,7 @@ th.sortable:hover { color: var(--color-text); }
 td { padding: 10px 12px; font-size: var(--text-body-sm); border-bottom: 1px solid rgba(0,0,0,0.05); vertical-align: middle; }
 tbody tr:last-child td { border-bottom: none; }
 
-.patient-row { transition: background 0.1s; }
+.patient-row { transition: var(--transition-bg); }
 .patient-row:hover { background: rgba(0,0,0,0.02); }
 .row--red { background: rgba(221,91,0,0.04); }
 .row--yellow { background: rgba(199,139,0,0.03); }
@@ -431,7 +431,7 @@ tbody tr:last-child td { border-bottom: none; }
   width: 100%; height: 4px; background: var(--color-surface-alt);
   border-radius: var(--radius-pill); overflow: hidden;
 }
-.progress-fill { height: 100%; background: var(--color-blue); border-radius: var(--radius-pill); transition: width 0.3s; }
+.progress-fill { width: 100%; height: 100%; background: var(--color-blue); border-radius: var(--radius-pill); transform-origin: left; transition: var(--transition-progress); }
 
 .days-badge {
   display: inline-flex; align-items: center; gap: 3px;
@@ -449,7 +449,7 @@ tbody tr:last-child td { border-bottom: none; }
   display: inline-flex; align-items: center; justify-content: center;
   width: 30px; height: 30px; border-radius: var(--radius-sm);
   border: none; background: var(--color-blue); color: var(--color-text-inverse);
-  cursor: pointer; transition: background 0.13s;
+  cursor: pointer; transition: var(--transition-bg);
 }
 .btn-detail-icon:hover { background: var(--color-blue-active); }
 
@@ -458,12 +458,10 @@ tbody tr:last-child td { border-bottom: none; }
   padding: 7px 16px; background: var(--color-blue); color: var(--color-text-inverse);
   border: none; border-radius: var(--radius-sm); font-size: var(--text-body-sm);
   font-weight: var(--weight-emphasis); font-family: var(--font-family); cursor: pointer;
-  text-decoration: none; transition: background 0.15s;
+  text-decoration: none; transition: var(--transition-bg);
 }
 .empty-cta:hover { background: var(--color-blue-active); }
 
 .search-empty { text-align: center; padding: 56px 16px; font-size: var(--text-body); color: var(--color-text-muted); }
 
-.spin { animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
 </style>

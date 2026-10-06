@@ -476,7 +476,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   font-size: var(--text-body-sm);
   font-weight: var(--weight-emphasis);
   cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+  transition: var(--transition-bg), var(--transition-border), var(--transition-color);
 }
 
 .btn-ghost {
@@ -736,11 +736,13 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   border: var(--border-standard);
   border-radius: var(--radius-md);
   padding: 11px 12px;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 64px;
   display: flex;
   justify-content: space-between;
   gap: 10px;
   cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease;
+  transition: var(--transition-bg), var(--transition-border);
 }
 
 .patient-row:hover {
@@ -852,16 +854,6 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   text-align: center;
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
-}
-
-.spin {
-  animation: spin 0.9s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 @media (max-width: 1180px) {

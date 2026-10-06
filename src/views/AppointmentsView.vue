@@ -103,9 +103,9 @@ onMounted(() => {
       <div v-if="store.isLoading" class="table-card">
         <div class="skeleton-thead" />
         <div v-for="i in 7" :key="i" class="skeleton-row">
-          <div class="skeleton-cell" style="width: 100px" />
-          <div class="skeleton-cell" style="width: 76px" />
-          <div class="skeleton-cell" style="width: 172px" />
+          <div class="skeleton skeleton-cell" style="width: 100px" />
+          <div class="skeleton skeleton-cell" style="width: 76px" />
+          <div class="skeleton skeleton-cell" style="width: 172px" />
         </div>
       </div>
 
@@ -411,7 +411,7 @@ onMounted(() => {
 
 .appt-table tbody tr {
   border-bottom: var(--border-standard);
-  transition: background 0.1s;
+  transition: var(--transition-bg);
 }
 
 .appt-table tbody tr:last-child {
@@ -503,32 +503,7 @@ onMounted(() => {
 
 .skeleton-cell {
   height: 16px;
-  border-radius: var(--radius-sm);
-  background: linear-gradient(90deg, var(--skeleton-color-1) 25%, var(--skeleton-color-2) 50%, var(--skeleton-color-1) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
 }
 
 /* -- Spin Animation -- */
-.spin {
-  animation: spin 0.75s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
 </style>

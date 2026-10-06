@@ -1003,7 +1003,7 @@ function exportCSV() {
   cursor: pointer;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
-  transition: background 0.13s;
+  transition: var(--transition-bg);
 }
 
 .btn-ghost:hover:not(:disabled) {
@@ -1028,7 +1028,7 @@ function exportCSV() {
   cursor: pointer;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
-  transition: background 0.13s;
+  transition: var(--transition-bg);
 }
 
 .btn-export:hover {
@@ -1101,7 +1101,7 @@ function exportCSV() {
   display: flex;
   gap: 14px;
   align-items: flex-start;
-  transition: box-shadow 0.15s, border-color 0.15s, background 0.15s;
+  transition: var(--transition-card-hover), var(--transition-border), var(--transition-bg);
 }
 
 .report-card:hover {
@@ -1529,11 +1529,6 @@ function exportCSV() {
 
 /* -- Spin animation -- */
 .spin {
-  animation: spin 0.85s linear infinite;
   flex-shrink: 0;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 </style>

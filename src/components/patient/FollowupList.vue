@@ -513,6 +513,8 @@ function hasMeaningfulData(f: Followup): boolean {
   border-radius: var(--radius-md);
   overflow: hidden;
   transition: box-shadow var(--duration-base) var(--ease-standard);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 96px;
 }
 
 .fup-card:hover {
@@ -817,7 +819,7 @@ function hasMeaningfulData(f: Followup): boolean {
 }
 
 .fup-list-move {
-  transition: transform 0.25s var(--ease-standard);
+  transition: transform var(--duration-medium) var(--ease-standard);
 }
 
 .expand-enter-active {

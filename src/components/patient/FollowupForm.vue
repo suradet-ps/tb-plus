@@ -956,10 +956,10 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .panel-enter-active {
-  transition: opacity var(--duration-slow) var(--ease-standard);
+  transition: opacity var(--duration-medium) var(--ease-standard);
 }
 .panel-leave-active {
-  transition: opacity var(--duration-normal) var(--ease-standard);
+  transition: opacity var(--duration-slow) var(--ease-standard);
 }
 .panel-enter-from,
 .panel-leave-to {
@@ -967,10 +967,10 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .panel-enter-active .panel {
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform var(--duration-medium) var(--ease-standard);
 }
 .panel-leave-active .panel {
-  transition: transform var(--duration-slow) cubic-bezier(0.4, 0, 0.6, 1);
+  transition: transform var(--duration-slow) var(--ease-standard);
 }
 .panel-enter-from .panel,
 .panel-leave-to .panel {
@@ -991,13 +991,6 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .spin {
-  animation: spin var(--duration-animate) linear infinite;
   flex-shrink: 0;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 </style>

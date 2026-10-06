@@ -102,12 +102,12 @@ describe('ProgressBar', () => {
     expect(wrapper.find('.progress__track').exists()).toBe(true);
   });
 
-  it('should set fill width to percentage', () => {
+  it('should set fill scale to the progress percentage', () => {
     const wrapper = mount(ProgressBar, {
       props: { currentMonth: 1, totalMonths: 4 },
     });
 
     const fill = wrapper.find('.progress__fill');
-    expect(fill.attributes('style')).toContain('width: 25%');
+    expect(fill.attributes('style')).toContain('transform: scaleX(0.25)');
   });
 });

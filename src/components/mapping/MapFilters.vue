@@ -208,7 +208,7 @@ const emit = defineEmits<{
   font-size: var(--text-body-sm);
   font-weight: var(--weight-emphasis);
   cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+  transition: var(--transition-bg), var(--transition-border), var(--transition-color);
 }
 
 .btn-reset:hover {

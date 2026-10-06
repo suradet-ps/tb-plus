@@ -683,7 +683,7 @@ function drugColor(drug: string): DrugColor {
 }
 
 .alert-fade-enter-active {
-  transition: opacity 0.25s var(--ease-standard), transform 0.25s var(--ease-standard);
+  transition: var(--transition-modal-panel);
 }
 
 .alert-fade-leave-active {
