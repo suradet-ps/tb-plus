@@ -282,7 +282,7 @@ function sexLabel(sex: string | null | undefined): string | null {
   padding: var(--page-root-padding);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-10);
 }
 
 .view-header {
@@ -297,7 +297,7 @@ function sexLabel(sex: string | null | undefined): string | null {
   font-weight: var(--weight-heading);
   letter-spacing: var(--tracking-heading);
   color: var(--color-text);
-  margin: 0 0 4px;
+  margin: 0 0 var(--space-2);
 }
 
 .view-header p,
@@ -327,9 +327,9 @@ function sexLabel(sex: string | null | undefined): string | null {
 .status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   border-radius: var(--radius-pill);
-  padding: 6px 12px;
+  padding: var(--space-3) var(--space-6);
   font-size: var(--text-sm);
   font-weight: var(--weight-emphasis);
 }
@@ -357,19 +357,19 @@ function sexLabel(sex: string | null | undefined): string | null {
 .warnings-card,
 .phase-card,
 .state-box {
-  padding: 22px 24px;
+  padding: var(--card-padding);
 }
 
 .search-grid {
   display: grid;
   grid-template-columns: minmax(220px, 360px) minmax(260px, 420px);
-  gap: 14px;
+  gap: var(--space-7);
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .form-label {
@@ -400,7 +400,7 @@ function sexLabel(sex: string | null | undefined): string | null {
   display: flex;
   align-items: center;
   gap: var(--space-6);
-  margin-top: 16px;
+  margin-top: var(--space-8);
   flex-wrap: wrap;
 }
 
@@ -430,7 +430,7 @@ function sexLabel(sex: string | null | undefined): string | null {
 .phase-header h3,
 .empty-title {
   color: var(--color-text);
-  margin: 0 0 4px;
+  margin: 0 0 var(--space-2);
   font-weight: var(--weight-heading);
 }
 
@@ -445,7 +445,7 @@ function sexLabel(sex: string | null | undefined): string | null {
   font-size: var(--text-sm);
   font-weight: var(--weight-emphasis);
   color: var(--color-text-muted);
-  margin: 0 0 6px;
+  margin: 0 0 var(--space-3);
   text-transform: uppercase;
   letter-spacing: var(--tracking-label);
 }
@@ -454,7 +454,7 @@ function sexLabel(sex: string | null | undefined): string | null {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .weight-badge {
@@ -482,7 +482,7 @@ function sexLabel(sex: string | null | undefined): string | null {
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-8);
-  margin-bottom: 14px;
+  margin-bottom: var(--space-7);
 }
 
 .assessment-table-wrap {
@@ -496,7 +496,7 @@ function sexLabel(sex: string | null | undefined): string | null {
 
 .assessment-table th,
 .assessment-table td {
-  padding: 12px 10px;
+  padding: var(--space-6) var(--space-5);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   vertical-align: top;
   text-align: left;
@@ -513,7 +513,7 @@ function sexLabel(sex: string | null | undefined): string | null {
 .drug-cell {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: var(--space-5);
 }
 
 .drug-name,
@@ -528,7 +528,7 @@ function sexLabel(sex: string | null | undefined): string | null {
 .drug-code {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
-  margin-top: 2px;
+  margin-top: var(--space-1);
 }
 
 .status-pill--ok {
@@ -544,12 +544,12 @@ function sexLabel(sex: string | null | undefined): string | null {
 .calc-chain {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 6px;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
   font-size: 11px;
   color: var(--color-text-muted);
   background: var(--color-bg-subtle);
-  padding: 4px 8px;
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-sm);
   flex-wrap: wrap;
 }
@@ -570,12 +570,12 @@ function sexLabel(sex: string | null | undefined): string | null {
 }
 
 .empty-card {
-  padding: 28px 24px;
+  padding: var(--space-14) var(--space-12);
   text-align: center;
 }
 
 .empty-card--large {
-  padding: 56px 24px;
+  padding: var(--space-28) var(--space-12);
 }
 
 @media (max-width: 960px) {

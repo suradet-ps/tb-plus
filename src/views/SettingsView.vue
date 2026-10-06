@@ -839,7 +839,7 @@ function cancelRestore() {
 
               <!-- Configured classes -->
               <div v-if="settingsStore.drugClasses.length" class="classes-summary">
-                <h4 class="sub-title" style="margin-top:16px">กลุ่มยาที่กำหนดแล้ว</h4>
+                <h4 class="sub-title" style="margin-top: var(--space-8)">กลุ่มยาที่กำหนดแล้ว</h4>
                 <div v-for="cls in settingsStore.drugClasses" :key="cls.class" class="class-summary-card">
                   <div class="cs-top">
                     <DrugChip :drug="cls.class" size="md" />
@@ -1282,7 +1282,7 @@ function cancelRestore() {
 
 /* -- Page header -- */
 .view-header {
-  margin-bottom: 28px;
+  margin-bottom: var(--space-14);
 }
 
 .view-header h1 {
@@ -1290,7 +1290,7 @@ function cancelRestore() {
   font-weight: var(--weight-heading);
   letter-spacing: var(--tracking-heading);
   color: var(--color-text);
-  margin: 0 0 4px;
+  margin: 0 0 var(--space-2);
 }
 
 .view-header p {
@@ -1302,7 +1302,7 @@ function cancelRestore() {
 /* -- Two-column layout -- */
 .settings-layout {
   display: flex;
-  gap: 24px;
+  gap: var(--space-12);
   align-items: flex-start;
 }
 
@@ -1312,7 +1312,7 @@ function cancelRestore() {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
   position: sticky;
   top: 24px;
 }
@@ -1320,8 +1320,8 @@ function cancelRestore() {
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-6);
   border-radius: var(--radius-md);
   font-size: var(--text-body-sm);
   font-weight: var(--weight-ui);
@@ -1358,7 +1358,7 @@ function cancelRestore() {
   border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  padding: 24px;
+  padding: var(--card-padding);
 }
 
 /* Card top row: title block + status pill side by side */
@@ -1367,7 +1367,7 @@ function cancelRestore() {
   justify-content: space-between;
   align-items: flex-start;
   gap: var(--space-8);
-  margin-bottom: 20px;
+  margin-bottom: var(--space-10);
 }
 
 .card-title {
@@ -1375,18 +1375,18 @@ function cancelRestore() {
   font-weight: var(--weight-heading);
   letter-spacing: var(--tracking-snug);
   color: var(--color-text);
-  margin: 0 0 5px;
+  margin: 0 0 var(--space-3);
 }
 
 /* When card-title is direct child (no card-top-row wrapper) */
 .settings-card > .card-title {
-  margin-bottom: 5px;
+  margin-bottom: var(--space-3);
 }
 
 .card-subtitle {
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
-  margin: 0 0 20px;
+  margin: 0 0 var(--space-10);
   line-height: var(--leading-body);
 }
 
@@ -1394,8 +1394,8 @@ function cancelRestore() {
 .connection-status {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-5);
   border-radius: var(--radius-pill);
   font-size: var(--text-sm);
   font-weight: var(--weight-emphasis);
@@ -1417,13 +1417,13 @@ function cancelRestore() {
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: var(--space-7);
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--space-3);
 }
 
 .form-group.full {
@@ -1437,7 +1437,7 @@ function cancelRestore() {
 }
 
 .form-input {
-  padding: 7px 10px;
+  padding: var(--space-4) var(--space-5);
   border: 1px solid var(--border-color-input);
   border-radius: var(--radius-sm);
   font-size: var(--text-body-sm);
@@ -1462,7 +1462,7 @@ function cancelRestore() {
 .form-actions {
   display: flex;
   gap: var(--space-4);
-  margin-top: 18px;
+  margin-top: var(--space-9);
   align-items: center;
   flex-wrap: wrap;
 }
@@ -1471,10 +1471,10 @@ function cancelRestore() {
 .btn-ghost-download {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-4);
   background: var(--color-surface);
   border: var(--border-standard);
-  padding: 9px 18px;
+  padding: var(--space-5) var(--space-9);
   font-size: var(--text-body-sm);
   font-weight: var(--weight-emphasis);
   font-family: var(--font-family);
@@ -1497,10 +1497,10 @@ function cancelRestore() {
 .btn-ghost-restore {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-4);
   background: var(--color-surface);
   border: var(--border-standard);
-  padding: 9px 18px;
+  padding: var(--space-5) var(--space-9);
   font-size: var(--text-body-sm);
   font-weight: var(--weight-emphasis);
   font-family: var(--font-family);
@@ -1522,7 +1522,7 @@ function cancelRestore() {
 
 .backup-actions {
   display: flex;
-  gap: 10px;
+  gap: var(--space-5);
   flex-wrap: wrap;
 }
 
@@ -1532,7 +1532,7 @@ function cancelRestore() {
 .test-result {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-3);
   font-size: var(--text-body-sm);
   font-weight: var(--weight-emphasis);
 }
@@ -1542,7 +1542,7 @@ function cancelRestore() {
 
 /* -- Error note -- */
 .error-note {
-  margin-top: 10px;
+  margin-top: var(--space-5);
   font-size: var(--text-sm);
   color: var(--color-orange);
   line-height: var(--leading-body);
@@ -1553,11 +1553,11 @@ function cancelRestore() {
   background: var(--color-surface-alt);
   border: var(--border-standard);
   border-radius: var(--radius-md);
-  padding: 11px 14px;
+  padding: var(--space-6) var(--space-7);
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   line-height: var(--leading-relaxed);
-  margin-top: 16px;
+  margin-top: var(--space-8);
 }
 
 .info-note strong {
@@ -1568,7 +1568,7 @@ function cancelRestore() {
 /* -- Sub-section layout -- */
 .sub-section {
   margin-bottom: var(--space-12);
-  padding-bottom: 24px;
+  padding-bottom: var(--space-12);
   border-bottom: 1px solid var(--divider-color);
 }
 
@@ -1582,19 +1582,19 @@ function cancelRestore() {
   font-size: var(--text-body);
   font-weight: var(--weight-emphasis);
   color: var(--color-text);
-  margin: 0 0 4px;
+  margin: 0 0 var(--space-2);
 }
 
 .sub-desc {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
-  margin: 0 0 12px;
+  margin: 0 0 var(--space-6);
 }
 
 .dosage-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(96px, 120px) minmax(96px, 120px) minmax(96px, 130px);
-  gap: 10px;
+  gap: var(--space-5);
   align-items: center;
 }
 
@@ -1603,7 +1603,7 @@ function cancelRestore() {
 }
 
 .dosage-grid--head {
-  padding: 0 0 8px;
+  padding: 0 0 var(--space-4);
   margin-bottom: var(--space-4);
   border-bottom: var(--border-standard);
   font-size: var(--text-caption);
@@ -1614,7 +1614,7 @@ function cancelRestore() {
 }
 
 .dosage-grid--row {
-  padding: 10px 0;
+  padding: var(--space-5) 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
@@ -1625,7 +1625,7 @@ function cancelRestore() {
 .dosage-drug-cell {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-5);
 }
 
 .dosage-drug-name {
@@ -1645,7 +1645,7 @@ function cancelRestore() {
 .dosage-code-cell {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--space-3);
   align-items: flex-start;
 }
 
@@ -1653,14 +1653,14 @@ function cancelRestore() {
 .regimen-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .regimen-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
+  padding: var(--space-5) var(--space-6);
   background: var(--color-surface-alt);
   border-radius: var(--radius-sm);
   border: var(--border-standard);
@@ -1677,15 +1677,15 @@ function cancelRestore() {
 .staff-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 14px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-7);
 }
 
 .staff-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 12px;
+  padding: var(--space-5) var(--space-6);
   background: var(--color-surface-alt);
   border: var(--border-standard);
   border-radius: var(--radius-md);
@@ -1699,7 +1699,7 @@ function cancelRestore() {
 .staff-item-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-5);
 }
 
 .staff-avatar {
@@ -1728,7 +1728,7 @@ function cancelRestore() {
   border: none;
   cursor: pointer;
   color: var(--color-text-muted);
-  padding: 4px;
+  padding: var(--space-2);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
@@ -1744,11 +1744,11 @@ function cancelRestore() {
 .staff-empty {
   font-size: var(--text-body-sm);
   color: var(--color-text-muted);
-  padding: 16px 0 10px;
+  padding: var(--space-8) 0 var(--space-5);
   text-align: center;
   border: 1px dashed rgba(0, 0, 0, 0.12);
   border-radius: var(--radius-md);
-  margin-bottom: 14px;
+  margin-bottom: var(--space-7);
 }
 
 .staff-add-row {
@@ -1771,12 +1771,12 @@ function cancelRestore() {
 
 .backup-info-box {
   display: flex;
-  gap: 14px;
+  gap: var(--space-7);
   align-items: flex-start;
   background: var(--color-surface-alt);
   border: var(--border-standard);
   border-radius: var(--radius-md);
-  padding: 16px;
+  padding: var(--space-8);
 }
 
 .backup-icon-wrap {
@@ -1795,7 +1795,7 @@ function cancelRestore() {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .backup-info-title {
@@ -1834,8 +1834,8 @@ function cancelRestore() {
 
 .sr-header {
   display: flex;
-  gap: 10px;
-  padding: 7px 12px;
+  gap: var(--space-5);
+  padding: var(--space-4) var(--space-6);
   background: var(--color-surface-alt);
   border-bottom: var(--border-standard);
   font-size: var(--text-caption);
@@ -1850,9 +1850,9 @@ function cancelRestore() {
 
 .sr-row {
   display: flex;
-  gap: 10px;
+  gap: var(--space-5);
   align-items: center;
-  padding: 6px 12px;
+  padding: var(--space-3) var(--space-6);
   border-bottom: 1px solid rgba(0,0,0,0.05);
   font-size: var(--text-body-sm);
   transition: var(--transition-bg);
@@ -1863,11 +1863,11 @@ function cancelRestore() {
 
 .sr-icode { font-family: var(--font-family-mono-simple); font-weight: var(--weight-emphasis); width: 90px; color: var(--color-text); }
 .sr-name { flex: 1; }
-.sr-assign { display: flex; gap: 4px; align-items: center; width: 180px; }
+.sr-assign { display: flex; gap: var(--space-2); align-items: center; width: 180px; }
 
 .sr-input {
   width: 50px;
-  padding: 3px 6px;
+  padding: var(--space-2) var(--space-3);
   border: 1px solid rgba(0,0,0,0.15);
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
@@ -1881,7 +1881,7 @@ function cancelRestore() {
 .sr-input:focus { border-color: var(--color-focus-ring); box-shadow: var(--shadow-focus-input); }
 
 .sr-btn {
-  padding: 3px 8px;
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-sm);
   border: none;
   background: var(--color-blue);
@@ -1897,29 +1897,29 @@ function cancelRestore() {
 
 /* -- Configured classes summary -- */
 .classes-summary {
-  margin-top: 4px;
+  margin-top: var(--space-2);
 }
 
 .class-summary-card {
   background: var(--color-surface-alt);
   border: var(--border-standard);
   border-radius: var(--radius-md);
-  padding: 10px 12px;
-  margin-bottom: 6px;
+  padding: var(--space-5) var(--space-6);
+  margin-bottom: var(--space-3);
 }
 
 .cs-top {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  margin-bottom: 6px;
+  margin-bottom: var(--space-3);
 }
 
 .cs-name { font-size: var(--text-body-sm); font-weight: var(--weight-emphasis); flex: 1; }
 
 .cs-icodes {
   display: flex;
-  gap: 4px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
@@ -1928,12 +1928,12 @@ function cancelRestore() {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
   background: var(--color-surface);
-  padding: 2px 7px;
+  padding: var(--space-1) var(--space-4);
   border-radius: var(--radius-sm);
   border: var(--border-standard);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .cs-remove {
@@ -1952,13 +1952,13 @@ function cancelRestore() {
 .input-hint {
   font-size: var(--text-caption);
   color: var(--color-text-muted);
-  margin-top: 2px;
+  margin-top: var(--space-1);
 }
 
 .empty-hint {
   font-size: var(--text-body-sm);
   color: var(--color-text-muted);
-  padding: 16px;
+  padding: var(--space-8);
   text-align: center;
   border: 1px dashed rgba(0,0,0,0.12);
   border-radius: var(--radius-md);
@@ -1970,19 +1970,19 @@ function cancelRestore() {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .regimen-phases {
   display: flex;
-  gap: 4px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
 .phase-tag {
   font-size: var(--text-caption);
   font-weight: var(--weight-emphasis);
-  padding: 2px 7px;
+  padding: var(--space-1) var(--space-4);
   border-radius: var(--radius-pill);
   background: var(--color-badge-bg);
   color: var(--color-blue);
@@ -1999,10 +1999,10 @@ function cancelRestore() {
 .btn-secondary-sm {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   background: var(--color-surface);
   border: var(--border-standard);
-  padding: 5px 10px;
+  padding: var(--space-3) var(--space-5);
   border-radius: var(--radius-sm);
   font-family: var(--font-family);
   font-size: var(--text-sm);
@@ -2018,7 +2018,7 @@ function cancelRestore() {
   align-items: center;
   background: none;
   border: none;
-  padding: 4px;
+  padding: var(--space-2);
   border-radius: var(--radius-sm);
   cursor: pointer;
   color: var(--color-text-muted);
@@ -2043,7 +2043,7 @@ function cancelRestore() {
   flex-direction: column;
   background: var(--color-surface);
   border-radius: var(--radius-card);
-  padding: 24px;
+  padding: var(--space-12);
   min-width: 520px;
   max-width: 640px;
   max-height: 90vh;
@@ -2056,7 +2056,7 @@ function cancelRestore() {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  margin-bottom: 16px;
+  margin-bottom: var(--space-8);
 }
 
 .modal-title {
@@ -2132,8 +2132,8 @@ function cancelRestore() {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  margin-bottom: 10px;
-  padding: 10px;
+  margin-bottom: var(--space-5);
+  padding: var(--space-5);
   background: var(--color-surface-alt);
   border-radius: var(--radius-md);
 }
@@ -2146,7 +2146,7 @@ function cancelRestore() {
 
 .drug-toggle-group {
   display: flex;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .toggle-btn {
@@ -2170,23 +2170,23 @@ function cancelRestore() {
 .phase-actions {
   display: flex;
   gap: var(--space-4);
-  margin-top: 12px;
+  margin-top: var(--space-6);
 }
 
 /* -- Clinic search -- */
 .current-clinic {
-  margin-top: 12px;
+  margin-top: var(--space-6);
 }
 .current-clinic h4 {
   font-size: var(--text-body-sm);
   font-weight: var(--weight-emphasis);
-  margin-bottom: 6px;
+  margin-bottom: var(--space-3);
 }
 .clinic-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-7);
   background: var(--color-badge-bg);
   color: var(--color-blue);
   border-radius: var(--radius-pill);

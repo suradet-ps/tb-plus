@@ -164,7 +164,7 @@ onMounted(() => {
   padding: var(--page-root-padding);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-10);
 }
 
 /* -- Header -- */
@@ -178,7 +178,7 @@ onMounted(() => {
 .header-left {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .page-title {
@@ -199,7 +199,7 @@ onMounted(() => {
 .btn-refresh {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   padding: var(--btn-padding);
   border-radius: var(--radius-sm);
   border: var(--border-standard);
@@ -242,12 +242,12 @@ onMounted(() => {
 
 .day-chips {
   display: flex;
-  gap: 6px;
+  gap: var(--space-3);
   flex-wrap: wrap;
 }
 
 .day-chip {
-  padding: 4px 14px;
+  padding: var(--space-2) var(--space-7);
   border-radius: var(--radius-pill);
   border: var(--border-standard);
   background: var(--color-surface);
@@ -299,7 +299,7 @@ onMounted(() => {
 .state-text {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--space-2);
 }
 
 .state-title {
@@ -326,7 +326,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  padding: 10px 16px;
+  padding: var(--space-5) var(--space-8);
   border-bottom: 1px solid rgba(42, 157, 153, 0.14);
 }
 
@@ -347,20 +347,20 @@ onMounted(() => {
   font-weight: var(--weight-heading);
   color: var(--color-surface);
   background: var(--color-teal);
-  padding: 2px 9px;
+  padding: var(--space-1) var(--space-5);
   border-radius: var(--radius-pill);
   line-height: var(--leading-normal);
 }
 
 .today-rows {
-  padding: 4px 0;
+  padding: var(--space-2) 0;
 }
 
 .today-row {
   display: flex;
   align-items: center;
   gap: var(--space-8);
-  padding: 7px 16px;
+  padding: var(--space-4) var(--space-8);
 }
 
 .today-hn {
@@ -400,7 +400,7 @@ onMounted(() => {
 }
 
 .appt-table thead th {
-  padding: 10px 16px;
+  padding: var(--space-5) var(--space-8);
   text-align: left;
   font-size: var(--text-sm);
   font-weight: var(--weight-emphasis);
@@ -431,7 +431,7 @@ onMounted(() => {
 }
 
 .appt-table td {
-  padding: 10px 16px;
+  padding: var(--table-cell-padding);
   vertical-align: middle;
   font-variant-numeric: tabular-nums;
 }
@@ -441,7 +441,7 @@ onMounted(() => {
   white-space: nowrap;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-4);
 }
 
 .date-today {
@@ -454,7 +454,7 @@ onMounted(() => {
   font-weight: var(--weight-heading);
   color: var(--color-teal);
   background: rgba(42, 157, 153, 0.12);
-  padding: 1px 7px;
+  padding: var(--space-1) var(--space-4);
   border-radius: var(--radius-pill);
   border: 1px solid rgba(42, 157, 153, 0.22);
   white-space: nowrap;
@@ -475,7 +475,7 @@ onMounted(() => {
 
 /* -- Table Footer -- */
 .table-footer {
-  padding: 9px 16px;
+  padding: var(--space-5) var(--space-8);
   font-size: 11.5px;
   color: var(--color-text-muted);
   border-top: var(--border-standard);
@@ -492,8 +492,8 @@ onMounted(() => {
 .skeleton-row {
   display: flex;
   align-items: center;
-  gap: 28px;
-  padding: 12px 16px;
+  gap: var(--space-14);
+  padding: var(--space-6) var(--space-8);
   border-bottom: var(--border-standard);
 }
 

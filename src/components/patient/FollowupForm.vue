@@ -568,7 +568,7 @@ function onKeydown(e: KeyboardEvent) {
 .panel-header-info {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--space-2);
 }
 
 .panel-title {
@@ -653,7 +653,7 @@ function onKeydown(e: KeyboardEvent) {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--space-3);
 }
 
 .form-label {
@@ -665,7 +665,7 @@ function onKeydown(e: KeyboardEvent) {
 
 .required {
   color: var(--color-warning);
-  margin-left: 1px;
+  margin-left: var(--space-1);
 }
 
 .form-input,
@@ -725,7 +725,7 @@ function onKeydown(e: KeyboardEvent) {
   background: var(--color-surface);
   border: var(--border-standard);
   border-radius: var(--radius-sm);
-  padding: var(--input-padding-lg) 30px var(--input-padding-lg) var(--space-5);
+  padding: var(--input-padding-lg) var(--space-16) var(--input-padding-lg) var(--space-5);
   width: 100%;
   appearance: none;
   cursor: pointer;
@@ -750,7 +750,7 @@ function onKeydown(e: KeyboardEvent) {
   background: var(--alert-error-bg);
   border: 1px solid var(--alert-error-border);
   border-radius: var(--radius-sm);
-  padding: 9px 12px;
+  padding: var(--space-5) var(--space-6);
   font-size: var(--text-sm);
   font-weight: var(--weight-ui);
   color: var(--palette-orange-dark);
@@ -760,7 +760,7 @@ function onKeydown(e: KeyboardEvent) {
 
 .se-alert-icon {
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: var(--space-1);
   color: var(--color-warning);
 }
 
@@ -775,7 +775,7 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .se-group-header {
-  padding: var(--space-2) 7px 2px;
+  padding: var(--space-2) var(--space-4) var(--space-1);
 }
 
 .se-group-label {
@@ -789,8 +789,8 @@ function onKeydown(e: KeyboardEvent) {
 .checkbox-item {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: var(--space-3) 7px;
+  gap: var(--space-5);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: var(--transition-btn);
@@ -817,7 +817,7 @@ function onKeydown(e: KeyboardEvent) {
 .checkbox-content {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: var(--space-1);
   flex: 1;
   min-width: 0;
 }
@@ -842,7 +842,7 @@ function onKeydown(e: KeyboardEvent) {
   background: var(--color-surface);
   border: var(--border-standard);
   border-radius: var(--radius-pill);
-  padding: 1px 6px;
+  padding: var(--space-1) var(--space-3);
   white-space: nowrap;
 }
 
@@ -850,11 +850,11 @@ function onKeydown(e: KeyboardEvent) {
 .quick-taps {
   display: flex;
   gap: var(--space-2);
-  margin-top: 4px;
+  margin-top: var(--space-2);
 }
 
 .quick-tap {
-  padding: 2px 8px;
+  padding: var(--space-1) var(--space-4);
   font-size: var(--text-xs);
   font-weight: var(--weight-emphasis);
   font-family: var(--font-family);
@@ -893,7 +893,7 @@ function onKeydown(e: KeyboardEvent) {
   background: var(--alert-error-bg);
   border: 1px solid var(--alert-warning-border);
   border-radius: var(--radius-sm);
-  padding: 9px 12px;
+  padding: var(--space-5) var(--space-6);
   font-size: var(--text-body-sm);
   font-weight: var(--weight-ui);
   color: var(--color-warning);
@@ -911,7 +911,7 @@ function onKeydown(e: KeyboardEvent) {
 
 .btn-cancel {
   flex: 1;
-  padding: 9px var(--space-8);
+  padding: var(--space-5) var(--space-8);
   background: var(--btn-secondary-bg);
   border: none;
   border-radius: var(--radius-sm);
@@ -932,8 +932,8 @@ function onKeydown(e: KeyboardEvent) {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 9px var(--space-8);
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-8);
   background: var(--btn-primary-bg);
   border: none;
   border-radius: var(--radius-sm);

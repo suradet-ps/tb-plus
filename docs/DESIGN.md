@@ -16,7 +16,7 @@ What makes Notion's visual language distinctive is its border philosophy. Rather
 - Multi-layer shadow stacks with sub-0.05 opacity for barely-there depth
 - Notion Blue (`#0075de`) as the singular accent color for CTAs and interactive elements
 - Pill badges (9999px radius) with tinted blue backgrounds for status indicators
-- 8px base spacing unit with an organic, non-rigid scale
+- 8px base spacing unit implemented as a 2px-step token ladder
 
 ## 2. Color Palette & Roles
 
@@ -198,9 +198,14 @@ with the weight, leading, and tracking tokens listed below.
 ## 5. Layout Principles
 
 ### Spacing System
-- Base unit: 8px
-- Scale: 2px, 3px, 4px, 5px, 6px, 7px, 8px, 11px, 12px, 14px, 16px, 24px, 32px
-- Non-rigid organic scale with fractional values (5.6px, 6.4px) for micro-adjustments
+- Rhythm: an 8px base unit, implemented as a 2px-step token ladder so dense
+  desktop surfaces can use half steps without hardcoded values.
+- Tokens: `--space-1` 2px through `--space-12` 24px in 2px steps, then
+  `--space-14` 28px, `--space-16` 32px, `--space-20` 40px, `--space-24` 48px,
+  `--space-28` 56px, and `--space-30` 60px.
+- Components take `gap`, `padding`, and `margin` values from the ladder only.
+- Surface density: tables use `--table-cell-padding` (10px 12px), cards use
+  `--card-padding` (24px), and stat cards use `--stat-padding` (14px 18px).
 
 ### Grid & Container
 - Max content width: approximately 1200px

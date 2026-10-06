@@ -219,7 +219,7 @@ const infoItems: InfoItem[] = [
 
 /* Page header */
 .view-header {
-  margin-bottom: 28px;
+  margin-bottom: var(--space-14);
 }
 
 .view-header h1 {
@@ -228,7 +228,7 @@ const infoItems: InfoItem[] = [
   font-weight: var(--weight-heading);
   letter-spacing: var(--tracking-heading);
   color: var(--color-text);
-  margin: 0 0 4px;
+  margin: 0 0 var(--space-2);
 }
 
 .view-header p {
@@ -242,7 +242,7 @@ const infoItems: InfoItem[] = [
 .about-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: var(--space-10);
 }
 
 /* Individual card */
@@ -251,15 +251,15 @@ const infoItems: InfoItem[] = [
   border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  padding: 24px;
+  padding: var(--card-padding);
 }
 
 /* Card header row */
 .card-header {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  margin-bottom: 18px;
+  gap: var(--space-7);
+  margin-bottom: var(--space-9);
 }
 
 /* Colored icon wrapper */
@@ -316,7 +316,7 @@ const infoItems: InfoItem[] = [
   font-size: var(--text-body);
   line-height: 1.65;
   color: var(--color-text-secondary);
-  margin: 0 0 18px;
+  margin: 0 0 var(--space-9);
 }
 
 /* Feature list (Section 1) */
@@ -324,7 +324,7 @@ const infoItems: InfoItem[] = [
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-5);
   margin: 0;
   padding: 0;
 }
@@ -332,7 +332,7 @@ const infoItems: InfoItem[] = [
 .feature-item {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: var(--space-5);
   font-family: var(--font-family);
   font-size: 13.5px;
   font-weight: var(--weight-ui);
@@ -343,19 +343,19 @@ const infoItems: InfoItem[] = [
 .feature-check {
   flex-shrink: 0;
   color: var(--color-teal);
-  margin-top: 1px;
+  margin-top: var(--space-1);
 }
 
 /* Security callout banner (Section 2) */
 .security-banner {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-5);
   background: var(--color-surface-alt);
   border: var(--border-standard);
   border-radius: var(--radius-md);
   padding: var(--alert-padding);
-  margin-bottom: 20px;
+  margin-bottom: var(--space-10);
 }
 
 .banner-shield {
@@ -393,8 +393,8 @@ const infoItems: InfoItem[] = [
 .security-point {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  padding: 14px 0;
+  gap: var(--space-7);
+  padding: var(--space-7) 0;
   border-bottom: var(--border-standard);
 }
 
@@ -417,7 +417,7 @@ const infoItems: InfoItem[] = [
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 1px;
+  margin-top: var(--space-1);
 }
 
 .security-point-text {
@@ -430,7 +430,7 @@ const infoItems: InfoItem[] = [
   font-size: 13.5px;
   font-weight: var(--weight-emphasis);
   color: var(--color-text);
-  margin: 0 0 4px;
+  margin: 0 0 var(--space-2);
   line-height: var(--leading-normal);
 }
 
@@ -446,7 +446,7 @@ const infoItems: InfoItem[] = [
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 14px;
+  margin-bottom: var(--space-7);
 }
 
 .data-th {
@@ -457,7 +457,7 @@ const infoItems: InfoItem[] = [
   color: var(--color-text-muted);
   text-transform: uppercase;
   text-align: left;
-  padding: 0 12px 9px;
+  padding: 0 var(--space-6) var(--space-5);
   border-bottom: var(--border-standard);
 }
 
@@ -481,7 +481,7 @@ const infoItems: InfoItem[] = [
   font-family: var(--font-family);
   font-size: 13.5px;
   color: var(--color-text);
-  padding: 11px 12px;
+  padding: var(--space-6) var(--space-6);
   vertical-align: middle;
   line-height: var(--leading-normal);
 }
@@ -504,7 +504,7 @@ const infoItems: InfoItem[] = [
 .access-badge {
   display: inline-flex;
   align-items: center;
-  padding: 3px 9px;
+  padding: var(--space-2) var(--space-5);
   border-radius: var(--radius-pill);
   font-family: var(--font-family);
   font-size: 11.5px;
@@ -527,7 +527,7 @@ const infoItems: InfoItem[] = [
 .backup-note {
   display: flex;
   align-items: flex-start;
-  gap: 7px;
+  gap: var(--space-4);
   font-family: var(--font-family);
   font-size: 12.5px;
   color: var(--color-text-muted);
@@ -537,7 +537,7 @@ const infoItems: InfoItem[] = [
 
 .backup-note-icon {
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: var(--space-1);
 }
 
 /* Info grid (Section 4) */
@@ -550,8 +550,8 @@ const infoItems: InfoItem[] = [
 .info-row {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 12px 0;
+  gap: var(--space-2);
+  padding: var(--space-6) 0;
   border-bottom: var(--border-standard);
 }
 
@@ -562,7 +562,7 @@ const infoItems: InfoItem[] = [
 
 /* Right-column items: separate with a left border + left padding */
 .info-row:nth-child(even) {
-  padding-left: 20px;
+  padding-left: var(--space-10);
   border-left: var(--border-standard);
 }
 

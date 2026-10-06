@@ -309,7 +309,7 @@ thead th {
   align-items: center;
   gap: var(--space-2);
   width: 100%;
-  padding: 9px 12px;
+  padding: var(--space-5) var(--space-6);
   background: none;
   border: none;
   font-size: var(--table-header-font-size);
@@ -366,7 +366,7 @@ thead th {
 .row-unknown { border-left-color: transparent; }
 
 td {
-  padding: 9px 12px;
+  padding: var(--space-5) var(--space-6);
   vertical-align: middle;
 }
 
@@ -392,7 +392,7 @@ td {
   display: block;
   font-size: var(--text-caption);
   color: var(--color-text-muted);
-  margin-top: 1px;
+  margin-top: var(--space-1);
   font-variant-numeric: tabular-nums;
 }
 
@@ -420,6 +420,6 @@ td {
 .qty-unit {
   font-size: var(--text-caption);
   color: var(--color-text-muted);
-  margin-left: 3px;
+  margin-left: var(--space-2);
 }
 </style>

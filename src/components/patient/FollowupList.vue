@@ -581,7 +581,7 @@ function hasMeaningfulData(f: Followup): boolean {
 .created-by-inline {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: var(--space-2);
   font-size: var(--text-caption);
   color: var(--color-text-muted);
 }
@@ -604,7 +604,7 @@ function hasMeaningfulData(f: Followup): boolean {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 3px 8px;
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-pill);
   font-size: var(--text-caption);
   font-weight: var(--weight-emphasis);
@@ -644,7 +644,7 @@ function hasMeaningfulData(f: Followup): boolean {
 .result-block {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--space-3);
   min-width: 80px;
 }
 
@@ -685,21 +685,21 @@ function hasMeaningfulData(f: Followup): boolean {
   font-weight: var(--weight-emphasis);
   color: var(--color-text-muted);
   white-space: nowrap;
-  margin-top: 3px;
+  margin-top: var(--space-2);
   flex-shrink: 0;
 }
 
 .se-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: var(--space-3);
 }
 
 .se-tag {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 3px 9px;
+  padding: var(--space-2) var(--space-5);
   background: var(--tint-orange);
   color: var(--palette-orange-dark);
   border-radius: var(--radius-pill);
@@ -732,14 +732,14 @@ function hasMeaningfulData(f: Followup): boolean {
   font-weight: var(--weight-emphasis);
   color: var(--color-text-muted);
   white-space: nowrap;
-  margin-top: 3px;
+  margin-top: var(--space-2);
   flex-shrink: 0;
 }
 
 .dispensed-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: var(--space-3);
 }
 
 .dispensed-tag {
@@ -755,7 +755,7 @@ function hasMeaningfulData(f: Followup): boolean {
 .notes-row {
   display: flex;
   align-items: flex-start;
-  gap: 7px;
+  gap: var(--space-4);
   background: var(--color-surface-alt);
   border-radius: var(--radius-sm);
   padding: var(--space-4) var(--space-5);

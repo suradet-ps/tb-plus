@@ -181,7 +181,7 @@ onBeforeUnmount(() => {
 }
 
 :deep(.leaflet-popup-content) {
-  margin: 10px 12px;
+  margin: var(--space-5) var(--space-6);
   font-family: var(--font-family);
 }
 
@@ -189,7 +189,7 @@ onBeforeUnmount(() => {
   font-size: var(--text-body-sm);
   font-weight: var(--weight-heading);
   color: var(--color-text);
-  margin-bottom: 3px;
+  margin-bottom: var(--space-2);
 }
 
 :deep(.tb-map-popup__meta) {
@@ -200,11 +200,11 @@ onBeforeUnmount(() => {
 
 :deep(.tb-map-popup__phase) {
   display: inline-block;
-  padding: 1px 6px;
+  padding: var(--space-1) var(--space-3);
   border-radius: 9999px;
   font-size: 10px;
   font-weight: 600;
-  margin-left: 4px;
+  margin-left: var(--space-2);
 }
 
 :deep(.tb-map-popup__phase--intensive) {
@@ -218,8 +218,8 @@ onBeforeUnmount(() => {
 }
 
 :deep(.tb-map-popup__note) {
-  margin-top: 4px;
-  padding-top: 4px;
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   font-size: var(--text-sm);
   color: var(--color-orange);

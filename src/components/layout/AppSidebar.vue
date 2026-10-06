@@ -153,7 +153,7 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
 .sidebar-brand {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: var(--space-1);
   overflow: hidden;
 }
 
@@ -192,7 +192,7 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: var(--space-5);
   padding: var(--space-4) var(--space-5);
   border-radius: var(--radius-sm);
   text-decoration: none;
@@ -248,7 +248,7 @@ const todayApptCount = computed(() => appointmentsStore.todayAppointments.length
   flex-shrink: 0;
   min-width: 18px;
   height: 18px;
-  padding: 0 5px;
+  padding: 0 var(--space-3);
   border-radius: var(--radius-pill);
   background: var(--color-warning);
   color: var(--color-text-inverse);

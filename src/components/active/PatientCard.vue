@@ -265,7 +265,7 @@ function handleDischarge() {
   display: flex;
   gap: var(--space-2);
   align-items: center;
-  margin-top: 3px;
+  margin-top: var(--space-2);
 }
 
 .patient-card__sex {
@@ -302,7 +302,7 @@ function handleDischarge() {
   font-size: var(--text-xs);
   font-weight: var(--weight-heavy);
   opacity: 0.7;
-  margin-left: 1px;
+  margin-left: var(--space-1);
 }
 
 .patient-card__regimen {
@@ -326,7 +326,7 @@ function handleDischarge() {
 
 .patient-card__chips {
   display: flex;
-  gap: 3px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
@@ -410,7 +410,7 @@ function handleDischarge() {
 
 .patient-card__action--discharge {
   color: var(--color-text-muted);
-  padding: 5px 9px;
+  padding: var(--space-3) var(--space-5);
   flex-shrink: 0;
 }
 
