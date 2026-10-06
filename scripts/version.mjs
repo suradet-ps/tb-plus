@@ -3,7 +3,29 @@ import { readFileSync, writeFileSync } from "node:fs";
 
 const PKG_PATH = "package.json";
 const PKG_VERSION_PATTERN = /"version"\s*:\s*"([^"]+)"/;
-const SEMVER_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$/;
+
+function isValidSemver(version) {
+  const match = version.match(/^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$/);
+  if (!match) {
+    return false;
+  }
+  const [, major, minor, patch, prerelease] = match;
+  if ([major, minor, patch].some((part) => part !== String(Number(part)))) {
+    return false;
+  }
+  if (prerelease === undefined) {
+    return true;
+  }
+  return prerelease
+    .split(".")
+    .every(
+      (identifier) =>
+        identifier !== "" &&
+        (/^\d+$/.test(identifier)
+          ? identifier === String(Number(identifier))
+          : /^[0-9A-Za-z-]+$/.test(identifier)),
+    );
+}
 
 const MANIFESTS = [
   { path: "src-tauri/tauri.conf.json", pattern: /"version"\s*:\s*"([^"]+)"/ },
@@ -62,7 +84,7 @@ function sync() {
 }
 
 function bump(version) {
-  if (!version || !SEMVER_PATTERN.test(version)) {
+  if (!version || !isValidSemver(version)) {
     console.error("Usage: bun run version:bump <x.y.z>");
     process.exit(1);
   }
@@ -75,12 +97,13 @@ function bump(version) {
   sync();
   try {
     execFileSync("cargo", ["update", "--workspace"], { stdio: "inherit" });
-    console.log("Cargo.lock refreshed.");
   } catch {
-    console.warn(
-      "Could not run cargo update --workspace. Refresh Cargo.lock manually before committing.",
+    console.error(
+      "cargo update --workspace failed. The manifests were updated, but Cargo.lock may be stale. Install Rust or refresh the lock manually, then commit.",
     );
+    process.exit(1);
   }
+  console.log("Cargo.lock refreshed.");
   console.log(
     [
       "",
