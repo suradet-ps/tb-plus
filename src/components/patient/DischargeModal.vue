@@ -379,7 +379,7 @@ function onKeydown(e: KeyboardEvent) {
           <div class="modal-actions">
             <button
               type="button"
-              class="btn-cancel"
+              class="btn btn-secondary"
               @click="close"
               :disabled="isSubmitting"
             >
@@ -388,7 +388,7 @@ function onKeydown(e: KeyboardEvent) {
             <button
               type="submit"
               form="discharge-form"
-              class="btn-discharge"
+              class="btn btn-danger"
               :disabled="isSubmitting || !form.outcome"
             >
               <Loader2 v-if="isSubmitting" :size="14" class="spin" aria-hidden="true" />
@@ -689,53 +689,6 @@ function onKeydown(e: KeyboardEvent) {
   background: var(--color-surface-alt);
 }
 
-.btn-cancel {
-  padding: var(--space-4) var(--space-9);
-  background: var(--btn-secondary-bg);
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-emphasis);
-  font-family: var(--font-family);
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  transition: var(--transition-btn);
-}
-
-.btn-cancel:hover:not(:disabled) {
-  background: var(--btn-secondary-hover);
-}
-
-.btn-discharge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: var(--space-4) var(--space-10);
-  background: var(--btn-danger-bg);
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-heading);
-  font-family: var(--font-family);
-  cursor: pointer;
-  color: var(--btn-danger-text);
-  transition: var(--transition-btn-hover);
-}
-
-.btn-discharge:hover:not(:disabled) {
-  background: var(--btn-danger-hover);
-}
-
-.btn-discharge:active:not(:disabled) {
-  transform: scale(0.97);
-}
-
-.btn-cancel:disabled,
-.btn-discharge:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
 
 .modal-enter-active {
   transition: var(--transition-modal);

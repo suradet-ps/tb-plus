@@ -294,7 +294,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 
           <button
             v-if="detail.patient.status === 'active'"
-            class="btn-discharge"
+            class="btn btn-danger-ghost"
             type="button"
             @click="showDischargeModal = true"
           >
@@ -712,27 +712,6 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   border-color: rgba(42, 157, 153, 0.5);
 }
 
-.btn-discharge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--color-surface);
-  border: 1px solid rgba(221, 91, 0, 0.3);
-  border-radius: var(--radius-sm);
-  padding: var(--btn-padding);
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-emphasis);
-  font-family: var(--font-family);
-  color: var(--color-orange);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: var(--transition-bg), var(--transition-border);
-}
-
-.btn-discharge:hover {
-  background: rgba(221, 91, 0, 0.05);
-  border-color: rgba(221, 91, 0, 0.5);
-}
 
 /* -- Patient header card -- */
 .patient-header-card {

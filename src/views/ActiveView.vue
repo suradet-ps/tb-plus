@@ -316,15 +316,6 @@ function sortIcon(key: SortKey): string {
 .header-sub strong { font-weight: var(--weight-heading); color: var(--color-text); }
 .header-right { flex-shrink: 0; }
 
-.btn-ghost {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: transparent; border: 1px solid rgba(0,0,0,0.15);
-  padding: 7px 13px; font-size: var(--text-body-sm); font-weight: var(--weight-emphasis);
-  font-family: var(--font-family); cursor: pointer; border-radius: var(--radius-sm);
-  color: var(--color-text-secondary); transition: var(--transition-bg), var(--transition-border);
-}
-.btn-ghost:hover:not(:disabled) { background: var(--color-surface-alt); border-color: rgba(0,0,0,0.22); }
-.btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .stats-bar { display: flex; gap: var(--space-6); margin-bottom: 20px; flex-wrap: wrap; }
 .stat-card {

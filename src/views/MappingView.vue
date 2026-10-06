@@ -463,48 +463,6 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   gap: 10px;
 }
 
-.btn-ghost,
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 36px;
-  padding: 0 14px;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-family);
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-emphasis);
-  cursor: pointer;
-  transition: var(--transition-bg), var(--transition-border), var(--transition-color);
-}
-
-.btn-ghost {
-  background: var(--color-surface);
-  border: var(--border-standard);
-  color: var(--color-text-secondary);
-}
-
-.btn-ghost:hover:not(:disabled) {
-  background: var(--color-surface-alt);
-  color: var(--color-text);
-}
-
-.btn-primary {
-  background: var(--color-blue);
-  border: 1px solid transparent;
-  color: var(--color-surface);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--color-blue-active);
-}
-
-.btn-primary:disabled,
-.btn-ghost:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 
 .btn-primary--full {
   width: 100%;
@@ -806,7 +764,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 
 .pin-note-input:focus {
   outline: none;
-  border-color: var(--color-blue-focus);
+  border-color: var(--color-focus-ring);
   box-shadow: var(--shadow-focus-input);
 }
 

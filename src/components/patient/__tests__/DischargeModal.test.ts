@@ -199,7 +199,7 @@ describe('DischargeModal', () => {
     await wrapper.find('#discharge-form').trigger('submit');
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.find('.btn-discharge').attributes('disabled')).toBeDefined();
+    expect(wrapper.find('.btn-danger').attributes('disabled')).toBeDefined();
 
     resolveInvoke?.(undefined);
     await flushPromises();

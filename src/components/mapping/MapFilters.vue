@@ -188,7 +188,7 @@ const emit = defineEmits<{
 
 .filter-input:focus {
   outline: none;
-  border-color: var(--color-blue-focus);
+  border-color: var(--color-focus-ring);
   box-shadow: var(--shadow-focus-input);
 }
 

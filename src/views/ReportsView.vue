@@ -990,30 +990,6 @@ function exportCSV() {
   flex-shrink: 0;
 }
 
-.btn-ghost {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--color-surface);
-  border: var(--border-standard);
-  padding: 7px 13px;
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-emphasis);
-  font-family: var(--font-family);
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-secondary);
-  transition: var(--transition-bg);
-}
-
-.btn-ghost:hover:not(:disabled) {
-  background: var(--color-surface-alt);
-}
-
-.btn-ghost:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .btn-export {
   display: inline-flex;
