@@ -272,31 +272,6 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
   color: var(--color-text);
 }
 
-/* -- Refresh button -- */
-.btn-ghost {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: transparent;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  padding: 7px 13px;
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-emphasis);
-  font-family: var(--font-family);
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-secondary);
-  transition: var(--transition-bg);
-}
-
-.btn-ghost:hover:not(:disabled) {
-  background: var(--color-surface-alt);
-}
-
-.btn-ghost:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 /* -- Stats bar -- */
 .stats-bar {

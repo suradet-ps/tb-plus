@@ -111,7 +111,12 @@ p {
 }
 
 /* -- 6. BUTTONS (Global base - use in templates with class) -- */
-.btn {
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-ghost,
+.btn-danger,
+.btn-danger-ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -126,12 +131,22 @@ p {
   outline: none;
 }
 
-.btn:focus-visible {
+.btn:focus-visible,
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.btn-ghost:focus-visible,
+.btn-danger:focus-visible,
+.btn-danger-ghost:focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 
-.btn:active {
+.btn:active,
+.btn-primary:active,
+.btn-secondary:active,
+.btn-ghost:active,
+.btn-danger:active,
+.btn-danger-ghost:active {
   transform: scale(0.97);
 }
 
@@ -223,6 +238,25 @@ p {
 
 .btn-danger:disabled {
   opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Danger ghost (transparent, alert red) */
+.btn-danger-ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--color-alert-red);
+  padding: var(--btn-padding);
+  font-size: var(--btn-font-size);
+  transition: var(--transition-bg), var(--transition-color);
+}
+
+.btn-danger-ghost:hover:not(:disabled) {
+  background: var(--color-alert-red-bg);
+}
+
+.btn-danger-ghost:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 

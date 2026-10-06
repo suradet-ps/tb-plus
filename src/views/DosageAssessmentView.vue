@@ -404,30 +404,6 @@ function sexLabel(sex: string | null | undefined): string | null {
   flex-wrap: wrap;
 }
 
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--color-blue);
-  color: var(--color-text-inverse);
-  border: none;
-  padding: 8px 16px;
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-emphasis);
-  font-family: var(--font-family);
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: var(--transition-bg);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--color-blue-active);
-}
-
-.btn-primary:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
 
 .state-box {
   display: flex;

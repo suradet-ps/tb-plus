@@ -259,11 +259,11 @@ async function submit() {
 
           <!-- Footer -->
           <div class="modal-footer">
-            <button class="btn-ghost" type="button" @click="close" :disabled="isSubmitting">
+            <button class="btn-ghost btn-lg" type="button" @click="close" :disabled="isSubmitting">
               ยกเลิก
             </button>
             <button
-              class="btn-primary"
+              class="btn-primary btn-lg"
               type="button"
               :disabled="isSubmitting"
               @click="submit"
@@ -574,52 +574,5 @@ async function submit() {
   flex-shrink: 0;
 }
 
-.btn-ghost {
-  background: transparent;
-  border: none;
-  padding: var(--btn-padding-lg);
-  font-size: var(--btn-font-size-lg);
-  font-weight: var(--weight-emphasis);
-  cursor: pointer;
-  border-radius: var(--btn-radius);
-  color: var(--color-text-secondary);
-  transition: var(--transition-btn);
-  font-family: var(--font-family);
-}
-
-.btn-ghost:hover:not(:disabled) {
-  background: var(--color-surface-alt);
-  color: var(--color-text);
-}
-
-.btn-ghost:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  border: none;
-  padding: var(--btn-padding-lg);
-  font-size: var(--btn-font-size-lg);
-  font-weight: var(--weight-emphasis);
-  cursor: pointer;
-  border-radius: var(--btn-radius);
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  transition: var(--transition-btn);
-  font-family: var(--font-family);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--btn-primary-hover);
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 
 </style>

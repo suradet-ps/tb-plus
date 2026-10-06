@@ -92,7 +92,7 @@
   --color-overlay-light: rgba(0, 0, 0, 0.3);
 
   /* Semantic - focus ring */
-  --color-focus-ring: var(--palette-blue);
+  --color-focus-ring: var(--palette-blue-focus);
 
   /* Semantic - result badges (sputum, xray, adherence) */
   --result-negative-bg: rgba(26, 174, 57, 0.1);

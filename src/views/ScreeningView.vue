@@ -186,6 +186,7 @@ function formatLastSearch(iso: string | null): string {
               :title="{ H: 'Isoniazid', R: 'Rifampicin', Z: 'Pyrazinamide', E: 'Ethambutol' }[drug]"
             >
               <input
+                class="sr-only"
                 type="checkbox"
                 :value="drug"
                 :checked="screeningStore.filters.drug_classes?.includes(drug)"
@@ -370,8 +371,8 @@ function formatLastSearch(iso: string | null): string {
 
 .filter-group input[type='date']:focus,
 .filter-group select:focus {
-  border-color: var(--color-blue);
-  box-shadow: 0 0 0 3px var(--tint-blue);
+  border-color: var(--color-focus-ring);
+  box-shadow: var(--shadow-focus-input);
 }
 
 /* -- Search row (HN + Name) -- */
@@ -403,8 +404,8 @@ function formatLastSearch(iso: string | null): string {
 }
 
 .filter-group input[type='text']:focus {
-  border-color: var(--color-blue);
-  box-shadow: 0 0 0 3px var(--tint-blue);
+  border-color: var(--color-focus-ring);
+  box-shadow: var(--shadow-focus-input);
 }
 
 /* -- Drug class filter -- */
@@ -427,13 +428,14 @@ function formatLastSearch(iso: string | null): string {
   cursor: pointer;
 }
 
-/* Hide the real checkbox; the chip acts as the toggle indicator */
-.drug-check-label input[type='checkbox'] {
-  display: none;
+/* Visually hide the real checkbox; the chip acts as the toggle indicator */
+.drug-check-label input[type='checkbox']:focus-visible + .drug-chip {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
 }
 
 .drug-chip {
-  padding: 3px 12px;
+  padding: 6px 12px;
   border-radius: 9999px;
   font-size: var(--text-sm);
   font-weight: var(--weight-heading);
@@ -595,27 +597,6 @@ function formatLastSearch(iso: string | null): string {
   overflow: hidden;
 }
 
-/* -- Shared buttons -- */
-.btn-ghost {
-  background: transparent;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  padding: var(--btn-padding);
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-emphasis);
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-family);
-  transition: var(--transition-icon-btn);
-}
-
-.btn-ghost:hover {
-  background: var(--color-surface-alt);
-  color: var(--color-text);
-}
 
 .btn-ghost-small {
   background: transparent;
@@ -634,30 +615,6 @@ function formatLastSearch(iso: string | null): string {
   background: var(--tint-blue-hover);
 }
 
-.btn-primary {
-  background: var(--color-blue);
-  color: var(--color-text-inverse);
-  border: none;
-  padding: var(--btn-padding);
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-emphasis);
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-family);
-  transition: var(--transition-btn);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--color-blue-active);
-}
-
-.btn-primary:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
 
 /* -- Spinner -- */
 /* -- Last search badge -- */

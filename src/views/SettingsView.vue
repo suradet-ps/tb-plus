@@ -673,7 +673,7 @@ function cancelRestore() {
               </button>
 
               <button
-                class="btn-ghost-danger"
+                class="btn btn-danger-ghost"
                 :disabled="isSaving"
                 @click="settingsStore.deleteSavedConfig()"
                 title="ล้างการตั้งค่าที่บันทึกและคืนค่าเริ่มต้น"
@@ -951,6 +951,7 @@ function cancelRestore() {
                             type="button"
                             class="toggle-btn"
                             :class="{ active: ph.drug_classes.includes(cls.class) }"
+                            :aria-pressed="ph.drug_classes.includes(cls.class)"
                             @click="togglePhaseDrug(ph, cls.class)"
                           >
                             {{ cls.class }}
@@ -1449,8 +1450,8 @@ function cancelRestore() {
 }
 
 .form-input:focus {
-  border-color: var(--color-blue);
-  box-shadow: 0 0 0 3px var(--tint-blue);
+  border-color: var(--color-focus-ring);
+  box-shadow: var(--shadow-focus-input);
 }
 
 .form-input::placeholder {
@@ -1466,56 +1467,6 @@ function cancelRestore() {
   flex-wrap: wrap;
 }
 
-/* -- Buttons -- */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--color-blue);
-  color: var(--color-text-inverse);
-  border: none;
-  padding: 8px 16px;
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-emphasis);
-  font-family: var(--font-family);
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: var(--transition-bg);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--color-blue-active);
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--color-surface);
-  border: var(--border-standard);
-  padding: 8px 16px;
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-emphasis);
-  font-family: var(--font-family);
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-secondary);
-  transition: var(--transition-bg);
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: var(--color-surface-alt);
-}
-
-.btn-secondary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .btn-ghost-download {
   display: inline-flex;
@@ -1577,32 +1528,6 @@ function cancelRestore() {
 
 /* -- Test-result inline feedback -- */
 /* -- Ghost danger button (delete config) -- */
-.btn-ghost-danger {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--color-alert-red);
-  font-family: var(--font-family);
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-ui);
-  cursor: pointer;
-  transition: var(--transition-bg), var(--transition-color);
-  white-space: nowrap;
-}
-
-.btn-ghost-danger:hover:not(:disabled) {
-  background: rgba(185, 28, 28, 0.07);
-  color: var(--palette-red-dark);
-}
-
-.btn-ghost-danger:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
 
 .test-result {
   display: inline-flex;
@@ -1953,7 +1878,7 @@ function cancelRestore() {
   outline: none;
   background: var(--color-surface);
 }
-.sr-input:focus { border-color: var(--color-blue); box-shadow: 0 0 0 2px rgba(0,117,222,0.1); }
+.sr-input:focus { border-color: var(--color-focus-ring); box-shadow: var(--shadow-focus-input); }
 
 .sr-btn {
   padding: 3px 8px;
