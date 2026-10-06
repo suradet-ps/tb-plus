@@ -700,48 +700,6 @@ function onKeydown(e: KeyboardEvent) {
   line-height: 1.55;
 }
 
-.select-wrap {
-  position: relative;
-}
-
-.select-wrap::after {
-  content: '';
-  position: absolute;
-  right: var(--space-5);
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 5px solid var(--color-text-muted);
-  pointer-events: none;
-}
-
-.form-select {
-  font-family: var(--font-family);
-  font-size: var(--text-body-sm);
-  color: var(--color-text);
-  background: var(--color-surface);
-  border: var(--border-standard);
-  border-radius: var(--radius-sm);
-  padding: var(--input-padding-lg) var(--space-16) var(--input-padding-lg) var(--space-5);
-  width: 100%;
-  appearance: none;
-  cursor: pointer;
-  transition: var(--transition-input);
-}
-
-.form-select:focus {
-  outline: none;
-  border-color: var(--color-accent);
-  box-shadow: var(--shadow-focus-ring);
-}
-
-.form-select:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
 
 .se-priority-alert {
   display: flex;
