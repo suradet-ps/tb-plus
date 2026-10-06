@@ -26,7 +26,7 @@ const referenced = new Set();
 const inlineAssigned = new Set();
 for (const file of walk(SRC)) {
   const text = readFileSync(file, "utf8");
-  for (const m of text.matchAll(/var\((--[A-Za-z0-9-]+)/g)) {
+  for (const m of text.matchAll(/var\(\s*(--[A-Za-z0-9-]+)/g)) {
     referenced.add(m[1]);
   }
   for (const m of text.matchAll(/['"](--[A-Za-z0-9-]+)['"]\s*:/g)) {
