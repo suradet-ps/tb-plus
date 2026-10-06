@@ -25,20 +25,15 @@
   --palette-teal: #2a9d99;
   --palette-green: #1aae39;
   --palette-orange: #dd5b00;
-  --palette-pink: #ff64c8;
-  --palette-purple: #391c57;
   --palette-brown: #523410;
 
   /* Alert / extended */
   --palette-red: #b91c1c;
-  --palette-red-dark: #991b1b;
   --palette-amber: #f5a623;
   --palette-amber-dark: #c78b00;
   --palette-orange-dark: #b84a00;
-  --palette-orange-darker: #c44e00;
   --palette-teal-dark: #238582;
   --palette-red-mid: #c0392b;
-  --palette-gold-brown: #ad7e26;
 
   /* Pure white / near-black */
   --palette-white: #ffffff;
@@ -56,7 +51,6 @@
   /* Surface */
   --color-surface: var(--palette-white);
   --color-surface-alt: var(--palette-warm-white);
-  --color-surface-dark: var(--palette-warm-dark);
 
   /* Brand / interactive */
   --color-accent: var(--palette-blue);
@@ -65,11 +59,8 @@
 
   /* Semantic - status */
   --color-success: var(--palette-green);
-  --color-success-text: var(--palette-green);
   --color-info: var(--palette-teal);
   --color-warning: var(--palette-orange);
-  --color-danger: var(--palette-orange);
-  --color-error: var(--palette-red);
 
   /* Semantic - alert severity */
   --color-alert-red: var(--palette-red);
@@ -175,19 +166,15 @@
 :root {
   --drug-H: var(--palette-teal);
   --drug-H-bg: #e8f8f7;
-  --drug-H-border: rgba(42, 157, 153, 0.25);
 
   --drug-R: var(--palette-orange);
   --drug-R-bg: #fdf0e8;
-  --drug-R-border: rgba(221, 91, 0, 0.25);
 
   --drug-Z: var(--palette-brown);
   --drug-Z-bg: #f0ebe6;
-  --drug-Z-border: rgba(82, 52, 16, 0.25);
 
   --drug-E: var(--palette-blue);
   --drug-E-bg: #e8f2fd;
-  --drug-E-border: rgba(0, 117, 222, 0.25);
 }
 
 /* -- 4. SPACING SCALE (8px base) -- */
@@ -282,11 +269,9 @@
   --border-standard: 1px solid rgba(0, 0, 0, 0.1);
   --border-color: rgba(0, 0, 0, 0.1);
   --border-color-light: rgba(0, 0, 0, 0.06);
-  --border-color-medium: rgba(0, 0, 0, 0.07);
   --border-color-input: rgba(0, 0, 0, 0.15);
   --border-color-focus: rgba(0, 117, 222, 0.25);
   --border-color-teal: rgba(42, 157, 153, 0.25);
-  --border-color-orange: rgba(221, 91, 0, 0.25);
   --border-color-green: rgba(26, 174, 57, 0.22);
   --border-color-error: rgba(221, 91, 0, 0.22);
 }
@@ -307,11 +292,9 @@
     rgba(0, 0, 0, 0.04) 0px 14px 28px,
     rgba(0, 0, 0, 0.05) 0px 23px 52px;
   --shadow-focus-ring: 0 0 0 3px rgba(0, 117, 222, 0.1);
-  --shadow-focus-ring-sm: 0 0 0 2px rgba(0, 117, 222, 0.1);
   --shadow-focus-ring-error: 0 0 0 3px rgba(221, 91, 0, 0.1);
   --shadow-timeline-dot: 0 1px 4px rgba(0, 117, 222, 0.4);
   --shadow-map-marker: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 6px 16px rgba(0, 0, 0, 0.16);
-  --shadow-focus-search: 0 0 0 3px rgba(9, 127, 232, 0.15);
   --shadow-focus-input: 0 0 0 3px rgba(9, 127, 232, 0.14);
 }
 
@@ -319,10 +302,8 @@
 :root {
   --z-sticky: 1;
   --z-timeline: 3;
-  --z-overlay-settings: 100;
   --z-panel: 900;
   --z-modal: 1000;
-  --z-splash: 9999;
 }
 
 /* -- 10. TRANSITIONS -- */
@@ -346,9 +327,6 @@
     border-color var(--duration-base) var(--ease-standard),
     box-shadow var(--duration-base) var(--ease-standard);
   --transition-btn: background var(--duration-fast) var(--ease-standard);
-  --transition-btn-hover:
-    background var(--duration-fast) var(--ease-standard),
-    transform var(--duration-instant) var(--ease-standard);
   --transition-modal: opacity var(--duration-slow) var(--ease-standard);
   --transition-modal-panel:
     opacity var(--duration-slow) var(--ease-standard),
@@ -363,30 +341,16 @@
     color var(--duration-fast) var(--ease-standard);
 }
 
-/* -- 11. BREAKPOINTS -- */
-:root {
-  --bp-mobile-sm: 400px;
-  --bp-mobile: 600px;
-  --bp-tablet-sm: 768px;
-  --bp-tablet: 1080px;
-  --bp-desktop-sm: 1200px;
-  --bp-desktop: 1440px;
-}
-
-/* -- 12. LAYOUT -- */
+/* -- 11. LAYOUT -- */
 :root {
   --sidebar-width: 240px;
-  --page-max-sm: 780px;
-  --page-max: 900px;
-  --page-max-md: 1100px;
-  --page-max-lg: 1200px;
-  --page-max-xl: 1440px;
+  --page-max-lg: 1440px;
   --dialog-max: 400px;
   --modal-max-sm: 500px;
   --modal-max: 540px;
 }
 
-/* -- 13. COMPONENT TOKENS -- */
+/* -- 12. COMPONENT TOKENS -- */
 :root {
   /* -- Button -- */
   --btn-primary-bg: var(--palette-blue);
@@ -412,18 +376,14 @@
   /* -- Input / Form -- */
   --input-bg: var(--color-surface);
   --input-text: rgba(0, 0, 0, 0.9);
-  --input-placeholder: var(--palette-warm-gray-300);
   --input-border: var(--border-color-input);
   --input-border-focus: var(--palette-blue);
   --input-border-error: var(--palette-orange);
   --input-padding: 6px 10px;
-  --input-padding-sm: 6px 10px;
   --input-padding-md: 7px 10px;
   --input-padding-lg: 8px 10px;
-  --input-font-size: var(--text-body-sm);
   --input-font-size-sm: var(--text-body-sm);
   --input-font-size-md: var(--text-body);
-  --input-font-size-lg: var(--text-body);
   --input-radius: var(--radius-sm);
 
   /* -- Card -- */
@@ -454,14 +414,12 @@
 
   /* -- Modal / Dialog -- */
   --modal-overlay: var(--color-overlay);
-  --modal-overlay-light: var(--color-overlay-light);
   --modal-bg: var(--color-surface);
   --modal-shadow: var(--shadow-deep);
   --modal-radius: var(--radius-card);
   --modal-header-padding: 20px 24px 16px;
   --modal-body-padding: 20px 24px;
   --modal-footer-padding: 16px 24px;
-  --modal-padding: var(--space-12);
   --dialog-padding: var(--space-12);
 
   /* -- Table -- */
@@ -480,13 +438,9 @@
   /* -- Empty State -- */
   --empty-padding-sm: 40px 24px;
   --empty-padding: 48px 24px;
-  --empty-padding-lg: 60px 24px;
-  --empty-padding-xl: 56px 24px;
-  --empty-icon-color: var(--palette-warm-gray-300);
 
   /* -- Page layout -- */
   --page-root-padding: var(--space-page-padding) var(--space-page-padding) var(--space-page-bottom);
-  --page-header-margin: var(--space-12);
   --filter-card-padding: 20px 24px;
   --filter-card-margin: var(--space-8);
 
@@ -535,18 +489,14 @@
   --search-wrap-radius: var(--radius-sm);
 
   /* -- Tab -- */
-  --tab-padding: 10px 18px;
-  --tab-active-border: 2px solid var(--palette-blue);
 
   /* -- Divider -- */
   --divider-color: rgba(0, 0, 0, 0.07);
 
   /* -- Timeline -- */
-  --timeline-bar-height: 28px;
   --timeline-intensive-bg: rgba(221, 91, 0, 0.1);
   --timeline-continuation-bg: rgba(42, 157, 153, 0.1);
   --timeline-intensive-border: rgba(221, 91, 0, 0.3);
-  --timeline-continuation-border: rgba(42, 157, 153, 0.3);
   --timeline-today-color: var(--palette-blue);
 
   /* -- Tinted backgrounds (reusable overlay tints) -- */
@@ -556,29 +506,19 @@
   --tint-blue-hover: rgba(0, 117, 222, 0.08);
   --tint-teal: rgba(42, 157, 153, 0.06);
   --tint-orange: rgba(221, 91, 0, 0.06);
-  --tint-red: rgba(185, 28, 28, 0.06);
   --tint-selected: #f0f7ff;
 }
 
 /* -- Aliases for backward compatibility -- */
 :root {
-  --color-bg: var(--color-surface);
-  --color-bg-alt: var(--color-surface-alt);
-  --color-bg-dark: var(--color-surface-dark);
   --color-blue: var(--color-accent);
   --color-blue-active: var(--color-accent-active);
-  --color-blue-focus: var(--color-accent-focus);
   --color-teal: var(--color-info);
   --color-green: var(--color-success);
   --color-orange: var(--color-warning);
-  --color-pink: var(--palette-pink);
-  --color-purple: var(--palette-purple);
-  --color-brown: var(--palette-brown);
-  --font: var(--font-family);
-  --border: var(--border-standard);
 }
 
-/* -- 10. HIGH CONTRAST MODE -- */
+/* -- 13. HIGH CONTRAST MODE -- */
 @media (prefers-contrast: more) {
   :root {
     --color-text: #000000;
@@ -589,8 +529,6 @@
     --border-color: rgba(0, 0, 0, 0.3);
     --border-color-input: rgba(0, 0, 0, 0.4);
     --divider-color: rgba(0, 0, 0, 0.2);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.15);
-    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.2);
     --shadow-deep: 0 4px 12px rgba(0, 0, 0, 0.25);
     --color-focus-ring: #0000cc;
   }

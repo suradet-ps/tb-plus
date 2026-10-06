@@ -304,7 +304,7 @@ function formatLastSearch(iso: string | null): string {
 /* -- Root layout -- */
 .view-root {
   padding: var(--page-root-padding);
-  max-width: 1440px;
+  max-width: var(--page-max-lg);
 }
 
 /* -- Page header -- */
@@ -624,7 +624,7 @@ function formatLastSearch(iso: string | null): string {
   gap: var(--space-2);
   margin-left: var(--space-4);
   font-size: var(--text-xs);
-  font-weight: var(--weight-normal);
+  font-weight: var(--weight-body);
   color: var(--color-text-muted);
   background: var(--color-surface-alt);
   padding: var(--space-1) var(--space-4);

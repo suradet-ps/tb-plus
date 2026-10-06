@@ -261,11 +261,6 @@ p {
 }
 
 /* Sizes */
-.btn-sm {
-  padding: var(--btn-padding-sm);
-  font-size: var(--btn-font-size-sm);
-}
-
 .btn-lg {
   padding: var(--btn-padding-lg);
   font-size: var(--btn-font-size-lg);
@@ -295,11 +290,6 @@ p {
 }
 
 .form-input--error,
-.form-select--error {
-  border-color: var(--input-border-error);
-  box-shadow: var(--shadow-focus-ring-error);
-}
-
 .form-textarea {
   resize: vertical;
   min-height: 72px;
@@ -330,11 +320,6 @@ p {
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
   overflow: hidden;
-}
-
-.card--hover:hover {
-  box-shadow: var(--shadow-card-hover);
-  transition: var(--transition-card-hover);
 }
 
 /* -- 9. MODAL / OVERLAY (Global base) -- */
@@ -408,11 +393,6 @@ p {
   padding: var(--badge-padding);
 }
 
-.badge--sm {
-  font-size: var(--text-caption);
-  padding: var(--badge-padding-sm);
-}
-
 /* -- 11. DRUG CHIP (Global base) -- */
 .chip {
   display: inline-flex;
@@ -439,23 +419,6 @@ p {
 }
 
 /* Drug class colour presets (for use in components) */
-.chip--H {
-  background: var(--drug-H-bg);
-  color: var(--drug-H);
-}
-.chip--R {
-  background: var(--drug-R-bg);
-  color: var(--drug-R);
-}
-.chip--Z {
-  background: var(--drug-Z-bg);
-  color: var(--drug-Z);
-}
-.chip--E {
-  background: var(--drug-E-bg);
-  color: var(--drug-E);
-}
-
 /* -- 12. FILTER / SEARCH BAR PATTERNS -- */
 .filter-card {
   background: var(--card-bg);
@@ -503,31 +466,7 @@ p {
   align-items: center;
 }
 
-/* -- 13. PAGE LAYOUT PATTERNS -- */
-.page-root {
-  padding: var(--page-root-padding);
-  max-width: var(--page-max-lg);
-}
-
-.page-header {
-  margin-bottom: var(--page-header-margin);
-}
-
-.page-header h1 {
-  font-size: var(--text-display-sm);
-  font-weight: var(--weight-heading);
-  letter-spacing: var(--tracking-heading);
-  color: var(--color-text);
-  margin: 0 0 var(--space-2);
-}
-
-.page-header p {
-  font-size: var(--text-body);
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-/* -- 14. ERROR / SUCCESS BANNERS -- */
+/* -- 13. ERROR / SUCCESS BANNERS -- */
 .error-banner {
   background: var(--alert-error-bg);
   border: 1px solid var(--alert-error-border);
@@ -547,7 +486,7 @@ p {
   color: var(--color-success);
 }
 
-/* -- 15. ACTION BAR -- */
+/* -- 14. ACTION BAR -- */
 .action-bar {
   background: var(--action-bar-bg);
   border: var(--action-bar-border);
@@ -559,7 +498,7 @@ p {
   margin-bottom: var(--space-8);
 }
 
-/* -- 16. TABLE PATTERNS -- */
+/* -- 15. TABLE PATTERNS -- */
 .table-card {
   background: var(--table-bg);
   border: var(--table-border);
@@ -576,7 +515,7 @@ p {
   }
 }
 
-/* -- 17. EMPTY STATE -- */
+/* -- 16. EMPTY STATE -- */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -587,34 +526,7 @@ p {
   color: var(--color-text-muted);
 }
 
-.empty-state--lg {
-  padding: var(--empty-padding-lg);
-}
-
-.empty-state--xl {
-  padding: var(--empty-padding-xl);
-}
-
-.empty-state-icon {
-  color: var(--empty-icon-color);
-  margin-bottom: var(--space-8);
-  opacity: 0.5;
-}
-
-.empty-state-title {
-  font-size: var(--text-body);
-  font-weight: var(--weight-emphasis);
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-2);
-}
-
-.empty-state-sub {
-  font-size: var(--text-body-sm);
-  color: var(--color-text-muted);
-  margin-bottom: var(--space-3);
-}
-
-/* -- 18. SEARCH + INPUT WRAPS -- */
+/* -- 17. SEARCH + INPUT WRAPS -- */
 .search-wrap {
   display: flex;
   align-items: center;
@@ -646,7 +558,7 @@ p {
   flex-shrink: 0;
 }
 
-/* -- 19. STAT CARD -- */
+/* -- 18. STAT CARD -- */
 .stat-card {
   background: var(--color-surface);
   border: var(--border-standard);
@@ -671,7 +583,7 @@ p {
   color: var(--color-text-muted);
 }
 
-/* -- 20. ANIMATIONS -- */
+/* -- 19. ANIMATIONS -- */
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -705,7 +617,7 @@ p {
   animation: pulse var(--duration-loop) ease-in-out infinite;
 }
 
-/* -- 21. SKELETON LOADING -- */
+/* -- 20. SKELETON LOADING -- */
 .skeleton {
   background: linear-gradient(
     90deg,
@@ -718,61 +630,8 @@ p {
   border-radius: var(--radius-sm);
 }
 
-.skeleton--text {
-  height: var(--space-7);
-  margin-bottom: var(--space-4);
-}
-
-.skeleton--heading {
-  height: var(--text-display);
-  margin-bottom: var(--space-6);
-}
-
-/* -- 22. DRUG CLASS FILTER CHIPS (toggle chips) -- */
-.drug-filter-chip {
-  padding: var(--space-2) var(--space-6);
-  border-radius: var(--radius-pill);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-heading);
-  cursor: pointer;
-  transition: opacity var(--duration-base) var(--ease-standard);
-  user-select: none;
-}
-
-.drug-filter-chip--unchecked {
-  opacity: 0.35;
-}
-
-/* -- 23. MISC UTILITY CLASSES -- */
-.flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.gap-1 {
-  gap: var(--space-1);
-}
-.gap-2 {
-  gap: var(--space-2);
-}
-.gap-3 {
-  gap: var(--space-3);
-}
-.gap-4 {
-  gap: var(--space-4);
-}
-.gap-6 {
-  gap: var(--space-6);
-}
-.gap-8 {
-  gap: var(--space-8);
-}
-.gap-12 {
-  gap: var(--space-12);
-}
-
-/* -- 21. VIEW STATE PANELS (LoadingState / EmptyState / ErrorState) -- */
+/* -- 21. MISC UTILITY CLASSES -- */
+/* -- 22. VIEW STATE PANELS (LoadingState / EmptyState / ErrorState) -- */
 .view-state {
   display: flex;
   align-items: center;
@@ -822,7 +681,7 @@ p {
   margin-top: var(--space-2);
 }
 
-/* -- 22. REDUCED MOTION -- */
+/* -- 23. REDUCED MOTION -- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
