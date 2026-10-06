@@ -258,7 +258,7 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
   font-weight: var(--weight-heading);
   letter-spacing: var(--tracking-heading);
   color: var(--color-text);
-  margin: 0 0 4px;
+  margin: 0 0 var(--space-2);
 }
 
 .header-sub {
@@ -277,7 +277,7 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 .stats-bar {
   display: flex;
   gap: var(--space-6);
-  margin-bottom: 20px;
+  margin-bottom: var(--space-10);
   flex-wrap: wrap;
 }
 
@@ -311,7 +311,7 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 .stat-body {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .stat-num {
@@ -329,7 +329,7 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 .stat-label {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
-  margin-top: 1px;
+  margin-top: var(--space-1);
 }
 
 /* -- Table card -- */
@@ -354,7 +354,7 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 }
 
 .discharged-table thead th {
-  padding: 10px 14px;
+  padding: var(--space-5) var(--space-7);
   text-align: left;
   font-size: var(--text-sm);
   font-weight: var(--weight-emphasis);
@@ -377,7 +377,7 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 }
 
 .discharged-table td {
-  padding: 10px 14px;
+  padding: var(--table-cell-padding);
   vertical-align: middle;
 }
 
@@ -417,7 +417,7 @@ function getTbTypeLabel(tbType: string | null | undefined): string {
 .btn-view {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
+  padding: var(--space-2) var(--space-5);
   font-size: var(--text-sm);
   font-weight: var(--weight-emphasis);
   color: var(--color-blue);

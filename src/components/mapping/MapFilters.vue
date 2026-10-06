@@ -141,7 +141,7 @@ const emit = defineEmits<{
   border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  padding: 16px;
+  padding: var(--space-8);
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
@@ -160,7 +160,7 @@ const emit = defineEmits<{
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .filter-group--wide {
@@ -199,7 +199,7 @@ const emit = defineEmits<{
 
 .btn-reset {
   min-height: 36px;
-  padding: 0 14px;
+  padding: 0 var(--space-7);
   border-radius: var(--radius-sm);
   border: var(--border-standard);
   background: var(--color-surface);

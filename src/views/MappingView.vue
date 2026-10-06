@@ -460,7 +460,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 
 .header-actions {
   display: inline-flex;
-  gap: 10px;
+  gap: var(--space-5);
 }
 
 
@@ -480,7 +480,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  padding: 14px 16px;
+  padding: var(--space-7) var(--space-8);
   display: flex;
   gap: var(--space-6);
   align-items: center;
@@ -535,7 +535,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 }
 
 .stat-label {
-  margin-top: 4px;
+  margin-top: var(--space-2);
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
@@ -546,7 +546,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   border: var(--border-standard);
   background: rgba(0, 117, 222, 0.07);
   color: var(--color-blue);
-  padding: 10px 12px;
+  padding: var(--space-5) var(--space-6);
   font-size: var(--text-body-sm);
   line-height: var(--leading-body);
 }
@@ -570,7 +570,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   display: grid;
   grid-template-columns: 360px minmax(0, 1fr);
   gap: var(--space-8);
-  margin-top: 16px;
+  margin-top: var(--space-8);
 }
 
 .side-card {
@@ -578,10 +578,10 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  padding: 16px;
+  padding: var(--space-8);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--space-7);
   min-height: 560px;
 }
 
@@ -599,7 +599,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 }
 
 .section-subtitle {
-  margin-top: 4px;
+  margin-top: var(--space-2);
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   line-height: 1.45;
@@ -607,7 +607,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 
 .count-pill {
   align-self: flex-start;
-  padding: 4px 10px;
+  padding: var(--space-2) var(--space-5);
   border-radius: var(--radius-pill);
   background: var(--color-badge-bg);
   color: var(--color-badge-text);
@@ -616,7 +616,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 }
 
 .detail-card {
-  padding: 14px;
+  padding: var(--space-7);
   border-radius: var(--radius-card);
   background: var(--color-surface-alt);
   border: var(--border-standard);
@@ -639,7 +639,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 }
 
 .detail-hn {
-  margin-top: 3px;
+  margin-top: var(--space-2);
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
@@ -647,14 +647,14 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 .detail-meta-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: var(--space-5);
 }
 
 .detail-block,
 .detail-meta-grid > div {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .meta-label {
@@ -684,7 +684,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   flex-direction: column;
   gap: var(--space-4);
   overflow: auto;
-  padding-right: 2px;
+  padding-right: var(--space-1);
 }
 
 .patient-row {
@@ -693,12 +693,12 @@ async function handleSingleGeocode(hn: string): Promise<void> {
   background: var(--color-surface);
   border: var(--border-standard);
   border-radius: var(--radius-md);
-  padding: 11px 12px;
+  padding: var(--space-6) var(--space-6);
   content-visibility: auto;
   contain-intrinsic-size: auto 64px;
   display: flex;
   justify-content: space-between;
-  gap: 10px;
+  gap: var(--space-5);
   cursor: pointer;
   transition: var(--transition-bg), var(--transition-border);
 }
@@ -723,7 +723,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 }
 
 .patient-row__sub {
-  margin-top: 4px;
+  margin-top: var(--space-2);
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   line-height: 1.45;
@@ -731,7 +731,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 
 .patient-row__phase {
   align-self: center;
-  padding: 3px 7px;
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-pill);
   font-size: var(--text-caption);
   font-weight: var(--weight-emphasis);
@@ -770,14 +770,14 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 
 .btn-ghost--sm {
   min-height: 28px;
-  padding: 0 10px;
+  padding: 0 var(--space-5);
   font-size: var(--text-caption);
-  margin-top: 4px;
+  margin-top: var(--space-2);
 }
 
 .geo-pill {
   align-self: center;
-  padding: 4px 8px;
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-pill);
   font-size: var(--text-caption);
   font-weight: var(--weight-emphasis);
@@ -808,7 +808,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 .empty-inline {
   border-radius: var(--radius-md);
   border: var(--border-standard);
-  padding: 14px;
+  padding: var(--space-7);
   text-align: center;
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
@@ -830,7 +830,7 @@ async function handleSingleGeocode(hn: string): Promise<void> {
 
 @media (max-width: 760px) {
   .view-root {
-    padding: 24px 20px 40px;
+    padding: var(--space-12) var(--space-10) var(--space-20);
   }
 
   .view-header {

@@ -974,7 +974,7 @@ function exportCSV() {
   font-weight: var(--weight-heading);
   letter-spacing: var(--tracking-heading);
   color: var(--color-text);
-  margin: 0 0 4px;
+  margin: 0 0 var(--space-2);
 }
 
 .header-left p {
@@ -994,7 +994,7 @@ function exportCSV() {
 .btn-export {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   background: var(--color-surface);
   border: var(--border-standard);
   padding: var(--btn-padding);
@@ -1026,10 +1026,10 @@ function exportCSV() {
 
 .qs-item {
   flex: 1;
-  padding: 16px 20px;
+  padding: var(--space-8) var(--space-10);
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--space-2);
 }
 
 .qs-divider {
@@ -1055,15 +1055,15 @@ function exportCSV() {
 .qs-label {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
-  margin-top: 2px;
+  margin-top: var(--space-1);
 }
 
 /* -- Report cards grid -- */
 .report-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: var(--space-7);
+  margin-bottom: var(--space-14);
 }
 
 .report-card {
@@ -1072,10 +1072,10 @@ function exportCSV() {
   border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  padding: 18px;
+  padding: var(--space-9);
   cursor: pointer;
   display: flex;
-  gap: 14px;
+  gap: var(--space-7);
   align-items: flex-start;
   transition: var(--transition-card-hover), var(--transition-border), var(--transition-bg);
 }
@@ -1093,7 +1093,7 @@ function exportCSV() {
 
 /* Icon container */
 .report-card-icon {
-  padding: 8px;
+  padding: var(--space-4);
   border-radius: var(--radius-md);
   flex-shrink: 0;
   display: flex;
@@ -1110,7 +1110,7 @@ function exportCSV() {
   font-size: var(--text-body-sm);
   font-weight: var(--weight-heading);
   color: var(--color-text);
-  margin-bottom: 6px;
+  margin-bottom: var(--space-3);
   letter-spacing: var(--tracking-snug);
 }
 
@@ -1119,13 +1119,13 @@ function exportCSV() {
   font-weight: var(--weight-heading);
   letter-spacing: var(--tracking-tight);
   line-height: 1;
-  margin-bottom: 5px;
+  margin-bottom: var(--space-3);
 }
 
 .report-label {
   font-size: var(--text-caption);
   color: var(--color-text-secondary);
-  margin-bottom: 3px;
+  margin-bottom: var(--space-2);
   line-height: var(--leading-normal);
 }
 
@@ -1142,11 +1142,11 @@ function exportCSV() {
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   padding: var(--filter-card-padding);
-  margin-bottom: 28px;
+  margin-bottom: var(--space-14);
 }
 
 .detail-header {
-  margin-bottom: 18px;
+  margin-bottom: var(--space-9);
 }
 
 .detail-header h3 {
@@ -1161,23 +1161,23 @@ function exportCSV() {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--space-6);
-  margin-bottom: 20px;
+  margin-bottom: var(--space-10);
 }
 
 .detail-grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-6);
-  margin-bottom: 20px;
+  margin-bottom: var(--space-10);
 }
 
 .stat-box {
   background: var(--color-badge-bg);
   border-radius: var(--radius-md);
-  padding: 14px 16px;
+  padding: var(--space-7) var(--space-8);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .stat-val {
@@ -1200,14 +1200,14 @@ function exportCSV() {
 .stat-red    { color: var(--color-orange); }
 
 .detail-subsection {
-  margin-top: 20px;
+  margin-top: var(--space-10);
 }
 
 .detail-subsection h4 {
   font-size: var(--text-body-sm);
   font-weight: var(--weight-heading);
   color: var(--color-text);
-  margin: 0 0 10px;
+  margin: 0 0 var(--space-5);
   letter-spacing: var(--tracking-snug);
 }
 
@@ -1217,12 +1217,12 @@ function exportCSV() {
   gap: var(--space-4);
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
-  padding: 24px 0;
+  padding: var(--space-12) 0;
 }
 
 .mini-empty {
   text-align: center;
-  padding: 32px 0;
+  padding: var(--space-16) 0;
   font-size: var(--text-body-sm);
   color: var(--color-text-muted);
 }
@@ -1233,26 +1233,26 @@ function exportCSV() {
 }
 
 .data-table.mini-table th {
-  padding: 7px 12px;
+  padding: var(--space-4) var(--space-6);
   font-size: var(--text-sm);
   vertical-align: middle;
 }
 
 .data-table.mini-table td {
-  padding: 7px 12px;
+  padding: var(--space-4) var(--space-6);
   font-size: var(--text-sm);
 }
 
 /* Month group in drug consumption */
 .month-group {
-  margin-bottom: 18px;
+  margin-bottom: var(--space-9);
 }
 
 .month-label {
   font-size: var(--text-sm);
   font-weight: var(--weight-heading);
   color: var(--color-text-secondary);
-  margin: 0 0 6px;
+  margin: 0 0 var(--space-3);
   letter-spacing: var(--tracking-badge);
   text-transform: uppercase;
 }
@@ -1260,7 +1260,7 @@ function exportCSV() {
 .drug-chip {
   display: inline-flex;
   align-items: center;
-  padding: 1px 8px;
+  padding: var(--space-1) var(--space-4);
   border-radius: var(--radius-pill);
   font-size: var(--text-xs);
   font-weight: var(--weight-heading);
@@ -1275,7 +1275,7 @@ function exportCSV() {
 /* Outcome pill */
 .outcome-pill {
   display: inline-flex;
-  padding: 2px 9px;
+  padding: var(--space-1) var(--space-5);
   border-radius: var(--radius-pill);
   font-size: var(--text-caption);
   font-weight: var(--weight-emphasis);
@@ -1301,7 +1301,7 @@ function exportCSV() {
 
 .rate-pill {
   display: inline-flex;
-  padding: 1px 8px;
+  padding: var(--space-1) var(--space-4);
   border-radius: var(--radius-pill);
   font-size: var(--text-caption);
   font-weight: var(--weight-heading);
@@ -1314,7 +1314,7 @@ function exportCSV() {
 /* Status pill */
 .status-pill {
   display: inline-flex;
-  padding: 2px 9px;
+  padding: var(--space-1) var(--space-5);
   border-radius: var(--radius-pill);
   font-size: var(--text-caption);
   font-weight: var(--weight-emphasis);
@@ -1336,7 +1336,7 @@ function exportCSV() {
 }
 
 .table-header {
-  padding: 15px 20px;
+  padding: var(--space-8) var(--space-10);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1346,7 +1346,7 @@ function exportCSV() {
 .table-header-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-5);
 }
 
 .table-header h3 {
@@ -1360,7 +1360,7 @@ function exportCSV() {
 .table-count {
   background: var(--color-badge-bg);
   color: var(--color-badge-text);
-  padding: 2px 9px;
+  padding: var(--space-1) var(--space-5);
   border-radius: var(--radius-pill);
   font-size: var(--text-caption);
   font-weight: var(--weight-emphasis);
@@ -1378,7 +1378,7 @@ function exportCSV() {
 }
 
 .data-table th {
-  padding: 10px 14px;
+  padding: var(--space-5) var(--space-7);
   text-align: left;
   font-size: var(--text-caption);
   font-weight: var(--weight-emphasis);
@@ -1390,7 +1390,7 @@ function exportCSV() {
 }
 
 .data-table td {
-  padding: 10px 14px;
+  padding: var(--table-cell-padding);
   border-bottom: var(--border-standard);
   vertical-align: middle;
   color: var(--color-text);
@@ -1438,7 +1438,7 @@ function exportCSV() {
   background: var(--color-surface-alt);
   border: var(--border-standard);
   border-radius: var(--radius-sm);
-  padding: 2px 7px;
+  padding: var(--space-1) var(--space-4);
   font-size: var(--text-sm);
   font-weight: var(--weight-emphasis);
   white-space: nowrap;
@@ -1447,7 +1447,7 @@ function exportCSV() {
 .phase-chip {
   display: inline-flex;
   align-items: center;
-  padding: 2px 9px;
+  padding: var(--space-1) var(--space-5);
   border-radius: var(--radius-pill);
   font-size: var(--text-caption);
   font-weight: var(--weight-emphasis);
@@ -1472,7 +1472,7 @@ function exportCSV() {
 .month-sep {
   color: var(--color-text-muted);
   font-weight: var(--weight-body);
-  margin: 0 1px;
+  margin: 0 var(--space-1);
 }
 
 .overdue-cell {
@@ -1492,7 +1492,7 @@ function exportCSV() {
 .alert-pill {
   display: inline-flex;
   align-items: center;
-  padding: 2px 9px;
+  padding: var(--space-1) var(--space-5);
   border-radius: var(--radius-pill);
   font-size: var(--text-caption);
   font-weight: var(--weight-emphasis);

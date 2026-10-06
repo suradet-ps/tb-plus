@@ -482,7 +482,7 @@ const gapZones = computed<GapZone[]>((() => {
   font-weight: var(--weight-heading);
   color: rgba(0, 0, 0, 0.65);
   white-space: nowrap;
-  margin-top: 3px;
+  margin-top: var(--space-2);
   letter-spacing: var(--tracking-label);
 }
 
@@ -530,7 +530,7 @@ const gapZones = computed<GapZone[]>((() => {
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-3);
   font-size: var(--text-caption);
   color: var(--color-text-muted);
   user-select: none;

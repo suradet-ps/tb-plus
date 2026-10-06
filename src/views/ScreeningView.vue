@@ -317,7 +317,7 @@ function formatLastSearch(iso: string | null): string {
   font-weight: var(--weight-heading);
   letter-spacing: var(--tracking-heading);
   color: var(--color-text);
-  margin: 0 0 4px;
+  margin: 0 0 var(--space-2);
 }
 
 .view-header p {
@@ -346,7 +346,7 @@ function formatLastSearch(iso: string | null): string {
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .filter-group label {
@@ -381,7 +381,7 @@ function formatLastSearch(iso: string | null): string {
   gap: var(--space-8);
   flex-wrap: wrap;
   margin-bottom: var(--space-6);
-  padding-bottom: 12px;
+  padding-bottom: var(--space-6);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
@@ -424,7 +424,7 @@ function formatLastSearch(iso: string | null): string {
 .drug-check-label {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
   cursor: pointer;
 }
 
@@ -435,7 +435,7 @@ function formatLastSearch(iso: string | null): string {
 }
 
 .drug-chip {
-  padding: 6px 12px;
+  padding: var(--space-3) var(--space-6);
   border-radius: 9999px;
   font-size: var(--text-sm);
   font-weight: var(--weight-heading);
@@ -471,7 +471,7 @@ function formatLastSearch(iso: string | null): string {
 .filter-actions {
   display: flex;
   gap: var(--space-4);
-  margin-top: 16px;
+  margin-top: var(--space-8);
   justify-content: flex-end;
   align-items: center;
 }
@@ -481,7 +481,7 @@ function formatLastSearch(iso: string | null): string {
   background: var(--tint-selected);
   border: 1px solid rgba(0, 117, 222, 0.2);
   border-radius: var(--radius-md);
-  padding: 12px 20px;
+  padding: var(--space-6) var(--space-10);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -529,7 +529,7 @@ function formatLastSearch(iso: string | null): string {
 
 .error-banner__retry {
   flex-shrink: 0;
-  padding: 4px 12px;
+  padding: var(--space-2) var(--space-6);
   border: 1px solid currentColor;
   border-radius: var(--radius-sm);
   background: none;
@@ -580,7 +580,7 @@ function formatLastSearch(iso: string | null): string {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
   margin-bottom: var(--space-4);
-  padding-left: 2px;
+  padding-left: var(--space-1);
 }
 
 .results-meta strong {
@@ -601,7 +601,7 @@ function formatLastSearch(iso: string | null): string {
 .btn-ghost-small {
   background: transparent;
   border: none;
-  padding: 5px 10px;
+  padding: var(--space-3) var(--space-5);
   font-size: var(--text-sm);
   font-weight: var(--weight-emphasis);
   cursor: pointer;
@@ -621,13 +621,13 @@ function formatLastSearch(iso: string | null): string {
 .last-search-badge {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: var(--space-2);
   margin-left: var(--space-4);
   font-size: var(--text-xs);
   font-weight: var(--weight-normal);
   color: var(--color-text-muted);
   background: var(--color-surface-alt);
-  padding: 2px 8px;
+  padding: var(--space-1) var(--space-4);
   border-radius: 9999px;
 }
 
@@ -635,13 +635,13 @@ function formatLastSearch(iso: string | null): string {
 .stale-badge {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: var(--space-2);
   margin-left: var(--space-4);
   font-size: var(--text-xs);
   font-weight: var(--weight-emphasis);
   color: var(--palette-orange-dark);
   background: var(--tint-orange);
-  padding: 2px 8px;
+  padding: var(--space-1) var(--space-4);
   border-radius: 9999px;
 }
 
@@ -653,7 +653,7 @@ function formatLastSearch(iso: string | null): string {
   font-size: 10px;
   min-width: 16px;
   height: 16px;
-  padding: 0 3px;
+  padding: 0 var(--space-2);
   border-radius: 3px;
   background: rgba(255, 255, 255, 0.2);
   font-weight: var(--weight-heading);

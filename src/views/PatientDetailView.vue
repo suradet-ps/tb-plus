@@ -592,11 +592,11 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 .alert-banner {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-5);
   background: rgba(221, 91, 0, 0.07);
   border: 1px solid rgba(221, 91, 0, 0.22);
   border-radius: var(--radius-md);
-  padding: 10px 14px;
+  padding: var(--space-5) var(--space-7);
   margin-bottom: var(--space-8);
   flex-wrap: wrap;
 }
@@ -608,7 +608,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 
 .banner-alert-list {
   display: flex;
-  gap: 6px;
+  gap: var(--space-3);
   flex-wrap: wrap;
   flex: 1;
 }
@@ -630,18 +630,18 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-6);
-  margin-bottom: 20px;
+  margin-bottom: var(--space-10);
   flex-wrap: wrap;
 }
 
 .btn-back {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   background: none;
   border: var(--border-standard);
   border-radius: var(--radius-sm);
-  padding: 6px 13px;
+  padding: var(--space-3) var(--space-7);
   font-size: var(--text-body-sm);
   font-weight: var(--weight-emphasis);
   font-family: var(--font-family);
@@ -667,11 +667,11 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: var(--space-3);
   background: none;
   border: var(--border-standard);
   border-radius: var(--radius-sm);
-  padding: 6px 9px;
+  padding: var(--space-3) var(--space-5);
   font-size: var(--text-sm);
   font-weight: var(--weight-ui);
   font-family: var(--font-family);
@@ -693,7 +693,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 .btn-followup {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   background: var(--color-surface);
   border: 1px solid rgba(42, 157, 153, 0.35);
   border-radius: var(--radius-sm);
@@ -719,11 +719,11 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  padding: 22px 24px;
+  padding: var(--card-padding);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 24px;
+  gap: var(--space-12);
   margin-bottom: var(--space-8);
   flex-wrap: wrap;
 }
@@ -740,7 +740,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 .hn-row {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-4);
 }
 
 .hn-label {
@@ -770,7 +770,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 .demo-unavailable {
   font-size: var(--text-caption);
   color: var(--color-text-muted);
-  margin: 2px 0 0;
+  margin: var(--space-1) 0 0;
 }
 
 .demo-unavailable--warn {
@@ -796,7 +796,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 .patient-meta {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-4);
   flex-wrap: wrap;
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
@@ -826,7 +826,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 .contact-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
@@ -845,7 +845,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   align-items: center;
   gap: var(--space-4);
   flex-wrap: wrap;
-  margin-top: 2px;
+  margin-top: var(--space-1);
 }
 
 .phase-badge {
@@ -860,7 +860,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 
 .drug-chips {
   display: flex;
-  gap: 4px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
@@ -877,7 +877,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 .enrollment-dl {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: var(--space-4);
   margin: 0;
 }
 
@@ -885,13 +885,13 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .enroll-dt {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: var(--space-2);
   font-size: var(--text-xs);
   font-weight: var(--weight-emphasis);
   color: var(--color-text-muted);
@@ -932,7 +932,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 /* -- Yellow alerts row -- */
 .yellow-alerts-row {
   display: flex;
-  gap: 6px;
+  gap: var(--space-3);
   flex-wrap: wrap;
   margin-bottom: var(--space-6);
 }
@@ -941,7 +941,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 .tabs-bar {
   display: flex;
   border-bottom: var(--border-standard);
-  margin-bottom: 20px;
+  margin-bottom: var(--space-10);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -953,8 +953,8 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
 .tab-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 18px;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-9);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
@@ -989,7 +989,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   border-radius: var(--radius-pill);
   font-size: var(--text-xs);
   font-weight: var(--weight-heading);
-  padding: 0 5px;
+  padding: 0 var(--space-3);
   line-height: 1;
   transition: var(--transition-bg), var(--transition-color);
 }
@@ -1005,7 +1005,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   border: var(--border-standard);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  padding: 22px 24px;
+  padding: var(--card-padding);
 }
 
 .card-head {
@@ -1013,7 +1013,7 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-6);
-  margin-bottom: 20px;
+  margin-bottom: var(--space-10);
   flex-wrap: wrap;
 }
 
@@ -1035,19 +1035,19 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   background: var(--color-surface-alt);
   border: var(--border-standard);
   border-radius: var(--radius-pill);
-  padding: 3px 9px;
+  padding: var(--space-2) var(--space-5);
 }
 
 /* -- Add follow-up button (inside followups tab header) -- */
 .btn-add {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-3);
   background: var(--color-blue);
   color: var(--color-text-inverse);
   border: none;
   border-radius: var(--radius-sm);
-  padding: 6px 12px;
+  padding: var(--space-3) var(--space-6);
   font-size: var(--text-sm);
   font-weight: var(--weight-emphasis);
   font-family: var(--font-family);
@@ -1084,13 +1084,13 @@ function getContinuationDrugsFromRegimen(regimen: string): string[] {
   font-size: var(--text-xs);
   font-weight: 800;
   opacity: 0.7;
-  margin-left: 1px;
+  margin-left: var(--space-1);
 }
 
 .stale-plan-note {
   font-size: var(--text-caption);
   color: var(--color-text-muted);
-  margin: 4px 0 0;
+  margin: var(--space-2) 0 0;
   font-style: italic;
   letter-spacing: var(--tracking-badge);
 }

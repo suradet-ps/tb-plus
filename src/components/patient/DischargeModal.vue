@@ -369,7 +369,7 @@ function onKeydown(e: KeyboardEvent) {
             <!-- Submit error -->
             <Transition name="badge-fade">
               <div v-if="submitError" class="form-error" role="alert">
-                <AlertTriangle :size="14" style="flex-shrink: 0; margin-top: 1px" aria-hidden="true" />
+                <AlertTriangle :size="14" style="flex-shrink: 0; margin-top: var(--space-1)" aria-hidden="true" />
                 <span>{{ submitError }}</span>
               </div>
             </Transition>
@@ -503,7 +503,7 @@ function onKeydown(e: KeyboardEvent) {
   background: var(--tint-orange);
   border-left: 3px solid var(--warning-border-50);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  padding: 9px 12px;
+  padding: var(--space-5) var(--space-6);
   font-size: var(--text-sm);
   color: var(--palette-orange-dark);
   line-height: 1.55;
@@ -511,7 +511,7 @@ function onKeydown(e: KeyboardEvent) {
 
 .warning-icon {
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: var(--space-1);
   color: var(--color-warning);
   opacity: 0.9;
 }
@@ -554,7 +554,7 @@ function onKeydown(e: KeyboardEvent) {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--space-3);
 }
 
 .form-label {
@@ -566,7 +566,7 @@ function onKeydown(e: KeyboardEvent) {
 
 .required {
   color: var(--color-warning);
-  margin-left: 1px;
+  margin-left: var(--space-1);
 }
 
 .form-input,
@@ -627,7 +627,7 @@ function onKeydown(e: KeyboardEvent) {
   background: var(--color-surface);
   border: var(--border-standard);
   border-radius: var(--radius-sm);
-  padding: var(--input-padding-lg) 30px var(--input-padding-lg) var(--space-5);
+  padding: var(--input-padding-lg) var(--space-16) var(--input-padding-lg) var(--space-5);
   width: 100%;
   appearance: none;
   cursor: pointer;
@@ -649,8 +649,8 @@ function onKeydown(e: KeyboardEvent) {
 .outcome-preview {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 5px 12px;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-6);
   border-radius: var(--radius-pill);
   border: 1px solid transparent;
   font-size: var(--text-sm);
@@ -672,7 +672,7 @@ function onKeydown(e: KeyboardEvent) {
   background: var(--alert-error-bg);
   border: 1px solid var(--border-color-error);
   border-radius: var(--radius-sm);
-  padding: 9px 12px;
+  padding: var(--space-5) var(--space-6);
   font-size: var(--text-body-sm);
   font-weight: var(--weight-ui);
   color: var(--color-warning);

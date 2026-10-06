@@ -431,7 +431,7 @@
   --card-border: var(--border-standard);
   --card-radius: var(--radius-card);
   --card-shadow: var(--shadow-card);
-  --card-padding: var(--space-8);
+  --card-padding: var(--space-12);
 
   /* -- Badge / Pill -- */
   --badge-radius: var(--radius-pill);

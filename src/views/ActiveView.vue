@@ -311,13 +311,13 @@ function sortIcon(key: SortKey): string {
 .view-root { padding: var(--page-root-padding); max-width: 1440px; }
 
 .view-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--space-12); gap: var(--space-8); }
-.header-title { font-size: var(--text-display-sm); font-weight: var(--weight-heading); letter-spacing: var(--tracking-heading); margin: 0 0 4px; }
+.header-title { font-size: var(--text-display-sm); font-weight: var(--weight-heading); letter-spacing: var(--tracking-heading); margin: 0 0 var(--space-2); }
 .header-sub { font-size: var(--text-body); color: var(--color-text-secondary); margin: 0; }
 .header-sub strong { font-weight: var(--weight-heading); color: var(--color-text); }
 .header-right { flex-shrink: 0; }
 
 
-.stats-bar { display: flex; gap: var(--space-6); margin-bottom: 20px; flex-wrap: wrap; }
+.stats-bar { display: flex; gap: var(--space-6); margin-bottom: var(--space-10); flex-wrap: wrap; }
 .stat-card {
   background: var(--color-surface); border: var(--border-standard);
   border-radius: var(--radius-card); padding: var(--stat-padding);
@@ -329,9 +329,9 @@ function sortIcon(key: SortKey): string {
 .stat-icon-orange { background: rgba(221,91,0,0.1); color: var(--color-orange); }
 .stat-icon-teal { background: rgba(42,157,153,0.1); color: var(--color-teal); }
 .stat-icon-alert { background: rgba(245,166,35,0.1); color: var(--color-alert-yellow); }
-.stat-body { display: flex; flex-direction: column; gap: 2px; }
+.stat-body { display: flex; flex-direction: column; gap: var(--space-1); }
 .stat-num { font-size: 24px; font-weight: var(--weight-heading); line-height: 1; letter-spacing: var(--tracking-tight); color: var(--color-text); }
-.stat-num-group { display: flex; align-items: baseline; gap: 4px; line-height: 1; }
+.stat-num-group { display: flex; align-items: baseline; gap: var(--space-2); line-height: 1; }
 .stat-num-group .stat-num { font-size: var(--text-display-sm); }
 .stat-divider { font-size: var(--text-heading-sm); font-weight: var(--weight-body); color: var(--color-text-muted); }
 .stat-num-orange { color: var(--color-orange); }
@@ -339,11 +339,11 @@ function sortIcon(key: SortKey): string {
 .stat-num-red { color: var(--color-warning); }
 .stat-num-yellow { color: var(--color-alert-yellow); }
 .stat-num-ok { color: var(--color-text-muted); }
-.stat-label { font-size: var(--text-sm); color: var(--color-text-muted); margin-top: 1px; }
+.stat-label { font-size: var(--text-sm); color: var(--color-text-muted); margin-top: var(--space-1); }
 
 .toolbar { display: flex; align-items: center; gap: var(--space-6); margin-bottom: var(--space-6); }
 .search-wrap {
-  display: flex; align-items: center; gap: 7px;
+  display: flex; align-items: center; gap: var(--space-4);
   background: var(--color-text-inverse); border: 1px solid var(--border-color); border-radius: 4px;
   padding: var(--input-padding); transition: var(--transition-input);
 }
@@ -364,7 +364,7 @@ function sortIcon(key: SortKey): string {
 
 thead { background: var(--color-surface-alt); }
 th {
-  padding: 10px 12px; font-size: var(--text-caption); font-weight: var(--weight-heading);
+  padding: var(--space-5) var(--space-6); font-size: var(--text-caption); font-weight: var(--weight-heading);
   color: var(--color-text-muted); text-transform: uppercase;
   letter-spacing: var(--tracking-label); text-align: left; white-space: nowrap;
   border-bottom: var(--border-standard);
@@ -372,7 +372,7 @@ th {
 th.sortable { cursor: pointer; user-select: none; }
 th.sortable:hover { color: var(--color-text); }
 
-td { padding: 10px 12px; font-size: var(--text-body-sm); border-bottom: 1px solid rgba(0,0,0,0.05); vertical-align: middle; }
+td { padding: var(--space-5) var(--space-6); font-size: var(--text-body-sm); border-bottom: 1px solid rgba(0,0,0,0.05); vertical-align: middle; }
 tbody tr:last-child td { border-bottom: none; }
 
 .patient-row { transition: var(--transition-bg); }
@@ -403,7 +403,7 @@ tbody tr:last-child td { border-bottom: none; }
   font-weight: var(--weight-emphasis);
   color: var(--color-text);
 }
-.td-name__stack { display: flex; flex-direction: column; gap: 2px; }
+.td-name__stack { display: flex; flex-direction: column; gap: var(--space-1); }
 .patient-name { font-weight: var(--weight-emphasis); color: var(--color-text); }
 .patient-age { font-size: var(--text-sm); color: var(--color-text-muted); }
 .regimen-text { font-family: 'SF Mono', 'Roboto Mono', monospace; font-weight: var(--weight-emphasis); font-size: var(--text-sm); }
@@ -425,7 +425,7 @@ tbody tr:last-child td { border-bottom: none; }
 .progress-fill { width: 100%; height: 100%; background: var(--color-blue); border-radius: var(--radius-pill); transform-origin: left; transition: var(--transition-progress); }
 
 .days-badge {
-  display: inline-flex; align-items: center; gap: 3px;
+  display: inline-flex; align-items: center; gap: var(--space-2);
   padding: var(--badge-padding-sm); border-radius: var(--radius-pill);
   font-size: var(--text-caption); font-weight: var(--weight-heading);
   font-variant-numeric: tabular-nums;
@@ -445,14 +445,14 @@ tbody tr:last-child td { border-bottom: none; }
 .btn-detail-icon:hover { background: var(--color-blue-active); }
 
 .empty-cta {
-  margin-top: 6px; display: inline-flex; align-items: center;
-  padding: 7px 16px; background: var(--color-blue); color: var(--color-text-inverse);
+  margin-top: var(--space-3); display: inline-flex; align-items: center;
+  padding: var(--space-4) var(--space-8); background: var(--color-blue); color: var(--color-text-inverse);
   border: none; border-radius: var(--radius-sm); font-size: var(--text-body-sm);
   font-weight: var(--weight-emphasis); font-family: var(--font-family); cursor: pointer;
   text-decoration: none; transition: var(--transition-bg);
 }
 .empty-cta:hover { background: var(--color-blue-active); }
 
-.search-empty { text-align: center; padding: 56px 16px; font-size: var(--text-body); color: var(--color-text-muted); }
+.search-empty { text-align: center; padding: var(--space-28) var(--space-8); font-size: var(--text-body); color: var(--color-text-muted); }
 
 </style>

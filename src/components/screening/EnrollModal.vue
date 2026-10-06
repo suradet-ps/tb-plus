@@ -363,7 +363,7 @@ async function submit() {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 5px;
+  padding: var(--space-3);
   color: var(--color-text-muted);
   border-radius: var(--radius-sm);
   display: flex;
@@ -417,7 +417,7 @@ async function submit() {
   font-weight: var(--weight-ui);
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-3);
   white-space: nowrap;
 }
 
@@ -503,7 +503,7 @@ async function submit() {
 .radio-label {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-4);
   cursor: pointer;
   user-select: none;
 }
@@ -541,8 +541,8 @@ async function submit() {
 .reenroll-warning {
   display: flex;
   align-items: flex-start;
-  gap: 9px;
-  padding: var(--space-5) 13px;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-7);
   border-radius: var(--radius-sm);
   border: 1px solid var(--alert-warning-border);
   border-left: 3px solid var(--color-warning);

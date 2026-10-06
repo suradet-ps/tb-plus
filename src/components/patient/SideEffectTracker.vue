@@ -406,7 +406,7 @@ function drugColor(drug: string): DrugColor {
 .priority-alert-body {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--space-3);
 }
 
 .priority-alert-title {
@@ -494,14 +494,14 @@ function drugColor(drug: string): DrugColor {
 .summary-ok {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-3);
   margin-left: auto;
   font-size: var(--text-sm);
   font-weight: var(--weight-emphasis);
   color: var(--color-success);
   background: var(--status-active-bg);
   border-radius: var(--radius-pill);
-  padding: 3px 9px;
+  padding: var(--space-2) var(--space-5);
 }
 
 .drug-groups {
@@ -540,7 +540,7 @@ function drugColor(drug: string): DrugColor {
   color: var(--color-text-muted);
   background: var(--btn-secondary-bg);
   border-radius: var(--radius-pill);
-  padding: var(--space-1) 7px;
+  padding: var(--space-1) var(--space-4);
 }
 
 .has-reports-badge {
@@ -549,7 +549,7 @@ function drugColor(drug: string): DrugColor {
   color: var(--color-warning);
   background: var(--status-defaulted-bg);
   border-radius: var(--radius-pill);
-  padding: var(--space-1) 7px;
+  padding: var(--space-1) var(--space-4);
 }
 
 .effect-list {
@@ -630,7 +630,7 @@ function drugColor(drug: string): DrugColor {
   flex-shrink: 0;
   font-size: var(--text-xs);
   font-weight: var(--weight-emphasis);
-  padding: var(--space-1) 7px;
+  padding: var(--space-1) var(--space-4);
   border-radius: var(--radius-pill);
   background: var(--btn-secondary-bg);
   color: var(--color-text-muted);
@@ -651,7 +651,7 @@ function drugColor(drug: string): DrugColor {
 .count-badge {
   display: inline-flex;
   align-items: baseline;
-  gap: 3px;
+  gap: var(--space-2);
   padding: var(--badge-padding);
   border-radius: var(--radius-pill);
   font-size: var(--text-body-sm);
@@ -678,7 +678,7 @@ function drugColor(drug: string): DrugColor {
 .count-none {
   font-size: var(--text-body-sm);
   color: var(--color-text-muted);
-  padding: 3px 8px;
+  padding: var(--space-2) var(--space-4);
   opacity: 0.5;
 }
 

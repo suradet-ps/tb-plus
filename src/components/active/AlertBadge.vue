@@ -21,8 +21,8 @@ const isRed = props.alert.severity === 'red';
 .alert-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-pill);
   font-size: var(--text-caption);
   font-weight: var(--weight-emphasis);

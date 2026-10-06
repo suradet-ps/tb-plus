@@ -215,7 +215,7 @@ function sexLabel(sex: string | null | undefined): string {
             <div class="skeleton skeleton-line" style="width: 26px; margin: 0 auto" />
           </td>
           <td>
-            <div style="display: flex; gap: 4px">
+            <div style="display: flex; gap: var(--space-2)">
               <div
                 class="skeleton skeleton-line"
                 style="width: 26px; height: 20px; border-radius: 9999px"
@@ -346,7 +346,7 @@ thead th {
 .sort-icon {
   display: inline;
   vertical-align: middle;
-  margin-left: 3px;
+  margin-left: var(--space-2);
   opacity: 0;
   transition: opacity var(--duration-base) var(--ease-standard),
     transform var(--duration-slow) var(--ease-standard);
