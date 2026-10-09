@@ -22,7 +22,7 @@ jobs:
         run: mkdir -p dist && touch dist/index.html
 
       - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+        uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
         with:
           components: clippy
 
@@ -46,7 +46,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Rust nightly
-        uses: dtolnay/rust-toolchain@be39649afda95dbf70f87cce95f68b8d5797b296 # nightly
+        uses: dtolnay/rust-toolchain@f0d5300ba8908d942c808f4d31c08471d7798ba3 # nightly
         with:
           components: miri
 
