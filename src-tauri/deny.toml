@@ -23,6 +23,12 @@ ignore = [
   "RUSTSEC-2024-0429",
   # proc-macro-error: dep of glib-macros, no upgrade path
   "RUSTSEC-2024-0370",
+  # zbus_names/zvariant/zvariant_derive were folded into zbus 6.0. keyring
+  # 4.1.6 (via encryptman-keyring) and tauri-plugin-opener still pin zbus 5.x,
+  # and no patched 5.x release exists. Revisit when they migrate to zbus 6.
+  { id = "RUSTSEC-2026-0370", reason = "zvariant folded into zbus 6; keyring 4.1.6 and tauri-plugin-opener still pin zbus 5.x with no patched release" },
+  { id = "RUSTSEC-2026-0371", reason = "zbus_names folded into zbus 6; keyring 4.1.6 and tauri-plugin-opener still pin zbus 5.x with no patched release" },
+  { id = "RUSTSEC-2026-0372", reason = "zvariant_derive folded into zbus 6; keyring 4.1.6 and tauri-plugin-opener still pin zbus 5.x with no patched release" },
 ]
 
 [licenses]
